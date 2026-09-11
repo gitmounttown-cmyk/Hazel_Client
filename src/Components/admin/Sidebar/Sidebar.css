@@ -1,0 +1,188 @@
+/* ==== Hazel Admin - Sidebar ==== */
+/* Color tokens (kept local to this file so the component is drop-in portable) */
+.hz-sidebar {
+  --hz-maroon: #6d1f31;
+  --hz-maroon-dark: #5c1a29;
+  --hz-gold: #e3c08a;
+  --hz-gold-soft: #cfa876;
+  --hz-orange-active: #c9752f;
+  --hz-text-muted: #d9b98f;
+
+  width: 272px;
+  min-width: 272px;
+  flex-shrink: 0;
+  height: 100vh;
+  margin: 0;
+  background: var(--hz-maroon-dark);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.hz-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.hz-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(227, 192, 138, 0.25);
+  border-radius: 4px;
+}
+
+/* --- Logo --- */
+.hz-sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 20px;
+  border-bottom: 1px solid rgba(227, 192, 138, 0.15);
+}
+
+.hz-sidebar__logo-icon {
+  color: var(--hz-gold);
+  width: 32px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.hz-sidebar__dress-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.hz-sidebar__logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.hz-sidebar__logo-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--hz-gold);
+  font-weight: 700;
+}
+
+.hz-sidebar__logo-subtitle {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--hz-text-muted);
+  margin-top: 2px;
+}
+
+/* --- Nav --- */
+.hz-sidebar__nav {
+  flex: 1;
+  padding: 12px 12px 24px;
+}
+
+.hz-sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hz-sidebar__item {
+  display: flex;
+  flex-direction: column;
+}
+
+.hz-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  text-align: left;
+}
+
+.hz-sidebar__link:hover {
+  background: rgba(227, 192, 138, 0.08);
+  color: var(--hz-gold);
+}
+
+.hz-sidebar__link--active {
+  background: var(--hz-orange-active);
+  color: #ffffff;
+}
+
+.hz-sidebar__link--active .hz-sidebar__icon {
+  color: #ffffff;
+}
+
+.hz-sidebar__link--parent {
+  justify-content: flex-start;
+}
+
+.hz-sidebar__icon {
+  color: var(--hz-gold-soft);
+  flex-shrink: 0;
+}
+
+.hz-sidebar__chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+  color: var(--hz-text-muted);
+}
+
+.hz-sidebar__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* --- Submenu --- */
+.hz-sidebar__submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: max-height 0.25s ease;
+}
+
+.hz-sidebar__submenu--open {
+  max-height: 500px;
+}
+
+.hz-sidebar__sublink {
+  display: block;
+  padding: 8px 12px 8px 46px;
+  font-size: 13px;
+color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  opacity: 0.9;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.hz-sidebar__sublink:hover {
+  background: rgba(227, 192, 138, 0.08);
+  color: var(--hz-gold);
+}
+
+.hz-sidebar__sublink--active {
+color:white;
+  font-weight: 600;
+  opacity: 1;
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+  .hz-sidebar {
+    width: 220px;
+    min-width: 220px;
+  }
+}

@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --primary-maroon: #5A1827;
+  --accent-gold: #C5A880;
+  --bg-cream: #F5F0EB;
+  --text-dark: #3A111A;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-cream);
+  color: var(--text-dark);
+}
+
+h1, h2, h3, .serif-font {
+  font-family: 'Playfair Display', serif;
+}

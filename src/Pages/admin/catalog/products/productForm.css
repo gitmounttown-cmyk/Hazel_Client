@@ -1,0 +1,370 @@
+.prod-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.prod-form-card {
+  background: #fff;
+  width: 560px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.prod-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.prod-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.prod-form-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+}
+
+.prod-form-close:hover {
+  color: #333;
+}
+
+.prod-form-loading {
+  padding: 40px;
+  text-align: center;
+  color: #888;
+}
+
+.prod-form-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prod-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.prod-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.prod-form-group input,
+.prod-form-group textarea,
+.prod-form-group select {
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.prod-form-group input:focus,
+.prod-form-group textarea:focus,
+.prod-form-group select:focus {
+  border-color: #780524;
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+}
+
+.prod-form-group textarea {
+  resize: vertical;
+}
+
+.prod-form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.prod-form-checkboxes {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.prod-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+}
+
+.prod-checkbox-label input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #780524;
+}
+
+.prod-form-image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prod-form-image-preview-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.prod-form-image-preview {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e2e2e2;
+}
+
+.prod-form-file-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #444;
+  background: #fafafa;
+  transition: background 0.15s ease;
+  width: fit-content;
+}
+
+.prod-form-file-label:hover {
+  background: #f0f0f0;
+}
+
+.prod-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding-top: 6px;
+}
+
+.prod-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s ease;
+}
+
+.prod-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.prod-btn-primary {
+  background: #780524;
+  color: #fff;
+}
+
+.prod-btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.prod-btn-secondary {
+  background: #f2f2f2;
+  color: #333;
+}
+
+.prod-btn-secondary:hover {
+  background: #e6e6e6;
+}
+
+/* ============================================================
+   COLOR VARIANT SECTION (new)
+   ============================================================ */
+
+.prod-variant-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.prod-variant-card {
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fbfaf8;
+}
+
+.prod-variant-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prod-variant-card-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #780524;
+}
+
+.prod-variant-remove-btn {
+  background: none;
+  border: none;
+  color: #b3261e;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.prod-variant-remove-btn:hover {
+  text-decoration: underline;
+}
+
+.prod-add-variant-btn {
+  align-self: flex-start;
+  background: #f7e7ec;
+  color: #780524;
+  border: 1px dashed #780524;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.prod-add-variant-btn:hover {
+  background: #f0d8de;
+}
+
+.prod-inline-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.prod-inline-checkbox input {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #780524;
+}
+
+/* ============================================================
+   SIZE ROWS (new)
+   ============================================================ */
+
+.prod-size-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prod-size-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prod-size-row select,
+.prod-size-row input[type="number"] {
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.prod-size-row select:focus,
+.prod-size-row input[type="number"]:focus {
+  border-color: #780524;
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+}
+
+.prod-size-row select {
+  flex: 1;
+}
+
+.prod-size-row input[type="number"] {
+  width: 90px;
+}
+
+.prod-size-remove-btn {
+  background: none;
+  border: none;
+  color: #b3261e;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.prod-size-remove-btn:hover {
+  color: #8a1c14;
+}
+
+.prod-add-size-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed #ccc;
+  color: #666;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.prod-add-size-btn:hover {
+  border-color: #780524;
+  color: #780524;
+}

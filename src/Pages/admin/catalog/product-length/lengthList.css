@@ -1,0 +1,169 @@
+.length-page {
+  padding: 24px;
+}
+
+.length-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.length-page-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+.length-add-btn {
+  background: #780524;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.length-add-btn:hover {
+  opacity: 0.9;
+}
+
+.length-error {
+  background: #fdecec;
+  color: #b3261e;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.length-loading {
+  padding: 30px;
+  text-align: center;
+  color: #888;
+}
+
+.length-table-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.length-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.length-table thead th {
+  text-align: left;
+  padding: 14px 18px;
+  background: #faf7f2;
+  color: #666;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #eee;
+}
+
+.length-table tbody td {
+  padding: 12px 18px;
+  border-bottom: 1px solid #f2f2f2;
+  color: #333;
+  vertical-align: middle;
+}
+
+.length-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.length-table tbody tr:hover {
+  background: #fbfaf8;
+}
+
+.length-sno {
+  color: #999;
+  width: 50px;
+}
+
+.length-name-text {
+  font-weight: 600;
+  color: #222;
+}
+
+.length-slug {
+  color: #888;
+  font-size: 13px;
+}
+
+.length-desc {
+  color: #888;
+  font-size: 13px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.length-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.length-status-badge.active {
+  background: #e6f6ec;
+  color: #1a7f3c;
+}
+
+.length-status-badge.inactive {
+  background: #f2f2f2;
+  color: #777;
+}
+
+.length-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.length-icon-btn {
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.length-icon-btn.edit {
+  color: #780524;
+}
+
+.length-icon-btn.edit:hover {
+  background: #f7e7ec;
+}
+
+.length-icon-btn.delete {
+  color: #b3261e;
+}
+
+.length-icon-btn.delete:hover {
+  background: #fdecec;
+}
+
+.length-empty {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}

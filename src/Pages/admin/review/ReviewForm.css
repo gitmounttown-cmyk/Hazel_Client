@@ -1,0 +1,158 @@
+.review-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.review-form-card {
+  background: #fff;
+  width: 520px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.review-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.review-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.review-form-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+}
+
+.review-form-close:hover {
+  color: #333;
+}
+
+.review-form-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.review-form-group input,
+.review-form-group textarea,
+.review-form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+  color: #333;
+  background: #fff;
+}
+
+.review-form-group input,
+.review-form-group select {
+  height: 40px;
+}
+
+.review-form-group input:focus,
+.review-form-group textarea:focus,
+.review-form-group select:focus {
+  border-color: #780524;
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+}
+
+.review-form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.review-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.review-form-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s ease;
+}
+
+.review-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.review-form-btn-primary {
+  background: #780524;
+  color: #fff;
+}
+
+.review-form-btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.review-form-btn-secondary {
+  background: #f2f2f2;
+  color: #333;
+}
+
+.review-form-btn-secondary:hover:not(:disabled) {
+  background: #e6e6e6;
+}
+
+@media (max-width: 600px) {
+  .review-form-card {
+    width: 92vw;
+  }
+
+  .review-form-body {
+    padding: 18px;
+  }
+
+  .review-form-actions {
+    flex-direction: column;
+  }
+
+  .review-form-btn {
+    width: 100%;
+  }
+}

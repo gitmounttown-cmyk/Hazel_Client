@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+
+.festival-banner-section {
+  width: 100%;
+  background: #E8D5C2;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.festival-banner-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+}
+
+.festival-loading-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #5A1827;
+  font-size: 16px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.festival-banner-link {
+  width: 100%;
+  display: block;
+  line-height: 0;
+}
+
+.festival-model-img {
+  width: 100%;
+  height: 480px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+@media screen and (max-width: 1440px) {
+  .festival-model-img {
+    height: 420px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .festival-model-img {
+    height: 332px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .festival-model-img {
+    height: 273px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .festival-model-img {
+    height: 219px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .festival-model-img {
+    height: 139px;
+  }
+}

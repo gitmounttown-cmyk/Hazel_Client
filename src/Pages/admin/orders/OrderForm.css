@@ -1,0 +1,263 @@
+.order-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.order-form-card {
+  background: #fff;
+  width: 480px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.order-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.order-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.order-form-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+}
+
+.order-form-close:hover {
+  color: #333;
+}
+
+.order-form-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.order-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.order-form-group input,
+.order-form-group textarea,
+.order-form-group select {
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.order-form-group input:focus,
+.order-form-group textarea:focus,
+.order-form-group select:focus {
+  border-color: #780524;
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+}
+
+.order-form-group textarea {
+  resize: vertical;
+}
+
+.order-form-hint {
+  font-size: 11px;
+  color: #888;
+}
+
+.order-form-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
+
+.order-form-items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.order-form-items-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+}
+
+.order-form-add-item {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #780524;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.order-form-add-item:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.order-form-add-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.order-form-item {
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 16px;
+  background: #fafafa;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.order-form-remove-item {
+  width: fit-content;
+  padding: 7px 12px;
+  background: none;
+  border: none;
+  color: #b3261e;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.order-form-remove-item:hover:not(:disabled) {
+  background: #fdecec;
+}
+
+.order-form-remove-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.order-form-success {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eaf7ee;
+  color: #237a3b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.order-form-error {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fdecec;
+  color: #b3261e;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.order-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.order-form-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.order-form-btn-primary {
+  background: #780524;
+  color: #fff;
+  border: none;
+}
+
+.order-form-btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.order-form-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.order-refresh-btn {
+    background: #780524;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.order-form-btn-secondary {
+  background: #f2f2f2;
+  color: #333;
+  border: none;
+}
+
+.order-form-btn-secondary:hover:not(:disabled) {
+  background: #e6e6e6;
+}
+
+.order-form-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .order-form-card {
+    width: 100%;
+  }
+
+  .order-form-item {
+    grid-template-columns: 1fr;
+  }
+
+  .order-form-items-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

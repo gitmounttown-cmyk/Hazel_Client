@@ -1,0 +1,168 @@
+.neck-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.neck-form-card {
+  background: #fff;
+  width: 480px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.neck-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.neck-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.neck-form-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+}
+
+.neck-form-close:hover {
+  color: #333;
+}
+
+.neck-form-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.neck-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.neck-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.neck-form-group input,
+.neck-form-group textarea,
+.neck-form-group select {
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.neck-form-group input:focus,
+.neck-form-group textarea:focus,
+.neck-form-group select:focus {
+  border-color: #780524;
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+}
+
+.neck-form-group textarea {
+  resize: vertical;
+}
+
+.neck-form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.neck-form-image-upload {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.neck-form-image-preview {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e2e2e2;
+}
+
+.neck-form-file-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #444;
+  background: #fafafa;
+  transition: background 0.15s ease;
+}
+
+.neck-form-file-label:hover {
+  background: #f0f0f0;
+}
+
+.neck-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.neck-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s ease;
+}
+
+.neck-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.neck-btn-primary {
+  background: #780524;
+  color: #fff;
+}
+
+.neck-btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.neck-btn-secondary {
+  background: #f2f2f2;
+  color: #333;
+}
+
+.neck-btn-secondary:hover {
+  background: #e6e6e6;
+}

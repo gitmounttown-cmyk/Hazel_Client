@@ -1,0 +1,161 @@
+.color-page {
+  padding: 24px;
+}
+
+.color-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.color-page-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+.color-add-btn {
+  background: #780524;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.color-add-btn:hover {
+  opacity: 0.9;
+}
+
+.color-error {
+  background: #fdecec;
+  color: #b3261e;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.color-loading {
+  padding: 30px;
+  text-align: center;
+  color: #888;
+}
+
+.color-table-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.color-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.color-table thead th {
+  text-align: left;
+  padding: 14px 18px;
+  background: #faf7f2;
+  color: #666;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #eee;
+}
+
+.color-table tbody td {
+  padding: 12px 18px;
+  border-bottom: 1px solid #f2f2f2;
+  color: #333;
+  vertical-align: middle;
+}
+
+.color-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.color-table tbody tr:hover {
+  background: #fbfaf8;
+}
+
+.color-sno {
+  color: #999;
+  width: 50px;
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.color-name-text {
+  font-weight: 600;
+  color: #222;
+}
+
+.color-code {
+  color: #888;
+  font-size: 13px;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+}
+
+.color-desc {
+  color: #888;
+  font-size: 13px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.color-icon-btn {
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.color-icon-btn.edit {
+  color: #780524;
+}
+
+.color-icon-btn.edit:hover {
+  background: #f7e7ec;
+}
+
+.color-icon-btn.delete {
+  color: #b3261e;
+}
+
+.color-icon-btn.delete:hover {
+  background: #fdecec;
+}
+
+.color-empty {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}

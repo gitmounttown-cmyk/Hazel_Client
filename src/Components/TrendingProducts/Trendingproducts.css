@@ -1,0 +1,750 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+.trending-section {
+  width: 100%;
+  background: #5a1827;
+
+  padding: 50px 0 55px;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+}
+
+.trending-container {
+  width: 100%;
+  max-width: 1450px;
+
+  margin: 0 auto;
+
+  padding: 0 35px;
+
+  box-sizing: border-box;
+}
+
+.trending-header {
+  width: 100%;
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.trending-heading {
+  margin: 0;
+
+  color: #edc484;
+
+  font-family: 'Playfair Display', serif;
+
+  font-size: 42px;
+  font-weight: 500;
+
+  line-height: 1.2;
+}
+
+.trending-slider-wrapper {
+  position: relative;
+
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+}
+
+.trending-grid {
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+
+  align-items: stretch;
+
+  gap: 20px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 15px 55px 20px;
+
+  scroll-behavior: smooth;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  box-sizing: border-box;
+
+  -webkit-overflow-scrolling: touch;
+
+  cursor: grab;
+
+  scroll-snap-type: none;
+}
+
+.trending-grid:active {
+  cursor: grabbing;
+}
+
+.trending-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.trending-card {
+  position: relative;
+
+  flex: 0 0 230px;
+
+  width: 230px;
+  min-width: 230px;
+
+  background: #ffffff;
+
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+
+  box-sizing: border-box;
+
+  scroll-snap-align: start;
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trending-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+.trending-image-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: 285px;
+
+  overflow: hidden;
+
+  background: #eee7e0;
+}
+
+.trending-image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  object-position: center top;
+
+  transition: transform 0.45s ease;
+}
+
+.trending-card:hover .trending-image {
+  transform: scale(1.04);
+}
+
+.trending-no-image {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #eee7e0;
+
+  color: #8c7a70;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  font-size: 13px;
+}
+
+.trending-discount-badge {
+  position: absolute;
+
+  top: 12px;
+  left: 12px;
+
+  padding: 5px 9px;
+
+  background: #8c1d40;
+
+  color: #ffffff;
+
+  border-radius: 4px;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  line-height: 1;
+}
+
+.trending-details {
+  width: 100%;
+
+  padding: 14px;
+
+  background: #ffffff;
+
+  box-sizing: border-box;
+}
+
+.trending-title {
+  width: 100%;
+
+  margin: 0 0 10px;
+
+  color: #2c221e;
+
+  font-family: 'Playfair Display', serif;
+
+  font-size: 17px;
+
+  font-weight: 600;
+
+  line-height: 1.3;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.trending-price-row {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.trending-price-group {
+  min-width: 0;
+
+  flex: 1 1 auto;
+
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 7px;
+}
+
+.trending-current-price {
+  display: inline-block;
+
+  color: #2c221e;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+.trending-original-price {
+  display: inline-block;
+
+  color: #8c7a70;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  line-height: 1.2;
+
+  text-decoration: line-through;
+
+  white-space: nowrap;
+}
+
+.trending-actions {
+  flex: 0 0 auto;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+.trending-wishlist-btn,
+.trending-cart-btn {
+  width: 29px;
+  height: 29px;
+
+  min-width: 29px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border-radius: 5px;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 14px;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.trending-wishlist-btn {
+  background: #ffffff;
+
+  border: 1px solid #d8ccc4;
+
+  color: #5a1827;
+}
+
+.trending-wishlist-btn:hover {
+  border-color: #8c1d40;
+
+  color: #8c1d40;
+
+  transform: translateY(-1px);
+}
+
+.trending-cart-btn {
+  background: #5a1827;
+
+  border: 1px solid #5a1827;
+
+  color: #ffffff;
+}
+
+.trending-cart-btn:hover {
+  background: #43121c;
+
+  border-color: #43121c;
+
+  transform: translateY(-1px);
+}
+
+.trending-offer {
+  width: 100%;
+
+  margin-top: 8px;
+
+  color: #8c1d40;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  line-height: 1.3;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.trending-slider-btn {
+  position: absolute;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  z-index: 20;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: #5a1827;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 30px;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.18);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trending-slider-btn:hover {
+  transform: translateY(-50%) scale(1.06);
+
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.23);
+}
+
+.trending-prev-btn {
+  left: 4px;
+}
+
+.trending-next-btn {
+  right: 4px;
+}
+
+@media (max-width: 1200px) {
+  .trending-container {
+    padding: 0 25px;
+  }
+
+  .trending-heading {
+    font-size: 38px;
+  }
+
+  .trending-grid {
+    gap: 18px;
+
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  .trending-card {
+    flex-basis: 215px;
+
+    width: 215px;
+    min-width: 215px;
+  }
+
+  .trending-image-wrapper {
+    height: 270px;
+  }
+}
+
+@media (max-width: 992px) {
+  .trending-section {
+    padding: 42px 0 48px;
+  }
+
+  .trending-container {
+    padding: 0 20px;
+  }
+
+  .trending-header {
+    margin-bottom: 24px;
+  }
+
+  .trending-heading {
+    font-size: 34px;
+  }
+
+  .trending-grid {
+    gap: 16px;
+
+    padding: 12px 45px 18px;
+  }
+
+  .trending-card {
+    flex-basis: 200px;
+
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .trending-image-wrapper {
+    height: 250px;
+  }
+
+  .trending-details {
+    padding: 12px;
+  }
+
+  .trending-title {
+    font-size: 16px;
+  }
+
+  .trending-current-price {
+    font-size: 15px;
+  }
+
+  .trending-original-price {
+    font-size: 11px;
+  }
+
+  .trending-slider-btn {
+    width: 38px;
+    height: 38px;
+
+    font-size: 27px;
+  }
+}
+
+@media (max-width: 768px) {
+  .trending-section {
+    padding: 35px 0 42px;
+  }
+
+  .trending-container {
+    padding: 0 12px;
+  }
+
+  .trending-header {
+    margin-bottom: 20px;
+  }
+
+  .trending-heading {
+    font-size: 29px;
+  }
+
+  .trending-grid {
+    gap: 14px;
+
+    padding: 10px 38px 15px 28px;
+  }
+
+  .trending-card {
+    flex-basis: 180px;
+
+    width: 180px;
+    min-width: 180px;
+  }
+
+  .trending-image-wrapper {
+    height: 225px;
+  }
+
+  .trending-details {
+    padding: 11px 10px 12px;
+  }
+
+  .trending-title {
+    font-size: 14px;
+
+    margin-bottom: 8px;
+  }
+
+  .trending-current-price {
+    font-size: 14px;
+  }
+
+  .trending-original-price {
+    font-size: 10px;
+  }
+
+  .trending-wishlist-btn,
+  .trending-cart-btn {
+    width: 27px;
+    height: 27px;
+
+    min-width: 27px;
+
+    font-size: 12px;
+  }
+
+  .trending-offer {
+    font-size: 10px;
+  }
+
+  .trending-discount-badge {
+    top: 9px;
+    left: 9px;
+
+    padding: 4px 7px;
+
+    font-size: 9px;
+  }
+
+  .trending-slider-btn {
+    width: 34px;
+    height: 34px;
+
+    font-size: 24px;
+  }
+
+  .trending-prev-btn {
+    left: 1px;
+  }
+
+  .trending-next-btn {
+    right: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trending-section {
+    padding: 30px 0 35px;
+  }
+
+  .trending-container {
+    padding: 0 7px;
+  }
+
+  .trending-heading {
+    font-size: 25px;
+  }
+
+  .trending-header {
+    margin-bottom: 17px;
+  }
+
+  .trending-grid {
+    gap: 12px;
+
+    padding: 8px 34px 12px 20px;
+  }
+
+  .trending-card {
+    flex-basis: 165px;
+
+    width: 165px;
+    min-width: 165px;
+  }
+
+  .trending-image-wrapper {
+    height: 205px;
+  }
+
+  .trending-details {
+    padding: 10px 9px 11px;
+  }
+
+  .trending-title {
+    font-size: 13px;
+
+    margin-bottom: 7px;
+  }
+
+  .trending-current-price {
+    font-size: 13px;
+  }
+
+  .trending-original-price {
+    font-size: 9px;
+  }
+
+  .trending-price-group {
+    gap: 4px;
+  }
+
+  .trending-wishlist-btn,
+  .trending-cart-btn {
+    width: 25px;
+    height: 25px;
+
+    min-width: 25px;
+
+    font-size: 11px;
+  }
+
+  .trending-offer {
+    font-size: 9px;
+  }
+
+  .trending-discount-badge {
+    top: 8px;
+    left: 8px;
+
+    font-size: 8px;
+
+    padding: 4px 6px;
+  }
+
+  .trending-slider-btn {
+    width: 31px;
+    height: 31px;
+
+    font-size: 22px;
+  }
+
+  .trending-prev-btn {
+    left: 0;
+  }
+
+  .trending-next-btn {
+    right: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .trending-heading {
+    font-size: 23px;
+  }
+
+  .trending-card {
+    flex-basis: 155px;
+
+    width: 155px;
+    min-width: 155px;
+  }
+
+  .trending-image-wrapper {
+    height: 190px;
+  }
+
+  .trending-details {
+    padding: 9px 8px 10px;
+  }
+
+  .trending-title {
+    font-size: 12px;
+  }
+
+  .trending-current-price {
+    font-size: 12px;
+  }
+
+  .trending-original-price {
+    font-size: 8px;
+  }
+
+  .trending-wishlist-btn,
+  .trending-cart-btn {
+    width: 24px;
+    height: 24px;
+
+    min-width: 24px;
+
+    font-size: 10px;
+  }
+
+  .trending-slider-btn {
+    width: 29px;
+    height: 29px;
+
+    font-size: 20px;
+  }
+}

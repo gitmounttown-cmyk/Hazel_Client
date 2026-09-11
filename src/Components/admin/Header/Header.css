@@ -1,0 +1,197 @@
+/* ==== Hazel Admin - Header ==== */
+.hz-header {
+  --hz-maroon: #6d1f31;
+  --hz-maroon-light: #7c2438;
+  --hz-gold: #e3c08a;
+  --hz-text-muted: #d9b98f;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  height: 76px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 28px;
+  background: var(--hz-maroon);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* --- Search --- */
+.hz-header__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 420px;
+  background: var(--hz-maroon-light);
+  border: 1px solid rgba(227, 192, 138, 0.25);
+  border-radius: 10px;
+  padding: 10px 16px;
+}
+
+.hz-header__search-icon {
+  color: var(--hz-text-muted);
+  flex-shrink: 0;
+}
+
+.hz-header__search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  width: 100%;
+}
+
+.hz-header__search-input::placeholder {
+  color: var(--hz-text-muted);
+}
+
+/* --- Actions --- */
+.hz-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hz-header__icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--hz-maroon-light);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.hz-header__icon-btn:hover {
+  background: rgba(227, 192, 138, 0.25);
+}
+
+.hz-header__badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: #e0522f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--hz-maroon);
+}
+
+/* --- Profile --- */
+.hz-header__profile {
+  position: relative;
+}
+
+.hz-header__profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hz-header__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--hz-gold);
+  color: var(--hz-maroon);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hz-header__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hz-header__profile-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.25;
+}
+
+.hz-header__profile-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hz-header__profile-role {
+  color: var(--hz-text-muted);
+  font-size: 12px;
+}
+
+.hz-header__chevron {
+  color: var(--hz-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.hz-header__chevron--open {
+  transform: rotate(180deg);
+}
+
+.hz-header__dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 180px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.hz-header__dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #4a2233;
+  cursor: pointer;
+}
+
+.hz-header__dropdown-item:hover {
+  background: #f7ede1;
+}
+
+.hz-header__dropdown-item--danger {
+  color: #b3261e;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .hz-header__search {
+    max-width: 220px;
+  }
+  .hz-header__profile-text {
+    display: none;
+  }
+}

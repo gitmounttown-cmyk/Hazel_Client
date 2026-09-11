@@ -1,0 +1,1180 @@
+/* ============================================================
+   HAZEL — SIZES PAGE
+   ============================================================ */
+
+.hz-sizes {
+  --hz-maroon: #6d1b3a;
+  --hz-maroon-dark: #57152e;
+
+  --hz-gold: #c9a227;
+
+  --hz-cream: #f4ecd7;
+  --hz-cream-soft: #efe3c4;
+
+  --hz-ink: #2c1a20;
+  --hz-muted: #8a7a6a;
+
+  --hz-border: #e3d5b5;
+
+  --hz-good: #2f8f5b;
+  --hz-good-soft: #e1f4e7;
+
+  --hz-bad: #9c2b3a;
+  --hz-bad-soft: #fbe7e9;
+
+  --hz-radius: 10px;
+
+  --hz-serif:
+    "Playfair Display",
+    "Georgia",
+    serif;
+
+  --hz-sans:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  width: 100%;
+
+  color: var(--hz-ink);
+
+  font-family: var(--hz-sans);
+}
+
+.hz-sizes{
+  padding: 24px;
+}
+
+.hz-sizes *,
+.hz-sizes *::before,
+.hz-sizes *::after {
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+
+.hz-sizes-topbar {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+}
+
+.hz-sizes-topbar h1 {
+  margin: 0;
+
+  font-family: var(--hz-serif);
+
+  font-size: 27px;
+
+  font-weight: 700;
+
+  color: var(--hz-ink);
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.hz-btn {
+  border: 1px solid transparent;
+
+  border-radius: 8px;
+
+  padding: 10px 18px;
+
+  font-family: var(--hz-sans);
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.hz-btn--primary {
+  background: var(--hz-maroon);
+
+  color: #fdf6e8;
+}
+
+.hz-btn--primary:hover {
+  background: var(--hz-maroon-dark);
+}
+
+.hz-btn--primary:disabled {
+  opacity: 0.6;
+
+  cursor: default;
+}
+
+.hz-btn--ghost {
+  background: transparent;
+
+  border-color: var(--hz-border);
+
+  color:black;
+}
+
+.hz-btn--ghost:hover:not(:disabled) {
+  background: var(--hz-cream-soft);
+}
+
+.hz-btn--ghost:disabled {
+  opacity: 0.5;
+
+  cursor: default;
+}
+
+.hz-btn--danger {
+  background: var(--hz-bad);
+
+  color: #ffffff;
+}
+
+.hz-btn--danger:hover {
+  background: #7f202c;
+}
+
+
+/* ============================================================
+   TEXT LINK
+   ============================================================ */
+
+.hz-link {
+  display: inline-block;
+
+  flex: 0 0 auto;
+
+  padding: 0;
+
+  margin: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--hz-maroon);
+
+  font-family: var(--hz-sans);
+
+  font-size: 13.5px;
+
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.hz-link:hover {
+  text-decoration: underline;
+}
+
+.hz-link--danger {
+  color: #c0293d;
+}
+
+
+/* ============================================================
+   ICON BUTTON
+   ============================================================ */
+
+.hz-icon-btn {
+  width: 32px;
+
+  height: 32px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--hz-muted);
+
+  font-size: 24px;
+
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.hz-icon-btn:hover {
+  color: var(--hz-ink);
+}
+
+
+/* ============================================================
+   CARD
+   ============================================================ */
+
+.hz-card {
+  width: 100%;
+
+  padding: 20px;
+
+  background: #fffdf7;
+
+  border-radius: var(--hz-radius);
+
+  box-shadow:
+    0 4px 18px rgba(109, 27, 58, 0.08);
+}
+
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+
+.hz-filters {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 16px;
+}
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+.hz-search {
+  width: 300px;
+
+  height: 41px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 12px;
+
+  background: var(--hz-cream);
+
+  border: 1px solid var(--hz-border);
+
+  border-radius: 8px;
+
+  color: var(--hz-muted);
+}
+
+.hz-search svg {
+  flex: 0 0 auto;
+}
+
+.hz-search input {
+  width: 100%;
+
+  min-width: 0;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  padding: 10px 0;
+
+  font-family: var(--hz-sans);
+
+  font-size: 14px;
+
+  color: var(--hz-ink);
+}
+
+.hz-search input::placeholder {
+  color: var(--hz-muted);
+}
+
+
+/* ============================================================
+   SELECT
+   ============================================================ */
+
+.hz-select {
+  height: 41px;
+
+  min-width: 106px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--hz-border);
+
+  border-radius: 8px;
+
+  background: var(--hz-cream);
+
+  font-family: var(--hz-sans);
+
+  font-size: 14px;
+
+  color: var(--hz-ink);
+
+  cursor: pointer;
+
+  outline: none;
+}
+
+.hz-select:focus {
+  outline: 2px solid var(--hz-maroon);
+
+  outline-offset: 1px;
+}
+
+
+/* ============================================================
+   TABLE WRAPPER
+   ============================================================ */
+
+.hz-table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border-radius: 8px;
+}
+
+
+/* ============================================================
+   TABLE
+
+   IMPORTANT:
+   The table remains a real HTML table.
+
+   Do NOT use display:flex on any <td> or <th>.
+   ============================================================ */
+
+.hz-table {
+  width: 100%;
+
+  min-width: 700px;
+
+  border-collapse: collapse;
+
+  border-spacing: 0;
+
+  table-layout: fixed;
+
+  font-family: var(--hz-sans);
+
+  font-size: 14px;
+}
+
+
+/* ============================================================
+   EXACT COLUMN WIDTHS
+   ============================================================ */
+
+.hz-table .hz-col-sno {
+  width: 64px;
+}
+
+.hz-table .hz-col-name {
+  width: auto;
+}
+
+.hz-table .hz-col-code {
+  width: 90px;
+}
+
+.hz-table .hz-col-status {
+  width: 110px;
+}
+
+.hz-table .hz-col-actions {
+  width: 140px;
+}
+
+
+/* ============================================================
+   TABLE HEADER
+   ============================================================ */
+
+.hz-table thead {
+  background: #faf3e4;
+}
+
+.hz-table thead tr {
+  background: #faf3e4;
+}
+
+.hz-table thead th {
+  height: 44px;
+
+  padding: 13px 16px;
+
+  text-align: left;
+
+  vertical-align: middle;
+
+  background: #faf3e4;
+
+  border-bottom: 1px solid var(--hz-border);
+
+  color: var(--hz-maroon);
+
+  font-family: var(--hz-sans);
+
+  font-size: 12.5px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.02em;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   TABLE BODY
+   ============================================================ */
+
+.hz-table tbody tr {
+  background: #fffdf7;
+}
+
+.hz-table tbody td {
+  height: 56px;
+
+  padding: 15px 16px;
+
+  vertical-align: middle;
+
+  background: #fffdf7;
+
+  border-bottom: 1px solid #ece0c3;
+}
+
+.hz-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.hz-table tbody tr:hover td {
+  background: #fbf3e2;
+}
+
+
+/* ============================================================
+   COLUMN ALIGNMENT
+   ============================================================ */
+
+.hz-table th:nth-child(1),
+.hz-table td:nth-child(1) {
+  text-align: left;
+}
+
+.hz-table th:nth-child(2),
+.hz-table td:nth-child(2) {
+  text-align: left;
+}
+
+.hz-table th:nth-child(3),
+.hz-table td:nth-child(3) {
+  text-align: left;
+}
+
+.hz-table th:nth-child(4),
+.hz-table td:nth-child(4) {
+  text-align: left;
+}
+
+.hz-table th:nth-child(5),
+.hz-table td:nth-child(5) {
+  text-align: left;
+}
+
+
+/* ============================================================
+   S.NO
+   ============================================================ */
+
+.hz-sno {
+  color: var(--hz-ink);
+
+  font-size: 13px;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   NAME
+   ============================================================ */
+
+.hz-name {
+  color: var(--hz-ink);
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* ============================================================
+   CODE
+   ============================================================ */
+
+.hz-code-cell {
+  vertical-align: middle;
+
+  white-space: nowrap;
+}
+
+.hz-code {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 27px;
+
+  min-height: 22px;
+
+  padding: 3px 8px;
+
+  background: var(--hz-cream);
+
+  border: 1px solid var(--hz-border);
+
+  border-radius: 5px;
+
+  color: var(--hz-maroon);
+
+  font-family:
+    "Courier New",
+    monospace;
+
+  font-size: 12px;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+.hz-empty {
+  color: var(--hz-muted);
+}
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.hz-status-cell {
+  vertical-align: middle;
+
+  white-space: nowrap;
+}
+
+.hz-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 58px;
+
+  padding: 4px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+.hz-badge--active {
+  background: var(--hz-good-soft);
+
+  color: var(--hz-good);
+}
+
+.hz-badge--inactive {
+  background: var(--hz-cream-soft);
+
+  color: var(--hz-muted);
+}
+
+
+/* ============================================================
+   ACTIONS CELL
+
+   VERY IMPORTANT:
+
+   This <td> stays a table-cell.
+
+   There is NO display:flex here.
+   ============================================================ */
+
+.hz-actions-cell {
+  width: 140px;
+
+  text-align: left;
+
+  vertical-align: middle;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   ACTIONS INNER CONTAINER
+
+   Flex belongs to this DIV.
+   ============================================================ */
+
+.hz-actions {
+  display: flex;
+
+  flex-direction: row;
+
+  align-items: center;
+
+  justify-content: flex-start;
+
+  gap: 18px;
+
+  width: 100%;
+
+  min-width: 0;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+
+.hz-actions .hz-link {
+  flex: 0 0 auto;
+
+  margin: 0;
+
+  padding: 0;
+}
+
+
+/* ============================================================
+   LOADING / EMPTY / ERROR
+   ============================================================ */
+
+.hz-state {
+  height: 100px !important;
+
+  padding: 36px 16px !important;
+
+  text-align: center !important;
+
+  vertical-align: middle !important;
+
+  background: #fffdf7 !important;
+
+  color: var(--hz-muted);
+
+  font-size: 14px;
+}
+
+.hz-state--error {
+  color: var(--hz-bad);
+}
+
+.hz-retry {
+  margin-left: 8px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--hz-maroon);
+
+  font-family: var(--hz-sans);
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.hz-retry:hover {
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.hz-footer {
+  display: flex;
+  color : black !important;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  min-height: 40px;
+
+  margin-top: 16px;
+}
+
+.hz-range {
+color: black !important;
+  font-size: 13px;
+}
+
+.hz-pager {
+  display: flex;
+color: black !important;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.hz-page-info {
+color: black !important;
+  font-size: 13px;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   MODAL OVERLAY
+   ============================================================ */
+
+.hz-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 100;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(44, 26, 32, 0.45);
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.hz-modal {
+  width: 420px;
+
+  max-width: 92vw;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  padding: 24px;
+
+  background: #fffdf7;
+
+  border-radius: var(--hz-radius);
+
+  box-shadow:
+    0 12px 32px rgba(44, 26, 32, 0.25);
+
+  animation: hz-pop-in 0.16s ease-out;
+}
+
+@keyframes hz-pop-in {
+  from {
+    transform: scale(0.97);
+
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+
+    opacity: 1;
+  }
+}
+
+
+/* ============================================================
+   MODAL HEADER
+   ============================================================ */
+
+.hz-modal-head {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+
+  padding-bottom: 12px;
+
+  border-bottom: 1px solid var(--hz-border);
+}
+
+.hz-modal-head h2 {
+  margin: 0;
+
+  color: var(--hz-ink);
+
+  font-family: var(--hz-serif);
+
+  font-size: 19px;
+}
+
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+.hz-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.hz-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  color: var(--hz-ink);
+
+  font-size: 13.5px;
+
+  font-weight: 600;
+}
+
+.hz-field input,
+.hz-field textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--hz-border);
+
+  border-radius: 8px;
+
+  outline: none;
+
+  background: var(--hz-cream);
+
+  color: var(--hz-ink);
+
+  font-family: var(--hz-sans);
+
+  font-size: 14px;
+
+  font-weight: 400;
+
+  resize: vertical;
+}
+
+.hz-field input:focus,
+.hz-field textarea:focus {
+  outline: 2px solid var(--hz-maroon);
+
+  outline-offset: 1px;
+}
+
+.hz-field input::placeholder,
+.hz-field textarea::placeholder {
+  color: var(--hz-muted);
+}
+
+
+/* ============================================================
+   CODE INPUT
+   ============================================================ */
+
+.hz-mono-input {
+  font-family:
+    "Courier New",
+    monospace !important;
+
+  text-transform: uppercase;
+}
+
+
+/* ============================================================
+   FIELD ERROR
+   ============================================================ */
+
+.hz-field-error {
+  color: var(--hz-bad);
+
+  font-size: 12.5px;
+
+  font-weight: 600;
+}
+
+
+/* ============================================================
+   TOGGLE
+   ============================================================ */
+
+.hz-toggle-field {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  color: var(--hz-ink);
+
+  font-size: 13.5px;
+}
+
+.hz-toggle-field input {
+  width: 16px;
+
+  height: 16px;
+
+  margin: 0;
+
+  accent-color: var(--hz-maroon);
+
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   FORM NOTICE
+   ============================================================ */
+
+.hz-form-notice {
+  padding: 9px 12px;
+
+  border-radius: 8px;
+
+  background: var(--hz-bad-soft);
+
+  color: var(--hz-bad);
+
+  font-size: 13.5px;
+}
+
+
+/* ============================================================
+   FORM ACTIONS
+   ============================================================ */
+
+.hz-form-actions {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 4px;
+}
+
+
+/* ============================================================
+   CONFIRM DIALOG
+   ============================================================ */
+
+.hz-confirm {
+  width: 380px;
+
+  max-width: 90vw;
+
+  padding: 24px;
+
+  background: #fffdf7;
+
+  border-radius: var(--hz-radius);
+
+  box-shadow:
+    0 12px 32px rgba(44, 26, 32, 0.25);
+}
+
+.hz-confirm h3 {
+  margin: 0 0 8px;
+
+  color: var(--hz-ink);
+
+  font-family: var(--hz-serif);
+
+  font-size: 17px;
+}
+
+.hz-confirm p {
+  margin: 0 0 18px;
+
+  color: var(--hz-muted);
+
+  font-size: 13.5px;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+
+.hz-toast {
+  position: fixed;
+
+  right: 24px;
+
+  bottom: 24px;
+
+  z-index: 200;
+
+  max-width: 360px;
+
+  padding: 12px 18px;
+
+  border-radius: 8px;
+
+  color: #ffffff;
+
+  font-size: 13.5px;
+
+  font-weight: 600;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.2);
+
+  animation: hz-toast-in 0.2s ease-out;
+}
+
+.hz-toast--success {
+  background: var(--hz-good);
+}
+
+.hz-toast--error {
+  background: var(--hz-bad);
+}
+
+@keyframes hz-toast-in {
+  from {
+    transform: translateY(8px);
+
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+
+    opacity: 1;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 720px) {
+  .hz-sizes-topbar {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 12px;
+  }
+
+  .hz-sizes-topbar .hz-btn {
+    width: 100%;
+  }
+
+  .hz-filters {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .hz-search {
+    width: 100%;
+  }
+
+  .hz-select {
+    width: 100%;
+  }
+
+  .hz-table {
+    min-width: 700px;
+  }
+
+  .hz-footer {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 14px;
+  }
+
+  .hz-pager {
+    width: 100%;
+
+    justify-content: space-between;
+  }
+
+  .hz-toast {
+    right: 15px;
+
+    bottom: 15px;
+
+    left: 15px;
+
+    max-width: none;
+  }
+}

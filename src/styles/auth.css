@@ -1,0 +1,639 @@
+/* ============================================================
+   HAZEL AUTH
+   COLOR PALETTE
+   ============================================================ */
+
+:root {
+  --hazel-light: #f3d9b4;
+  --hazel-gold: #edc484;
+  --hazel-burgundy: #780524;
+  --hazel-dark-burgundy: #52131e;
+  --hazel-dark: #231918;
+
+  --white: #ffffff;
+  --light-bg: #fffaf5;
+  --error: #b42318;
+  --success: #16803c;
+}
+
+/* ============================================================
+   PAGE
+   ============================================================ */
+
+.auth-page {
+  min-height: 100vh;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  background: var(--light-bg);
+
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+/* ============================================================
+   LEFT IMAGE
+   ============================================================ */
+
+.auth-image-section {
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+}
+
+.auth-background-image {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.auth-image-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background: linear-gradient(
+    90deg,
+    rgba(35, 25, 24, 0.75),
+    rgba(82, 19, 30, 0.35)
+  );
+}
+
+.auth-image-content {
+  position: relative;
+
+  z-index: 2;
+
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  padding: 80px;
+
+  color: var(--white);
+}
+
+.auth-small-title {
+  font-size: 14px;
+
+  letter-spacing: 4px;
+
+  margin-bottom: 20px;
+
+  color: var(--hazel-gold);
+}
+
+.auth-image-content h1 {
+  margin: 0;
+
+  font-family: Georgia, serif;
+
+  font-size: 56px;
+
+  line-height: 1.08;
+
+  font-weight: 500;
+}
+
+.auth-image-content p {
+  margin-top: 20px;
+
+  font-size: 17px;
+
+  letter-spacing: 0.5px;
+}
+
+.auth-feature-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 30px;
+
+  font-size: 14px;
+}
+
+/* ============================================================
+   RIGHT SIDE
+   ============================================================ */
+
+.auth-form-section {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 40px;
+
+  background-color: #f3d9b4;
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+
+.auth-card {
+  width: 100%;
+
+  max-width: 450px;
+
+  padding: 45px 42px;
+
+  background-color: #780524;
+
+  border-radius: 12px;
+
+  box-shadow: 0 15px 45px rgba(35, 25, 24, 0.15);
+}
+
+/* ============================================================
+   LOGO
+   ============================================================ */
+
+.hazel-logo {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 35px;
+
+  color: var(--hazel-burgundy);
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, serif;
+  font-weight: bold;
+}
+
+.brand-logo {
+  height: 65px;
+  width: 100px;
+}
+/* .hazel-logo h2 {
+  margin: 0;
+
+  font-family:
+    Georgia,
+    serif;
+
+  letter-spacing: 4px;
+
+  font-size: 27px;
+}
+
+
+.hazel-logo span {
+  display: block;
+
+  text-align: center;
+
+  font-size: 8px;
+
+  letter-spacing: 4px;
+
+  margin-top: 2px;
+} */
+
+/* ============================================================
+   HEADING
+   ============================================================ */
+
+.auth-heading {
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.auth-heading h1 {
+  margin: 0;
+  color: #edc484;
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.auth-heading p {
+  margin-top: 9px;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.login-tab {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 15px;
+}
+
+.login-tab span {
+  color: #edc484;
+}
+
+.login-tab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 180px; /* 👈 underline length */
+  height: 2px; /* underline thickness */
+  background-color: #edc484;
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label,
+.otp-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* ============================================================
+   MOBILE INPUT
+   ============================================================ */
+
+.mobile-input-wrapper {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  overflow: hidden;
+  transition: 0.2s;
+}
+
+.mobile-input-wrapper:focus-within {
+  border-color: var(--hazel-burgundy);
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.08);
+}
+
+.country-code {
+  padding: 0 15px;
+  /* color: var(--hazel-dark); */
+  color: #ffffff;
+  font-weight: 600;
+  border-right: 1px solid #F3D9B4;
+}
+
+.mobile-input-wrapper input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0 15px;
+  font-size: 14px;
+  background-color: #780524;
+  color: #ffffff;
+}
+
+/* ============================================================
+   PRIMARY BUTTON
+   ============================================================ */
+
+.auth-primary-button {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--hazel-burgundy);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer; 
+ transition: 0.25s; 
+}
+
+/* .auth-primary-button:hover {
+  background: var(--hazel-dark-burgundy);
+  transform: translateY(-1px);
+} */
+
+.auth-primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.auth-error {
+  margin-bottom: 15px;
+  padding: 11px;
+  border-radius: 5px;
+  background: #fff0ee;
+  color: var(--error);
+  font-size: 12px;
+  text-align: center;
+}
+
+.auth-success {
+  margin-bottom: 15px;
+  padding: 11px;
+  border-radius: 5px;
+  background: #edf9f0;
+  color: var(--success);
+  font-size: 18;
+  text-align: center;
+}
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
+.auth-divider {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 22px 0;
+
+  color: #aaa;
+
+  font-size: 12px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+
+  flex: 1;
+
+  height: 1px;
+
+  background: #e5e5e5;
+}
+
+/* ============================================================
+   GOOGLE
+   ============================================================ */
+
+.google-button {
+  width: 100%;
+
+  height: 48px;
+
+  background: var(--white);
+
+  border: 1px solid #ddd;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  color: var(--hazel-dark);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.google-icon {
+  font-weight: bold;
+
+  color: #4285f4;
+}
+
+/* ============================================================
+   BENEFITS
+   ============================================================ */
+
+.auth-benefits {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 25px;
+}
+
+.auth-benefits div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: var(--hazel-dark-burgundy);
+}
+
+.auth-benefits span {
+  font-size: 18px;
+}
+
+.auth-benefits small {
+  color: #777;
+
+  font-size: 9px;
+}
+
+/* ============================================================
+   OTP MOBILE
+   ============================================================ */
+
+.otp-mobile {
+  text-align: center;
+  padding: 13px;
+  margin-bottom: 25px;
+  background: #fff8ef;
+  border-radius: 6px;
+  color: var(--hazel-dark);
+  font-size: 13px;
+}
+
+.otp-mobile button {
+  margin-left: 8px;
+  border: none;
+  background: none;
+  color: var(--hazel-burgundy);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ============================================================
+   OTP INPUT
+   ============================================================ */
+
+.otp-label {
+  text-align: center;
+}
+
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin: 15px 0 18px;
+}
+
+.otp-input {
+  width: 45px;
+  height: 50px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--hazel-dark-burgundy);
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+}
+
+.otp-input:focus,
+.otp-input.filled {
+  border-color: var(--hazel-burgundy);
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.08);
+}
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+
+.otp-timer {
+  text-align: center;
+  margin-bottom: 22px;
+  color: #777;
+  font-size: 12px;
+}
+
+.otp-timer strong {
+  color: var(--hazel-burgundy);
+}
+
+.resend-button {
+  border: none;
+  background: none;
+  color: var(--hazel-burgundy);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ============================================================
+   SECURITY
+   ============================================================ */
+
+.security-message {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 25px;
+  padding: 12px;
+  background: #fff8ef;
+  border-radius: 6px;
+}
+
+.security-message p {
+  margin: 0;
+  color: #777;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-image-section {
+    display: none;
+  }
+
+  .auth-form-section {
+    min-height: 100vh;
+
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 35px 22px;
+  }
+
+  .auth-heading h1 {
+    font-size: 23px;
+  }
+
+  .otp-input {
+    width: 40px;
+
+    height: 45px;
+  }
+
+  .otp-input-container {
+    gap: 6px;
+  }
+}
+/* ============================================================
+   GOOGLE LOGIN
+============================================================ */
+
+.google-login-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0;
+  margin-bottom: 10px;
+  background-color: #780524;
+  color: white;
+}
+
+.google-login-container > div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Loading button */
+
+.google-login-container .google-button {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  background-color: #780524 !important;
+  color:white !important;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: default;
+}

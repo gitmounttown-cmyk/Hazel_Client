@@ -1,0 +1,45 @@
+/* ==== Hazel Admin - Layout shell ==== */
+
+/* Reset so no browser default margin/padding can create edge gaps.
+   Safe to keep even if you already reset elsewhere - it's idempotent. */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.hz-admin-layout {
+  display: flex;
+  align-items: stretch;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* the two children scroll internally, not the shell */
+  background: #f6e9d3;
+}
+
+/* Right-hand column: Header on top, scrollable page content below.
+   flex: 1 makes it fill every pixel not used by the sidebar, so the
+   header can never stop short of the right edge. */
+.hz-admin-layout__main {
+  flex: 1 1 auto;
+  min-width: 0; /* prevents flex children (e.g. wide tables) from overflowing */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.hz-admin-layout__content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 24px 28px;
+  background: #f6e9d3;
+}

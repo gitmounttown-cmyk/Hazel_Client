@@ -1,0 +1,185 @@
+.neck-page {
+  padding: 24px;
+}
+
+.neck-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.neck-page-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+.neck-add-btn {
+  background: #780524;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.neck-add-btn:hover {
+  opacity: 0.9;
+}
+
+.neck-error {
+  background: #fdecec;
+  color: #b3261e;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.neck-loading {
+  padding: 30px;
+  text-align: center;
+  color: #888;
+}
+
+.neck-table-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.neck-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.neck-table thead th {
+  text-align: left;
+  padding: 14px 18px;
+  background: #faf7f2;
+  color: #666;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #eee;
+}
+
+.neck-table tbody td {
+  padding: 12px 18px;
+  border-bottom: 1px solid #f2f2f2;
+  color: #333;
+  vertical-align: middle;
+}
+
+.neck-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.neck-table tbody tr:hover {
+  background: #fbfaf8;
+}
+
+.neck-sno {
+  color: #999;
+  width: 50px;
+}
+
+.neck-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.neck-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.neck-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2ece7;
+  color: #780524;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.neck-name-text {
+  font-weight: 600;
+  color: #222;
+}
+
+.neck-slug {
+  color: #888;
+  font-size: 13px;
+}
+
+.neck-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.neck-status-badge.active {
+  background: #e6f6ec;
+  color: #1a7f3c;
+}
+
+.neck-status-badge.inactive {
+  background: #f2f2f2;
+  color: #777;
+}
+
+.neck-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.neck-icon-btn {
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.neck-icon-btn.edit {
+  color: #780524;
+}
+
+.neck-icon-btn.edit:hover {
+  background: #f7e7ec;
+}
+
+.neck-icon-btn.delete {
+  color: #b3261e;
+}
+
+.neck-icon-btn.delete:hover {
+  background: #fdecec;
+}
+
+.neck-empty {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}

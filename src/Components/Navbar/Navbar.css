@@ -1,0 +1,468 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+
+.navbar {
+  background-color: #5A1827;
+  padding: 1rem 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(197, 168, 128, 0.2);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.nav-left-group {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.nav-logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo-img {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 2.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  transition: color 0.3s ease;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.nav-links a:hover {
+  color: #C5A880;
+}
+
+.nav-links a.active-link {
+  color: #C5A880;
+  font-weight: 500;
+  border-bottom: 2px solid #C5A880;
+}
+
+.nav-right-section {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  color: #C5A880;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.nav-icon:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(197, 168, 128, 0.4);
+  border-radius: 20px;
+  padding: 4px 10px;
+  transition: all 0.3s ease;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FFFFFF;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
+  width: 140px;
+  padding-left: 6px;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.nav-right-section a {
+  display: flex;
+  align-items: center;
+}
+
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2.5px;
+  background-color: #C5A880;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+}
+
+.hamburger-menu.open .hamburger-line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger-menu.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-menu.open .hamburger-line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* nav dropdown css */
+/* =========================================================
+   USER ACCOUNT
+========================================================= */
+
+.navbar-user-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-user-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: #edc484;
+}
+
+.navbar-user-button .nav-icon {
+  color: #edc484;
+  cursor: pointer;
+}
+
+.user-chevron {
+  width: 14px;
+  height: 14px;
+  color: #edc484;
+  transition: transform 0.25s ease;
+}
+
+.user-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   USER DROPDOWN
+========================================================= */
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  width: 270px;
+
+  background-color: #5A1827;
+  border: 1px solid rgba(237, 196, 132, 0.45);
+  border-radius: 4px;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(90, 24, 39, 0.25);
+
+  overflow: hidden;
+  z-index: 9999;
+
+  font-family: 'Playfair Display', serif;
+
+  animation: userDropdownAnimation 0.2s ease;
+}
+
+@keyframes userDropdownAnimation {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   USER HEADER
+========================================================= */
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 18px 17px;
+}
+
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+
+  border-radius: 50%;
+
+  background-color: #edc484;
+  color: #5A1827;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+
+  border: 1px solid rgba(237, 196, 132, 0.8);
+}
+
+.user-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.user-name {
+  margin: 0 0 4px;
+
+  color: #edc484;
+
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  margin: 0;
+
+  color: rgba(237, 196, 132, 0.72);
+
+  font-family: 'Playfair Display', serif;
+  font-size: 12px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.user-dropdown-divider {
+  height: 1px;
+
+  background-color: rgba(237, 196, 132, 0.25);
+
+  margin: 0 15px;
+}
+
+
+/* =========================================================
+   DROPDOWN ITEMS
+========================================================= */
+
+.user-dropdown-item {
+  width: 100%;
+
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px 17px;
+
+  cursor: pointer;
+
+  color: #edc484;
+
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+
+  text-align: left;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    padding-left 0.25s ease;
+}
+
+.user-dropdown-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.user-dropdown-item:hover {
+  background-color: rgba(237, 196, 132, 0.12);
+  color: #ffffff;
+  padding-left: 21px;
+}
+
+.user-dropdown-item:hover svg {
+  color: #edc484;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.logout-item {
+  color: #edc484;
+}
+
+.logout-item:hover {
+  background-color: rgba(237, 196, 132, 0.15);
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   OPTIONAL: FUTURE DROPDOWN ITEMS
+========================================================= */
+
+.user-dropdown-item + .user-dropdown-item {
+  border-top: 1px solid rgba(237, 196, 132, 0.08);
+}
+
+@media screen and (max-width: 1024px) {
+  .navbar {
+    padding: 1rem 2rem;
+  }
+
+  .nav-links {
+    gap: 1.5rem;
+  }
+
+  .search-input {
+    width: 110px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .navbar {
+    padding: 1rem 1.5rem;
+  }
+
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .nav-left-group {
+    gap: 1rem;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #5A1827;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.4s ease-in-out;
+    border-bottom: 1px solid rgba(197, 168, 128, 0.2);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+
+  .nav-links.mobile-open {
+    padding: 2rem 0;
+    max-height: 350px;
+    opacity: 1;
+  }
+
+  .nav-right-section {
+    gap: 1rem;
+  }
+
+ .search-container {
+   height: 21px;
+   padding: 3px 6px;
+  }
+
+  .search-input {
+    width: 75px;
+    font-size: 0.75rem;
+  }
+
+
+  .search-container.open {
+    width: 140px; 
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .search-container.open .search-input {
+    width: 110px;
+    opacity: 1;
+    padding-left: 6px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .navbar {
+    padding: 0.8rem 1rem;
+  }
+
+  .nav-logo-img {
+    height: 38px;
+  }
+
+  .nav-right-section {
+    gap: 0.8rem;
+  }
+ .search-input {
+        padding: 8px 3px 8px 3px;
+        width: 89px;
+ }
+}

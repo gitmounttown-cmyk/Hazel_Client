@@ -1,0 +1,180 @@
+.address-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.address-form-card {
+  background: #fff;
+  width: 650px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.address-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.address-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.address-form-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+  padding: 4px;
+}
+
+.address-form-close:hover {
+  color: #333;
+}
+
+.address-form-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.address-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.address-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.address-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.address-form-group input,
+.address-form-group textarea,
+.address-form-group select {
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.address-form-group input:focus,
+.address-form-group textarea:focus,
+.address-form-group select:focus {
+  border-color: #780524;
+  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+}
+
+.address-form-group textarea {
+  resize: vertical;
+}
+
+.address-form-default {
+  display: flex;
+  align-items: center;
+  padding-top: 24px;
+}
+
+.address-form-default label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+}
+
+.address-form-default input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.address-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.address-form-save-btn,
+.address-form-cancel-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.address-form-save-btn {
+  background: #780524;
+  color: #fff;
+  border: none;
+}
+
+.address-form-save-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.address-form-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.address-form-cancel-btn {
+  background: #f2f2f2;
+  color: #333;
+  border: none;
+}
+
+.address-form-cancel-btn:hover:not(:disabled) {
+  background: #e6e6e6;
+}
+
+.address-form-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .address-form-card {
+    width: 100%;
+  }
+
+  .address-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
