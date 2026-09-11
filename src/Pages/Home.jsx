@@ -12,6 +12,7 @@ const Home = () => {
       <TrendingProducts />
       <FestivalBanner />
       <NewArrivals />
+      
     </>
   );
 };

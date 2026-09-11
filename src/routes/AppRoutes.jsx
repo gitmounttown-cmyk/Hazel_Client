@@ -25,7 +25,7 @@ import Order from "../Pages/admin/orders/Order";
 import Banner from "../Pages/admin/banners/Banner";
 import Profile from "../Pages/admin/profile/Profile";
 import CouponList from "../Components/admin/coupons/CouponList";
-
+import About from "../Pages/About/About"
 import NewArrival from "../Pages/admin/newarrival/NewArrival";
 import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
@@ -39,6 +39,9 @@ const AppRoutes = () => {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product" element={<Productpreview />} />
+          <Route path="/About" element={<About />} />
+          
+
         </Route>
         {/* =================================
           AUTH ROUTES
