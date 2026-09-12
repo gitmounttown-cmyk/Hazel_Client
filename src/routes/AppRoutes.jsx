@@ -30,6 +30,9 @@ import NewArrival from "../Pages/admin/newarrival/NewArrival";
 import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
 
+// Import your AccountOverview page component
+import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -41,8 +44,10 @@ const AppRoutes = () => {
           <Route path="/product" element={<Productpreview />} />
           <Route path="/About" element={<About />} />
           
-
+          {/* Added User Account Overview Route */}
+          <Route path="/account" element={<AccountOverview />} />
         </Route>
+
         {/* =================================
           AUTH ROUTES
       ================================= */}
@@ -97,7 +102,7 @@ const AppRoutes = () => {
       ================================= */}
         {/* 
       <Route path="*" element={<Navigate to="/login" replace />} />
-      */}
+    */}
       </Routes>
     </BrowserRouter>
   );

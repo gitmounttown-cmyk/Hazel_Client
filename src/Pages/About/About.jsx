@@ -221,7 +221,7 @@ export default function AboutPage() {
             <br />
             something you settle for.
           </h2>
-          <button className="btn-filled1">Shop The Collection</button>
+          <button className="btn-filled1">Find Your Style</button>
         </div>
       </section>
     </div>
