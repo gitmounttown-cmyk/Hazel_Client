@@ -19,6 +19,7 @@ import Shop from "../pages/Shop/Shop";
 import Productpreview from "../pages/Product/productpreview/Productpreview";
 import Contact from "../pages/Contact/Contact";
 import Cartpage from "../pages/Cart/Cartpage";
+import Wishlist from "../pages/Wishlist/Wishlist";
 
 import UserLayout from "../layouts/UserLayout";
 import Home from "../Pages/Home";
@@ -43,6 +44,7 @@ const AppRoutes = () => {
           <Route path="/product" element={<Productpreview />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cartpage" element={<Cartpage />} />
+          <Route path="/Wishlist" element={<Wishlist />} />
         </Route>
         {/* =================================
           AUTH ROUTES
