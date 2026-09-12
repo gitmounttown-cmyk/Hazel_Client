@@ -109,21 +109,7 @@ function useShopData() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-
   const debounceRef = useRef(null);
-
-const location = useLocation();
-
-//go to start of page on route change
-useEffect(() => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}, [location.pathname]);
-
-
 
   useEffect(() => {
     API.get("/subcategories/all")
@@ -420,10 +406,41 @@ export default function ShopPage() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const navigate = useNavigate();
+const location = useLocation();
+const shopRef = useRef(null);
+
+useEffect(() => {
+  const scrollToTop = () => {
+    // 1. Browser/document scroll
+    window.scrollTo(0, 0);
+
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 2. Shop body scroll
+    if (shopRef.current) {
+      shopRef.current.scrollTop = 0;
+      shopRef.current.scrollLeft = 0;
+
+      // 3. Product grid scroll
+      const mainScroll =
+        shopRef.current.querySelector(".main-scroll");
+
+      if (mainScroll) {
+        mainScroll.scrollTop = 0;
+        mainScroll.scrollLeft = 0;
+      }
+    }
+  };
+
+  // Run after React has rendered the new page
+  requestAnimationFrame(scrollToTop);
+
+}, [location.pathname, location.search]);
 
   return (
     <div className="shop-page">
-      <div className="shop-body">
+      <div ref={shopRef} className="shop-body">
         <Sidebar
           filterGroups={filterGroups}
           filters={filters}
