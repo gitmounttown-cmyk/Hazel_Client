@@ -6,7 +6,7 @@
   font-family: "Plus Jakarta Sans", sans-serif;
   color: #2c2c2a;
   overflow-x: hidden;
-  background-color: #fdf9f4;
+  background-color: #F1D0A0;
 }
 
 .eyebrow {
@@ -83,18 +83,19 @@
 
 /* ---------------- SHOP THE LOOK SECTION (VIDEOS CAROUSEL) ---------------- */
 .shop-the-look-section {
-  background-color: #f7e7d0; /* Soft beige background matching screenshot */
+  background-color: #F1D0A0; 
   padding: 60px 40px;
   overflow-x: hidden;
+  width: 100%;
 }
 
 .shop-the-look-section .section-title {
   font-family: serif;
-  color: #3b2219;
+  color: #5C1F26;
   font-size: 38px;
   text-align: center;
   margin-bottom: 40px;
-  font-weight: 500;
+  font-weight: bolder;
 }
 
 .carousel-wrapper {
@@ -103,6 +104,7 @@
   margin: 0 auto;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .carousel-btn {
@@ -124,27 +126,27 @@
 }
 
 .prev-btn {
-  left: -20px;
+  left: -10px;
 }
 
 .next-btn {
-  right: -20px;
+  right: -10px;
 }
 
 .looks-container {
   display: flex;
-  gap: 20px;
+  gap: 40px;
   max-width: 1300px;
   width: 100%;
   margin: 0 auto;
   overflow-x: auto;
-  padding-bottom: 20px;
+  padding: 10px 10px 20px 38px;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Hide scrollbar for clean look */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
 }
 
 .looks-container::-webkit-scrollbar {
-  display: none;
+  display: none; /* Hide scrollbar for Chrome, Safari, Opera */
 }
 
 .look-card {
@@ -185,7 +187,7 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.15);
   z-index: 2;
-  pointer-events: none; /* Allows video interaction if needed */
+  pointer-events: none; 
 }
 
 .play-icon-circle {
@@ -207,7 +209,7 @@
 .play-triangle {
   color: #3b2219;
   font-size: 14px;
-  margin-left: 2px; /* Visual balance for play triangle */
+  margin-left: 2px; 
 }
 
 /* Bottom info card banner */
@@ -262,20 +264,69 @@
   border-radius: 4px;
 }
 
-/* Responsive adjustments */
+/* ============================================================
+   RESPONSIVE MEDIA QUERIES FOR ALL DEVICES (200px to 1500px+)
+   ============================================================ */
+
+/* Tablets and Medium Laptops (769px to 1024px) */
+@media (max-width: 1024px) {
+  .shop-the-look-section {
+    padding: 50px 30px;
+  }
+  
+  .look-card {
+    flex: 0 0 190px;
+    height: 330px;
+  }
+}
+
+/* Mobile Devices (768px and below) */
 @media (max-width: 768px) {
   .shop-the-look-section {
-    padding: 40px 20px;
+    padding: 40px 15px;
   }
+
   .shop-the-look-section .section-title {
-    font-size: 28px;
-    margin-bottom: 25px;
+    font-size: 26px;
+    margin-bottom: 20px;
   }
+
+  .looks-container {
+    gap: 15px;
+    padding-left: 5px;
+  }
+
   .look-card {
-    flex: 0 0 160px;
-    height: 280px;
+    flex: 0 0 150px;
+    height: 260px;
+    border-width: 3px;
   }
+
   .carousel-btn {
-    display: none; /* Hide slide arrows on mobile for native touch swiping */
+    display: none; /* Hide buttons on touch screens for natural swiping */
+  }
+}
+
+/* Extra Small / Compact Phones (480px and below) */
+@media (max-width: 480px) {
+  .shop-the-look-section {
+    padding: 30px 10px;
+  }
+
+  .shop-the-look-section .section-title {
+    font-size: 22px;
+  }
+
+  .look-card {
+    flex: 0 0 135px;
+    height: 230px;
+  }
+
+  .look-name {
+    font-size: 11px;
+  }
+
+  .look-price {
+    font-size: 10px;
   }
 }
