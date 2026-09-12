@@ -11,10 +11,10 @@ export default function AccountOverview() {
   });
   const [loading, setLoading] = useState(true);
 
-  // View state: "overview" or "addresses"
+
   const [currentView, setCurrentView] = useState("overview");
 
-  // State for Edit Details Modal Popup
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -24,14 +24,12 @@ export default function AccountOverview() {
   const [isPhoneEditable, setIsPhoneEditable] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
 
-  // State for Saved Addresses (fetched from backend)
   const [addresses, setAddresses] = useState([]);
 
-  // State for Add/Edit Address Popup Modal
+ 
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   
-  // Completely blank initial state for Add Address
   const [addressFormData, setAddressFormData] = useState({
     fullName: "",
     mobileNumber: "",
@@ -44,7 +42,6 @@ export default function AccountOverview() {
     addressType: "home",
   });
 
-  // Fetch User and Addresses on Mount
   useEffect(() => {
     const storedUser = localStorage.getItem("hazelUser");
     if (storedUser) {
@@ -69,7 +66,7 @@ export default function AccountOverview() {
     setLoading(false);
   }, [navigate]);
 
-  // Fetch Addresses from Backend API
+ 
   const fetchAddresses = async () => {
     const token = localStorage.getItem("hazelToken");
     if (!token) return;
@@ -89,13 +86,12 @@ export default function AccountOverview() {
     }
   };
 
-  // Handle user details form changes
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Triggered when clicking "Change number →"
   const handleRequestOtp = async () => {
     if (!isPhoneEditable) {
       setIsPhoneEditable(true);
@@ -109,7 +105,7 @@ export default function AccountOverview() {
     }
   };
 
-  // Save profile changes
+
   const handleSaveChanges = (e) => {
     e.preventDefault();
     setUser(formData);
@@ -129,7 +125,7 @@ export default function AccountOverview() {
     setOtpSent(false);
   };
 
-  // Open Add Address Modal (Completely blank state)
+
   const handleOpenAddAddress = () => {
     setEditingAddressId(null);
     setAddressFormData({
@@ -146,7 +142,6 @@ export default function AccountOverview() {
     setIsAddressModalOpen(true);
   };
 
-  // Open Edit Address Modal (Loads specific address info for editing)
   const handleOpenEditAddress = (addr) => {
     setEditingAddressId(addr._id);
     setAddressFormData({
@@ -163,13 +158,11 @@ export default function AccountOverview() {
     setIsAddressModalOpen(true);
   };
 
-  // Handle Address Form Input Change
   const handleAddressInputChange = (e) => {
     const { name, value } = e.target;
     setAddressFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Save Address Form (Create or Update via Backend API)
   const handleSaveAddress = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("hazelToken");
@@ -203,7 +196,6 @@ export default function AccountOverview() {
     }
   };
 
-  // Remove Address via Backend API
   const handleRemoveAddress = async (id) => {
     const token = localStorage.getItem("hazelToken");
     if (!token) return;
@@ -224,7 +216,6 @@ export default function AccountOverview() {
     }
   };
 
-  // Set Default Address via Backend API
   const handleSetDefaultAddress = async (id) => {
     const token = localStorage.getItem("hazelToken");
     if (!token) return;
@@ -253,7 +244,7 @@ export default function AccountOverview() {
 
   return (
     <div className="about-page account-container">
-      {/* Header Section */}
+
       <div className="account-header">
         <span className="eyebrow" onClick={() => setCurrentView("overview")} style={{ cursor: "pointer" }}>
           {currentView === "addresses" ? "← Back to Overview" : "My Account"}
@@ -268,10 +259,9 @@ export default function AccountOverview() {
         </p>
       </div>
 
-      {/* VIEW 1: OVERVIEW SCREEN */}
       {currentView === "overview" && (
         <div className="account-workspace-full">
-          {/* Card 1: Your Details */}
+
           <div className="info-card">
             <div className="card-header-flex">
               <h3 className="card-title">Your details</h3>
@@ -299,7 +289,6 @@ export default function AccountOverview() {
             </div>
           </div>
 
-          {/* Card 2: Saved Address Preview */}
           <div className="info-card">
             <div className="card-header-flex">
               <h3 className="card-title">Saved address</h3>
@@ -334,7 +323,6 @@ export default function AccountOverview() {
         </div>
       )}
 
-      {/* VIEW 2: ALL ADDRESSES PAGE */}
       {currentView === "addresses" && (
         <div className="addresses-page-container">
           <div className="addresses-top-row">
@@ -384,7 +372,6 @@ export default function AccountOverview() {
         </div>
       )}
 
-      {/* ================= EDIT DETAILS POPUP MODAL ================= */}
       {isEditModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -451,7 +438,6 @@ export default function AccountOverview() {
         </div>
       )}
 
-      {/* ================= ADD / EDIT ADDRESS POPUP MODAL ================= */}
       {isAddressModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card address-modal-card">
