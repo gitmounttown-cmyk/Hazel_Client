@@ -2,8 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { isLoggedIn } from "../../../services/authService";
-import { addToCart } from "../../../services/cartService";
+import { addToCart, getCart } from "../../../services/cartService";
 import "./ProductPreview.css";
+import {
+  addToWishlist,
+  checkWishlist,
+  removeWishlistItem,
+} from "../../../Services/wishlistService";
 
 /* ---------- real image assets ----------
    Swap these import paths for your real product photography — everything
@@ -27,7 +32,6 @@ import { getAllReviews } from "../../../Services/reviewService";
 import { formatCurrency } from "../../../utils/currencyFormat";
 import { formatTimeAgo } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
-
 
 /* ---------- inline icons ---------- */
 const Star = ({ filled = true }) => (
@@ -212,27 +216,27 @@ const COLOR_MAP = {
     id: "light-orchid",
     hex: "#E6B7D1",
   },
-  "ROSE": {
+  ROSE: {
     id: "rose",
     hex: "#E7CDD3",
   },
-  "BEIGE": {
+  BEIGE: {
     id: "beige",
     hex: "#F1E9DE",
   },
-  "MINT": {
+  MINT: {
     id: "mint",
     hex: "#E4F1DC",
   },
-  "AQUA": {
+  AQUA: {
     id: "aqua",
     hex: "#DCF1EE",
   },
-  "LILAC": {
+  LILAC: {
     id: "lilac",
     hex: "#DEDCF2",
   },
-  "BLUSH": {
+  BLUSH: {
     id: "blush",
     hex: "#F1DDDC",
   },
@@ -265,49 +269,51 @@ const DELIVERY_ADDRESSES = [
     city: "Coimbatore",
     state: "Tamil Nadu",
     pincode: "641001",
-  }
+  },
 ];
-
-
 
 export default function ProductPage() {
   const navigate = useNavigate();
+  const [addedToCart, setAddedToCart] = useState(false);
   const [products, setProducts] = useState([]);
   const [activeThumb, setActiveThumb] = useState(0);
   const [activeColor, setActiveColor] = useState("rose");
   const [activeSize, setActiveSize] = useState("L");
   const [qty, setQty] = useState(1);
   const [activeFilter, setActiveFilter] = useState("all");
+
   const [wishlisted, setWishlisted] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [relatedWishlisted, setRelatedWishlisted] = useState({});
+
   const [productDetails, setProductDetails] = useState(null); // State to hold product details
   const [reviews, setReviews] = useState([]); // State to hold product reviews
   const [variantMedia, setVariantMedia] = useState([]); // State to hold variant media images
   const [showLocations, setShowLocations] = useState(false);
-const [showAddAddress, setShowAddAddress] = useState(false);
-const [selectedAddress, setSelectedAddress] = useState(null);
-const [newAddress, setNewAddress] = useState({
-  name: "",
-  phone: "",
-  address: "",
-  city: "",
-  state: "",
-  pincode: "",
-});
+  const [showAddAddress, setShowAddAddress] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [newAddress, setNewAddress] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
 
-const [deliveryAddresses, setDeliveryAddresses] = useState([
-  {
-    id: 1,
-    name: "Name",
-    phone: "9234556783",
-    address: "12, Gandhi Road",
-    city: "Coimbatore",
-    state: "Tamil Nadu",
-    pincode: "641001",
-  }
-]);
+  const [deliveryAddresses, setDeliveryAddresses] = useState([
+    {
+      id: 1,
+      name: "Name",
+      phone: "9234556783",
+      address: "12, Gandhi Road",
+      city: "Coimbatore",
+      state: "Tamil Nadu",
+      pincode: "641001",
+    },
+  ]);
   const { id } = useParams();
   console.log("Product ID:", id); // Log the product ID to the console
-
 
   // get product details using the id from the backend API and display them on the page. You can use useEffect to fetch the product details when the component mounts or when the id changes.
   useEffect(() => {
@@ -325,250 +331,417 @@ const [deliveryAddresses, setDeliveryAddresses] = useState([
       });
   }, [id]);
 
-useEffect(() => {
-  if (!productDetails?.variants?.length) {
-    setVariantMedia([]);
-    return;
-  }
+  useEffect(() => {
+    if (!id || !isLoggedIn()) return;
 
-  const images = productDetails.variants.flatMap((variant) => {
-    if (!variant.media?.length) return [];
+    const checkCart = async () => {
+      try {
+        const response = await getCart();
 
-    console.log(`Media for variant ${variant.id}:`, variant.media);
+        const cart = response?.data?.cart || response?.cart;
 
-    return variant.media.map((mediaItem) => {
-      console.log(
-        `Media item for variant ${variant.id}:`,
-        mediaItem
+        const items = cart?.items || [];
+
+        const exists = items.some(
+          (item) =>
+            String(item?.product?._id || item?.productId) === String(id),
+        );
+
+        setAddedToCart(exists);
+      } catch (error) {
+        console.error("CHECK CART ERROR:", error);
+      }
+    };
+
+    checkCart();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id || !isLoggedIn()) return;
+
+    const checkProductWishlist = async () => {
+      try {
+        const response = await checkWishlist(id);
+
+        setWishlisted(
+          response?.data?.isWishlisted ??
+            response?.data?.wishlisted ??
+            response?.data?.data?.isWishlisted ??
+            false,
+        );
+      } catch (error) {
+        console.error("CHECK WISHLIST ERROR:", error);
+      }
+    };
+
+    checkProductWishlist();
+  }, [id]);
+
+  const handleRelatedWishlist = async (e, productId) => {
+    e.stopPropagation();
+
+    if (!isLoggedIn()) {
+      toast.error("Please log in to use wishlist.");
+      return;
+    }
+
+    if (!productId) return;
+
+    try {
+      setWishlistLoading(true);
+
+      const isCurrentlyWishlisted = relatedWishlisted[productId];
+
+      if (isCurrentlyWishlisted) {
+        await removeWishlistItem(productId);
+
+        setRelatedWishlisted((prev) => ({
+          ...prev,
+          [productId]: false,
+        }));
+
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlist({
+          productId,
+        });
+
+        setRelatedWishlisted((prev) => ({
+          ...prev,
+          [productId]: true,
+        }));
+
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      console.error("RELATED WISHLIST ERROR:", error);
+
+      toast.error(
+        error?.response?.data?.message || "Failed to update wishlist",
       );
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
-      return mediaItem.imageURL;
+  useEffect(() => {
+    if (!productDetails?.variants?.length) {
+      setVariantMedia([]);
+      return;
+    }
+
+    const images = productDetails.variants.flatMap((variant) => {
+      if (!variant.media?.length) return [];
+
+      console.log(`Media for variant ${variant.id}:`, variant.media);
+
+      return variant.media.map((mediaItem) => {
+        console.log(`Media item for variant ${variant.id}:`, mediaItem);
+
+        return mediaItem.imageURL;
+      });
     });
-  });
 
-  // Remove duplicate image URLs
-  const uniqueImages = [...new Set(images)];
+    // Remove duplicate image URLs
+    const uniqueImages = [...new Set(images)];
 
-  console.log("All variant images:", images);
-  console.log("Unique variant images:", uniqueImages);
+    console.log("All variant images:", images);
+    console.log("Unique variant images:", uniqueImages);
 
-  setVariantMedia(uniqueImages);
-}, [productDetails]);
+    setVariantMedia(uniqueImages);
+  }, [productDetails]);
 
+  //get all product reviews using the product id from the backend API and display them on the page. You can use useEffect to fetch the product reviews when the component mounts or when the id changes.
+  useEffect(() => {
+    getAllReviews()
+      .then((response) => {
+        console.log("Product reviews:", response.data?.data);
+        // Update state with product reviews here
+        const productReviews = response?.data?.data?.filter(
+          (review) => review.product === id,
+        );
+        console.log(
+          "Filtered product reviews for product ID",
+          id,
+          ":",
+          productReviews,
+        );
+        setReviews(
+          productReviews?.length ? productReviews : response.data?.data,
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching product reviews:", error);
+      });
+  }, [id]);
 
-//get all product reviews using the product id from the backend API and display them on the page. You can use useEffect to fetch the product reviews when the component mounts or when the id changes.
-useEffect(() => {
-  getAllReviews()
-    .then((response) => {
-      console.log("Product reviews:", response.data?.data);
-      // Update state with product reviews here
-      const productReviews = response?.data?.data?.filter((review) => review.product === id);
-      console.log("Filtered product reviews for product ID", id, ":", productReviews);
-      setReviews(productReviews?.length ? productReviews : response.data?.data);
-    })
-    .catch((error) => {
-      console.error("Error fetching product reviews:", error);
-    });
-}, [id]);
-
-//get products using the backend API and display them on the page. You can use useEffect to fetch the products when the component mounts.
-useEffect(() => {
-  getProducts()
-    .then((response) => {
-      console.log("Products:", response.data?.data);
-      // Update state with products here
-      setProducts(response.data?.data);
-    })
-    .catch((error) => {
-      console.error("Error fetching products:", error);
-    });
-}, []);
+  //get products using the backend API and display them on the page. You can use useEffect to fetch the products when the component mounts.
+  useEffect(() => {
+    getProducts()
+      .then((response) => {
+        console.log("Products:", response.data?.data);
+        // Update state with products here
+        setProducts(response.data?.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+      });
+  }, []);
 
   console.log("Variant media state:", variantMedia); // Log the variant media state to the console
 
-console.log("Reviews state:", reviews); // Log the reviews state to the console
+  console.log("Reviews state:", reviews); // Log the reviews state to the console
 
-console.log("Product details state:", productDetails); // Log the product details state to the console
+  console.log("Product details state:", productDetails); // Log the product details state to the console
 
+  const colors = [
+    ...new Map(
+      (productDetails?.variants || [])
+        .map((variant, index) => {
+          const colorName = variant.color?.trim().toUpperCase();
 
+          if (!colorName) return null;
 
-const colors = [
-  ...new Map(
-    (productDetails?.variants || [])
-      .map((variant, index) => {
-        const colorName = variant.color?.trim().toUpperCase();
+          const mappedColor = COLOR_MAP[colorName];
 
-        if (!colorName) return null;
+          if (!mappedColor) {
+            console.warn("New color found:", colorName);
+          }
 
-        const mappedColor = COLOR_MAP[colorName];
+          return [
+            colorName,
+            {
+              id: mappedColor?.id || createColorId(colorName),
 
-        if (!mappedColor) {
-          console.warn("New color found:", colorName);
-        }
+              hex:
+                mappedColor?.hex ||
+                FALLBACK_COLORS[index % FALLBACK_COLORS.length],
 
-        return [
-          colorName,
-          {
-            id: mappedColor?.id || createColorId(colorName),
+              selected: index === 0,
+            },
+          ];
+        })
+        .filter(Boolean),
+    ).values(),
+  ];
 
-            hex:
-              mappedColor?.hex ||
-              FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+  console.log("Colors derived from product details:", colors); // Log the colors derived from product details
 
-            selected: index === 0,
-          },
-        ];
-      })
-      .filter(Boolean)
-  ).values(),
-];
+  const SIZES =
+    productDetails?.variants?.[0]?.sizes?.map((item) => {
+      const inStock = item.isActive && item.stockQuantity > 0;
 
-console.log("Colors derived from product details:", colors); // Log the colors derived from product details
-
-const SIZES = productDetails?.variants?.[0]?.sizes?.map((item) => {
-    const inStock = item.isActive && item.stockQuantity > 0;
-
-    return {
-      id: item.size,
-      label: inStock ? "In Stock" : "Out of Stock",
-      disabled: !inStock,
-    };
-  }) || [];
+      return {
+        id: item.size,
+        label: inStock ? "In Stock" : "Out of Stock",
+        disabled: !inStock,
+      };
+    }) || [];
 
   console.log("Sizes derived from product details:", SIZES); // Log the sizes derived from product details
 
   const selectedVariant =
-  productDetails?.variants?.find((variant) => variant.isActive) ||
-  productDetails?.variants?.[0];
+    productDetails?.variants?.find((variant) => variant.isActive) ||
+    productDetails?.variants?.[0];
 
   const DETAILS = [
-  ["Fabric", selectedVariant?.fabric || "-"],
-  ["Feel", selectedVariant?.feel || "-"],
-  ["Lining", selectedVariant?.lining || "-"],
-  ["Sleeves", selectedVariant?.sleeves || "-"],
-  ["Finishing", selectedVariant?.finishing || "-"],
-  ["Pocket", selectedVariant?.pocket || "-"],
-  [
-    "Available Sizes",
-    selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
-  ],
-];
+    ["Fabric", selectedVariant?.fabric || "-"],
+    ["Feel", selectedVariant?.feel || "-"],
+    ["Lining", selectedVariant?.lining || "-"],
+    ["Sleeves", selectedVariant?.sleeves || "-"],
+    ["Finishing", selectedVariant?.finishing || "-"],
+    ["Pocket", selectedVariant?.pocket || "-"],
+    [
+      "Available Sizes",
+      selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
+    ],
+  ];
 
-const handleAddToCart = async () => {
-  console.log("Add to Cart clicked",isLoggedIn());
-  if (!isLoggedIn()) {
-    toast.error("Please log in to add items to your cart.");
-    return;
-  }
-  console.log("productDetails:", productDetails);
-  console.log("Adding to cart:", productDetails._id, selectedVariant._id, qty);
-  const cartItem = {
-    productId: productDetails._id,
-    variantId: selectedVariant._id,
-    quantity: qty,
-    price: selectedVariant.discountPrice || selectedVariant.price,
-  };
-  console.log("Cart item:", cartItem);
-  const response = await addToCart(cartItem);
-  console.log("Add to Cart response:", response);
-  if(response.success) {
-  toast.success(response?.message || "Item added to cart!");
-  }else{
-  toast.error(response?.message || "Failed to add item to cart.");
-  }
-}
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
 
-const handleBuyNow = () => {
-  if (!isLoggedIn()) {
-    toast.error("Please log in to proceed with the purchase.");
-    return;
-  }
-}
+    if (!isLoggedIn()) {
+      toast.error("Please log in to use wishlist.");
+      return;
+    }
 
-const handleSaveAddress = () => {
-  if (!newAddress.name.trim()) {
-    toast.error("Please enter your name");
-    return;
-  }
+    if (!id) return;
 
-  if (!newAddress.phone.trim()) {
-    toast.error("Please enter your phone number");
-    return;
-  }
+    try {
+      setWishlistLoading(true);
 
-  if (!newAddress.address.trim()) {
-    toast.error("Please enter your address");
-    return;
-  }
-
-  if (!newAddress.city.trim()) {
-    toast.error("Please enter your city");
-    return;
-  }
-
-  if (!newAddress.state.trim()) {
-    toast.error("Please enter your state");
-    return;
-  }
-
-  if (newAddress.pincode.length !== 6) {
-    toast.error("Please enter a valid 6 digit pincode");
-    return;
-  }
-
-  const address = {
-    id: Date.now(),
-    ...newAddress,
+      if (wishlisted) {
+        await removeWishlistItem(id);
+        setWishlisted(false);
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlist({
+          productId: id,
+        });
+        setWishlisted(true);
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      console.error("WISHLIST ERROR:", error);
+      toast.error(
+        error?.response?.data?.message || "Failed to update wishlist",
+      );
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
-  setDeliveryAddresses((prev) => [
-    ...prev,
-    address,
-  ]);
+  const handleAddToCart = async () => {
+    console.log("Add to Cart clicked", isLoggedIn());
+    if (!isLoggedIn()) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+    console.log("productDetails:", productDetails);
+    console.log(
+      "Adding to cart:",
+      productDetails._id,
+      selectedVariant._id,
+      qty,
+    );
+    const cartItem = {
+      productId: productDetails._id,
+      variantId: selectedVariant._id,
+      quantity: qty,
+      price: selectedVariant.discountPrice || selectedVariant.price,
+    };
+    console.log("Cart item:", cartItem);
+    const response = await addToCart(cartItem);
+    console.log("Add to Cart response:", response);
+    if (response.success) {
+      setAddedToCart(true);
+      toast.success("Product added");
+    } else {
+      toast.error(response?.message || "Failed to add item to cart.");
+    }
+  };
 
-  // Automatically select new address
-  setSelectedAddress(address);
+  const handleBuyNow = () => {
+    if (!isLoggedIn()) {
+      toast.error("Please log in to proceed with the purchase.");
+      return;
+    }
+  };
 
-  // Reset form
-  setNewAddress({
-    name: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
+  const handleSaveAddress = () => {
+    if (!newAddress.name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    if (!newAddress.phone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    if (!newAddress.address.trim()) {
+      toast.error("Please enter your address");
+      return;
+    }
+
+    if (!newAddress.city.trim()) {
+      toast.error("Please enter your city");
+      return;
+    }
+
+    if (!newAddress.state.trim()) {
+      toast.error("Please enter your state");
+      return;
+    }
+
+    if (newAddress.pincode.length !== 6) {
+      toast.error("Please enter a valid 6 digit pincode");
+      return;
+    }
+
+    const address = {
+      id: Date.now(),
+      ...newAddress,
+    };
+
+    setDeliveryAddresses((prev) => [...prev, address]);
+
+    // Automatically select new address
+    setSelectedAddress(address);
+
+    // Reset form
+    setNewAddress({
+      name: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      pincode: "",
+    });
+
+    // Close both modals
+    setShowAddAddress(false);
+    setShowLocations(false);
+
+    toast.success("Address added successfully");
+  };
+
+  const RELATED = products.map((product) => {
+    const variant = product.variants?.[0];
+
+    return {
+      id: product._id,
+      name: product.name,
+      subtitle: `${variant?.fabric || ""} · ${variant?.color || ""}`,
+      rating: product.rating || 0,
+      reviewCount: product.reviewCount || 0,
+      price: formatCurrency(variant?.discountPrice || variant?.price || 0),
+      image:
+        import.meta.env.VITE_UPLOAD_URL + (variant?.media?.[0]?.imageURL || ""),
+    };
   });
 
-  // Close both modals
-  setShowAddAddress(false);
-  setShowLocations(false);
+  useEffect(() => {
+    if (!RELATED?.length || !isLoggedIn()) return;
 
-  toast.success("Address added successfully");
-};
+    const checkRelatedWishlist = async () => {
+      try {
+        const wishlistStatus = {};
 
+        await Promise.all(
+          RELATED.slice(0, 4).map(async (product) => {
+            if (!product.id) return;
 
-const RELATED = products.map((product) => {
-  const variant = product.variants?.[0];
+            try {
+              const response = await checkWishlist(product.id);
 
-  return {
-    id: product._id,
-    name: product.name,
-    subtitle: `${variant?.fabric || ""} · ${variant?.color || ""}`,
-    rating: product.rating || 0,
-    reviewCount: product.reviewCount || 0,
-    price: formatCurrency(
-      variant?.discountPrice || variant?.price || 0
-    ),
-    image:  import.meta.env.VITE_UPLOAD_URL + (variant?.media?.[0]?.imageURL || "") ,
-  };
-});
+              wishlistStatus[product.id] =
+                response?.data?.isWishlisted ??
+                response?.data?.wishlisted ??
+                response?.data?.data?.isWishlisted ??
+                false;
+            } catch (error) {
+              wishlistStatus[product.id] = false;
+            }
+          }),
+        );
+
+        setRelatedWishlisted(wishlistStatus);
+      } catch (error) {
+        console.error("CHECK RELATED WISHLIST ERROR:", error);
+      }
+    };
+
+    checkRelatedWishlist();
+  }, [products, id]);
 
   return (
     <div className="pp">
       {/* ============ PRODUCT SECTION ============ */}
       <section className="pp-product">
         <div className="pp-breadcrumb">
-          <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {productDetails?.name || "Product Name"}
+          <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> /{" "}
+          {productDetails?.name || "Product Name"}
         </div>
 
         <div className="pp-grid">
@@ -597,7 +770,10 @@ const RELATED = products.map((product) => {
             <div className="pp-main-image">
               <img
                 className="pp-main-image-ph"
-                src={import.meta.env.VITE_UPLOAD_URL + (variantMedia[activeThumb] || mainPhoto)}
+                src={
+                  import.meta.env.VITE_UPLOAD_URL +
+                  (variantMedia[activeThumb] || mainPhoto)
+                }
                 alt={productDetails?.name || "Admire Maxi"}
                 onError={(e) => {
                   console.error(`Error loading main image:`, e);
@@ -609,15 +785,20 @@ const RELATED = products.map((product) => {
 
           {/* ---- info ---- */}
           <div className="pp-info">
-            <div className="pp-eyebrow">{productDetails?.variants?.[0]?.fabric || null}</div>
+            <div className="pp-eyebrow">
+              {productDetails?.variants?.[0]?.fabric || null}
+            </div>
 
             <div className="pp-title-row">
               {/* //if no name show nill */}
               <h1 className="pp-title">{productDetails?.name || null}</h1>
               <button
                 className={`pp-wish ${wishlisted ? "is-active" : ""}`}
-                onClick={() => setWishlisted((w) => !w)}
-                aria-label="Add to wishlist"
+                onClick={handleWishlist}
+                disabled={wishlistLoading}
+                aria-label={
+                  wishlisted ? "Remove from wishlist" : "Add to wishlist"
+                }
               >
                 <Heart active={wishlisted} />
               </button>
@@ -630,10 +811,14 @@ const RELATED = products.map((product) => {
             <div className="pp-rating">
               <Stars count={productDetails?.rating} />
               <span className="pp-rating-num">{productDetails?.rating}</span>
-              <span className="pp-rating-count">({productDetails?.reviewCount || 0} Reviews)</span>
+              <span className="pp-rating-count">
+                ({productDetails?.reviewCount || 0} Reviews)
+              </span>
             </div>
 
-            <div className="pp-price">₹{formatCurrency(productDetails?.variants?.[0]?.price) || "0"}</div>
+            <div className="pp-price">
+              ₹{formatCurrency(productDetails?.variants?.[0]?.price) || "0"}
+            </div>
 
             <div className="pp-block">
               <div className="pp-label-row">
@@ -727,8 +912,13 @@ const RELATED = products.map((product) => {
             </div>
 
             <div className="pp-actions">
-              <button className="btn btn--primary" onClick={handleAddToCart}>
-                Add To Cart
+              <button
+                className="btn btn--primary"
+                onClick={
+                  addedToCart ? () => navigate("/cartpage") : handleAddToCart
+                }
+              >
+                {addedToCart ? "Go to Cart" : "Add To Cart"}
               </button>
               <button className="btn btn--outline" onClick={handleBuyNow}>
                 Buy Now
@@ -752,7 +942,7 @@ const RELATED = products.map((product) => {
           </div>
 
           {/* <div className="pp-delivery"> */}
-            {/* <h2 className="pp-h2">Delivery Details</h2>
+          {/* <h2 className="pp-h2">Delivery Details</h2>
 
             <div className="pp-delivery-card">
               <div className="pp-delivery-row">
@@ -833,146 +1023,129 @@ const RELATED = products.map((product) => {
               </div>
             </div> */}
 
-            {/* <div className="pp-delivery-card"> */}
-              <div className="pp-delivery">
-                <h2 className="pp-h2">Delivery Details</h2>
+          {/* <div className="pp-delivery-card"> */}
+          <div className="pp-delivery">
+            <h2 className="pp-h2">Delivery Details</h2>
 
-                <div className="pp-delivery-card">
+            <div className="pp-delivery-card">
+              {/* Delivery location */}
+              <div className="pp-delivery-row">
+                <span className="pp-delivery-icon">
+                  <PinIcon />
+                </span>
 
-                  {/* Delivery location */}
-                  <div className="pp-delivery-row">
-                    <span className="pp-delivery-icon">
-                      <PinIcon />
+                <div className="pp-delivery-content">
+                  {selectedAddress ? (
+                    <>
+                      <span className="pp-delivery-text">
+                        Deliver to{" "}
+                        <strong>
+                          {selectedAddress.city} - {selectedAddress.pincode}
+                        </strong>
+                      </span>
+
+                      <button
+                        type="button"
+                        className="pp-change-location"
+                        onClick={() => setShowLocations(true)}
+                      >
+                        Change
+                      </button>
+                    </>
+                  ) : (
+                    <span className="pp-delivery-text">
+                      Location not set{" "}
+                      <button
+                        type="button"
+                        className="pp-location-link"
+                        onClick={() => setShowLocations(true)}
+                      >
+                        Select delivery location
+                      </button>
                     </span>
+                  )}
+                </div>
+              </div>
 
-                    <div className="pp-delivery-content">
-                      {selectedAddress ? (
-                        <>
-                          <span className="pp-delivery-text">
-                            Deliver to{" "}
-                            <strong>
-                              {selectedAddress.city} - {selectedAddress.pincode}
-                            </strong>
+              {/* Delivery date */}
+              <div className="pp-delivery-row">
+                <span className="pp-delivery-icon">
+                  <TruckIcon />
+                </span>
+
+                <span>
+                  Delivery by 11 Sep, Fri
+                  <br />
+                  <em>Order in 00h 00m 00s</em>
+                </span>
+              </div>
+            </div>
+
+            {/* ================= LOCATION POPUP ================= */}
+
+            {showLocations && (
+              <div
+                className="pp-location-overlay"
+                onClick={() => setShowLocations(false)}
+              >
+                <div
+                  className="pp-location-modal"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header */}
+                  <div className="pp-location-header">
+                    <h3>Select delivery location</h3>
+
+                    <button
+                      type="button"
+                      className="pp-location-close"
+                      onClick={() => setShowLocations(false)}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  {/* Address list */}
+                  <div className="pp-location-list">
+                    {deliveryAddresses.map((address) => (
+                      <button
+                        type="button"
+                        key={address.id}
+                        className={`pp-address-card ${
+                          selectedAddress?.id === address.id
+                            ? "is-selected"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedAddress(address);
+                          setShowLocations(false);
+                        }}
+                      >
+                        <span className="pp-address-icon">
+                          <PinIcon />
+                        </span>
+
+                        <span className="pp-address-info">
+                          <strong>{address.name}</strong>
+
+                          <span>{address.address}</span>
+
+                          <span>
+                            {address.city}, {address.state}
                           </span>
 
-                          <button
-                            type="button"
-                            className="pp-change-location"
-                            onClick={() => setShowLocations(true)}
-                          >
-                            Change
-                          </button>
-                        </>
-                      ) : (
-                        <span className="pp-delivery-text">
-                          Location not set{" "}
-                          <button
-                            type="button"
-                            className="pp-location-link"
-                            onClick={() => setShowLocations(true)}
-                          >
-                            Select delivery location
-                          </button>
+                          <span>{address.pincode}</span>
                         </span>
-                      )}
-                    </div>
+
+                        {/* Radio */}
+                        <span className="pp-address-radio">
+                          {selectedAddress?.id === address.id && <span />}
+                        </span>
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Delivery date */}
-                  <div className="pp-delivery-row">
-                    <span className="pp-delivery-icon">
-                      <TruckIcon />
-                    </span>
-
-                    <span>
-                      Delivery by 11 Sep, Fri
-                      <br />
-                      <em>Order in 00h 00m 00s</em>
-                    </span>
-                  </div>
-                </div>
-
-
-                {/* ================= LOCATION POPUP ================= */}
-
-                {showLocations && (
-                  <div
-                    className="pp-location-overlay"
-                    onClick={() => setShowLocations(false)}
-                  >
-                    <div
-                      className="pp-location-modal"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-
-                      {/* Header */}
-                      <div className="pp-location-header">
-                        <h3>Select delivery location</h3>
-
-                        <button
-                          type="button"
-                          className="pp-location-close"
-                          onClick={() => setShowLocations(false)}
-                        >
-                          ×
-                        </button>
-                      </div>
-
-
-                      {/* Address list */}
-                      <div className="pp-location-list">
-
-                        {deliveryAddresses.map((address) => (
-                          <button
-                            type="button"
-                            key={address.id}
-                            className={`pp-address-card ${selectedAddress?.id === address.id
-                                ? "is-selected"
-                                : ""
-                              }`}
-                            onClick={() => {
-                              setSelectedAddress(address);
-                              setShowLocations(false);
-                            }}
-                          >
-
-                            <span className="pp-address-icon">
-                              <PinIcon />
-                            </span>
-
-                            <span className="pp-address-info">
-
-                              <strong>{address.name}</strong>
-
-                              <span>
-                                {address.address}
-                              </span>
-
-                              <span>
-                                {address.city}, {address.state}
-                              </span>
-
-                              <span>
-                                {address.pincode}
-                              </span>
-
-                            </span>
-
-
-                            {/* Radio */}
-                            <span className="pp-address-radio">
-                              {selectedAddress?.id === address.id && (
-                                <span />
-                              )}
-                            </span>
-
-                          </button>
-                        ))}
-
-                      </div>
-
-
-                      {/* Add address */}
+                  {/* Add address */}
                   <button
                     type="button"
                     className="pp-add-address"
@@ -980,10 +1153,9 @@ const RELATED = products.map((product) => {
                   >
                     + Add New Address
                   </button>
-
-                    </div>
-                  </div>
-                )}
+                </div>
+              </div>
+            )}
 
             {showAddAddress && (
               <div
@@ -1007,7 +1179,6 @@ const RELATED = products.map((product) => {
                   </div>
 
                   <div className="pp-address-form">
-
                     <div className="pp-form-group">
                       <label>Full Name</label>
                       <input
@@ -1054,7 +1225,6 @@ const RELATED = products.map((product) => {
                     </div>
 
                     <div className="pp-form-row">
-
                       <div className="pp-form-group">
                         <label>City</label>
                         <input
@@ -1084,7 +1254,6 @@ const RELATED = products.map((product) => {
                           }
                         />
                       </div>
-
                     </div>
 
                     <div className="pp-form-group">
@@ -1104,7 +1273,6 @@ const RELATED = products.map((product) => {
                     </div>
 
                     <div className="pp-form-actions">
-
                       <button
                         type="button"
                         className="pp-cancel-address"
@@ -1120,39 +1288,36 @@ const RELATED = products.map((product) => {
                       >
                         Save Address
                       </button>
-
                     </div>
-
                   </div>
                 </div>
               </div>
             )}
 
-
-                {/* Perks */}
-                <div className="pp-perks">
-                  <div className="pp-perk">
-                    <ShieldIcon />
-                    <span>Secure Pay</span>
-                  </div>
-
-                  <div className="pp-perk">
-                    <RefreshIcon />
-                    <span>Easy Exchange</span>
-                  </div>
-
-                  <div className="pp-perk">
-                    <TruckIcon size={20} />
-                    <span>Fast Delivery</span>
-                  </div>
-
-                  <div className="pp-perk">
-                    <QualityIcon />
-                    <span>Quality Check</span>
-                  </div>
-                </div>
+            {/* Perks */}
+            <div className="pp-perks">
+              <div className="pp-perk">
+                <ShieldIcon />
+                <span>Secure Pay</span>
               </div>
-            {/* </div> */}
+
+              <div className="pp-perk">
+                <RefreshIcon />
+                <span>Easy Exchange</span>
+              </div>
+
+              <div className="pp-perk">
+                <TruckIcon size={20} />
+                <span>Fast Delivery</span>
+              </div>
+
+              <div className="pp-perk">
+                <QualityIcon />
+                <span>Quality Check</span>
+              </div>
+            </div>
+          </div>
+          {/* </div> */}
           {/* </div> */}
         </div>
       </section>
@@ -1163,7 +1328,9 @@ const RELATED = products.map((product) => {
           <div>
             <h2 className="pp-h1-serif">Real Women. Real Comfort.</h2>
             <div className="pp-reviews-score">
-              <span className="pp-score-num">{productDetails?.rating || 0}</span>
+              <span className="pp-score-num">
+                {productDetails?.rating || 0}
+              </span>
               <div className="pp-reviews-score-meta">
                 <Stars count={5} />
                 <span>Based On {productDetails?.reviewCount || 0} Reviews</span>
@@ -1190,13 +1357,23 @@ const RELATED = products.map((product) => {
             <article className="pp-review-card" key={r?._id}>
               <div className="pp-review-top">
                 <Stars count={r.rating} />
-                <span className="pp-review-time">{formatTimeAgo(r?.createdAt)}</span>
+                <span className="pp-review-time">
+                  {formatTimeAgo(r?.createdAt)}
+                </span>
               </div>
 
               {r.images && (
                 <div className="pp-review-photos">
                   {r.images.map((src, i) => (
-                    <img className="pp-review-photo" src={import.meta.env.VITE_API_URL + src} alt="" key={i} onError={(e) => { e.target.src = mainPhoto }} />
+                    <img
+                      className="pp-review-photo"
+                      src={import.meta.env.VITE_API_URL + src}
+                      alt=""
+                      key={i}
+                      onError={(e) => {
+                        e.target.src = mainPhoto;
+                      }}
+                    />
                   ))}
                 </div>
               )}
@@ -1207,7 +1384,9 @@ const RELATED = products.map((product) => {
               <div className="pp-review-author">
                 <div className="pp-avatar" />
                 <div>
-                  <div className="pp-author-name">{r.user?.name || "Anonymous"}</div>
+                  <div className="pp-author-name">
+                    {r.user?.name || "Anonymous"}
+                  </div>
                   <div className="pp-verified">
                     <span className="pp-verified-dot" /> Verified Buyer
                   </div>
@@ -1219,7 +1398,7 @@ const RELATED = products.map((product) => {
 
         <div className="pp-related-head">
           <h2 className="pp-h1-serif pp-h1-serif--black">You May Also Like</h2>
-          <a onClick={(e) =>  navigate('/shop') } className="pp-explore">
+          <a onClick={(e) => navigate("/shop")} className="pp-explore">
             Explore All Shop
           </a>
         </div>
@@ -1230,10 +1409,18 @@ const RELATED = products.map((product) => {
             <article className="pp-related-card" key={p.id}>
               <div className="pp-related-image">
                 <button
-                  className="pp-wish pp-wish--onimage"
-                  aria-label="Add to wishlist"
+                  className={`pp-wish ${
+                    relatedWishlisted[p.id] ? "is-active" : ""
+                  }`}
+                  onClick={(e) => handleRelatedWishlist(e, p.id)}
+                  disabled={wishlistLoading}
+                  aria-label={
+                    relatedWishlisted[p.id]
+                      ? "Remove from wishlist"
+                      : "Add to wishlist"
+                  }
                 >
-                  <Heart />
+                  <Heart active={!!relatedWishlisted[p.id]} />
                 </button>
                 <img
                   className="pp-related-image-ph"

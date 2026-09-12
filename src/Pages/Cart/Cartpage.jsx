@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { removeCartItem } from "../../Services/cartService";
 const API_URL = "http://localhost:5004/api";
 
 const formatINR = (amount) =>
@@ -95,9 +95,14 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem }) {
             <h3 className="cart-item-name">{productName}</h3>
 
             <p className="cart-item-subtitle">
-              {product.description ||
-                product.subtitle ||
-                "Premium quality product"}
+              {typeof product.description === "object"
+                ? product.description.about ||
+                  product.description.itemDetails ||
+                  product.subtitle ||
+                  "Premium quality product"
+                : product.description ||
+                  product.subtitle ||
+                  "Premium quality product"}
             </p>
           </div>
 
@@ -527,7 +532,7 @@ export default function CartPage() {
       setLoadingItem(itemId);
       setError("");
 
-      const response = await api.delete(`/cart/item/${itemId}`);
+      const response = await removeCartItem(itemId);
 
       if (response.data.success) {
         const cart = response.data.cart;

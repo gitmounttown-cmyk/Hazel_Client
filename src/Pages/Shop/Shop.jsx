@@ -494,7 +494,10 @@ function ProductCard({ product, navigate }) {
           type="button"
           className={`wishlist-btn ${isWishlisted ? "wishlisted" : ""}`}
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          onClick={handleWishlist}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleWishlist(e);
+          }}
           disabled={wishlistLoading}
         >
           {isWishlisted ? "♥" : "♡"}

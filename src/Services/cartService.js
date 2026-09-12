@@ -28,6 +28,6 @@ export const decreaseCartItem = (itemId) =>
   axiosInstance.patch(`/item/${itemId}/decrease`);
 
 export const removeCartItem = (itemId) =>
-  axiosInstance.delete(`/item/${itemId}`);
+  axiosInstance.delete(`/cart/remove/${itemId}`);
 
 export const clearCart = () => axiosInstance.delete(`/clear`);
