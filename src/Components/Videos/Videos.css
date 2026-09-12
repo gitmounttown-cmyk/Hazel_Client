@@ -1,0 +1,332 @@
+* {
+  box-sizing: border-box;
+}
+
+.about-page {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: #2c2c2a;
+  overflow-x: hidden;
+  background-color: #F1D0A0;
+}
+
+.eyebrow {
+  color: black;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.eyebrow-light {
+  font-weight: bolder;
+  padding-bottom: 25px;
+  padding-left: 173px;
+  color: #71431B;
+}
+
+.center {
+  text-align: center;
+}
+
+.section-title {
+  font-family: serif;
+  color: #52131E;
+  font-size: 46px;
+  line-height: 1.3;
+  margin: 0 0 20px;
+}
+
+.title-light {
+  color: #fff;
+}
+
+.body-copy {
+  color: #5c5854;
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+
+.btn-filled {
+  background: #780524;
+  color: #fff;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-filled:hover {
+  background: #431319;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #A35461;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+.hero-bg-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ---------------- SHOP THE LOOK SECTION (VIDEOS CAROUSEL) ---------------- */
+.shop-the-look-section {
+  background-color: #F1D0A0; 
+  padding: 60px 40px;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.shop-the-look-section .section-title {
+  font-family: serif;
+  color: #5C1F26;
+  font-size: 38px;
+  text-align: center;
+  margin-bottom: 40px;
+  font-weight: bolder;
+}
+
+.carousel-wrapper {
+  position: relative;
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.carousel-btn {
+  position: absolute;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.carousel-btn:hover {
+  background: #fff;
+}
+
+.prev-btn {
+  left: -10px;
+}
+
+.next-btn {
+  right: -10px;
+}
+
+.looks-container {
+  display: flex;
+  gap: 40px;
+  max-width: 1300px;
+  width: 100%;
+  margin: 0 auto;
+  overflow-x: auto;
+  padding: 10px 10px 20px 38px;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+
+.looks-container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari, Opera */
+}
+
+.look-card {
+  position: relative;
+  flex: 0 0 220px;
+  height: 380px;
+  background-color: #000;
+  border-radius: 12px;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.look-card:hover {
+  transform: translateY(-5px);
+}
+
+.look-video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Play button overlay */
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  pointer-events: none; 
+}
+
+.play-icon-circle {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.look-card:hover .play-icon-circle {
+  transform: scale(1.1);
+}
+
+.play-triangle {
+  color: #3b2219;
+  font-size: 14px;
+  margin-left: 2px; 
+}
+
+/* Bottom info card banner */
+.look-info {
+  position: relative;
+  z-index: 3;
+  background: rgba(20, 20, 20, 0.75);
+  backdrop-filter: blur(4px);
+  padding: 12px 10px;
+  text-align: center;
+  margin-top: auto;
+}
+
+.look-name {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.look-price {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: #d8b25c;
+  font-size: 11px;
+  margin: 0;
+}
+
+/* Carousel Dots Indicator */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 25px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #d1b59a;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: #780524;
+  width: 18px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   RESPONSIVE MEDIA QUERIES FOR ALL DEVICES (200px to 1500px+)
+   ============================================================ */
+
+/* Tablets and Medium Laptops (769px to 1024px) */
+@media (max-width: 1024px) {
+  .shop-the-look-section {
+    padding: 50px 30px;
+  }
+  
+  .look-card {
+    flex: 0 0 190px;
+    height: 330px;
+  }
+}
+
+/* Mobile Devices (768px and below) */
+@media (max-width: 768px) {
+  .shop-the-look-section {
+    padding: 40px 15px;
+  }
+
+  .shop-the-look-section .section-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+
+  .looks-container {
+    gap: 15px;
+    padding-left: 5px;
+  }
+
+  .look-card {
+    flex: 0 0 150px;
+    height: 260px;
+    border-width: 3px;
+  }
+
+  .carousel-btn {
+    display: none; /* Hide buttons on touch screens for natural swiping */
+  }
+}
+
+/* Extra Small / Compact Phones (480px and below) */
+@media (max-width: 480px) {
+  .shop-the-look-section {
+    padding: 30px 10px;
+  }
+
+  .shop-the-look-section .section-title {
+    font-size: 22px;
+  }
+
+  .look-card {
+    flex: 0 0 135px;
+    height: 230px;
+  }
+
+  .look-name {
+    font-size: 11px;
+  }
+
+  .look-price {
+    font-size: 10px;
+  }
+}

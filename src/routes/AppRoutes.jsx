@@ -19,6 +19,7 @@ import Shop from "../pages/Shop/Shop";
 import Productpreview from "../pages/Product/productpreview/Productpreview";
 import Contact from "../pages/Contact/Contact";
 import Cartpage from "../pages/Cart/Cartpage";
+import Wishlist from "../pages/Wishlist/Wishlist";
 
 import UserLayout from "../layouts/UserLayout";
 import Home from "../Pages/Home";
@@ -27,10 +28,13 @@ import Order from "../Pages/admin/orders/Order";
 import Banner from "../Pages/admin/banners/Banner";
 import Profile from "../Pages/admin/profile/Profile";
 import CouponList from "../Components/admin/coupons/CouponList";
-
+import About from "../Pages/About/About"
 import NewArrival from "../Pages/admin/newarrival/NewArrival";
 import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
+
+// Import your AccountOverview page component
+import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
 
 const AppRoutes = () => {
   return (
@@ -40,10 +44,19 @@ const AppRoutes = () => {
         <Route element={<UserLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
+
           <Route path="/product" element={<Productpreview />} />
+          <Route path="/About" element={<About />} />
+          
+          {/* Added User Account Overview Route */}
+          <Route path="/account" element={<AccountOverview />} />
+
+          <Route path="/product/:id" element={<Productpreview />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cartpage" element={<Cartpage />} />
+          <Route path="/Wishlist" element={<Wishlist />} />
         </Route>
+
         {/* =================================
           AUTH ROUTES
       ================================= */}
@@ -98,7 +111,7 @@ const AppRoutes = () => {
       ================================= */}
         {/* 
       <Route path="*" element={<Navigate to="/login" replace />} />
-      */}
+    */}
       </Routes>
     </BrowserRouter>
   );

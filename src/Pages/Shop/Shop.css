@@ -273,6 +273,7 @@
   padding: 10px 10px 14px 10px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   transition: transform 0.2s ease;
+  cursor: pointer;
 }
 
 .card:hover {

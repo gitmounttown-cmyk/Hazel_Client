@@ -1,5 +1,6 @@
 import  { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../services/api";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Shop.css";
 
 const STATIC_FILTER_GROUPS = [
@@ -109,7 +110,20 @@ function useShopData() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+
   const debounceRef = useRef(null);
+
+const location = useLocation();
+
+//go to start of page on route change
+useEffect(() => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}, [location.pathname]);
+
+
 
   useEffect(() => {
     API.get("/subcategories/all")
@@ -340,11 +354,11 @@ function Sidebar({ filterGroups, filters, onToggleCheckbox, onSetRadio, onClearA
   );
 }
 
-function ProductCard({ product }) {
+function ProductCard({ product, navigate }) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className="card">
+    <div className="card" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="card-image">
         {product.image && !imgError ? (
           <img
@@ -370,7 +384,7 @@ function ProductCard({ product }) {
   );
 }
 
-function ProductGrid({ products, total, loading, error, sort, setSort, onOpenMobileFilters }) {
+function ProductGrid({ products, total, loading, error, sort, setSort, onOpenMobileFilters, navigate }) {
   return (
     <main className="main">
       <div className="main-scroll">
@@ -387,7 +401,7 @@ function ProductGrid({ products, total, loading, error, sort, setSort, onOpenMob
         {error && <p className="error-text">{error}</p>}
 
         <div className="grid">
-          {products.map((p) => <ProductCard key={p.id} product={p} />)}
+          {products.map((p) => <ProductCard key={p.id} product={p} navigate={navigate} />)}
         </div>
 
         {loading && <p className="loading-text">Loading styles from server…</p>}
@@ -405,6 +419,7 @@ export default function ShopPage() {
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="shop-page">
@@ -428,6 +443,7 @@ export default function ShopPage() {
           sort={sort}
           setSort={setSort}
           onOpenMobileFilters={() => setMobileFiltersOpen(true)}
+          navigate={navigate}
         />
       </div>
     </div>
