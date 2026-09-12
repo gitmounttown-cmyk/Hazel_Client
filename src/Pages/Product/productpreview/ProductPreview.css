@@ -678,6 +678,7 @@
   font-size: 12px;
   color: var(--red);
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .pp-related-grid {
@@ -744,6 +745,445 @@
 .pp-related-price {
   font-family: var(--font-display);
   font-size: 16px;
+}
+
+/* delivery section css */
+/* ========================================
+   DELIVERY LOCATION
+======================================== */
+
+.pp-delivery-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.pp-delivery-text {
+  color: #555;
+  font-size: 14px;
+}
+
+.pp-delivery-text strong {
+  color: #333;
+  font-weight: 500;
+}
+
+.pp-location-link,
+.pp-change-location {
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  color: #b18443;
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.pp-location-link:hover,
+.pp-change-location:hover {
+  text-decoration: underline;
+}
+
+.pp-change-location {
+  margin-left: auto;
+  font-size: 13px;
+}
+
+
+/* ========================================
+   LOCATION OVERLAY
+======================================== */
+
+.pp-location-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.45);
+}
+
+
+/* ========================================
+   LOCATION MODAL
+======================================== */
+
+.pp-location-modal {
+  width: 100%;
+  max-width: 480px;
+
+  background: #fff;
+
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ========================================
+   LOCATION HEADER
+======================================== */
+
+.pp-location-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 22px;
+
+  border-bottom: 1px solid #eee;
+}
+
+.pp-location-header h3 {
+  margin: 0;
+
+  color: #292525;
+
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.pp-location-close {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #555;
+
+  font-size: 26px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+
+/* ========================================
+   ADDRESS LIST
+======================================== */
+
+.pp-location-list {
+  max-height: 400px;
+
+  overflow-y: auto;
+
+  padding: 15px 18px;
+}
+
+
+/* ========================================
+   ADDRESS CARD
+======================================== */
+
+.pp-address-card {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 13px;
+
+  padding: 16px;
+
+  margin-bottom: 10px;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+
+  background: #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.pp-address-card:hover {
+  border-color: #c5a06a;
+}
+
+.pp-address-card.is-selected {
+  border-color: #b18443;
+  background: #fdfaf5;
+}
+
+
+/* ========================================
+   ADDRESS ICON
+======================================== */
+
+.pp-address-icon {
+  width: 21px;
+  height: 21px;
+
+  flex-shrink: 0;
+
+  color: #b18443;
+}
+
+.pp-address-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ========================================
+   ADDRESS INFO
+======================================== */
+
+.pp-address-info {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  flex: 1;
+
+  color: #666;
+
+  font-size: 13px;
+
+  line-height: 1.4;
+}
+
+.pp-address-info strong {
+  margin-bottom: 2px;
+
+  color: #292525;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+
+/* ========================================
+   RADIO
+======================================== */
+
+.pp-address-radio {
+  width: 18px;
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  margin-top: 2px;
+
+  border: 1.5px solid #aaa;
+
+  border-radius: 50%;
+}
+
+.pp-address-card.is-selected .pp-address-radio {
+  border-color: #b18443;
+}
+
+.pp-address-radio span {
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #b18443;
+}
+
+
+/* ========================================
+   ADD ADDRESS
+======================================== */
+
+.pp-add-address {
+  width: calc(100% - 36px);
+
+  margin: 0 18px 18px;
+
+  padding: 13px;
+
+  border: 1px solid #b18443;
+  border-radius: 5px;
+
+  background: #fff;
+
+  color: #b18443;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.pp-add-address:hover {
+  background: #b18443;
+  color: #fff;
+}
+
+.pp-add-address-modal {
+  max-width: 520px;
+}
+
+.pp-address-form {
+  padding: 22px;
+}
+
+.pp-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.pp-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3a3636;
+}
+
+.pp-form-group input,
+.pp-form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd6d0;
+  border-radius: 4px;
+  padding: 12px 13px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: #fff;
+  color: #333;
+}
+
+.pp-form-group input:focus,
+.pp-form-group textarea:focus {
+  border-color: #b99a6b;
+}
+
+.pp-form-group textarea {
+  resize: vertical;
+}
+
+.pp-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.pp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.pp-cancel-address,
+.pp-save-address {
+  border: none;
+  padding: 12px 22px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pp-cancel-address {
+  background: #f1eeee;
+  color: #3b3636;
+}
+
+.pp-save-address {
+  background: #2c2828;
+  color: #fff;
+}
+
+.pp-save-address:hover {
+  background: #3b3535;
+}
+
+@media (max-width: 600px) {
+  .pp-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .pp-address-form {
+    padding: 18px;
+  }
+
+  .pp-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .pp-cancel-address,
+  .pp-save-address {
+    width: 100%;
+  }
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 600px) {
+
+  .pp-delivery-content {
+    flex-wrap: wrap;
+  }
+
+  .pp-delivery-text {
+    font-size: 13px;
+  }
+
+  .pp-location-overlay {
+    align-items: flex-end;
+
+    padding: 0;
+  }
+
+  .pp-location-modal {
+    max-width: none;
+
+    max-height: 85vh;
+
+    border-radius: 14px 14px 0 0;
+  }
+
+  .pp-location-header {
+    padding: 18px;
+  }
+
+  .pp-location-list {
+    max-height: 55vh;
+
+    padding: 12px;
+  }
+
+  .pp-address-card {
+    padding: 14px;
+  }
+
 }
 
 /* ============ RESPONSIVE ============ */

@@ -15,3 +15,4 @@ export const updateReviewStatus = (id, data) =>
 
 export const deleteReview = (id) =>
   axiosInstance.delete(`${BASE}/delete/${id}`);
+
