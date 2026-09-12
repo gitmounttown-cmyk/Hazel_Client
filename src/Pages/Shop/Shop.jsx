@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import  { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../services/api";
 import "./Shop.css";
 
@@ -137,7 +137,7 @@ function useShopData() {
       params.append("limit", PAGE_SIZE);
       params.append("sort", currentSort);
       
-      // Send max_price only if no specific price tier checkbox is checked
+     
       if (currentMaxPrice && !activeFilters.price_range_option) {
         params.append("max_price", currentMaxPrice);
       }
