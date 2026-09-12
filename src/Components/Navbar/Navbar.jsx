@@ -141,7 +141,7 @@ const handleLogout = () => {
             Shop
           </NavLink>
         </li>
-        <li>
+        {/* <li>
           <NavLink
             to="/new-arrivals"
             onClick={closeMobileMenu}
@@ -149,7 +149,7 @@ const handleLogout = () => {
           >
             New Arrivals
           </NavLink>
-        </li>
+        </li> */}
         <li>
           <NavLink
             to="/about"

@@ -93,6 +93,7 @@
 }
 
 .hero-title {
+  padding-left: 78px;
   font-family: serif;
   font-size: 48px;
   line-height: 1.25;
@@ -520,7 +521,8 @@
   background-repeat: no-repeat;
  background-position: 0% center; 
     height:343px;
-    width:453px;
+    /* width:453px; */
+    width:100%;
   }
   .btn-filled {
     width: 107px;
@@ -729,6 +731,7 @@
 @media (min-width: 769px) and (max-width: 1200px) {
   .hero {
     padding: 20px 20px 20px 420px;
+    width:100%;
   }
   .hero-content {
     max-width: 560px;
