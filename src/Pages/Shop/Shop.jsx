@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../services/api";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Shop.css";
 import {
   addToWishlist,
@@ -115,6 +116,16 @@ function useShopData() {
   const [error, setError] = useState(null);
 
   const debounceRef = useRef(null);
+
+  const location = useLocation();
+
+  //go to start of page on route change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [location.pathname]);
 
   useEffect(() => {
     API.get("/subcategories/all")
@@ -407,7 +418,7 @@ function Sidebar({
   );
 }
 
-function ProductCard({ product }) {
+function ProductCard({ product, navigate }) {
   const [imgError, setImgError] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -454,7 +465,7 @@ function ProductCard({ product }) {
   };
 
   return (
-    <div className="card">
+    <div className="card" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="card-image">
         {product.image && !imgError ? (
           <img
@@ -499,6 +510,7 @@ function ProductCard({ product }) {
     </div>
   );
 }
+
 function ProductGrid({
   products,
   total,
@@ -507,6 +519,7 @@ function ProductGrid({
   sort,
   setSort,
   onOpenMobileFilters,
+  navigate,
 }) {
   return (
     <main className="main">
@@ -535,7 +548,7 @@ function ProductGrid({
 
         <div className="grid">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} navigate={navigate} />
           ))}
         </div>
 
@@ -563,6 +576,7 @@ export default function ShopPage() {
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="shop-page">
@@ -586,6 +600,7 @@ export default function ShopPage() {
           sort={sort}
           setSort={setSort}
           onOpenMobileFilters={() => setMobileFiltersOpen(true)}
+          navigate={navigate}
         />
       </div>
     </div>
