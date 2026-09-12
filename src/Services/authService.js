@@ -124,6 +124,12 @@ export const googleLogin = async (
   }
 };
 
+// check if user is logged in
+export const isLoggedIn = () => {
+  const token = localStorage.getItem("hazelToken");
+  return !!token; // returns true if token exists, false otherwise
+}
+
 //add logout function to clear localStorage and sessionStorage
 export const logout = () => {
   localStorage.removeItem("hazelToken");
