@@ -444,6 +444,7 @@
   .account-workspace-full {
     grid-template-columns: 1fr;
   }
+  
   .modal-card {
     padding: 24px;
   }
