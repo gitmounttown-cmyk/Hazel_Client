@@ -1,9 +1,16 @@
-import{ useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, Heart, ShoppingBag, User, ChevronDown, LogOut, Settings } from "lucide-react";
+import {
+  Search,
+  Heart,
+  ShoppingBag,
+  User,
+  ChevronDown,
+  LogOut,
+  Settings,
+} from "lucide-react";
 import logo from "../../assets/logo.png";
 import "./Navbar.css";
-
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -66,10 +73,7 @@ const Navbar = () => {
     }
 
     // Admin
-    if (
-      loggedInUser.role === "admin" ||
-      loggedInUser.role === "superadmin"
-    ) {
+    if (loggedInUser.role === "admin" || loggedInUser.role === "superadmin") {
       navigate("/admin");
       return;
     }
@@ -104,7 +108,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="nav-left-group">
-        <button 
+        <button
           className={`hamburger-menu ${isMobileMenuOpen ? "open" : ""}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle Navigation Menu"
@@ -140,6 +144,15 @@ const Navbar = () => {
             Shop
           </NavLink>
         </li>
+        {/* <li>
+          <NavLink
+            to="/new-arrivals"
+            onClick={closeMobileMenu}
+            className={({ isActive }) => (isActive ? "active-link" : "")}
+          >
+            New Arrivals
+          </NavLink>
+        </li> */}
         <li>
           <NavLink
             to="/about"
@@ -160,8 +173,7 @@ const Navbar = () => {
         </li>
       </ul>
 
-      <div className="nav-right-section">
-
+      {/* <div className="nav-right-section">
         <div className="search-container">
           <Search className="nav-icon" title="Search" />
 
@@ -176,23 +188,43 @@ const Navbar = () => {
           </form>
         </div>
 
-        <Heart
-          className="nav-icon"
-          title="Wishlist"
-        />
+        <Heart className="nav-icon" title="Wishlist" />
 
-        <Link to="/cart">
-          <ShoppingBag
-            className="nav-icon"
-            title="Cart"
-          />
+        <Link to="/cartpage">
+          <ShoppingBag className="nav-icon" title="Cart" />
+        </Link>
+
+        <User
+          className="nav-icon"
+          title="Account"
+          onClick={() => navigate("/login")}
+        />
+      </div> */}
+      {/* } */}
+      <div className="nav-right-section">
+        <div className="search-container">
+          <Search className="nav-icon" title="Search" />
+
+          <form onSubmit={handleSearchSubmit}>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </form>
+        </div>
+        <Link to="/wishlist">
+          <Heart className="nav-icon" title="Wishlist" />
+        </Link>
+
+        <Link to="/cartpage">
+          <ShoppingBag className="nav-icon" title="Cart" />
         </Link>
 
         {/* USER */}
-        <div
-          className="navbar-user-wrapper"
-          ref={userDropdownRef}
-        >
+        <div className="navbar-user-wrapper" ref={userDropdownRef}>
           <button
             type="button"
             className={`navbar-user-button ${
@@ -219,7 +251,6 @@ const Navbar = () => {
             loggedInUser.role !== "superadmin" &&
             isUserDropdownOpen && (
               <div className="user-dropdown">
-
                 <div className="user-dropdown-header">
                   <div className="user-avatar">
                     {(
@@ -234,14 +265,10 @@ const Navbar = () => {
 
                   <div className="user-info">
                     <p className="user-name">
-                      {loggedInUser.name ||
-                        loggedInUser.fullName ||
-                        "Customer"}
+                      {loggedInUser.name || loggedInUser.fullName || "Customer"}
                     </p>
 
-                    <p className="user-email">
-                      {loggedInUser.email || ""}
-                    </p>
+                    <p className="user-email">{loggedInUser.email || ""}</p>
                   </div>
                 </div>
 
@@ -270,11 +297,9 @@ const Navbar = () => {
                   <LogOut size={16} />
                   <span>Logout</span>
                 </button>
-
               </div>
             )}
         </div>
-
       </div>
     </nav>
   );

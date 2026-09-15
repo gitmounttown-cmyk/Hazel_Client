@@ -139,7 +139,7 @@ const NewArrival = () => {
       <div className="new-arrival-container">
         <div className="new-arrival-header">
           <div>
-            <h2>New Arrival</h2>
+            <h2>New Arrivals</h2>
             <p>Manage your latest product arrivals</p>
           </div>
 
@@ -161,10 +161,10 @@ const NewArrival = () => {
             onSuccess={handleFormSuccess}
           />
         )}
-
+       
         <div className="new-arrival-list-section">
           <div className="new-arrival-list-header">
-            <h3>New Arrivals</h3>
+            {/* <h3>New Arrivals</h3> */}
 
             <span>{newArrivals.length} total</span>
           </div>
