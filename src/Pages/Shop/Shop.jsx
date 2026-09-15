@@ -7,6 +7,8 @@ import {
   checkWishlist,
   removeWishlistItem,
 } from "../../Services/wishlistService";
+import { isUserLoggedIn } from "../../utils/auth";
+import toast from "react-hot-toast";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -423,23 +425,52 @@ function ProductCard({ product, navigate }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
-  useEffect(() => {
-    const checkProductWishlist = async () => {
-      if (!product?.id) return;
+  // useEffect(() => {
+  //   const checkProductWishlist = async () => {
+  //     if (!product?.id) return;
 
-      try {
-        const response = await checkWishlist(product.id);
-        setIsWishlisted(response?.data?.isWishlisted || false);
-      } catch (err) {
-        console.error("CHECK WISHLIST ERROR:", err);
-      }
-    };
+  //     try {
+  //       const response = await checkWishlist(product.id);
+  //       setIsWishlisted(response?.data?.isWishlisted || false);
+  //     } catch (err) {
+  //       console.error("CHECK WISHLIST ERROR:", err);
+  //     }
+  //   };
 
-    checkProductWishlist();
-  }, [product?.id]);
+  //   checkProductWishlist();
+  // }, [product?.id]);
+
+ useEffect(() => {
+  const checkProductWishlist = async () => {
+    if (!product?.id) return;
+
+    if (!isUserLoggedIn()) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    try {
+      const response = await checkWishlist(product.id);
+
+      setIsWishlisted(
+        response?.data?.isWishlisted || false
+      );
+    } catch (err) {
+      console.error("CHECK WISHLIST ERROR:", err);
+      setIsWishlisted(false);
+    }
+  };
+
+  checkProductWishlist();
+}, [product?.id]);
 
   const handleWishlist = async () => {
     if (!product?.id || wishlistLoading) return;
+    if (!isUserLoggedIn()) {
+      toast.error("Please log in to manage your wishlist.");
+      navigate("/login");
+      return;
+    }
 
     try {
       setWishlistLoading(true);
