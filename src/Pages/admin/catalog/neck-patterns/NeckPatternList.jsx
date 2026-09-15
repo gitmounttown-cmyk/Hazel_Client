@@ -3,7 +3,7 @@ import { getNeckPatterns, deleteNeckPattern } from "../../../../services/neckPat
 import NeckPatternForm from "./NeckPatternForm";
 import "./neckPatternList.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const NeckPatternList = () => {
   const [neckPatterns, setNeckPatterns] = useState([]);

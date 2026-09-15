@@ -3,7 +3,8 @@ import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { removeCartItem } from "../../Services/cartService";
-const API_URL = "http://localhost:5004/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5004/api";
+const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 const formatINR = (amount) =>
   `₹${Number(amount || 0).toLocaleString("en-IN", {
@@ -21,7 +22,7 @@ const getImageUrl = (image) => {
     return image;
   }
 
-  return `http://localhost:5004${image.startsWith("/") ? image : `/${image}`}`;
+  return `${UPLOAD_URL}${image.startsWith("/") ? image : `/${image}`}`;
 };
 
 function QuantityStepper({ value, onDecrease, onIncrease, disabled }) {

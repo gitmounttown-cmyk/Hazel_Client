@@ -16,10 +16,10 @@ const NewArrivals = () => {
     }
 
     if (image.startsWith("/")) {
-      return `http://localhost:5004${image}`;
+      return `${import.meta.env.VITE_UPLOAD_URL}${image}`;
     }
 
-    return `http://localhost:5004/${image}`;
+    return `${import.meta.env.VITE_UPLOAD_URL}/${image}`;
   };
 
   const getVariantImage = (product) => {

@@ -72,7 +72,7 @@ export default function AccountOverview() {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:5004/api/addresses/all", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/addresses/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -170,9 +170,9 @@ export default function AccountOverview() {
 
     try {
       const url = editingAddressId
-        ? `http://localhost:5004/api/addresses/update/${editingAddressId}`
-        : "http://localhost:5004/api/addresses/create";
-      
+        ? `${import.meta.env.VITE_API_URL}/addresses/update/${editingAddressId}`
+        : `${import.meta.env.VITE_API_URL}/addresses/create`;
+
       const method = editingAddressId ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -201,7 +201,7 @@ export default function AccountOverview() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:5004/api/addresses/delete/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/addresses/delete/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -221,7 +221,7 @@ export default function AccountOverview() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:5004/api/addresses/${id}/default`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/addresses/${id}/default`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

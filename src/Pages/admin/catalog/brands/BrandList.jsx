@@ -3,7 +3,7 @@ import { getBrands, deleteBrand } from "../../../../services/brandService";
 import BrandForm from "./BrandForm";
 import "./brandList.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const BrandList = () => {
   const [brands, setBrands] = useState([]);

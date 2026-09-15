@@ -12,7 +12,7 @@ const BannerForm = ({ editingBanner, onSuccess, onCancel }) => {
   const [imageError, setImageError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const API_BASE_URL = "http://localhost:5004";
+  const API_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
   useEffect(() => {
     if (editingBanner) {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createBrand, updateBrand } from "../../../../services/brandService";
 import "./brandForm.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const BrandForm = ({ brand, onClose, onSuccess }) => {
   const [name, setName] = useState(brand?.name || "");
