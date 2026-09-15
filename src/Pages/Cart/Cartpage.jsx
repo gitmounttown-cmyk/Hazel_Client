@@ -253,125 +253,125 @@ function OrderSummary({ subtotal, discount, shipping, tax, total }) {
   );
 }
 
-function DeliveryAvailability() {
-  const [pin, setPin] = useState("");
+// function DeliveryAvailability() {
+//   const [pin, setPin] = useState("");
 
-  const perks = [
-    {
-      icon: (
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-        >
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        </svg>
-      ),
-      label: "SECURE CHECKOUT",
-    },
-    {
-      icon: (
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-        >
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-          <path d="M3 3v5h5" />
-        </svg>
-      ),
-      label: "EASY RETURNS",
-    },
-    {
-      icon: (
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-        >
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
-          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-        </svg>
-      ),
-      label: "ECO-FRIENDLY PACKAGING",
-    },
-    {
-      icon: (
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      ),
-      label: "PREMIUM QUALITY",
-    },
-  ];
+//   const perks = [
+//     {
+//       icon: (
+//         <svg
+//           width="22"
+//           height="22"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1.2"
+//         >
+//           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+//         </svg>
+//       ),
+//       label: "SECURE CHECKOUT",
+//     },
+//     {
+//       icon: (
+//         <svg
+//           width="22"
+//           height="22"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1.2"
+//         >
+//           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+//           <path d="M3 3v5h5" />
+//         </svg>
+//       ),
+//       label: "EASY RETURNS",
+//     },
+//     {
+//       icon: (
+//         <svg
+//           width="22"
+//           height="22"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1.2"
+//         >
+//           <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+//           <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+//         </svg>
+//       ),
+//       label: "ECO-FRIENDLY PACKAGING",
+//     },
+//     {
+//       icon: (
+//         <svg
+//           width="22"
+//           height="22"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1.2"
+//         >
+//           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+//           <circle cx="12" cy="7" r="4" />
+//         </svg>
+//       ),
+//       label: "PREMIUM QUALITY",
+//     },
+//   ];
 
-  return (
-    <section className="delivery-box">
-      <div className="delivery-row">
-        <div className="delivery-label">
-          <svg
-            className="delivery-truck-icon"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <rect x="1" y="3" width="15" height="13" />
-            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
-          </svg>
-          DELIVERY &amp; AVAILABILITY
-        </div>
+//   return (
+//     <section className="delivery-box">
+//       <div className="delivery-row">
+//         <div className="delivery-label">
+//           <svg
+//             className="delivery-truck-icon"
+//             width="20"
+//             height="20"
+//             viewBox="0 0 24 24"
+//             fill="none"
+//             stroke="currentColor"
+//             strokeWidth="1.5"
+//           >
+//             <rect x="1" y="3" width="15" height="13" />
+//             <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+//             <circle cx="5.5" cy="18.5" r="2.5" />
+//             <circle cx="18.5" cy="18.5" r="2.5" />
+//           </svg>
+//           DELIVERY &amp; AVAILABILITY
+//         </div>
 
-        <div className="delivery-check">
-          <input
-            type="text"
-            className="pin-input"
-            placeholder="Enter PIN code"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-          />
+//         <div className="delivery-check">
+//           <input
+//             type="text"
+//             className="pin-input"
+//             placeholder="Enter PIN code"
+//             value={pin}
+//             onChange={(e) => setPin(e.target.value)}
+//           />
 
-          <button type="button" className="check-btn">
-            CHECK
-          </button>
-        </div>
-      </div>
+//           <button type="button" className="check-btn">
+//             CHECK
+//           </button>
+//         </div>
+//       </div>
 
-      <div className="delivery-divider" />
+//       <div className="delivery-divider" />
 
-      <div className="perks-row">
-        {perks.map((perk) => (
-          <div className="perk" key={perk.label}>
-            <div className="perk-icon">{perk.icon}</div>
+//       <div className="perks-row">
+//         {perks.map((perk) => (
+//           <div className="perk" key={perk.label}>
+//             <div className="perk-icon">{perk.icon}</div>
 
-            <span className="perk-label">{perk.label}</span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
+//             <span className="perk-label">{perk.label}</span>
+//           </div>
+//         ))}
+//       </div>
+//     </section>
+//   );
+// }
 
 function RecommendedCard({ product }) {
   const image = product.image || product.images?.[0] || "";
@@ -665,7 +665,7 @@ export default function CartPage() {
                   {clearing ? "CLEARING..." : "CLEAR CART"}
                 </button>
 
-                <DeliveryAvailability />
+                {/* <DeliveryAvailability /> */}
               </div>
 
               <OrderSummary
