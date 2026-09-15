@@ -38,21 +38,19 @@
 
 .auth-image-section {
   position: relative;
-
-  min-height: 100vh;
+  height:700px;
 
   overflow: hidden;
 }
 
 .auth-background-image {
   position: absolute;
-
   inset: 0;
 
-  width: 100%;
-  height: 100%;
+  width: 700px;
+  height: 700px;
 
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .auth-image-overlay {
@@ -79,7 +77,6 @@
   flex-direction: column;
 
   justify-content: center;
-
   padding: 80px;
 
   color: var(--white);
@@ -636,4 +633,125 @@
   font-size: 14px;
   font-weight: 500;
   cursor: default;
+}
+.hazel-dev-otp-overlay {
+  margin-right: 7px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+
+  padding-top: 20px;
+  pointer-events: none;
+}
+
+.hazel-dev-otp-popup {
+  margin-right:70px;
+  width: 260px;
+  height: 200px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 16px;
+
+  text-align: center;
+
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+
+  pointer-events: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  animation: hazelOtpPopupShow 0.25s ease-out;
+}
+
+.hazel-dev-otp-popup h2 {
+  margin: 0 0 5px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #780524;
+}
+
+.hazel-dev-otp-popup p {
+  margin: 0 0 7px;
+  font-size: 13px;
+  color: #666;
+}
+
+.hazel-dev-otp-code {
+  display: inline-block;
+
+  padding: 7px 14px;
+  margin-bottom: 7px;
+
+  border-radius: 7px;
+
+  background: #f3d9b4;
+  color: #780524;
+
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  line-height: 1;
+}
+
+.hazel-dev-otp-note {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-size: 12px;
+  color: #777;
+}
+
+.hazel-dev-otp-button {
+  width: 100%;
+
+  border: none;
+  border-radius: 6px;
+
+  padding: 8px;
+
+  background: #780524;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.hazel-dev-otp-button:hover {
+  opacity: 0.92;
+}
+
+@keyframes hazelOtpPopupShow {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .hazel-dev-otp-popup {
+    width: 100%;
+    padding: 25px 20px;
+  }
+
+  .hazel-dev-otp-code {
+    font-size: 26px;
+  }
 }

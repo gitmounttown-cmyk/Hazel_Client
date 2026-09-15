@@ -60,14 +60,27 @@ const Login = () => {
       setLoading(true);
 
       const response = await sendOTP(mobileNumber);
+if (response.success) {
+  console.log("SEND OTP RESPONSE:", response);
 
-      if (response.success) {
-        // Store mobile number temporarily
-        sessionStorage.setItem("hazelMobileNumber", mobileNumber);
+  sessionStorage.setItem(
+    "hazelMobileNumber",
+    mobileNumber
+  );
 
-        // Move to OTP page
-        navigate("/verify-otp");
-      } else {
+  if (response.otp) {
+    sessionStorage.setItem(
+      "hazelDevOTP",
+      response.otp
+    );
+
+    console.log("DEV OTP SAVED:", response.otp);
+  } else {
+    console.log("OTP NOT FOUND IN RESPONSE");
+  }
+
+  navigate("/verify-otp");
+}else {
         setError(response.message || "Unable to send OTP.");
       }
     } catch (error) {
@@ -157,7 +170,7 @@ const Login = () => {
 
       <div className="auth-image-section">
         <img
-          src="../../../src/assets/images/hazel_logo.png"
+          src="../../../src/assets/images/hazel_logo.jpg"
           alt="Hazel Fashion"
           className="auth-background-image"
         />

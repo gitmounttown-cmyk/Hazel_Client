@@ -18,3 +18,8 @@ export const deleteAddress = (id) =>
 
 export const setDefaultAddress = (id) =>
   axiosInstance.patch(`${BASE}/${id}/default`);
+
+// get user addresss
+export const getUserAddresses = (userId) =>
+  axiosInstance.get(`${BASE}/user/${userId}`);
+

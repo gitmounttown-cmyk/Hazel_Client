@@ -143,7 +143,7 @@ const Profile = () => {
                   profile.profileImage
                     ? profile.profileImage.startsWith("blob:")
                       ? profile.profileImage
-                      : `http://localhost:5004${profile.profileImage}`
+                      : `http://localhost:5004/${profile.profileImage.replace(/^\/+/, "")}`
                     : "https://via.placeholder.com/120"
                 }
                 alt="Profile"

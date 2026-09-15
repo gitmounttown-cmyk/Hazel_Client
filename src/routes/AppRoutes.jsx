@@ -16,6 +16,8 @@ import ProductVariantList from "../pages/admin/catalog/productVariant/ProductVar
 import SizeList from "../pages/admin/catalog/size/SizeList";
 import ColorList from "../pages/admin/catalog/color/Colorlist";
 import Shop from "../pages/Shop/Shop";
+import About from "../Pages/About/About";
+
 import Productpreview from "../pages/Product/productpreview/Productpreview";
 import Contact from "../pages/Contact/Contact";
 import Cartpage from "../pages/Cart/Cartpage";
@@ -28,10 +30,10 @@ import Order from "../Pages/admin/orders/Order";
 import Banner from "../Pages/admin/banners/Banner";
 import Profile from "../Pages/admin/profile/Profile";
 import CouponList from "../Components/admin/coupons/CouponList";
-import About from "../Pages/About/About"
 import NewArrival from "../Pages/admin/newarrival/NewArrival";
 import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
+import AdminTrendingProducts from "../Pages/admin/admintrendingproducts/admintrendingproducts";
 
 // Import your AccountOverview page component
 import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
@@ -47,7 +49,7 @@ const AppRoutes = () => {
 
           <Route path="/product" element={<Productpreview />} />
           <Route path="/About" element={<About />} />
-          
+
           {/* Added User Account Overview Route */}
           <Route path="/account" element={<AccountOverview />} />
 
@@ -55,6 +57,7 @@ const AppRoutes = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/cartpage" element={<Cartpage />} />
           <Route path="/Wishlist" element={<Wishlist />} />
+          <Route path="/about" element={<About />} />
         </Route>
 
         {/* =================================
@@ -102,7 +105,10 @@ const AppRoutes = () => {
           <Route path="/admin/reviews" element={<Review />} />
 
           <Route path="/admin/myprofile" element={<Profile />} />
-
+          <Route
+            path="/admin/trending-products"
+            element={<AdminTrendingProducts />}
+          />
           {/* add more admin routes here, all under this same AdminLayout wrapper */}
         </Route>
 
