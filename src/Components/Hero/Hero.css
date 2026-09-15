@@ -73,19 +73,22 @@ html, body {
   color: #642A30;
   text-transform: uppercase;
   margin-bottom: 1.5rem;
+  padding-left:65px;
 }
 
-.hero-title {
+.hero-title1 {
   font-family: 'Playfair Display', serif;
-  font-size: 4.2rem;
+  font-size: 63px;
   font-weight: 500;
   color: #780524;
   line-height: 1.15;
   margin: 0 0 1.5rem 0;
+  padding-left: 60px;
 }
 
 .hero-description {
   font-family: 'Plus Jakarta Sans', sans-serif;
+  padding-left:60px;
   font-size: 0.95rem;
   color: #352926;
   line-height: 1.6;
@@ -95,10 +98,12 @@ html, body {
 }
 
 .hero-buttons {
+  padding-left:55px;
+  width:600px;
   display: flex;
   gap: 1.2rem;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .btn-shop {
@@ -214,7 +219,7 @@ html, body {
     margin-bottom: 0.4rem;
   }
 
-  .hero-title {
+  .hero-title1 {
     font-size: 1.6rem; 
     margin-bottom: 0.6rem;
     line-height: 1.15;
@@ -269,7 +274,7 @@ html, body {
   } 
 
 
-  .hero-title {
+  .hero-title1 {
     font-size: 1.35rem;
   }
   
