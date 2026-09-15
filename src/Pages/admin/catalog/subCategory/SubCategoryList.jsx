@@ -3,7 +3,7 @@ import { getSubCategories, deleteSubCategory } from "../../../../services/subCat
 import SubCategoryForm from "./SubCategoryForm";
 import "./subCategoryList.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const SubCategoryList = () => {
   const [subCategories, setSubCategories] = useState([]);

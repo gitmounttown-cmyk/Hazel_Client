@@ -103,7 +103,7 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
-const BACKEND_BASE_URL = "http://localhost:5004";
+const BACKEND_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 function useShopData() {
   const [filters, setFilters] = useState({});

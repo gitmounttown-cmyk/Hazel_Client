@@ -3,7 +3,7 @@ import { getProducts, deleteProduct } from "../../../../services/productService"
 import ProductForm from "./ProductForm";
 import "./productList.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
