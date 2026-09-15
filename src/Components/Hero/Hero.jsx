@@ -39,7 +39,7 @@ const Hero = () => {
         <div className="hero-text-content">
           <span className="hero-tag">{slides[currentIndex].tag}</span>
 
-          <h1 className="hero-title">
+          <h1 className="hero-title1">
             Comfort
              That Feels Beautiful.
           </h1>
