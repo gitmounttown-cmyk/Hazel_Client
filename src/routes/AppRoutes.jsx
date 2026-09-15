@@ -30,11 +30,13 @@ import Order from "../Pages/admin/orders/Order";
 import Banner from "../Pages/admin/banners/Banner";
 import Profile from "../Pages/admin/profile/Profile";
 import CouponList from "../Components/admin/coupons/CouponList";
-
 import NewArrival from "../Pages/admin/newarrival/NewArrival";
 import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
 import AdminTrendingProducts from "../Pages/admin/admintrendingproducts/admintrendingproducts";
+
+// Import your AccountOverview page component
+import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
 
 const AppRoutes = () => {
   return (
@@ -44,12 +46,23 @@ const AppRoutes = () => {
         <Route element={<UserLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
+
+          <Route path="/product" element={<Productpreview />} />
+          <Route path="/About" element={<About />} />
+
+          {/* Added User Account Overview Route */}
+          <Route path="/account" element={<AccountOverview />} />
+
           <Route path="/product/:id" element={<Productpreview />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cartpage" element={<Cartpage />} />
           <Route path="/Wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />
         </Route>
+
+        {/* =================================
+          AUTH ROUTES
+      ================================= */}
 
         <Route path="/login" element={<Login />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
@@ -104,7 +117,7 @@ const AppRoutes = () => {
       ================================= */}
         {/* 
       <Route path="*" element={<Navigate to="/login" replace />} />
-      */}
+    */}
       </Routes>
     </BrowserRouter>
   );

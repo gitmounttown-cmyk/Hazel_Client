@@ -32,6 +32,7 @@ import { getAllReviews } from "../../../Services/reviewService";
 import { formatCurrency } from "../../../utils/currencyFormat";
 import { formatTimeAgo } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
+import { getUserAddresses } from "../../../Services/addressService";
 
 /* ---------- inline icons ---------- */
 const Star = ({ filled = true }) => (
@@ -273,6 +274,8 @@ const DELIVERY_ADDRESSES = [
 ];
 
 export default function ProductPage() {
+  const storedUser = localStorage.getItem("hazelUser");
+  const userId = storedUser ? JSON.parse(storedUser)?.id : null;
   const navigate = useNavigate();
   const [addedToCart, setAddedToCart] = useState(false);
   const [products, setProducts] = useState([]);
@@ -289,6 +292,7 @@ export default function ProductPage() {
   const [productDetails, setProductDetails] = useState(null); // State to hold product details
   const [reviews, setReviews] = useState([]); // State to hold product reviews
   const [variantMedia, setVariantMedia] = useState([]); // State to hold variant media images
+  const [userAddresses, setUserAddresses] = useState([]); // State to hold user addresses
   const [showLocations, setShowLocations] = useState(false);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -487,6 +491,23 @@ export default function ProductPage() {
         console.error("Error fetching products:", error);
       });
   }, []);
+
+
+//get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
+useEffect(() => {
+  console.log("Fetching user addresses for user ID:", userId);
+  if (userId) {
+    getUserAddresses(userId)
+      .then((response) => {
+        console.log("User addresses:", response.data?.data);
+        // Update state with user addresses here
+        setUserAddresses(response.data?.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching user addresses:", error);
+      });
+  }
+}, [userId]);
 
   console.log("Variant media state:", variantMedia); // Log the variant media state to the console
 

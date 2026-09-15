@@ -7,6 +7,7 @@ import {
   User,
   ChevronDown,
   LogOut,
+  Settings,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
 import "./Navbar.css";
@@ -18,7 +19,6 @@ const Navbar = () => {
 
   const userDropdownRef = useRef(null);
 
-  // const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -66,7 +66,7 @@ const Navbar = () => {
   // ============================================================
 
   const handleUserClick = () => {
-    // User not logged in
+    // User not logged in -> redirect to login page
     if (!loggedInUser) {
       navigate("/login");
       return;
@@ -78,7 +78,7 @@ const Navbar = () => {
       return;
     }
 
-    // Customer
+    // Customer -> toggle dropdown menu
     setIsUserDropdownOpen((prev) => !prev);
   };
 
@@ -175,8 +175,9 @@ const Navbar = () => {
 
       {/* <div className="nav-right-section">
         <div className="search-container">
-        <Search className="nav-icon" title="Search"/>
-         <form onSubmit={handleSearchSubmit}>
+          <Search className="nav-icon" title="Search" />
+
+          <form onSubmit={handleSearchSubmit}>
             <input
               type="text"
               placeholder="Search products..."
@@ -193,8 +194,13 @@ const Navbar = () => {
           <ShoppingBag className="nav-icon" title="Cart" />
         </Link>
 
-        <User className="nav-icon" title="Account"  onClick={()=> navigate('/login')}/>
+        <User
+          className="nav-icon"
+          title="Account"
+          onClick={() => navigate("/login")}
+        />
       </div> */}
+      {/* } */}
       <div className="nav-right-section">
         <div className="search-container">
           <Search className="nav-icon" title="Search" />
@@ -268,12 +274,27 @@ const Navbar = () => {
 
                 <div className="user-dropdown-divider"></div>
 
+                {/* Link to Account Overview page */}
+                <button
+                  type="button"
+                  className="user-dropdown-item"
+                  onClick={() => {
+                    setIsUserDropdownOpen(false);
+                    navigate("/account"); // Change "/account" to your actual account route path
+                  }}
+                >
+                  <User size={16} />
+                  <span>My Account</span>
+                </button>
+
+                <div className="user-dropdown-divider"></div>
+
                 <button
                   type="button"
                   className="user-dropdown-item logout-item"
                   onClick={handleLogout}
                 >
-                  <LogOut />
+                  <LogOut size={16} />
                   <span>Logout</span>
                 </button>
               </div>
