@@ -12,7 +12,7 @@ import {
   Image,
   Star,
   CreditCard,
-  BarChart2,
+  // BarChart2,
   // Settings,
 } from "lucide-react";
 import "./Sidebar.css";
@@ -40,28 +40,33 @@ const navConfig = [
     ],
   },
   {
-    label: "Inventory",
+    label: "Promotions",
     icon: Archive,
     children: [
-      { label: "Stock Overview", path: "/admin/inventory/stock" },
-      { label: "Low Stock", path: "/admin/inventory/low-stock" },
+      { label: "Banners", icon: Image, path: "/admin/banners" },
+
+      {
+        label: "Trending Products",
+        icon: CreditCard,
+        path: "/admin/trending-products",
+      },
     ],
   },
   { label: "Orders", icon: ClipboardList, path: "/admin/orders" },
   { label: "Address", icon: Users, path: "/admin/addresses" },
   { label: "Coupons", icon: Ticket, path: "/admin/coupons" },
   { label: "New Arrivals", icon: Tag, path: "/admin/newArrivals" },
-  { label: "Banners", icon: Image, path: "/admin/banners" },
+  // { label: "Banners", icon: Image, path: "/admin/banners" },
   { label: "Reviews", icon: Star, path: "/admin/reviews" },
   { label: "Payments", icon: CreditCard, path: "/admin/payments" },
-  {
-    label: "Reports",
-    icon: BarChart2,
-    children: [
-      { label: "Sales Report", path: "/admin/reports/sales" },
-      { label: "Customer Report", path: "/admin/reports/customers" },
-    ],
-  },
+  // {
+  //   label: "Reports",
+  //   icon: BarChart2,
+  //   children: [
+  //     { label: "Sales Report", path: "/admin/reports/sales" },
+  //     { label: "Customer Report", path: "/admin/reports/customers" },
+  //   ],
+  // },
   // {
   //   label: "Settings",
   //   icon: Settings,

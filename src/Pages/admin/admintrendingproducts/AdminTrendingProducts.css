@@ -1,0 +1,284 @@
+.admin-trending-page {
+  padding: 24px;
+}
+
+.admin-trending-container {
+  width: 100%;
+}
+
+.admin-trending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-trending-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+.admin-trending-header p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #777;
+}
+
+.admin-trending-add-btn {
+  background: #780524;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-trending-add-btn:hover {
+  opacity: 0.9;
+}
+
+.admin-trending-list-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+}
+
+.admin-trending-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.admin-trending-list-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+}
+
+.admin-trending-list-header span {
+  font-size: 13px;
+  color: #777;
+}
+
+.admin-trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-trending-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admin-trending-card:hover {
+  background: #fbfaf8;
+}
+
+.admin-trending-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-trending-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-trending-card-top h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #222;
+}
+
+.admin-trending-active-badge,
+.admin-trending-inactive-badge,
+.admin-trending-featured-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-trending-active-badge {
+  background: #edf7ee;
+  color: #2e7d32;
+}
+
+.admin-trending-inactive-badge {
+  background: #fdecec;
+  color: #b3261e;
+}
+
+.admin-trending-featured-badge {
+  background: #f7e7ec;
+  color: #780524;
+}
+
+.admin-trending-subtitle {
+  margin: 7px 0 16px;
+  color: #777;
+  font-size: 13px;
+}
+
+.admin-trending-products {
+  display: grid;
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
+  gap: 12px;
+}
+
+.admin-trending-product {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-trending-product-image-wrapper {
+  flex-shrink: 0;
+}
+
+.admin-trending-product-image {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid #eee;
+}
+
+.admin-trending-no-image {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: #f5f5f5;
+  color: #999;
+  font-size: 11px;
+  text-align: center;
+}
+
+.admin-trending-product-info {
+  min-width: 0;
+}
+
+.admin-trending-product-info h4 {
+  margin: 0 0 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.admin-trending-product-info p {
+  margin: 0 0 7px;
+  color: #888;
+  font-size: 11px;
+}
+
+.admin-trending-product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.admin-trending-product-meta span:first-child {
+  color: #777;
+  font-size: 11px;
+}
+
+.admin-trending-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.admin-trending-edit-btn,
+.admin-trending-delete-btn {
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.admin-trending-edit-btn {
+  color: #780524;
+}
+
+.admin-trending-edit-btn:hover {
+  background: #f7e7ec;
+}
+
+.admin-trending-delete-btn {
+  color: #b3261e;
+}
+
+.admin-trending-delete-btn:hover {
+  background: #fdecec;
+}
+
+.admin-trending-edit-btn:disabled,
+.admin-trending-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-trending-empty {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}
+
+@media (max-width: 1100px) {
+  .admin-trending-products {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-trending-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .admin-trending-card {
+    flex-direction: column;
+  }
+
+  .admin-trending-products {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-trending-card-actions {
+    justify-content: flex-end;
+  }
+}

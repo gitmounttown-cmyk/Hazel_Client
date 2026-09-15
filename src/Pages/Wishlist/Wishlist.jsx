@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./Wishlist.css";
-
-import img1 from "../../assets/Trending/img2.png";
+import {
+  getWishlist,
+  removeWishlistItem,
+} from "../../Services/wishlistService";
 
 const HeartIcon = () => (
   <svg
@@ -42,75 +44,174 @@ const SORT_OPTIONS = [
   "Top Rated",
 ];
 
-const WISHLIST_ITEMS = [
-  {
-    id: 1,
-    name: "Admire Maxi Ditsy",
-    meta: "Cambric Cotton · Hand Block Print",
-    rating: "4.2",
-    price: "1,299",
-    badge: "New",
-    image: img1,
-  },
-  {
-    id: 2,
-    name: "Admire Maxi Ditsy",
-    meta: "Cambric Cotton · Hand Block Print",
-    rating: "4.2",
-    price: "1,299",
-    badge: null,
-    image: img1,
-  },
-  {
-    id: 3,
-    name: "Admire Maxi Ditsy",
-    meta: "Cambric Cotton · Hand Block Print",
-    rating: "4.2",
-    price: "1,299",
-    badge: "New",
-    image: img1,
-  },
-  {
-    id: 4,
-    name: "Admire Maxi Ditsy",
-    meta: "Cambric Cotton · Hand Block Print",
-    rating: "4.2",
-    price: "1,299",
-    badge: null,
-    image: img1,
-  },
-];
+const getProductName = (product) => {
+  return (
+    product?.productName ||
+    product?.name ||
+    product?.title ||
+    product?.productTitle ||
+    "Unnamed Product"
+  );
+};
 
-function WishlistCard({ item }) {
+const getProductPrice = (product) => {
+  const variant = product?.variants?.[0] || {};
+
+  const discountPrice = Number(
+    variant.discountPrice ??
+      product?.discountPrice ??
+      product?.salePrice ??
+      product?.sellingPrice ??
+      0,
+  );
+
+  const price = Number(
+    variant.price ?? product?.price ?? product?.originalPrice ?? 0,
+  );
+
+  if (
+    Number.isFinite(discountPrice) &&
+    discountPrice > 0 &&
+    discountPrice < price
+  ) {
+    return discountPrice;
+  }
+
+  return Number.isFinite(price) ? price : 0;
+};
+
+const getProductImage = (product) => {
+  if (!product) return "";
+
+  const variant = product?.variants?.[0];
+
+  const variantImage = variant?.media?.[0]?.imageURL;
+
+  if (variantImage) {
+    return variantImage;
+  }
+
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    const firstImage = product.images[0];
+
+    if (typeof firstImage === "string") {
+      return firstImage;
+    }
+
+    if (firstImage?.url) {
+      return firstImage.url;
+    }
+
+    if (firstImage?.image) {
+      return firstImage.image;
+    }
+
+    if (firstImage?.imageURL) {
+      return firstImage.imageURL;
+    }
+  }
+
+  return (
+    product.image ||
+    product.productImage ||
+    product.thumbnail ||
+    product.imageUrl ||
+    ""
+  );
+};
+
+const getProductRating = (product) => {
+  return product?.rating ?? product?.averageRating ?? product?.ratings ?? "0";
+};
+
+const getProductMeta = (product) => {
+  if (product?.meta) {
+    return product.meta;
+  }
+
+  const values = [
+    product?.category?.name,
+    product?.category?.categoryName,
+    product?.fabric,
+    product?.material,
+  ].filter(Boolean);
+
+  return values.length > 0 ? values.join(" · ") : "Product";
+};
+
+const getImageUrl = (image) => {
+  if (!image) return "";
+
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://") ||
+    image.startsWith("data:")
+  ) {
+    return image;
+  }
+
+  return `http://localhost:5004${image.startsWith("/") ? image : `/${image}`}`;
+};
+
+function WishlistCard({ item, onRemove, removing }) {
+  const product = item?.product;
+
+  if (!product) {
+    return null;
+  }
+
+  const name = getProductName(product);
+  const price = getProductPrice(product);
+  const rating = getProductRating(product);
+  const meta = getProductMeta(product);
+  const image = getProductImage(product);
+
   return (
     <div className="wl-card">
       <div className="wl-card__image">
-        {item.badge && <span className="wl-card__badge">{item.badge}</span>}
-        <button className="wl-card__heart" aria-label="Remove from wishlist">
+        {product?.isNew && <span className="wl-card__badge">New</span>}
+
+        <button
+          type="button"
+          className="wl-card__heart"
+          aria-label="Remove from wishlist"
+          onClick={() => onRemove(item.product._id)}
+          disabled={removing}
+        >
           <HeartIcon />
         </button>
-        <img
-          className="wl-card__img"
-          src={item.image}
-          alt={item.name}
-          loading="lazy"
-        />
+
+        {image ? (
+          <img
+            className="wl-card__img"
+            src={getImageUrl(image)}
+            alt={name}
+            loading="lazy"
+          />
+        ) : (
+          <div className="wl-card__img">No Image</div>
+        )}
       </div>
+
       <div className="wl-card__body">
-        <h3 className="wl-card__name">{item.name}</h3>
-        <p className="wl-card__meta">{item.meta}</p>
+        <h3 className="wl-card__name">{name}</h3>
+
+        <p className="wl-card__meta">{meta}</p>
+
         <p className="wl-card__rating">
-          {item.rating} <StarIcon />
+          {Number(rating).toFixed(1)} <StarIcon />
         </p>
-        <p className="wl-card__price">₹{item.price}</p>
+
+        <p className="wl-card__price">
+          ₹{Number(price || 0).toLocaleString("en-IN")}
+        </p>
       </div>
     </div>
   );
 }
 
-function SortDropdown() {
+function SortDropdown({ selected, setSelected }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(SORT_OPTIONS[0]);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -119,8 +220,12 @@ function SortDropdown() {
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   function handleSelect(option) {
@@ -165,17 +270,105 @@ function SortDropdown() {
 }
 
 export default function Wishlist() {
+  const [wishlistItems, setWishlistItems] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+  const [removingId, setRemovingId] = useState(null);
+
+  const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
+
+  const fetchWishlist = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await getWishlist();
+
+      const data = response?.data;
+
+      if (data?.success && data?.wishlist) {
+        setWishlistItems(
+          Array.isArray(data.wishlist.items) ? data.wishlist.items : [],
+        );
+      } else {
+        setWishlistItems([]);
+      }
+    } catch (err) {
+      console.error("FETCH WISHLIST ERROR:", err);
+
+      setError(err?.response?.data?.message || "Failed to load wishlist");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
+
+  const handleRemove = async (productId) => {
+    if (!productId) return;
+
+    try {
+      setRemovingId(productId);
+
+      await removeWishlistItem(productId);
+
+      setWishlistItems((prev) =>
+        prev.filter((item) => item?.product?._id !== productId),
+      );
+    } catch (err) {
+      console.error("REMOVE WISHLIST ERROR:", err);
+
+      setError(err?.response?.data?.message || "Failed to remove product");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
+  const sortedItems = [...wishlistItems].sort((a, b) => {
+    const productA = a?.product || {};
+    const productB = b?.product || {};
+
+    if (selectedSort === "Price: Low to High") {
+      return getProductPrice(productA) - getProductPrice(productB);
+    }
+
+    if (selectedSort === "Price: High to Low") {
+      return getProductPrice(productB) - getProductPrice(productA);
+    }
+
+    if (selectedSort === "Top Rated") {
+      return (
+        Number(getProductRating(productB)) - Number(getProductRating(productA))
+      );
+    }
+
+    return (
+      new Date(b.createdAt || 0).getTime() -
+      new Date(a.createdAt || 0).getTime()
+    );
+  });
+
   return (
     <div className="wl-page">
       <section className="wl-hero">
         <span className="wl-hero__bg-text">SAVED</span>
+
         <div className="wl-hero__content">
           <p className="wl-hero__eyebrow">
-            <span className="wl-hero__dot" /> SAVED FOR LATER{" "}
+            <span className="wl-hero__dot" />
+            SAVED FOR LATER
             <span className="wl-hero__dot" />
           </p>
+
           <h1 className="wl-hero__title">The Pieces You Loved.</h1>
+
           <span className="wl-hero__rule" />
+
           <p className="wl-hero__subtitle">
             Keep your favourites close until you're ready to make them yours.
           </p>
@@ -184,22 +377,41 @@ export default function Wishlist() {
 
       <div className="wl-toolbar">
         <p className="wl-toolbar__count">
-          <strong>4 SAVED ITEMS</strong>{" "}
-          <span className="wl-toolbar__sep">•</span> Refined selection for your
-          repose.
+          <strong>{wishlistItems.length} SAVED ITEMS</strong>
+          <span className="wl-toolbar__sep">•</span>
+          Refined selection for your repose.
         </p>
-        <SortDropdown />
+
+        <SortDropdown selected={selectedSort} setSelected={setSelectedSort} />
       </div>
 
-      <div className="wl-grid">
-        {WISHLIST_ITEMS.map((item) => (
-          <WishlistCard key={item.id} item={item} />
-        ))}
-      </div>
+      {error && <div className="wl-error">{error}</div>}
+
+      {loading ? (
+        <div className="wl-empty">
+          <p>Loading wishlist...</p>
+        </div>
+      ) : sortedItems.length === 0 ? (
+        <div className="wl-empty">
+          <p>Your wishlist is empty.</p>
+        </div>
+      ) : (
+        <div className="wl-grid">
+          {sortedItems.map((item) => (
+            <WishlistCard
+              key={item._id}
+              item={item}
+              onRemove={handleRemove}
+              removing={removingId === item?.product?._id}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="wl-footer">
-        <p className="wl-footer__count">Showing 1 of 26 styles</p>
-        <button className="wl-footer__button">Load More Styles</button>
+        <p className="wl-footer__count">
+          Showing {sortedItems.length} of {wishlistItems.length} styles
+        </p>
       </div>
     </div>
   );

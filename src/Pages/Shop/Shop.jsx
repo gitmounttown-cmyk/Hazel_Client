@@ -1,7 +1,14 @@
-import  { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../services/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Shop.css";
+import {
+  addToWishlist,
+  checkWishlist,
+  removeWishlistItem,
+} from "../../Services/wishlistService";
+import { isUserLoggedIn } from "../../utils/auth";
+import toast from "react-hot-toast";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -110,26 +117,25 @@ function useShopData() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
   const debounceRef = useRef(null);
 
-const location = useLocation();
+  const location = useLocation();
 
-//go to start of page on route change
-useEffect(() => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}, [location.pathname]);
-
-
+  //go to start of page on route change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [location.pathname]);
 
   useEffect(() => {
     API.get("/subcategories/all")
       .then((res) => {
         const raw = res.data;
-        const subCategoriesList = Array.isArray(raw) ? raw : (raw?.data || raw?.subCategories || []);
+        const subCategoriesList = Array.isArray(raw)
+          ? raw
+          : raw?.data || raw?.subCategories || [];
         const formattedCollections = subCategoriesList
           .map((sub) => ({
             value: sub._id || sub.id,
@@ -141,59 +147,70 @@ useEffect(() => {
       .catch(() => {});
   }, []);
 
-  const fetchProductsFromBackend = useCallback(async (activeFilters, currentSort, currentPage, currentMaxPrice) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchProductsFromBackend = useCallback(
+    async (activeFilters, currentSort, currentPage, currentMaxPrice) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const params = new URLSearchParams();
-      params.append("page", currentPage);
-      params.append("limit", PAGE_SIZE);
-      params.append("sort", currentSort);
-      
-     
-      if (currentMaxPrice && !activeFilters.price_range_option) {
-        params.append("max_price", currentMaxPrice);
-      }
+        const params = new URLSearchParams();
+        params.append("page", currentPage);
+        params.append("limit", PAGE_SIZE);
+        params.append("sort", currentSort);
 
-      Object.entries(activeFilters).forEach(([key, val]) => {
-        if (!val) return;
-        if (Array.isArray(val)) {
-          if (val.length > 0 && val[0]) {
-            params.append(key, val[0]);
-          }
-        } else {
-          params.append(key, val);
+        if (currentMaxPrice && !activeFilters.price_range_option) {
+          params.append("max_price", currentMaxPrice);
         }
-      });
 
-      const response = await API.get(`/products/all?${params.toString()}`);
-      const rawData = response.data?.data || [];
+        Object.entries(activeFilters).forEach(([key, val]) => {
+          if (!val) return;
+          if (Array.isArray(val)) {
+            if (val.length > 0 && val[0]) {
+              params.append(key, val[0]);
+            }
+          } else {
+            params.append(key, val);
+          }
+        });
 
-      const formatted = rawData.map((item, idx) => {
-        const firstVariant = item.variants?.[0] || {};
-        let rawImage = firstVariant.media?.[0]?.imageURL || firstVariant.images?.[0] || "";
-        const imageUrl = rawImage.startsWith("http") ? rawImage : `${BACKEND_BASE_URL}${rawImage}`;
-        const price = firstVariant.discountPrice ?? firstVariant.price ?? item.price ?? 1299;
+        const response = await API.get(`/products/all?${params.toString()}`);
+        const rawData = response.data?.data || [];
 
-        return {
-          id: item._id || idx,
-          name: item.name || "Exclusive Item",
-          subtitle: firstVariant.fabric ? `${firstVariant.fabric} • Hand Block Print` : "Cambric Cotton • Hand Block Print",
-          rating: item.rating || 4.2,
-          price: price,
-          image: rawImage ? imageUrl : "",
-        };
-      });
+        const formatted = rawData.map((item, idx) => {
+          const firstVariant = item.variants?.[0] || {};
+          let rawImage =
+            firstVariant.media?.[0]?.imageURL || firstVariant.images?.[0] || "";
+          const imageUrl = rawImage.startsWith("http")
+            ? rawImage
+            : `${BACKEND_BASE_URL}${rawImage}`;
+          const price =
+            firstVariant.discountPrice ??
+            firstVariant.price ??
+            item.price ??
+            1299;
 
-      setProducts(formatted);
-      setTotal(response.data?.pagination?.total || formatted.length);
-    } catch (err) {
-      setError("Failed to load products from server.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+          return {
+            id: item._id || idx,
+            name: item.name || "Exclusive Item",
+            subtitle: firstVariant.fabric
+              ? `${firstVariant.fabric} • Hand Block Print`
+              : "Cambric Cotton • Hand Block Print",
+            rating: item.rating || 4.2,
+            price: price,
+            image: rawImage ? imageUrl : "",
+          };
+        });
+
+        setProducts(formatted);
+        setTotal(response.data?.pagination?.total || formatted.length);
+      } catch (err) {
+        setError("Failed to load products from server.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -212,7 +229,10 @@ useEffect(() => {
   }, []);
 
   const setRadio = useCallback((key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value === "any" ? undefined : value }));
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value === "any" ? undefined : value,
+    }));
   }, []);
 
   const clearAll = useCallback(() => {
@@ -232,20 +252,44 @@ useEffect(() => {
 
   return {
     filterGroups,
-    filters, sort, setSort, products, total, loading, error,
-    maxPrice, setMaxPrice,
-    toggleCheckbox, setRadio, clearAll,
+    filters,
+    sort,
+    setSort,
+    products,
+    total,
+    loading,
+    error,
+    maxPrice,
+    setMaxPrice,
+    toggleCheckbox,
+    setRadio,
+    clearAll,
   };
 }
 
-function FilterGroup({ group, filters, onToggleCheckbox, onSetRadio, maxPrice, setMaxPrice }) {
+function FilterGroup({
+  group,
+  filters,
+  onToggleCheckbox,
+  onSetRadio,
+  maxPrice,
+  setMaxPrice,
+}) {
   const [open, setOpen] = useState(true);
 
-  if (group.type !== "price_range_module" && group.type !== "range" && (!group.options || group.options.length === 0)) return null;
+  if (
+    group.type !== "price_range_module" &&
+    group.type !== "range" &&
+    (!group.options || group.options.length === 0)
+  )
+    return null;
 
   return (
     <div className="filter-group">
-      <button className="filter-group-header" onClick={() => setOpen((o) => !o)}>
+      <button
+        className="filter-group-header"
+        onClick={() => setOpen((o) => !o)}
+      >
         <span>{group.label}</span>
         <span className={`chevron ${open ? "chevron-open" : ""}`}>⌄</span>
       </button>
@@ -322,19 +366,41 @@ function FilterGroup({ group, filters, onToggleCheckbox, onSetRadio, maxPrice, s
   );
 }
 
-function Sidebar({ filterGroups, filters, onToggleCheckbox, onSetRadio, onClearAll, maxPrice, setMaxPrice, mobileOpen, onCloseMobile }) {
+function Sidebar({
+  filterGroups,
+  filters,
+  onToggleCheckbox,
+  onSetRadio,
+  onClearAll,
+  maxPrice,
+  setMaxPrice,
+  mobileOpen,
+  onCloseMobile,
+}) {
   return (
     <>
-      {mobileOpen && <div className="sidebar-overlay" onClick={onCloseMobile} />}
+      {mobileOpen && (
+        <div className="sidebar-overlay" onClick={onCloseMobile} />
+      )}
       <aside className={`sidebar ${mobileOpen ? "sidebar-mobile-open" : ""}`}>
         <div className="sidebar-scroll">
           <div className="sidebar-title-block">
             <div className="title-header-row">
               <h2 className="sidebar-title">Shop Nightwear</h2>
-              <button className="clear-all-top" onClick={onClearAll}>Clear All</button>
+              <button className="clear-all-top" onClick={onClearAll}>
+                Clear All
+              </button>
             </div>
-            <p className="sidebar-subtitle">Thoughtfully designed cotton nightwear for everyday comfort.</p>
-            <button className="sidebar-close-mobile" onClick={onCloseMobile} aria-label="Close filters">✕</button>
+            <p className="sidebar-subtitle">
+              Thoughtfully designed cotton nightwear for everyday comfort.
+            </p>
+            <button
+              className="sidebar-close-mobile"
+              onClick={onCloseMobile}
+              aria-label="Close filters"
+            >
+              ✕
+            </button>
           </div>
 
           {filterGroups.map((group) => (
@@ -356,6 +422,78 @@ function Sidebar({ filterGroups, filters, onToggleCheckbox, onSetRadio, onClearA
 
 function ProductCard({ product, navigate }) {
   const [imgError, setImgError] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // useEffect(() => {
+  //   const checkProductWishlist = async () => {
+  //     if (!product?.id) return;
+
+  //     try {
+  //       const response = await checkWishlist(product.id);
+  //       setIsWishlisted(response?.data?.isWishlisted || false);
+  //     } catch (err) {
+  //       console.error("CHECK WISHLIST ERROR:", err);
+  //     }
+  //   };
+
+  //   checkProductWishlist();
+  // }, [product?.id]);
+
+ useEffect(() => {
+  const checkProductWishlist = async () => {
+    if (!product?.id) return;
+
+    if (!isUserLoggedIn()) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    try {
+      const response = await checkWishlist(product.id);
+
+      setIsWishlisted(
+        response?.data?.isWishlisted || false
+      );
+    } catch (err) {
+      console.error("CHECK WISHLIST ERROR:", err);
+      setIsWishlisted(false);
+    }
+  };
+
+  checkProductWishlist();
+}, [product?.id]);
+
+  const handleWishlist = async () => {
+    if (!product?.id || wishlistLoading) return;
+    if (!isUserLoggedIn()) {
+      toast.error("Please log in to manage your wishlist.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setWishlistLoading(true);
+
+      if (isWishlisted) {
+        await removeWishlistItem(product.id);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlist({
+          productId: product.id,
+        });
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      console.error("WISHLIST ERROR:", err);
+
+      if (err?.response?.status === 409) {
+        setIsWishlisted(true);
+      }
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   return (
     <div className="card" onClick={() => navigate(`/product/${product.id}`)}>
@@ -368,12 +506,35 @@ function ProductCard({ product, navigate }) {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#f5f5f5', color: '#666', fontSize: '12px' }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              background: "#f5f5f5",
+              color: "#666",
+              fontSize: "12px",
+            }}
+          >
             No Image Available
           </div>
         )}
-        <button className="wishlist-btn" aria-label="Add to wishlist">♡</button>
+
+        <button
+          type="button"
+          className={`wishlist-btn ${isWishlisted ? "wishlisted" : ""}`}
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleWishlist(e);
+          }}
+          disabled={wishlistLoading}
+        >
+          {isWishlisted ? "♥" : "♡"}
+        </button>
       </div>
+
       <div className="card-body">
         <p className="card-name">{product.name}</p>
         <p className="card-subtitle">{product.subtitle}</p>
@@ -384,16 +545,35 @@ function ProductCard({ product, navigate }) {
   );
 }
 
-function ProductGrid({ products, total, loading, error, sort, setSort, onOpenMobileFilters, navigate }) {
+function ProductGrid({
+  products,
+  total,
+  loading,
+  error,
+  sort,
+  setSort,
+  onOpenMobileFilters,
+  navigate,
+}) {
   return (
     <main className="main">
       <div className="main-scroll">
         <div className="sort-bar">
-          <button className="mobile-filter-btn" onClick={onOpenMobileFilters}>Filters</button>
-          <span className="results-count">Showing {products.length} of {total} styles</span>
-          <select className="sort-select" value={sort} onChange={(e) => setSort(e.target.value)}>
+          <button className="mobile-filter-btn" onClick={onOpenMobileFilters}>
+            Filters
+          </button>
+          <span className="results-count">
+            Showing {products.length} of {total} styles
+          </span>
+          <select
+            className="sort-select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+          >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
             ))}
           </select>
         </div>
@@ -401,7 +581,9 @@ function ProductGrid({ products, total, loading, error, sort, setSort, onOpenMob
         {error && <p className="error-text">{error}</p>}
 
         <div className="grid">
-          {products.map((p) => <ProductCard key={p.id} product={p} navigate={navigate} />)}
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p} navigate={navigate} />
+          ))}
         </div>
 
         {loading && <p className="loading-text">Loading styles from server…</p>}
@@ -413,17 +595,57 @@ function ProductGrid({ products, total, loading, error, sort, setSort, onOpenMob
 export default function ShopPage() {
   const {
     filterGroups,
-    filters, sort, setSort, products, total, loading, error,
-    maxPrice, setMaxPrice,
-    toggleCheckbox, setRadio, clearAll,
+    filters,
+    sort,
+    setSort,
+    products,
+    total,
+    loading,
+    error,
+    maxPrice,
+    setMaxPrice,
+    toggleCheckbox,
+    setRadio,
+    clearAll,
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const navigate = useNavigate();
+const location = useLocation();
+const shopRef = useRef(null);
+
+useEffect(() => {
+  const scrollToTop = () => {
+    // 1. Browser/document scroll
+    window.scrollTo(0, 0);
+
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 2. Shop body scroll
+    if (shopRef.current) {
+      shopRef.current.scrollTop = 0;
+      shopRef.current.scrollLeft = 0;
+
+      // 3. Product grid scroll
+      const mainScroll =
+        shopRef.current.querySelector(".main-scroll");
+
+      if (mainScroll) {
+        mainScroll.scrollTop = 0;
+        mainScroll.scrollLeft = 0;
+      }
+    }
+  };
+
+  // Run after React has rendered the new page
+  requestAnimationFrame(scrollToTop);
+
+}, [location.pathname, location.search]);
 
   return (
     <div className="shop-page">
-      <div className="shop-body">
+      <div ref={shopRef} className="shop-body">
         <Sidebar
           filterGroups={filterGroups}
           filters={filters}
