@@ -25,7 +25,7 @@ const ShopByCategory = () => {
             ...subCat,
             image: subCat.imageURL?.startsWith("http")
               ? subCat.imageURL
-              : `http://localhost:5004${subCat.imageURL}`,
+              : `${import.meta.env.VITE_UPLOAD_URL}${subCat.imageURL}`,
             prints: `${subCat.displayOrder || 5} PRINTS`,
           }));
 

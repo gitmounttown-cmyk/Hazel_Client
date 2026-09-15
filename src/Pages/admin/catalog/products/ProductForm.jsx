@@ -9,7 +9,7 @@ import { getBrands } from "../../../../services/brandService";
 import { getSubCategories } from "../../../../services/subCategoryService";
 import "./productForm.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const ALLOWED_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
 

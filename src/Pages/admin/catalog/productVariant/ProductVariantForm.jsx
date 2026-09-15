@@ -28,7 +28,7 @@ const ProductVariantForm = ({ variant, onClose }) => {
 
   const [newImages, setNewImages] = useState([]);
   const [previews, setPreviews] = useState(
-    variant?.images?.map((img) => `http://localhost:5004${img}`) || []
+    variant?.images?.map((img) => `${import.meta.env.VITE_UPLOAD_URL}${img}`) || []
   );
 
   const [errors, setErrors] = useState({});

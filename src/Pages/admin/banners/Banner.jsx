@@ -12,7 +12,7 @@ const Banner = () => {
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
 
-  const API_BASE_URL = "http://localhost:5004";
+  const API_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
   const fetchBanners = async () => {
     try {

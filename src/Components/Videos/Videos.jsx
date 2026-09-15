@@ -13,7 +13,7 @@ export default function ShopTheLookSection() {
     async function fetchShopTheLooks() {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5004/api/videos/all");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/videos/all`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch videos from server");
@@ -27,7 +27,7 @@ export default function ShopTheLookSection() {
             _id: item._id,
             title: item.title,      // <--- fetched from backend
             price: item.price,      // <--- fetched from backend
-            videoUrl: `http://localhost:5004${item.videoUrl}`,
+            videoUrl: `${import.meta.env.VITE_UPLOAD_URL}${item.videoUrl}`,
           }));
           setLooks(formattedData);
         } else {

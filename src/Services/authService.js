@@ -1,6 +1,4 @@
 import axios from "axios";
-
-// const API_URL = "http://localhost:5004/api/auth";
 import axiosInstance from "../api/axiosInstance";
 
 // ============================================================

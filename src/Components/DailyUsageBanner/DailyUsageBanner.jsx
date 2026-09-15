@@ -18,7 +18,7 @@ const DailyUsageBanner = () => {
 
           const bannerImg = firstBanner.imageURL?.startsWith("http")
             ? firstBanner.imageURL
-            : `http://localhost:5004${firstBanner.imageURL}`;
+            : `${import.meta.env.VITE_UPLOAD_URL}${firstBanner.imageURL}`;
 
           setBanner({
             id: firstBanner._id,

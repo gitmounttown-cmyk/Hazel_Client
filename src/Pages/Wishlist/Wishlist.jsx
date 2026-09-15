@@ -150,7 +150,7 @@ const getImageUrl = (image) => {
     return image;
   }
 
-  return `http://localhost:5004${image.startsWith("/") ? image : `/${image}`}`;
+  return `${import.meta.env.VITE_UPLOAD_URL}${image.startsWith("/") ? image : `/${image}`}`;
 };
 
 function WishlistCard({ item, onRemove, removing }) {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createNeckPattern, updateNeckPattern } from "../../../../services/neckPatternService";
 import "./neckPatternForm.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const NeckPatternForm = ({ neckPattern, onClose, onSuccess }) => {
   const [name, setName] = useState(neckPattern?.name || "");

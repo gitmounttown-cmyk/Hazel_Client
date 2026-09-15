@@ -3,7 +3,7 @@ import { createSubCategory, updateSubCategory } from "../../../../services/subCa
 import { getCategories } from "../../../../services/categoryService";
 import "./subCategoryForm.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const SubCategoryForm = ({ subCategory, onClose, onSuccess }) => {
   const [name, setName] = useState(subCategory?.name || "");
