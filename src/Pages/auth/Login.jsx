@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { sendOTP, googleLogin } from "../../Services/authService";
 import "../../styles/auth.css";
 import { GoogleLogin } from "@react-oauth/google";
+import hazelBrandLogo from "../../assets/images/hazel_brand.png";
+import hazelLogo from "../../assets/images/hazel_logo.jpg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -170,7 +172,7 @@ if (response.success) {
 
       <div className="auth-image-section">
         <img
-          src="../../../src/assets/images/hazel_logo.jpg"
+          src={hazelLogo}
           alt="Hazel Fashion"
           className="auth-background-image"
         />
@@ -209,7 +211,7 @@ if (response.success) {
           <div className="hazel-logo">
             <div className="logo-icon">
               <img
-                src="../../../src/assets/images/hazel_brand.png"
+                src={hazelBrandLogo}
                 alt="brand"
                 className="brand-logo"
               />

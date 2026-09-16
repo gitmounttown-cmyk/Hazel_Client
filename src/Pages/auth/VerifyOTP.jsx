@@ -14,6 +14,7 @@ import {
 import "../../styles/auth.css";
 
 import toast from "react-hot-toast";
+import verifyOtpImage from "../../assets/images/verify-otp-left.png";
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
@@ -325,7 +326,7 @@ const handleCloseOtpPopup = () => {
       <div className="auth-image-section">
 
         <img
-          src="/images/otp-banner.jpg"
+          src={verifyOtpImage}
           alt="Hazel Fashion"
           className="auth-background-image"
         />
