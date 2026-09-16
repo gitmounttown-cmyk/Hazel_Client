@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { removeCartItem } from "../../Services/cartService";
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5004/api";
+import { removeCartItem, updateCartItem } from "../../Services/cartService";
+import { getAddresses } from "../../Services/addressService";
+const API_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5004/api";
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 const formatINR = (amount) =>
@@ -167,7 +169,14 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem }) {
   );
 }
 
-function OrderSummary({ subtotal, discount, shipping, tax, total }) {
+function OrderSummary({
+  subtotal,
+  discount,
+  shipping,
+  tax,
+  total,
+  handleCheckout,
+}) {
   const [promoOpen, setPromoOpen] = useState(false);
 
   const [promoCode, setPromoCode] = useState("");
@@ -237,7 +246,7 @@ function OrderSummary({ subtotal, discount, shipping, tax, total }) {
         </div>
       )}
 
-      <button type="button" className="checkout-btn">
+      <button type="button" className="checkout-btn" onClick={handleCheckout}>
         Proceed To Checkout
         <span className="checkout-arrow">→</span>
       </button>
@@ -431,6 +440,8 @@ export default function CartPage() {
   const [error, setError] = useState("");
 
   const [loadingItem, setLoadingItem] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
 
   const [clearing, setClearing] = useState(false);
 
@@ -443,6 +454,30 @@ export default function CartPage() {
     },
   });
 
+  const fetchAddresses = async () => {
+    try {
+      const response = await getAddresses();
+
+      if (response.data.success) {
+        const addressList = response.data.data || response.data.addresses || [];
+
+        setAddresses(addressList);
+
+        const defaultAddress = addressList.find(
+          (address) => address.isDefault === true || address.default === true,
+        );
+
+        if (defaultAddress?._id) {
+          setSelectedAddressId(defaultAddress._id);
+        } else if (addressList.length > 0) {
+          setSelectedAddressId(addressList[0]._id);
+        }
+      }
+    } catch (err) {
+      console.error("GET ADDRESSES ERROR:", err.response?.data || err);
+    }
+  };
+
   const fetchCart = async () => {
     try {
       setLoading(true);
@@ -454,9 +489,24 @@ export default function CartPage() {
       }
 
       const response = await api.get("/cart/all");
-
+      console.log("CART API RESPONSE:", response.data);
       if (response.data.success) {
         const cart = response.data.cart;
+        console.log("CART DATA:", cart);
+        console.log("CART ITEMS:", cart?.items);
+        console.log("ITEMS THAT WILL DISPLAY:", cart?.items || []);
+
+        cart?.items?.forEach((item, index) => {
+          console.log(`CART ITEM ${index}:`, item);
+          console.log(`CART ITEM ${index} PRODUCT:`, item?.product);
+          console.log(`CART ITEM ${index} VARIANT:`, item?.variant);
+          console.log(`CART ITEM ${index} VARIANT ID:`, item?.variant?._id);
+          console.log(`CART ITEM ${index} VARIANT ID DIRECT:`, item?.variantId);
+          console.log(
+            `CART ITEM ${index} PRODUCT VARIANT:`,
+            item?.productVariant,
+          );
+        });
 
         setItems(cart?.items || []);
 
@@ -481,6 +531,7 @@ export default function CartPage() {
 
   useEffect(() => {
     fetchCart();
+    fetchAddresses();
   }, []);
 
   const updateQuantity = async (itemId, quantity) => {
@@ -488,7 +539,7 @@ export default function CartPage() {
       setLoadingItem(itemId);
       setError("");
 
-      const response = await api.put(`/cart/item/${itemId}`, {
+      const response = await updateCartItem(itemId, {
         quantity,
       });
 
@@ -570,6 +621,83 @@ export default function CartPage() {
       setError(err.response?.data?.message || "Failed to clear cart");
     } finally {
       setClearing(false);
+    }
+  };
+
+  //PAYMENT CALCULATION
+  const handleCheckout = async () => {
+    try {
+      setError("");
+
+      if (!items.length) {
+        setError("Your cart is empty");
+        return;
+      }
+
+      if (!selectedAddressId) {
+        setError("Please select a delivery address");
+        return;
+      }
+
+      const orderResponse = await api.post("/orders/create", {
+        items: items
+          .map((item) => ({
+            variantId:
+              typeof item?.variant === "object"
+                ? item?.variant?._id
+                : item?.variant,
+            quantity: Number(item?.quantity || 1),
+          }))
+          .filter((item) => item.variantId),
+        addressId: selectedAddressId,
+        paymentMethod: "UPI",
+      });
+
+      if (!orderResponse.data.success) {
+        setError(orderResponse.data.message || "Failed to create order");
+        return;
+      }
+
+      const order = orderResponse.data.data;
+
+      if (!order?._id) {
+        setError("Order ID was not created");
+        return;
+      }
+
+      const paymentResponse = await api.post("/payments/create", {
+        orderId: order._id,
+        paymentMethod: "UPI",
+      });
+
+      if (!paymentResponse.data.success) {
+        setError(paymentResponse.data.message || "Failed to create payment");
+        return;
+      }
+
+      const paymentSessionId =
+        paymentResponse.data.paymentSessionId ||
+        paymentResponse.data.payment_session_id ||
+        paymentResponse.data.data?.payment_session_id;
+
+      if (!paymentSessionId) {
+        setError("Payment session was not created");
+        return;
+      }
+
+      const cashfree = window.Cashfree({
+        mode: "sandbox",
+      });
+
+      await cashfree.checkout({
+        paymentSessionId,
+      });
+    } catch (err) {
+      console.error("CHECKOUT ERROR:", err.response?.data || err);
+
+      setError(
+        err.response?.data?.message || "Failed to proceed with checkout",
+      );
     }
   };
 
@@ -675,6 +803,7 @@ export default function CartPage() {
                 shipping={shipping}
                 tax={tax}
                 total={total}
+                handleCheckout={handleCheckout}
               />
             </div>
           </>
