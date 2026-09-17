@@ -5,6 +5,7 @@ import "./OrderForm.css";
 
 const emptyItem = {
   variantId: "",
+  sizeId: "",
   quantity: 1,
 };
 
@@ -107,7 +108,10 @@ const OrderForm = ({ onSuccess, onCancel }) => {
         setError("Variant ID is required for every item");
         return;
       }
-
+      if (!item.sizeId) {
+        setError("Size ID is required for every item");
+        return;
+      }
       const quantity = Number(item.quantity);
 
       if (!Number.isInteger(quantity) || quantity <= 0) {
@@ -128,6 +132,7 @@ const OrderForm = ({ onSuccess, onCancel }) => {
     const payload = {
       items: items.map((item) => ({
         variantId: item.variantId.trim(),
+        sizeId: item.sizeId.trim(),
         quantity: Number(item.quantity),
       })),
       addressId,
@@ -294,7 +299,19 @@ const OrderForm = ({ onSuccess, onCancel }) => {
                     disabled={loading}
                   />
                 </div>
+                <div className="order-form-group">
+                  <label>Size ID</label>
 
+                  <input
+                    type="text"
+                    value={item.sizeId}
+                    onChange={(e) =>
+                      handleItemChange(index, "sizeId", e.target.value)
+                    }
+                    placeholder="Enter size ID"
+                    disabled={loading}
+                  />
+                </div>
                 <div className="order-form-group">
                   <label>Quantity</label>
 
@@ -344,7 +361,6 @@ const OrderForm = ({ onSuccess, onCancel }) => {
           </div>
         </form>
       </div>
-      
     </div>
   );
 };

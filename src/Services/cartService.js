@@ -19,13 +19,13 @@ export const addToCart = async (cartItem) => {
 export const getCart = () => axiosInstance.get("/all");
 
 export const updateCartItem = (itemId, data) =>
-  axiosInstance.put(`/item/${itemId}`, data);
+  axiosInstance.put(`/cart/update/${itemId}`, data);
 
 export const increaseCartItem = (itemId) =>
-  axiosInstance.patch(`/item/${itemId}/increase`);
+  axiosInstance.patch(`/cart/item/${itemId}/increase`);
 
 export const decreaseCartItem = (itemId) =>
-  axiosInstance.patch(`/item/${itemId}/decrease`);
+  axiosInstance.patch(`/cart/item/${itemId}/decrease`);
 
 export const removeCartItem = (itemId) =>
   axiosInstance.delete(`/cart/remove/${itemId}`);

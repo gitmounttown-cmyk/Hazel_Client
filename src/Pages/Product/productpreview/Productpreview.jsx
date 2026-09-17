@@ -324,9 +324,9 @@ export default function ProductPage() {
     // Fetch product details from the backend API using the id
     getProductById(id)
       .then((response) => {
-        // Handle the response and update the state with product details
-        console.log("Product details:", response.data);
-        // Update state with product details here
+        console.log("PRODUCT API RESPONSE:", response.data);
+        console.log("PRODUCT DATA:", response?.data?.data);
+        console.log("PRODUCT VARIANTS:", response?.data?.data?.variants);
         setProductDetails(response?.data?.data);
       })
       .catch((error) => {
@@ -492,22 +492,21 @@ export default function ProductPage() {
       });
   }, []);
 
-
-//get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
-useEffect(() => {
-  console.log("Fetching user addresses for user ID:", userId);
-  if (userId) {
-    getUserAddresses(userId)
-      .then((response) => {
-        console.log("User addresses:", response.data?.data);
-        // Update state with user addresses here
-        setUserAddresses(response.data?.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user addresses:", error);
-      });
-  }
-}, [userId]);
+  //get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
+  useEffect(() => {
+    console.log("Fetching user addresses for user ID:", userId);
+    if (userId) {
+      getUserAddresses(userId)
+        .then((response) => {
+          console.log("User addresses:", response.data?.data);
+          // Update state with user addresses here
+          setUserAddresses(response.data?.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user addresses:", error);
+        });
+    }
+  }, [userId]);
 
   console.log("Variant media state:", variantMedia); // Log the variant media state to the console
 
@@ -562,6 +561,10 @@ useEffect(() => {
   console.log("Sizes derived from product details:", SIZES); // Log the sizes derived from product details
 
   const selectedVariant =
+    productDetails?.variants?.find(
+      (variant) =>
+        variant.isActive && variant.color?.trim().toLowerCase() === activeColor,
+    ) ||
     productDetails?.variants?.find((variant) => variant.isActive) ||
     productDetails?.variants?.[0];
 
@@ -618,20 +621,28 @@ useEffect(() => {
       toast.error("Please log in to add items to your cart.");
       return;
     }
-    console.log("productDetails:", productDetails);
-    console.log(
-      "Adding to cart:",
-      productDetails._id,
-      selectedVariant._id,
-      qty,
-    );
+    console.log("PRODUCT ID:", productDetails?._id);
+    console.log("SELECTED VARIANT:", selectedVariant);
+    console.log("SELECTED VARIANT ID:", selectedVariant?._id);
+    console.log("CART ITEM BEING SENT:", {
+      productId: productDetails?._id,
+      variantId: selectedVariant?._id,
+      quantity: qty,
+      price: selectedVariant?.discountPrice || selectedVariant?.price,
+    });
     const cartItem = {
       productId: productDetails._id,
       variantId: selectedVariant._id,
       quantity: qty,
       price: selectedVariant.discountPrice || selectedVariant.price,
+      size: activeSize,
     };
     console.log("Cart item:", cartItem);
+    console.log("PRODUCT ID aaa:", productDetails?._id);
+    console.log("SELECTED VARIANT bbb:", selectedVariant);
+    console.log("SELECTED VARIANT ID ccc:", selectedVariant?._id);
+    console.log("CART ITEM BEING SENT ddd:", cartItem);
+
     const response = await addToCart(cartItem);
     console.log("Add to Cart response:", response);
     if (response.success) {
