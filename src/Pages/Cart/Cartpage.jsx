@@ -638,7 +638,7 @@ export default function CartPage() {
         setError("Please select a delivery address");
         return;
       }
-
+      console.log("items are the :", items);
       const orderResponse = await api.post("/orders/create", {
         items: items
           .map((item) => ({
@@ -646,6 +646,7 @@ export default function CartPage() {
               typeof item?.variant === "object"
                 ? item?.variant?._id
                 : item?.variant,
+            size: item?.size || item?.variant?.size || item?.variant?.sizeName || "",
             quantity: Number(item?.quantity || 1),
           }))
           .filter((item) => item.variantId),
