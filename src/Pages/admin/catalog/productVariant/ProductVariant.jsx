@@ -157,7 +157,7 @@ const ProductVariants = () => {
                     <div className="pv-thumb">
                       {variant.images?.[0] ? (
                         <img
-                          src={`http://localhost:5004${variant.images[0]}`}
+                          src={`${import.meta.env.VITE_UPLOAD_URL}${variant.images[0]}`}
                           alt={variant.sku}
                         />
                       ) : (

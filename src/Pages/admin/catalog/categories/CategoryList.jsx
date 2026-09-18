@@ -6,7 +6,7 @@ import {
 import CategoryForm from "./CategoryForm";
 import "./categoryList.css";
 
-const IMAGE_BASE_URL = "http://localhost:5004";
+const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
 const CategoryList = () => {
   const [categories, setCategories] = useState([]);

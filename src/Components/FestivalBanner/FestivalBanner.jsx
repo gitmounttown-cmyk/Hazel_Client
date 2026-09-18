@@ -14,11 +14,13 @@ const FestivalBanner = () => {
         const rawData = response.data.data || response.data;
 
         if (Array.isArray(rawData) && rawData.length > 0) {
-          const firstBanner = rawData[0];
+          // filter bannerType "festival"
+          const festivalBanners = rawData.filter((banner) => banner.bannerType === "festival");
+          const firstBanner = festivalBanners[0];
 
           const bannerImg = firstBanner.imageURL?.startsWith("http")
             ? firstBanner.imageURL
-            : `http://localhost:5004${firstBanner.imageURL}`;
+            : `${import.meta.env.VITE_UPLOAD_URL}${firstBanner.imageURL}`;
 
           setBanner({
             id: firstBanner._id,

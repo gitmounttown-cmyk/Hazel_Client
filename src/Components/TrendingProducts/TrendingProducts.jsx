@@ -15,12 +15,11 @@ const TrendingProducts = () => {
         const trendingResponse = await axiosInstance.get("/trending-products/all");
 
         const trendingData = trendingResponse.data?.data || [];
-
-        const activeTrending = trendingData.find(
+        const activeTrending = trendingData.filter(
           (item) => item.isActive !== false,
         );
 console.log("Active Trending Data:", activeTrending);
-        if (!activeTrending || !Array.isArray(activeTrending.products)) {
+        if (!activeTrending || !Array.isArray(activeTrending) || activeTrending.length === 0) {
           setProducts([]);
           return;
         }
@@ -39,7 +38,7 @@ console.log("Active Trending Data:", activeTrending);
           });
         }
 
-        const formattedProducts = activeTrending.products
+        const formattedProducts = activeTrending.flatMap((trending) => trending.products)
           .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
           .map((trendingItem) => {
             const productId =
