@@ -66,3 +66,7 @@ export const addVariantMedia = (productId, variantId, formData) =>
 
 export const deleteVariantMedia = (productId, variantId, mediaId) =>
   axiosInstance.delete(`${BASE}/${productId}/variants/${variantId}/media/${mediaId}`);
+
+//get video
+export const getVideos = () => 
+  axiosInstance.get('/videos/all');

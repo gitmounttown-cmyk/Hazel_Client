@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Videos.css";
+import { getVideos } from "../../Services/productService";
+import { formatCurrency } from "../../Utils/currencyFormat";
 
 export default function ShopTheLookSection() {
   const [looks, setLooks] = useState([]);
@@ -13,13 +15,15 @@ export default function ShopTheLookSection() {
     async function fetchShopTheLooks() {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/videos/all`);
+        // const response = await fetch(`${import.meta.env.VITE_API_URL}/videos/all`);
+        // console.log("Fetched videos response:", response); // Log the response for debugging
+        const response = await getVideos(); // Use the service function to fetch videos
         
-        if (!response.ok) {
+        if (!response?.data?.success) {
           throw new Error("Failed to fetch videos from server");
         }
         
-        const result = await response.json();
+        const result = await response?.data;
         
         if (result.success && Array.isArray(result.data)) {
           // Map real title and price coming from your database backend
@@ -100,7 +104,8 @@ export default function ShopTheLookSection() {
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
-                <p className="look-price">{item.price}</p>
+                {/* add indian currency symbol */}
+                <p className="look-price"> ₹ { formatCurrency(item.price)}</p>
               </div>
             </div>
           ))}
