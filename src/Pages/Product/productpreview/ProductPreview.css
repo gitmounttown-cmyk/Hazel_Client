@@ -55,21 +55,38 @@
   background: var(--deep-red);
   border-radius: 16px;
   padding: 16px;
-  display: grid;
-  grid-template-columns: 60px 1fr;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pp-main-image {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  height: auto;
+  max-height: 70vh;
+}
+
+.pp-main-image-ph {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
 }
 
 .pp-thumbs {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
-  max-height: 540px;
-  overflow-y: auto;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
 
 .pp-thumbs::-webkit-scrollbar {
-  width: 0;
+  height: 4px;
 }
 
 .pp-thumb {
@@ -80,6 +97,7 @@
   cursor: pointer;
   flex-shrink: 0;
   overflow: hidden;
+  width: 72px;
 }
 
 .pp-thumb-img {
@@ -98,21 +116,6 @@
 
 .pp-thumb.is-active .pp-thumb-img {
   opacity: 1;
-}
-
-.pp-main-image {
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--white);
-  height: 540px;
-}
-
-.pp-main-image-ph {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  display: block;
 }
 
 /* ---- info column ---- */
@@ -791,7 +794,6 @@
   font-size: 13px;
 }
 
-
 /* ========================================
    LOCATION OVERLAY
 ======================================== */
@@ -811,7 +813,6 @@
   background: rgba(0, 0, 0, 0.45);
 }
 
-
 /* ========================================
    LOCATION MODAL
 ======================================== */
@@ -826,10 +827,8 @@
 
   overflow: hidden;
 
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
-
 
 /* ========================================
    LOCATION HEADER
@@ -872,7 +871,6 @@
   cursor: pointer;
 }
 
-
 /* ========================================
    ADDRESS LIST
 ======================================== */
@@ -884,7 +882,6 @@
 
   padding: 15px 18px;
 }
-
 
 /* ========================================
    ADDRESS CARD
@@ -925,7 +922,6 @@
   background: #fdfaf5;
 }
 
-
 /* ========================================
    ADDRESS ICON
 ======================================== */
@@ -943,7 +939,6 @@
   width: 100%;
   height: 100%;
 }
-
 
 /* ========================================
    ADDRESS INFO
@@ -973,7 +968,6 @@
 
   font-weight: 500;
 }
-
 
 /* ========================================
    RADIO
@@ -1008,7 +1002,6 @@
 
   background: #b18443;
 }
-
 
 /* ========================================
    ADD ADDRESS
@@ -1141,13 +1134,11 @@
   }
 }
 
-
 /* ========================================
    MOBILE
 ======================================== */
 
 @media (max-width: 600px) {
-
   .pp-delivery-content {
     flex-wrap: wrap;
   }
@@ -1183,7 +1174,6 @@
   .pp-address-card {
     padding: 14px;
   }
-
 }
 
 /* ============ RESPONSIVE ============ */
@@ -1209,5 +1199,11 @@
   }
   .pp-actions {
     flex-direction: column;
+  }
+  .pp-main-image {
+    height: 420px;
+  }
+  .pp-thumb {
+    width: 60px;
   }
 }

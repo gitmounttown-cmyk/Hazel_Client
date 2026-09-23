@@ -492,22 +492,21 @@ export default function ProductPage() {
       });
   }, []);
 
-
-//get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
-useEffect(() => {
-  console.log("Fetching user addresses for user ID:", userId);
-  if (userId) {
-    getUserAddresses(userId)
-      .then((response) => {
-        console.log("User addresses:", response.data?.data);
-        // Update state with user addresses here
-        setUserAddresses(response.data?.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user addresses:", error);
-      });
-  }
-}, [userId]);
+  //get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
+  useEffect(() => {
+    console.log("Fetching user addresses for user ID:", userId);
+    if (userId) {
+      getUserAddresses(userId)
+        .then((response) => {
+          console.log("User addresses:", response.data?.data);
+          // Update state with user addresses here
+          setUserAddresses(response.data?.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user addresses:", error);
+        });
+    }
+  }, [userId]);
 
   console.log("Variant media state:", variantMedia); // Log the variant media state to the console
 
@@ -572,10 +571,6 @@ useEffect(() => {
     ["Sleeves", selectedVariant?.sleeves || "-"],
     ["Finishing", selectedVariant?.finishing || "-"],
     ["Pocket", selectedVariant?.pocket || "-"],
-    [
-      "Available Sizes",
-      selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
-    ],
   ];
 
   const handleWishlist = async (e) => {
@@ -756,6 +751,21 @@ useEffect(() => {
     checkRelatedWishlist();
   }, [products, id]);
 
+  /* ---------- gallery auto-slide ----------
+     Uses the existing activeThumb/variantMedia state — no new data logic,
+     just automatically advances the main image every 6 seconds. */
+  useEffect(() => {
+    if (!variantMedia.length || variantMedia.length <= 1) return;
+
+    const slideInterval = setInterval(() => {
+      setActiveThumb((prev) =>
+        prev === variantMedia.length - 1 ? 0 : prev + 1,
+      );
+    }, 6000); // rotates every 6 seconds (within the 5-7s range)
+
+    return () => clearInterval(slideInterval);
+  }, [variantMedia]);
+
   return (
     <div className="pp">
       {/* ============ PRODUCT SECTION ============ */}
@@ -768,6 +778,20 @@ useEffect(() => {
         <div className="pp-grid">
           {/* ---- gallery ---- */}
           <div className="pp-gallery-panel">
+            <div className="pp-main-image">
+              <img
+                className="pp-main-image-ph"
+                src={
+                  import.meta.env.VITE_UPLOAD_URL +
+                  (variantMedia[activeThumb] || mainPhoto)
+                }
+                alt={productDetails?.name || "Admire Maxi"}
+                onError={(e) => {
+                  console.error(`Error loading main image:`, e);
+                  e.target.src = mainPhoto; // Fallback to main photo on error
+                }}
+              />
+            </div>
             <div className="pp-thumbs">
               {variantMedia.map((src, i) => (
                 <button
@@ -787,20 +811,6 @@ useEffect(() => {
                   />
                 </button>
               ))}
-            </div>
-            <div className="pp-main-image">
-              <img
-                className="pp-main-image-ph"
-                src={
-                  import.meta.env.VITE_UPLOAD_URL +
-                  (variantMedia[activeThumb] || mainPhoto)
-                }
-                alt={productDetails?.name || "Admire Maxi"}
-                onError={(e) => {
-                  console.error(`Error loading main image:`, e);
-                  e.target.src = mainPhoto; // Fallback to main photo on error
-                }}
-              />
             </div>
           </div>
 
