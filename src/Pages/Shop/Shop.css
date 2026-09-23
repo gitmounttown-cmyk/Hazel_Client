@@ -19,8 +19,6 @@
   position: relative;
 }
 
-/* ---------------- SIDEBAR (INDEPENDENT SCROLL) ---------------- */
-
 .sidebar {
   width: 300px;
   background: #5a1827;
@@ -58,6 +56,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
+  gap: 12px;
 }
 
 .sidebar-title {
@@ -65,13 +64,7 @@
   font-size: 20px;
   margin: 0;
   font-family: serif;
-}
-
-.sidebar-subtitle {
-  color: #d1c5bd;
-  font-size: 11px;
-  line-height: 1.4;
-  margin: 0;
+  font-weight: 600;
 }
 
 .clear-all-top {
@@ -83,24 +76,23 @@
   text-decoration: underline;
   padding: 0;
   font-family: "Plus Jakarta Sans", sans-serif;
+  white-space: nowrap;
 }
 
 .sidebar-close-mobile {
   display: none;
-  position: absolute;
-  top: 0;
-  right: 0;
   background: none;
   border: none;
   color: #edc484;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
+  padding: 0;
+  line-height: 1;
 }
 
 .sidebar-overlay {
   display: none;
 }
-
 
 .filter-group {
   border-bottom: 1px solid rgba(237, 196, 132, 0.15);
@@ -111,18 +103,21 @@
   width: 100%;
   background: none;
   border: none;
-  color: #FFFFFF;
+  color: #edc484;
   font-size: 15px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   cursor: pointer;
   padding: 0;
   font-family: serif;
+  font-weight: 600;
 }
 
 .chevron {
   transition: transform 0.15s;
   display: inline-block;
+  color: #edc484;
 }
 
 .chevron-open {
@@ -136,6 +131,87 @@
   gap: 8px;
 }
 
+/* ---------------- SUBCATEGORY CIRCLE GRID ---------------- */
+
+.subcategory-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 8px;
+  padding: 6px 0;
+  text-align: center;
+}
+
+.subcategory-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.subcategory-item:hover {
+  transform: translateY(-2px);
+}
+
+.subcategory-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #d1c5bd;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subcategory-item.selected .subcategory-circle {
+  border-color: #edc484;
+  box-shadow: 0 0 10px rgba(237, 196, 132, 0.7);
+}
+
+.subcategory-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.subcategory-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #ede6df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5a1827;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.subcategory-label {
+  margin-top: 5px;
+  font-size: 10px;
+  color: #f5f0eb;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 75px;
+}
+
+/* ---------------- COLOR SWATCH GRID (7 IN A ROW) ---------------- */
+
+.color-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 4px 0;
+}
+
+/* ---------------- CHECKBOX / RADIO LABELS & TEXT ---------------- */
+
 .checkbox-row {
   display: flex;
   align-items: center;
@@ -145,45 +221,26 @@
   cursor: pointer;
 }
 
+.checkbox-row:hover {
+  color: #edc484;
+}
+
 .checkbox-input {
   accent-color: #edc484;
   width: 14px;
   height: 14px;
   cursor: pointer;
   flex-shrink: 0;
+  border: 1px solid #edc484;
+  background-color: transparent;
 }
 
 .checkbox-label {
   flex: 1;
+  color: #f5f0eb;
 }
 
-.swatch-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.swatch {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.swatch:hover {
-  transform: scale(1.08);
-}
-
-.swatch-checked {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #edc484;
-}
-
-.swatch-outline {
-  border: 1px solid #ccc;
-}
+/* ---------------- PRICE RANGE SLIDER ---------------- */
 
 .range-block {
   padding: 4px 0;
@@ -195,16 +252,32 @@
 .range-input {
   width: 100%;
   accent-color: #edc484;
+  background: rgba(237, 196, 132, 0.3);
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.range-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #edc484;
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
 .range-labels {
   display: flex;
   justify-content: space-between;
-  color: #d1c5bd;
+  color: #edc484;
   font-size: 11px;
+  font-weight: 500;
 }
 
-/* ---------------- MAIN / PRODUCT GRID (COMPACT CARDS) ---------------- */
+/* ---------------- MAIN / PRODUCT GRID ---------------- */
 
 .main {
   flex: 1;
@@ -234,6 +307,7 @@
   margin-right: auto;
   color: #5a1827;
   font-size: 13px;
+  font-weight: 600;
 }
 
 .sort-select {
@@ -260,7 +334,6 @@
   cursor: pointer;
 }
 
-/* 4 columns layout for medium-small cards on desktop */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -280,7 +353,6 @@
   transform: translateY(-3px);
 }
 
-/* Compact Image Height for Medium-Small Card Design */
 .card-image {
   position: relative;
   height: 220px;
@@ -366,7 +438,7 @@
 }
 
 /* ============================================================
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE BREAKPOINTS FOR ALL DEVICES
    ============================================================ */
 
 @media (max-width: 1280px) {
@@ -377,20 +449,12 @@
 
 @media (max-width: 1024px) {
   .sidebar {
-    width: 250px;
+    width: 260px;
   }
 
   .grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-  }
-
-  .card-image {
-    height: 240px;
-  }
-
-  .main-scroll {
-    padding: 24px 20px;
   }
 }
 
@@ -400,27 +464,43 @@
     top: 0;
     left: 0;
     width: 85%;
-    max-width: 300px;
-    z-index: 50;
+    max-width: 320px;
+    height: 100vh;
+    z-index: 1000;
     transform: translateX(-100%);
-    transition: transform 0.25s ease;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.4);
   }
 
-  .sidebar-mobile-open {
+  .sidebar.sidebar-mobile-open {
     transform: translateX(0);
   }
 
   .sidebar-close-mobile {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: static;
+  }
+
+  .title-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .sidebar-overlay {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 40;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
   }
 
   .mobile-filter-btn {
@@ -443,33 +523,27 @@
     gap: 12px;
   }
 
-  .card-image {
-    height: 190px;
-  }
-
   .main-scroll {
-    padding: 16px 12px;
-  }
-
-  .swatch-grid {
-    grid-template-columns: repeat(6, 1fr);
+    padding: 16px 14px;
   }
 }
 
 @media (max-width: 480px) {
   .grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .card-image {
-    height: 280px;
+    height: 260px;
   }
 
   .sidebar {
     width: 90%;
   }
 
-  .swatch-grid {
-    grid-template-columns: repeat(5, 1fr);
+  .color-swatch-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
   }
 }

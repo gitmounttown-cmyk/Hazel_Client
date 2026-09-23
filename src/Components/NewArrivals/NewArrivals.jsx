@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import "./NewArrivals.css";
-
-// import API from "../../Services/api";
 import axiosInstance from "../../api/axiosInstance";
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
   const getImageUrl = (image) => {
     if (!image) {
       return "";
@@ -15,11 +15,17 @@ const NewArrivals = () => {
       return image;
     }
 
+    const backendBaseURL = axiosInstance.defaults.baseURL 
+      ? axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "") 
+      : "http://localhost:5000";
+
+    const uploadBase = import.meta.env.VITE_UPLOAD_URL || backendBaseURL;
+
     if (image.startsWith("/")) {
-      return `${import.meta.env.VITE_UPLOAD_URL}${image}`;
+      return `${uploadBase}${image}`;
     }
 
-    return `${import.meta.env.VITE_UPLOAD_URL}/${image}`;
+    return `${uploadBase}/${image}`;
   };
 
   const getVariantImage = (product) => {
@@ -72,42 +78,36 @@ const NewArrivals = () => {
         const response = await axiosInstance.get("/newArrivals/all");
 
         if (!response.data?.success) {
+          setLoading(false);
           return;
         }
 
         const arrivals = response.data.data || [];
-
         const formattedProducts = [];
 
         arrivals.forEach((arrival) => {
-          if (
-            !Array.isArray(arrival.products) ||
-            arrival.products.length === 0
-          ) {
+          if (!Array.isArray(arrival.products) || arrival.products.length === 0) {
             return;
           }
 
           arrival.products.forEach((item, index) => {
-            const product = item?.product;
+            // Support both populated item.product and direct item objects
+            const product = item?.product || item;
 
             if (!product) {
               return;
             }
 
             const variant = getActiveVariant(product);
-            const descriptionAbout = product.description?.about || "";
-
-            // const descriptionItemDetails =
-            //   product.description?.itemDetails || "";
-
-            const description =
-              descriptionAbout || descriptionItemDetails || "";
+            const descriptionAbout = product.description?.about || product.description || "";
+            const descriptionItemDetails = product.description?.itemDetails || "";
+            const description = descriptionAbout || descriptionItemDetails || "";
 
             const price =
               variant?.discountPrice !== null &&
               variant?.discountPrice !== undefined
                 ? variant.discountPrice
-                : (variant?.price ?? 0);
+                : (variant?.price ?? product?.price ?? 0);
 
             const sizes = Array.isArray(variant?.sizes)
               ? variant.sizes
@@ -119,10 +119,8 @@ const NewArrivals = () => {
                   .join(" | ")
               : "";
 
-            const backendImage = item?.image || getVariantImage(product);
-
+            const backendImage = item?.image || getVariantImage(product) || product.imageURL;
             const rating = product.rating ?? product.averageRating ?? null;
-
             const prints = variant?.prints ?? product?.prints ?? null;
 
             formattedProducts.push({
@@ -130,21 +128,13 @@ const NewArrivals = () => {
                 item?._id ||
                 product?._id ||
                 `${arrival?._id || "arrival"}-${index}`,
-
               name: product.name || "New Arrival",
-
               tagline: arrival.subtitle || "LATEST COLLECTION",
-
               description,
-
               rating,
-
               prints,
-
               sizes,
-
               price,
-
               image: getImageUrl(backendImage),
             });
           });
@@ -154,6 +144,8 @@ const NewArrivals = () => {
         setSelectedIndex(0);
       } catch (error) {
         console.error("Failed to fetch New Arrivals:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -172,11 +164,21 @@ const NewArrivals = () => {
     return () => clearInterval(interval);
   }, [products.length]);
 
-  if (products.length === 0) {
-    return null;
+  if (loading) {
+    return (
+      <section className="new-arrivals-section">
+        <div style={{ textAlign: "center", padding: "40px", color: "#5A1827" }}>
+          Loading new arrivals...
+        </div>
+      </section>
+    );
   }
 
-  const activeProduct = products[selectedIndex];
+  if (products.length === 0) {
+    return null; 
+  }
+
+  const activeProduct = products[selectedIndex] || products[0];
 
   const thumbnailProducts = products
     .map((product, index) => ({
@@ -247,7 +249,6 @@ const NewArrivals = () => {
               {metaItems.map((item, index) => (
                 <span key={`${item}-${index}`}>
                   {index > 0 && <span className="meta-dot"> • </span>}
-
                   {item}
                 </span>
               ))}
