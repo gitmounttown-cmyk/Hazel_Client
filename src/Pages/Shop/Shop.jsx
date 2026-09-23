@@ -10,6 +10,31 @@ import {
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
 
+const COLOR_OPTIONS = [
+  { name: "Light Coral", hex: "#FF7F7F" },
+  { name: "Peach Orange", hex: "#FFAC7F" },
+  { name: "Warm Amber", hex: "#FFCC7F" },
+  { name: "Soft Yellow", hex: "#FFF67F" },
+  { name: "Lime Pastel", hex: "#D0FF7F" },
+  { name: "Spring Green", hex: "#7FFF8A" },
+  { name: "Aqua Mint", hex: "#7FFFC7" },
+  { name: "Pale Cyan", hex: "#7FFFEC" },
+  { name: "Sky Blue", hex: "#7FD4FF" },
+  { name: "Cornflower Blue", hex: "#7F9DFF" },
+  { name: "Periwinkle", hex: "#8C7FFF" },
+  { name: "Light Orchid", hex: "#C77FFF" },
+  { name: "Light Violet", hex: "#EE7FFF" },
+  { name: "Orchid Pink", hex: "#FF7FD9" },
+  { name: "Bubblegum Pink", hex: "#FF7FBB" },
+  { name: "Dusty Rose", hex: "#FF7F90" },
+  { name: "Salmon Pink", hex: "#FF7F81" },
+  { name: "Deep Burgundy Brown", hex: "#372425" },
+  { name: "Midnight Navy", hex: "#162441" },
+  { name: "Golden Brown", hex: "#946518" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Black", hex: "#000000" },
+];
+
 const STATIC_FILTER_GROUPS = [
   {
     key: "size",
@@ -36,6 +61,12 @@ const STATIC_FILTER_GROUPS = [
       { value: "Alpine", label: "Alpine" },
       { value: "Pure Flex Cotton", label: "Pure Flex Cotton" },
     ],
+  },
+  {
+    key: "color",
+    label: "Color",
+    type: "color_grid",
+    options: COLOR_OPTIONS.map((c) => ({ value: c.name, label: c.name, hex: c.hex })),
   },
   {
     key: "price_range_option",
@@ -105,6 +136,18 @@ const SORT_OPTIONS = [
 const PAGE_SIZE = 8;
 const BACKEND_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
+const DEFAULT_SUBCATEGORIES = [
+  { value: "sub_1", label: "Paradise – Flex Cotton Maxi", image: "" },
+  { value: "sub_2", label: "Breeze – Pure Cotton Co-ord Set", image: "" },
+  { value: "sub_3", label: "Maxi Mothers", image: "" },
+  { value: "sub_4", label: "Maxi Mothers – Cotton Flex Maternity Dress", image: "" },
+  { value: "sub_5", label: "Nesting Gown – Feeding-Friendly Maternity Dress", image: "" },
+  { value: "sub_6", label: "Aira Maxi", image: "" },
+  { value: "sub_7", label: "Aira Maxi", image: "" },
+  { value: "sub_8", label: "Aira Maxi", image: "" },
+  { value: "sub_9", label: "Aira Maxi", image: "" },
+];
+
 function useShopData() {
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState("recommended");
@@ -112,39 +155,61 @@ function useShopData() {
   const [maxPrice, setMaxPrice] = useState(5000);
 
   const [products, setProducts] = useState([]);
-  const [collections, setCollections] = useState([]);
+  const [collections, setCollections] = useState(DEFAULT_SUBCATEGORIES);
+  const [subCategoriesLoading, setSubCategoriesLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const debounceRef = useRef(null);
-
   const location = useLocation();
 
-  //go to start of page on route change
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
   useEffect(() => {
-    API.get("/subcategories/all")
-      .then((res) => {
-        const raw = res.data;
-        const subCategoriesList = Array.isArray(raw)
-          ? raw
-          : raw?.data || raw?.subCategories || [];
-        const formattedCollections = subCategoriesList
-          .map((sub) => ({
-            value: sub._id || sub.id,
-            label: sub.name,
-          }))
-          .filter((item) => item.value);
-        setCollections(formattedCollections);
-      })
-      .catch(() => {});
+    let isMounted = true;
+
+    const fetchSubCategories = async () => {
+      try {
+        let res;
+        try {
+          res = await API.get("/subcategories/all");
+        } catch {
+          res = await API.get("/api/subcategories/all");
+        }
+
+        if (!isMounted) return;
+
+        const responseData = res?.data;
+        const subCategoriesList = Array.isArray(responseData)
+          ? responseData
+          : responseData?.data || responseData?.subCategories || [];
+
+        if (subCategoriesList.length > 0) {
+          const formattedCollections = subCategoriesList.map((sub) => {
+            const rawImg = sub.imageURL || "";
+            const imgUrl = rawImg.startsWith("http")
+              ? rawImg
+              : `${BACKEND_BASE_URL}${rawImg}`;
+            return {
+              value: sub._id || sub.id,
+              label: sub.name || "Aira Maxi",
+              image: rawImg ? imgUrl : "",
+            };
+          });
+          setCollections(formattedCollections);
+        }
+      } catch (err) {
+        console.error("Error fetching subcategories:", err);
+      }
+    };
+
+    fetchSubCategories();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchProductsFromBackend = useCallback(
@@ -243,9 +308,10 @@ function useShopData() {
   const filterGroups = [
     {
       key: "subCategoryId",
-      label: "Collection",
-      type: "checkbox",
+      label: "Sub Category",
+      type: "image_grid",
       options: collections,
+      loading: subCategoriesLoading,
     },
     ...STATIC_FILTER_GROUPS,
   ];
@@ -280,6 +346,8 @@ function FilterGroup({
   if (
     group.type !== "price_range_module" &&
     group.type !== "range" &&
+    group.type !== "image_grid" &&
+    group.type !== "color_grid" &&
     (!group.options || group.options.length === 0)
   )
     return null;
@@ -296,6 +364,54 @@ function FilterGroup({
 
       {open && (
         <div className="filter-group-body">
+          {group.type === "image_grid" && (
+            <div className="subcategory-image-grid">
+              {group.options.map((opt) => {
+                const selected = filters[group.key]?.[0] === opt.value;
+                return (
+                  <div
+                    key={opt.value}
+                    className={`subcategory-item ${selected ? "selected" : ""}`}
+                    onClick={() => onToggleCheckbox(group.key, opt.value)}
+                  >
+                    <div className="subcategory-circle">
+                      {opt.image ? (
+                        <img src={opt.image} alt={opt.label} />
+                      ) : (
+                        <div className="subcategory-placeholder" />
+                      )}
+                    </div>
+                    <span className="subcategory-label">{opt.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {group.type === "color_grid" && (
+            <div className="color-swatch-grid">
+              {group.options.map((opt) => {
+                const checked = filters[group.key]?.[0] === opt.value;
+                return (
+                  <div
+                    key={opt.value}
+                    onClick={() => onToggleCheckbox(group.key, opt.value)}
+                    title={opt.label}
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      backgroundColor: opt.hex,
+                      border: checked ? "2px solid #edc484" : "1px solid rgba(255,255,255,0.3)",
+                      cursor: "pointer",
+                      boxShadow: checked ? "0 0 6px #edc484" : "none",
+                    }}
+                  />
+                );
+              })}
+            </div>
+          )}
+
           {group.type === "checkbox" &&
             group.options.map((opt) => {
               const checked = filters[group.key]?.[0] === opt.value;
@@ -386,14 +502,11 @@ function Sidebar({
         <div className="sidebar-scroll">
           <div className="sidebar-title-block">
             <div className="title-header-row">
-              <h2 className="sidebar-title">Shop Nightwear</h2>
+              <h2 className="sidebar-title">Filters</h2>
               <button className="clear-all-top" onClick={onClearAll}>
                 Clear All
               </button>
             </div>
-            <p className="sidebar-subtitle">
-              Thoughtfully designed cotton nightwear for everyday comfort.
-            </p>
             <button
               className="sidebar-close-mobile"
               onClick={onCloseMobile}
@@ -425,44 +538,26 @@ function ProductCard({ product, navigate }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
-  // useEffect(() => {
-  //   const checkProductWishlist = async () => {
-  //     if (!product?.id) return;
+  useEffect(() => {
+    const checkProductWishlist = async () => {
+      if (!product?.id) return;
 
-  //     try {
-  //       const response = await checkWishlist(product.id);
-  //       setIsWishlisted(response?.data?.isWishlisted || false);
-  //     } catch (err) {
-  //       console.error("CHECK WISHLIST ERROR:", err);
-  //     }
-  //   };
+      if (!isUserLoggedIn()) {
+        setIsWishlisted(false);
+        return;
+      }
 
-  //   checkProductWishlist();
-  // }, [product?.id]);
+      try {
+        const response = await checkWishlist(product.id);
+        setIsWishlisted(response?.data?.isWishlisted || false);
+      } catch (err) {
+        console.error("CHECK WISHLIST ERROR:", err);
+        setIsWishlisted(false);
+      }
+    };
 
- useEffect(() => {
-  const checkProductWishlist = async () => {
-    if (!product?.id) return;
-
-    if (!isUserLoggedIn()) {
-      setIsWishlisted(false);
-      return;
-    }
-
-    try {
-      const response = await checkWishlist(product.id);
-
-      setIsWishlisted(
-        response?.data?.isWishlisted || false
-      );
-    } catch (err) {
-      console.error("CHECK WISHLIST ERROR:", err);
-      setIsWishlisted(false);
-    }
-  };
-
-  checkProductWishlist();
-}, [product?.id]);
+    checkProductWishlist();
+  }, [product?.id]);
 
   const handleWishlist = async () => {
     if (!product?.id || wishlistLoading) return;
@@ -486,7 +581,6 @@ function ProductCard({ product, navigate }) {
       }
     } catch (err) {
       console.error("WISHLIST ERROR:", err);
-
       if (err?.response?.status === 409) {
         setIsWishlisted(true);
       }
@@ -611,37 +705,29 @@ export default function ShopPage() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const navigate = useNavigate();
-const location = useLocation();
-const shopRef = useRef(null);
+  const location = useLocation();
+  const shopRef = useRef(null);
 
-useEffect(() => {
-  const scrollToTop = () => {
-    // 1. Browser/document scroll
-    window.scrollTo(0, 0);
+  useEffect(() => {
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
 
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+      if (shopRef.current) {
+        shopRef.current.scrollTop = 0;
+        shopRef.current.scrollLeft = 0;
 
-    // 2. Shop body scroll
-    if (shopRef.current) {
-      shopRef.current.scrollTop = 0;
-      shopRef.current.scrollLeft = 0;
-
-      // 3. Product grid scroll
-      const mainScroll =
-        shopRef.current.querySelector(".main-scroll");
-
-      if (mainScroll) {
-        mainScroll.scrollTop = 0;
-        mainScroll.scrollLeft = 0;
+        const mainScroll = shopRef.current.querySelector(".main-scroll");
+        if (mainScroll) {
+          mainScroll.scrollTop = 0;
+          mainScroll.scrollLeft = 0;
+        }
       }
-    }
-  };
+    };
 
-  // Run after React has rendered the new page
-  requestAnimationFrame(scrollToTop);
-
-}, [location.pathname, location.search]);
+    requestAnimationFrame(scrollToTop);
+  }, [location.pathname, location.search]);
 
   return (
     <div className="shop-page">

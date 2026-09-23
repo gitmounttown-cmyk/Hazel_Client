@@ -15,24 +15,29 @@ export default function ShopTheLookSection() {
     async function fetchShopTheLooks() {
       try {
         setLoading(true);
-        // const response = await fetch(`${import.meta.env.VITE_API_URL}/videos/all`);
-        // console.log("Fetched videos response:", response); // Log the response for debugging
-        const response = await getVideos(); // Use the service function to fetch videos
+        const response = await getVideos();
         
         if (!response?.data?.success) {
           throw new Error("Failed to fetch videos from server");
         }
         
-        const result = await response?.data;
+        const result = response?.data;
         
         if (result.success && Array.isArray(result.data)) {
-          // Map real title and price coming from your database backend
-          const formattedData = result.data.map((item) => ({
-            _id: item._id,
-            title: item.title,      // <--- fetched from backend
-            price: item.price,      // <--- fetched from backend
-            videoUrl: `${import.meta.env.VITE_UPLOAD_URL}${item.videoUrl}`,
-          }));
+          const formattedData = result.data.map((item) => {
+            const rawUrl = item.videoUrl || "";
+            // Handle if videoUrl is already a full URL or a relative server path
+            const videoSource = rawUrl.startsWith("http")
+              ? rawUrl
+              : `${import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004"}${rawUrl}`;
+
+            return {
+              _id: item._id,
+              title: item.title,
+              price: item.price,
+              videoUrl: videoSource,
+            };
+          });
           setLooks(formattedData);
         } else {
           setLooks([]);
@@ -100,12 +105,12 @@ export default function ShopTheLookSection() {
                 muted 
                 loop 
                 playsInline
+                autoPlay
               />
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
-                {/* add indian currency symbol */}
-                <p className="look-price"> ₹ { formatCurrency(item.price)}</p>
+                <p className="look-price">₹ {formatCurrency(item.price)}</p>
               </div>
             </div>
           ))}

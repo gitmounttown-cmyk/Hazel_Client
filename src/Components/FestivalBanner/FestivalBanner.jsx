@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import API from "../../services/api";
 import axiosInstance from "../../api/axiosInstance"; 
 import "./FestivalBanner.css";
 
@@ -14,19 +13,27 @@ const FestivalBanner = () => {
         const rawData = response.data.data || response.data;
 
         if (Array.isArray(rawData) && rawData.length > 0) {
-          // filter bannerType "festival"
-          const festivalBanners = rawData.filter((banner) => banner.bannerType === "festival");
-          const firstBanner = festivalBanners[0];
+          const festivalBanners = rawData.filter(
+            (b) => b && b.bannerType && b.bannerType.toLowerCase() === "festival"
+          );
 
-          const bannerImg = firstBanner.imageURL?.startsWith("http")
-            ? firstBanner.imageURL
-            : `${import.meta.env.VITE_UPLOAD_URL}${firstBanner.imageURL}`;
+          if (festivalBanners.length > 0) {
+            const firstBanner = festivalBanners[0];
 
-          setBanner({
-            id: firstBanner._id,
-            image: bannerImg,
-            redirectUrl: firstBanner.redirectUrl || "#",
-          });
+            const backendBaseURL = axiosInstance.defaults.baseURL 
+              ? axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "") 
+              : "http://localhost:5000";
+
+            const bannerImg = firstBanner.imageURL?.startsWith("http")
+              ? firstBanner.imageURL
+              : `${import.meta.env.VITE_UPLOAD_URL || backendBaseURL}${firstBanner.imageURL}`;
+
+            setBanner({
+              id: firstBanner._id,
+              image: bannerImg,
+              redirectUrl: firstBanner.redirectUrl || "#",
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching banner from backend:", error.message);
@@ -60,6 +67,14 @@ const FestivalBanner = () => {
             className="festival-model-img"
           />
         </a>
+        <div className="festival-banner-overlay"></div>
+        <div className="festival-banner-content">
+          <h1 className="festival-banner-title">Make Comfort Your Everyday Luxury.</h1>
+          <p className="festival-banner-subtitle">Explore our collection of beautifully crafted nightwear.</p>
+          <a href={banner.redirectUrl} className="festival-banner-btn">
+            Shop All Nighties
+          </a>
+        </div>
       </div>
     </section>
   );
