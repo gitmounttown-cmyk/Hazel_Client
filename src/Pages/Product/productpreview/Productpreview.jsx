@@ -571,6 +571,10 @@ export default function ProductPage() {
     ["Sleeves", selectedVariant?.sleeves || "-"],
     ["Finishing", selectedVariant?.finishing || "-"],
     ["Pocket", selectedVariant?.pocket || "-"],
+    // [
+    //   "Available Sizes",
+    //   selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
+    // ],
   ];
 
   const handleWishlist = async (e) => {
@@ -963,12 +967,20 @@ export default function ProductPage() {
           <div className="pp-details">
             <h2 className="pp-h2">Product Details</h2>
             <dl className="pp-details-table">
-              {DETAILS.map(([k, v]) => (
-                <div className="pp-details-row" key={k}>
-                  <dt>{k}</dt>
-                  <dd>{v}</dd>
-                </div>
-              ))}
+              {DETAILS
+  .filter(([k, v]) => {
+    if (k === "Lining") {
+      return v?.trim() && v !== "N/A" && v !== "-";
+    }
+
+    return true;
+  })
+  .map(([k, v]) => (
+    <div className="pp-details-row" key={k}>
+      <dt>{k}</dt>
+      <dd>{v}</dd>
+    </div>
+  ))}
             </dl>
           </div>
 
