@@ -26,15 +26,20 @@ export default function ShopTheLookSection() {
         if (result.success && Array.isArray(result.data)) {
           const formattedData = result.data.map((item) => {
             const rawUrl = item.videoUrl || "";
-            // Handle if videoUrl is already a full URL or a relative server path
             const videoSource = rawUrl.startsWith("http")
               ? rawUrl
               : `${import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004"}${rawUrl}`;
 
+           
+            let cleanPrice = item.price;
+            if (typeof item.price === "string") {
+              cleanPrice = Number(item.price.replace(/[^0-9.-]+/g, "")) || 0;
+            }
+
             return {
               _id: item._id,
               title: item.title,
-              price: item.price,
+              price: cleanPrice,
               videoUrl: videoSource,
             };
           });
@@ -110,6 +115,7 @@ export default function ShopTheLookSection() {
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
+                {/* Ensure formatCurrency handles the number cleanly, or fallback to standard display */}
                 <p className="look-price">₹ {formatCurrency(item.price)}</p>
               </div>
             </div>

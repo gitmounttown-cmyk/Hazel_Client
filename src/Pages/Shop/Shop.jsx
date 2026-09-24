@@ -10,31 +10,6 @@ import {
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
 
-const COLOR_OPTIONS = [
-  { name: "Light Coral", hex: "#FF7F7F" },
-  { name: "Peach Orange", hex: "#FFAC7F" },
-  { name: "Warm Amber", hex: "#FFCC7F" },
-  { name: "Soft Yellow", hex: "#FFF67F" },
-  { name: "Lime Pastel", hex: "#D0FF7F" },
-  { name: "Spring Green", hex: "#7FFF8A" },
-  { name: "Aqua Mint", hex: "#7FFFC7" },
-  { name: "Pale Cyan", hex: "#7FFFEC" },
-  { name: "Sky Blue", hex: "#7FD4FF" },
-  { name: "Cornflower Blue", hex: "#7F9DFF" },
-  { name: "Periwinkle", hex: "#8C7FFF" },
-  { name: "Light Orchid", hex: "#C77FFF" },
-  { name: "Light Violet", hex: "#EE7FFF" },
-  { name: "Orchid Pink", hex: "#FF7FD9" },
-  { name: "Bubblegum Pink", hex: "#FF7FBB" },
-  { name: "Dusty Rose", hex: "#FF7F90" },
-  { name: "Salmon Pink", hex: "#FF7F81" },
-  { name: "Deep Burgundy Brown", hex: "#372425" },
-  { name: "Midnight Navy", hex: "#162441" },
-  { name: "Golden Brown", hex: "#946518" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Black", hex: "#000000" },
-];
-
 const STATIC_FILTER_GROUPS = [
   {
     key: "size",
@@ -63,36 +38,12 @@ const STATIC_FILTER_GROUPS = [
     ],
   },
   {
-    key: "color",
-    label: "Color",
-    type: "color_grid",
-    options: COLOR_OPTIONS.map((c) => ({ value: c.name, label: c.name, hex: c.hex })),
-  },
-  {
-    key: "price_range_option",
+    key: "price_sort",
     label: "Price",
-    type: "price_range_module",
-    min: 500,
-    max: 5000,
-    step: 100,
-    priceOptions: [
-      { value: "under_1000", label: "Under ₹1,000" },
-      { value: "1000_1500", label: "₹1,000–₹1,500" },
-      { value: "1500_2000", label: "₹1,500–₹2,000" },
-      { value: "above_2000", label: "₹2,000+" },
-    ],
-  },
-  {
-    key: "features",
-    label: "Features",
     type: "checkbox",
     options: [
-      { value: "Side Pocket", label: "Side Pocket" },
-      { value: "Cotton Lining", label: "Cotton Lining" },
-      { value: "Feeding Friendly", label: "Feeding Friendly" },
-      { value: "Invisible Zipper", label: "Invisible Zipper" },
-      { value: "Adjustable Rope", label: "Adjustable Rope" },
-      { value: "Breathable", label: "Breathable" },
+      { value: "price_low", label: "Price: Low to High" },
+      { value: "price_high", label: "Price: High to Low" },
     ],
   },
   {
@@ -102,25 +53,6 @@ const STATIC_FILTER_GROUPS = [
     options: [
       { value: "Puff Sleeve", label: "Puff Sleeve" },
       { value: "Ruched Sleeve", label: "Ruched Sleeve" },
-    ],
-  },
-  {
-    key: "availability",
-    label: "Availability",
-    type: "checkbox",
-    options: [
-      { value: "in-stock", label: "In Stock" },
-      { value: "new-arrivals", label: "New Arrivals" },
-    ],
-  },
-  {
-    key: "rating",
-    label: "Rating",
-    type: "radio",
-    options: [
-      { value: "4", label: "4★ & above" },
-      { value: "3", label: "3★ & above" },
-      { value: "any", label: "Any Rating" },
     ],
   },
 ];
@@ -136,84 +68,46 @@ const SORT_OPTIONS = [
 const PAGE_SIZE = 8;
 const BACKEND_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
-const DEFAULT_SUBCATEGORIES = [
-  { value: "sub_1", label: "Paradise – Flex Cotton Maxi", image: "" },
-  { value: "sub_2", label: "Breeze – Pure Cotton Co-ord Set", image: "" },
-  { value: "sub_3", label: "Maxi Mothers", image: "" },
-  { value: "sub_4", label: "Maxi Mothers – Cotton Flex Maternity Dress", image: "" },
-  { value: "sub_5", label: "Nesting Gown – Feeding-Friendly Maternity Dress", image: "" },
-  { value: "sub_6", label: "Aira Maxi", image: "" },
-  { value: "sub_7", label: "Aira Maxi", image: "" },
-  { value: "sub_8", label: "Aira Maxi", image: "" },
-  { value: "sub_9", label: "Aira Maxi", image: "" },
-];
-
 function useShopData() {
-  const [filters, setFilters] = useState({});
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialSubCat = searchParams.get("subCategoryId");
+  const initialCategory = searchParams.get("category");
+
+  const [filters, setFilters] = useState(() => {
+    const initial = {};
+    if (initialSubCat) initial.subCategoryId = [initialSubCat];
+    if (initialCategory) initial.category = [initialCategory];
+    return initial;
+  });
+
   const [sort, setSort] = useState("recommended");
   const [page, setPage] = useState(1);
-  const [maxPrice, setMaxPrice] = useState(5000);
-
   const [products, setProducts] = useState([]);
-  const [collections, setCollections] = useState(DEFAULT_SUBCATEGORIES);
-  const [subCategoriesLoading, setSubCategoriesLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const debounceRef = useRef(null);
-  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const subCat = params.get("subCategoryId");
+    const cat = params.get("category");
+
+    setFilters((prev) => ({
+      ...prev,
+      subCategoryId: subCat ? [subCat] : prev.subCategoryId,
+      category: cat ? [cat] : prev.category,
+    }));
+  }, [location.search]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchSubCategories = async () => {
-      try {
-        let res;
-        try {
-          res = await API.get("/subcategories/all");
-        } catch {
-          res = await API.get("/api/subcategories/all");
-        }
-
-        if (!isMounted) return;
-
-        const responseData = res?.data;
-        const subCategoriesList = Array.isArray(responseData)
-          ? responseData
-          : responseData?.data || responseData?.subCategories || [];
-
-        if (subCategoriesList.length > 0) {
-          const formattedCollections = subCategoriesList.map((sub) => {
-            const rawImg = sub.imageURL || "";
-            const imgUrl = rawImg.startsWith("http")
-              ? rawImg
-              : `${BACKEND_BASE_URL}${rawImg}`;
-            return {
-              value: sub._id || sub.id,
-              label: sub.name || "Aira Maxi",
-              image: rawImg ? imgUrl : "",
-            };
-          });
-          setCollections(formattedCollections);
-        }
-      } catch (err) {
-        console.error("Error fetching subcategories:", err);
-      }
-    };
-
-    fetchSubCategories();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   const fetchProductsFromBackend = useCallback(
-    async (activeFilters, currentSort, currentPage, currentMaxPrice) => {
+    async (activeFilters, currentSort, currentPage) => {
       try {
         setLoading(true);
         setError(null);
@@ -221,14 +115,15 @@ function useShopData() {
         const params = new URLSearchParams();
         params.append("page", currentPage);
         params.append("limit", PAGE_SIZE);
-        params.append("sort", currentSort);
 
-        if (currentMaxPrice && !activeFilters.price_range_option) {
-          params.append("max_price", currentMaxPrice);
+        let effectiveSort = currentSort;
+        if (activeFilters.price_sort) {
+          effectiveSort = activeFilters.price_sort[0];
         }
+        params.append("sort", effectiveSort);
 
         Object.entries(activeFilters).forEach(([key, val]) => {
-          if (!val) return;
+          if (!val || key === "price_sort") return;
           if (Array.isArray(val)) {
             if (val.length > 0 && val[0]) {
               params.append(key, val[0]);
@@ -281,11 +176,11 @@ function useShopData() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
-      fetchProductsFromBackend(filters, sort, 1, maxPrice);
+      fetchProductsFromBackend(filters, sort, 1);
     }, 300);
 
     return () => clearTimeout(debounceRef.current);
-  }, [filters, sort, maxPrice, fetchProductsFromBackend]);
+  }, [filters, sort, fetchProductsFromBackend]);
 
   const toggleCheckbox = useCallback((key, value) => {
     setFilters((prev) => {
@@ -293,28 +188,11 @@ function useShopData() {
     });
   }, []);
 
-  const setRadio = useCallback((key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === "any" ? undefined : value,
-    }));
-  }, []);
-
   const clearAll = useCallback(() => {
     setFilters({});
-    setMaxPrice(5000);
   }, []);
 
-  const filterGroups = [
-    {
-      key: "subCategoryId",
-      label: "Sub Category",
-      type: "image_grid",
-      options: collections,
-      loading: subCategoriesLoading,
-    },
-    ...STATIC_FILTER_GROUPS,
-  ];
+  const filterGroups = STATIC_FILTER_GROUPS;
 
   return {
     filterGroups,
@@ -325,32 +203,15 @@ function useShopData() {
     total,
     loading,
     error,
-    maxPrice,
-    setMaxPrice,
     toggleCheckbox,
-    setRadio,
     clearAll,
   };
 }
 
-function FilterGroup({
-  group,
-  filters,
-  onToggleCheckbox,
-  onSetRadio,
-  maxPrice,
-  setMaxPrice,
-}) {
+function FilterGroup({ group, filters, onToggleCheckbox }) {
   const [open, setOpen] = useState(true);
 
-  if (
-    group.type !== "price_range_module" &&
-    group.type !== "range" &&
-    group.type !== "image_grid" &&
-    group.type !== "color_grid" &&
-    (!group.options || group.options.length === 0)
-  )
-    return null;
+  if (!group.options || group.options.length === 0) return null;
 
   return (
     <div className="filter-group">
@@ -364,54 +225,6 @@ function FilterGroup({
 
       {open && (
         <div className="filter-group-body">
-          {group.type === "image_grid" && (
-            <div className="subcategory-image-grid">
-              {group.options.map((opt) => {
-                const selected = filters[group.key]?.[0] === opt.value;
-                return (
-                  <div
-                    key={opt.value}
-                    className={`subcategory-item ${selected ? "selected" : ""}`}
-                    onClick={() => onToggleCheckbox(group.key, opt.value)}
-                  >
-                    <div className="subcategory-circle">
-                      {opt.image ? (
-                        <img src={opt.image} alt={opt.label} />
-                      ) : (
-                        <div className="subcategory-placeholder" />
-                      )}
-                    </div>
-                    <span className="subcategory-label">{opt.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {group.type === "color_grid" && (
-            <div className="color-swatch-grid">
-              {group.options.map((opt) => {
-                const checked = filters[group.key]?.[0] === opt.value;
-                return (
-                  <div
-                    key={opt.value}
-                    onClick={() => onToggleCheckbox(group.key, opt.value)}
-                    title={opt.label}
-                    style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      backgroundColor: opt.hex,
-                      border: checked ? "2px solid #edc484" : "1px solid rgba(255,255,255,0.3)",
-                      cursor: "pointer",
-                      boxShadow: checked ? "0 0 6px #edc484" : "none",
-                    }}
-                  />
-                );
-              })}
-            </div>
-          )}
-
           {group.type === "checkbox" &&
             group.options.map((opt) => {
               const checked = filters[group.key]?.[0] === opt.value;
@@ -428,54 +241,6 @@ function FilterGroup({
                 </label>
               );
             })}
-
-          {group.type === "radio" &&
-            group.options.map((opt) => (
-              <label key={opt.value} className="checkbox-row">
-                <input
-                  type="radio"
-                  name={group.key}
-                  checked={(filters[group.key] || "any") === opt.value}
-                  onChange={() => onSetRadio(group.key, opt.value)}
-                  className="checkbox-input"
-                />
-                <span className="checkbox-label">{opt.label}</span>
-              </label>
-            ))}
-
-          {group.type === "price_range_module" && (
-            <div className="range-block">
-              <input
-                type="range"
-                min={group.min}
-                max={group.max}
-                step={group.step}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="range-input"
-              />
-              <div className="range-labels">
-                <span>₹{group.min.toLocaleString("en-IN")}</span>
-                <span>Max: ₹{maxPrice.toLocaleString("en-IN")}</span>
-              </div>
-              <div style={{ marginTop: "12px" }}>
-                {group.priceOptions.map((opt) => {
-                  const checked = filters[group.key]?.[0] === opt.value;
-                  return (
-                    <label key={opt.value} className="checkbox-row">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => onToggleCheckbox(group.key, opt.value)}
-                        className="checkbox-input"
-                      />
-                      <span className="checkbox-label">{opt.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -486,10 +251,7 @@ function Sidebar({
   filterGroups,
   filters,
   onToggleCheckbox,
-  onSetRadio,
   onClearAll,
-  maxPrice,
-  setMaxPrice,
   mobileOpen,
   onCloseMobile,
 }) {
@@ -522,9 +284,6 @@ function Sidebar({
               group={group}
               filters={filters}
               onToggleCheckbox={onToggleCheckbox}
-              onSetRadio={onSetRadio}
-              maxPrice={maxPrice}
-              setMaxPrice={setMaxPrice}
             />
           ))}
         </div>
@@ -696,10 +455,7 @@ export default function ShopPage() {
     total,
     loading,
     error,
-    maxPrice,
-    setMaxPrice,
     toggleCheckbox,
-    setRadio,
     clearAll,
   } = useShopData();
 
@@ -736,10 +492,7 @@ export default function ShopPage() {
           filterGroups={filterGroups}
           filters={filters}
           onToggleCheckbox={toggleCheckbox}
-          onSetRadio={setRadio}
           onClearAll={clearAll}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />
