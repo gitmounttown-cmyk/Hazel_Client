@@ -77,10 +77,12 @@ const ShopByCategory = () => {
 
               <div className="category-details">
                 <div className="category-header-row">
-                  <h3 className="category-title">{cat.name}</h3>
+                  <h3 className="category-title" title={cat.name}>
+                    {cat.name}
+                  </h3>
                   <span className="category-prints">{cat.prints}</span>
                 </div>
-                <p className="category-desc">
+                <p className="category-desc" title={cat.description}>
                   {cat.description ||
                     "Flattering empire waist with practical side pockets."}
                 </p>

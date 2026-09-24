@@ -356,6 +356,10 @@
   display: flex;
   flex-direction: column;
   height: 440px; /* Fixed uniform height for every card */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -369,7 +373,8 @@
   background: #ede6df;
   border-radius: 6px;
   overflow: hidden;
-  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 3 / 4;
 }
 
 .card-img-content {
@@ -377,6 +382,7 @@
   height: 100%;
   object-fit: cover;
   object-position: top center;
+  display: block;
 }
 
 .wishlist-btn {
@@ -402,17 +408,25 @@
   flex-direction: column;
   flex: 1;
   justify-content: space-between; /* Ensures equal spacing for name, subtitle, rating, and price */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .card-name {
   color: #edc484;
   font-size: 14px;
   font-weight: 600;
-  margin: 0;
+  /* margin: 0 0 3px; */
   font-family: serif;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Prevents long titles like 'Aira Maxi – Signature Ruched Sleeve Maxi Dress' from breaking layout */
+  text-overflow: ellipsis;
+  
+   margin: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .card-subtitle {
@@ -422,6 +436,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  
+  width: 100%;
+  min-width: 0;
+}
+
+.card-rating,
+.card-price {
+  margin-left: 0;
 }
 
 .card-rating {
@@ -450,6 +472,13 @@
   color: #b23b3b;
   font-size: 13px;
   margin-bottom: 16px;
+}
+
+.no-results-text {
+  text-align: center;
+  color: #5a1827;
+  font-size: 13px;
+  margin-top: 40px;
 }
 
 /* ============================================================
