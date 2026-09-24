@@ -338,8 +338,12 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
+  align-items: stretch;
 }
 
+/* ============================================================
+   STRICT EQUAL-SIZED CARD STYLES
+   ============================================================ */
 .card {
   background: #5a1827;
   border-radius: 10px;
@@ -347,6 +351,9 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   transition: transform 0.2s ease;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 440px; /* Fixed uniform height for every card */
 }
 
 .card:hover {
@@ -355,10 +362,12 @@
 
 .card-image {
   position: relative;
-  height: 220px;
+  width: 100%;
+  height: 260px; /* Fixed height for product thumbnail */
   background: #ede6df;
   border-radius: 6px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .card-img-content {
@@ -387,23 +396,27 @@
 
 .card-body {
   padding: 10px 2px 2px 2px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between; /* Ensures equal spacing for name, subtitle, rating, and price */
 }
 
 .card-name {
   color: #edc484;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  margin: 0 0 3px;
+  margin: 0;
   font-family: serif;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; /* Prevents long titles like 'Aira Maxi – Signature Ruched Sleeve Maxi Dress' from breaking layout */
 }
 
 .card-subtitle {
   color: #d1c5bd;
   font-size: 10px;
-  margin: 0 0 8px;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -413,7 +426,7 @@
   color: #e2d6ce;
   font-size: 11px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 0;
 }
 
 .card-price {
@@ -534,8 +547,12 @@
     gap: 14px;
   }
 
+  .card {
+    height: 420px;
+  }
+
   .card-image {
-    height: 260px;
+    height: 240px;
   }
 
   .sidebar {

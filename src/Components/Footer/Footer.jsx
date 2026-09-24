@@ -67,7 +67,7 @@ const Footer = () => {
         <div className="footer-column footer-contact">
           <h3>CONTACT US</h3>
 
-          <a href="tel:+919234556783" className="contact-link">
+          <a href="tel:+9186673 01625" className="contact-link">
   <span className="contact-icon">
     <svg
       viewBox="0 0 24 24"
@@ -84,7 +84,7 @@ const Footer = () => {
     </svg>
   </span>
 
-  <span>+91 92345 56783</span>
+  <span>+91 86673 01625</span>
 </a>
 
           <a href="mailto:support@hazel.co.in">
