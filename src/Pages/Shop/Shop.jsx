@@ -458,17 +458,20 @@ function ProductGrid({
 
 export default function ShopPage() {
   const {
-    filterGroups,
-    filters,
-    sort,
-    setSort,
-    products,
-    total,
-    loading,
-    error,
-    toggleCheckbox,
-    clearAll,
-  } = useShopData();
+  filterGroups,
+  filters,
+  sort,
+  setSort,
+  products,
+  total,
+  loading,
+  error,
+  maxPrice,
+  setMaxPrice,
+  toggleCheckbox,
+  setRadio,
+  clearAll,
+} = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -483,15 +486,16 @@ export default function ShopPage() {
       return products;
     }
 
-    return products.filter((product) => {
-      const productCategoryId =
-        typeof product.categoryId === "object"
-          ? product.categoryId?._id
-          : product.categoryId;
+  return products.filter((product) => {
+    const productCategoryId =
+      typeof product.categoryId === "object"
+        ? product.categoryId?._id
+        : product.categoryId;
 
-      return String(productCategoryId) === String(categoryId);
-    });
-  }, [products, categoryId]);
+    return String(productCategoryId) === String(categoryId);
+  });
+}, [products, categoryId]);
+
 
   useEffect(() => {
     const scrollToTop = () => {
