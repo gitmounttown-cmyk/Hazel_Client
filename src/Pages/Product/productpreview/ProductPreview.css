@@ -45,59 +45,76 @@
 /* ============ PRODUCT GRID ============ */
 .pp-grid {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 48px;
+  grid-template-columns: minmax(0, 400px) 1fr;
+  gap: 56px;
   align-items: start;
 }
 
-/* ---- gallery ---- */
+/* ---- gallery (background removed, full-size image, thumbs below) ---- */
 .pp-gallery-panel {
-  background: var(--deep-red);
-  border-radius: 16px;
-  padding: 16px;
+  background: none;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 400px;
+  position: sticky;
+  top: 24px;
 }
 
 .pp-main-image {
   position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
   border-radius: 12px;
   overflow: hidden;
-  aspect-ratio: 2 / 3;
-  height: auto;
-  max-height: 70vh;
+  background: none;
+  line-height: 0;
 }
 
 .pp-main-image-ph {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
   display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 520px;
+  margin: 0;
+  border-radius: 12px;
 }
 
 .pp-thumbs {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 2px;
+  width: 100%;
+  padding: 2px 0 6px;
 }
 
 .pp-thumbs::-webkit-scrollbar {
   height: 4px;
 }
 
+.pp-thumbs::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+
 .pp-thumb {
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: 8px;
   padding: 0;
   background: none;
   cursor: pointer;
   flex-shrink: 0;
   overflow: hidden;
-  width: 72px;
+  width: 60px;
 }
 
 .pp-thumb-img {
@@ -110,8 +127,12 @@
   transition: opacity 0.2s ease;
 }
 
+.pp-thumb:hover .pp-thumb-img {
+  opacity: 0.9;
+}
+
 .pp-thumb.is-active {
-  border-color: var(--white);
+  border-color: var(--red);
 }
 
 .pp-thumb.is-active .pp-thumb-img {
@@ -1182,6 +1203,22 @@
   .pp-lower {
     grid-template-columns: 1fr;
   }
+  .pp-gallery-panel {
+    position: static;
+    max-width: 420px;
+    margin: 0;
+  }
+  .pp-gallery-panel {
+    max-width: 100%;
+  }
+  /* mobile / tablet: centre the main image */
+  .pp-main-image {
+    margin: 0 auto;
+  }
+  .pp-main-image-ph {
+    max-height: 480px;
+    margin: 0 auto;
+  }
   .pp-review-grid {
     grid-template-columns: 1fr;
   }
@@ -1199,9 +1236,6 @@
   }
   .pp-actions {
     flex-direction: column;
-  }
-  .pp-main-image {
-    height: 420px;
   }
   .pp-thumb {
     width: 60px;
