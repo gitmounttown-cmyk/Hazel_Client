@@ -1647,6 +1647,10 @@ export default function ProductPage() {
                   className="pp-related-image-ph"
                   src={p.image}
                   alt={p.name}
+                  onError={(e) => {
+                    console.error(`Error loading related product image:`, e);
+                    e.target.src = mainPhoto; // Fallback to main photo on error
+                  }}
                 />
               </div>
               <h3 className="pp-related-name">{p.name}</h3>
