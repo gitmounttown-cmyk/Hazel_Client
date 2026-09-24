@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap");
+
+/* ================= DESKTOP ================= */
 
 .new-arrivals-section {
   width: 100%;
@@ -10,17 +12,8 @@
   overflow: hidden;
 }
 
-.thumbnail-slots-row {
-  display: flex;
-  gap: 53px;
-  position: absolute;
-  left: 553px;
-  bottom: 87px;
-  z-index: 10;
-}
-
 .new-arrivals-heading {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 45px;
   font-weight: 500;
   color: #edc484;
@@ -29,7 +22,7 @@
 
 .loading-text {
   color: #edc484;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .new-arrivals-container {
@@ -40,7 +33,6 @@
   justify-content: flex-start;
   gap: 81px;
   text-align: left;
-  position: relative;
   padding-left: 64px;
   box-sizing: border-box;
 }
@@ -66,7 +58,7 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover; 
+  object-fit: cover;
   object-position: top center;
   transition: transform 0.5s ease;
 }
@@ -75,17 +67,23 @@
   transform: scale(1.03);
 }
 
-.feature-details-pane {
+/* Right column: details + thumbnails stacked */
+.right-column {
   flex: 1;
   min-width: 0;
-  margin-bottom: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-details-pane {
+  min-width: 0;
   color: #f5f0eb;
   max-width: 480px;
   animation: fadeIn 0.5s ease-in-out;
 }
 
 .product-tagline {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 12px;
   letter-spacing: 2px;
   color: #edc484;
@@ -95,16 +93,17 @@
 }
 
 .product-title {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 38px;
   font-weight: 600;
   line-height: 1.15;
   color: #edc484;
+  margin-top: 0;
   margin-bottom: 10px;
 }
 
 .product-desc {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 15px;
   color: #e2d6ce;
   line-height: 1.6;
@@ -113,7 +112,7 @@
 }
 
 .product-meta {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 14px;
   color: #d1c5bd;
   display: flex;
@@ -135,7 +134,7 @@
 }
 
 .product-price {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 29px;
   font-weight: 700;
   margin-bottom: 10px;
@@ -143,13 +142,13 @@
 }
 
 .shop-now-btn {
-  position: absolute;
+  display: inline-block;
   background-color: #ffffff;
   color: #5a1827;
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -163,6 +162,13 @@
   transform: translateY(-2px);
 }
 
+.thumbnail-slots-row {
+  display: flex;
+  gap: 53px;
+  margin-top: 24px;
+  margin-left: 14px;
+}
+
 .thumbnail-slot-card {
   background: #ffffff;
   padding: 10px 10px 0px 10px;
@@ -173,7 +179,9 @@
   cursor: pointer;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   text-align: left;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .thumbnail-slot-card:hover {
@@ -206,7 +214,7 @@
 }
 
 .thumb-title {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 14px;
   color: #2c221e;
   margin: 0;
@@ -218,41 +226,39 @@
 }
 
 .thumb-price {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: #5a1827;
   white-space: nowrap;
 }
 
+/* ================= SMALL LAPTOP / LARGE TABLET ================= */
 
 @media screen and (max-width: 1200px) {
   .new-arrivals-section {
-    padding-left: 25px;
-    padding-right: 25px;
-    padding-bottom: 185px;
+    padding: 20px 25px 50px;
   }
   .new-arrivals-container {
     max-width: 1050px;
-    padding-left: 32px;
-    gap: 45px;
+    padding-left: 0;
+    gap: 50px;
   }
   .main-feature-card {
-    width: 500px;
+    width: 380px;
   }
   .main-img-wrapper {
-    height: 440px;
+    height: 500px;
   }
   .feature-details-pane {
-    max-width: 430px;
+    max-width: 440px;
   }
   .product-title {
     font-size: 34px;
   }
   .thumbnail-slots-row {
-    left: 386px;
-    bottom: 21px;
     gap: 30px;
+    margin-left: 10px;
   }
   .thumbnail-slot-card {
     width: 155px;
@@ -262,52 +268,149 @@
   }
 }
 
+/* ================= TABLET (same look as desktop) ================= */
+
 @media screen and (max-width: 1024px) {
   .new-arrivals-section {
-    padding: 20px 20px 175px 20px;
+    padding: 20px 20px 50px;
   }
   .new-arrivals-heading {
     font-size: 38px;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
   .new-arrivals-container {
     max-width: 900px;
-    padding-left: 0;
-    gap: 30px;
+    gap: 36px;
   }
   .main-feature-card {
-    width: 430px;
+    width: 330px;
   }
   .main-img-wrapper {
-    height: 400px;
+    height: 470px;
   }
   .feature-details-pane {
-    max-width: 400px;
+    max-width: 100%;
   }
   .product-title {
-    font-size: 31px;
+    font-size: 28px;
   }
   .product-desc {
     font-size: 14px;
   }
   .product-price {
     font-size: 26px;
-    margin-bottom: 80px;
   }
   .thumbnail-slots-row {
-    left: 300px;
-    bottom: 28px;
     gap: 20px;
+    margin-left: 0;
   }
   .thumbnail-slot-card {
-    width: 140px;
+    width: 130px;
   }
   .thumb-img-box {
-    height: 120px;
+    height: 115px;
   }
 }
 
-@media screen and (max-width: 768px) {
+/* ================= SMALL TABLET / iPAD PORTRAIT ================= */
+
+@media screen and (min-width: 768px) and (max-width: 860px) {
+  .new-arrivals-container {
+    gap: 24px;
+  }
+  .main-feature-card {
+    width: 280px;
+  }
+  .main-img-wrapper {
+    height: 420px;
+  }
+  .product-title {
+    font-size: 24px;
+  }
+  .product-desc {
+    font-size: 13px;
+  }
+  .product-price {
+    font-size: 22px;
+  }
+  .thumbnail-slots-row {
+    gap: 12px;
+  }
+  .thumbnail-slot-card {
+    width: 112px;
+    padding: 8px 8px 0;
+  }
+  .thumb-img-box {
+    height: 100px;
+  }
+  .thumb-title {
+    font-size: 12px;
+  }
+  .thumb-price {
+    font-size: 11px;
+  }
+}
+
+/* ================= SMALL TABLET (601px - 767px) ================= */
+
+@media screen and (min-width: 601px) and (max-width: 767px) {
+  .new-arrivals-section {
+    padding: 20px 16px 40px;
+  }
+  .new-arrivals-heading {
+    font-size: 32px;
+    margin-bottom: 24px;
+  }
+  .new-arrivals-container {
+    gap: 20px;
+  }
+  .main-feature-card {
+    width: 220px;
+  }
+  .main-img-wrapper {
+    height: 340px;
+  }
+  .product-title {
+    font-size: 20px;
+  }
+  .product-desc {
+    font-size: 12px;
+  }
+  .product-meta {
+    font-size: 12px;
+  }
+  .product-price {
+    font-size: 20px;
+  }
+  .shop-now-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  .thumbnail-slots-row {
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .thumbnail-slot-card {
+    width: 95px;
+    padding: 6px 6px 0;
+  }
+  .thumb-img-box {
+    height: 85px;
+  }
+  .thumb-info {
+    padding: 6px 4px;
+  }
+  .thumb-title {
+    font-size: 10px;
+  }
+  .thumb-price {
+    font-size: 9px;
+  }
+}
+
+/* ================= MOBILE ================= */
+
+@media screen and (max-width: 600px) {
   .new-arrivals-section {
     width: 100%;
     padding: 20px 12px 30px 12px;
@@ -328,6 +431,10 @@
     padding: 0;
     gap: 16px;
   }
+  /* lets order: 1/2/3 apply to the children on mobile */
+  .right-column {
+    display: contents;
+  }
   .main-feature-card {
     width: 300px;
     max-width: 100%;
@@ -335,7 +442,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     background: transparent;
-    order: 1; 
+    order: 1;
   }
   .main-img-wrapper {
     width: 100%;
@@ -352,7 +459,6 @@
     border-radius: 8px;
   }
   .thumbnail-slots-row {
-    position: static;
     width: 300px;
     max-width: 100%;
     margin: 0 auto;
@@ -361,7 +467,7 @@
     display: flex;
     justify-content: space-between;
     gap: 6px;
-    order: 2; 
+    order: 2;
   }
   .thumbnail-slot-card {
     flex: 0 0 calc(33.333% - 4px);
@@ -391,7 +497,7 @@
     padding: 0;
     text-align: center;
     box-sizing: border-box;
-    order: 3; 
+    order: 3;
   }
   .product-tagline {
     font-size: 10px;
@@ -418,7 +524,6 @@
     margin: 0 0 15px 0;
   }
   .shop-now-btn {
-    position: static;
     width: 100%;
     max-width: 200px;
     display: block;

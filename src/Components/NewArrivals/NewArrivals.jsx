@@ -15,8 +15,8 @@ const NewArrivals = () => {
       return image;
     }
 
-    const backendBaseURL = axiosInstance.defaults.baseURL 
-      ? axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "") 
+    const backendBaseURL = axiosInstance.defaults.baseURL
+      ? axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "")
       : "http://localhost:5000";
 
     const uploadBase = import.meta.env.VITE_UPLOAD_URL || backendBaseURL;
@@ -86,12 +86,14 @@ const NewArrivals = () => {
         const formattedProducts = [];
 
         arrivals.forEach((arrival) => {
-          if (!Array.isArray(arrival.products) || arrival.products.length === 0) {
+          if (
+            !Array.isArray(arrival.products) ||
+            arrival.products.length === 0
+          ) {
             return;
           }
 
           arrival.products.forEach((item, index) => {
-          
             const product = item?.product || item;
 
             if (!product) {
@@ -99,8 +101,8 @@ const NewArrivals = () => {
             }
 
             const variant = getActiveVariant(product);
-            // const descriptionAbout = product.description?.about || product.description || "";
-            const descriptionItemDetails = product.description?.itemDetails || "";
+            const descriptionItemDetails =
+              product.description?.itemDetails || "";
             const description = descriptionItemDetails || "";
 
             const price =
@@ -119,7 +121,8 @@ const NewArrivals = () => {
                   .join(" | ")
               : "";
 
-            const backendImage = item?.image || getVariantImage(product) || product.imageURL;
+            const backendImage =
+              item?.image || getVariantImage(product) || product.imageURL;
             const rating = product.rating ?? product.averageRating ?? null;
             const prints = variant?.prints ?? product?.prints ?? null;
 
@@ -174,7 +177,7 @@ const NewArrivals = () => {
   }
 
   if (products.length === 0) {
-    return null; 
+    return null;
   }
 
   const activeProduct = products[selectedIndex] || products[0];
@@ -236,70 +239,77 @@ const NewArrivals = () => {
           </div>
         </div>
 
-        <div className="feature-details-pane">
-          <span className="product-tagline">{activeProduct.tagline}</span>
+        {/* Right column: details + thumbnails flow together at every width */}
+        <div className="right-column">
+          <div className="feature-details-pane">
+            <span className="product-tagline">{activeProduct.tagline}</span>
 
-          <h3 className="product-title">{activeProduct.name}</h3>
+            <h3 className="product-title">{activeProduct.name}</h3>
 
-          <p className="product-desc">{activeProduct.description}</p>
+            <p className="product-desc">{activeProduct.description}</p>
 
-          {metaItems.length > 0 && (
-            <div className="product-meta">
-              {metaItems.map((item, index) => (
-                <span key={`${item}-${index}`}>
-                  {index > 0 && <span className="meta-dot"> • </span>}
-                  {item}
-                </span>
-              ))}
+            {metaItems.length > 0 && (
+              <div className="product-meta">
+                {metaItems.map((item, index) => (
+                  <span key={`${item}-${index}`}>
+                    {index > 0 && <span className="meta-dot"> • </span>}
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="product-price">
+              ₹{Number(activeProduct.price || 0).toLocaleString("en-IN")}
             </div>
-          )}
 
-          <div className="product-price">
-            ₹{Number(activeProduct.price || 0).toLocaleString("en-IN")}
+            <button className="shop-now-btn" type="button">
+              SHOP NOW
+            </button>
           </div>
 
-          <button className="shop-now-btn" type="button">
-            SHOP NOW
-          </button>
-        </div>
-      </div>
-
-      <div className="thumbnail-slots-row">
-        {thumbnailProducts.map((item) => (
-          <div
-            key={item.id}
-            className="thumbnail-slot-card"
-            onClick={() => setSelectedIndex(item.originalIndex)}
-          >
-            <div className="thumb-img-box">
-              {item.image ? (
-                <img src={item.image} alt={item.name} className="thumb-img" />
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#5A1827",
-                    fontSize: "12px",
-                  }}
-                >
-                  No Image
+          <div className="thumbnail-slots-row">
+            {thumbnailProducts.map((item) => (
+              <div
+                key={item.id}
+                className="thumbnail-slot-card"
+                onClick={() => setSelectedIndex(item.originalIndex)}
+              >
+                <div className="thumb-img-box">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="thumb-img"
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#5A1827",
+                        fontSize: "12px",
+                      }}
+                    >
+                      No Image
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="thumb-info">
-              <h4 className="thumb-title">{item.name}</h4>
+                <div className="thumb-info">
+                  <h4 className="thumb-title">{item.name}</h4>
 
-              <span className="thumb-price">
-                ₹{Number(item.price || 0).toLocaleString("en-IN")}
-              </span>
-            </div>
+                  <span className="thumb-price">
+                    ₹{Number(item.price || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );
