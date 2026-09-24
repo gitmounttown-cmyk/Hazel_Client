@@ -115,8 +115,12 @@ export default function ShopTheLookSection() {
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
+<<<<<<< HEAD
                 {/* Ensure formatCurrency handles the number cleanly, or fallback to standard display */}
                 <p className="look-price">₹ {formatCurrency(item.price)}</p>
+=======
+                <p className="look-price">{item.price}</p>
+>>>>>>> 2191eeafe58802b925d62416bd735d4534577b1d
               </div>
             </div>
           ))}

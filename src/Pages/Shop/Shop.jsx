@@ -9,6 +9,7 @@ import {
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
+import { useMemo } from "react";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -158,6 +159,7 @@ function useShopData() {
             rating: item.rating || 4.2,
             price: price,
             image: rawImage ? imageUrl : "",
+            categoryId: item.categoryId?._id || null,
           };
         });
 
@@ -389,9 +391,15 @@ function ProductCard({ product, navigate }) {
       </div>
 
       <div className="card-body">
-        <p className="card-name">{product.name}</p>
-        <p className="card-subtitle">{product.subtitle}</p>
-        <p className="card-rating">{product.rating} ★</p>
+        <p className="card-name" title={product?.name}>
+          {product.name}
+        </p>
+        <p className="card-subtitle" title={product?.subtitle}>
+          {product.subtitle}
+        </p>
+        <p className="card-rating" title={`Rating: ${product.rating}`}>
+          {product.rating} ★
+        </p>
         <p className="card-price">₹{product.price.toLocaleString("en-IN")}</p>
       </div>
     </div>
@@ -434,6 +442,11 @@ function ProductGrid({
         {error && <p className="error-text">{error}</p>}
 
         <div className="grid">
+          {
+            products.length === 0 && !loading && (
+              <p className="no-results-text">No styles found for the selected filters.</p>
+            )
+          }
           {products.map((p) => (
             <ProductCard key={p.id} product={p} navigate={navigate} />
           ))}
@@ -447,6 +460,7 @@ function ProductGrid({
 
 export default function ShopPage() {
   const {
+<<<<<<< HEAD
     filterGroups,
     filters,
     sort,
@@ -458,11 +472,46 @@ export default function ShopPage() {
     toggleCheckbox,
     clearAll,
   } = useShopData();
+=======
+  filterGroups,
+  filters,
+  sort,
+  setSort,
+  products,
+  total,
+  loading,
+  error,
+  maxPrice,
+  setMaxPrice,
+  toggleCheckbox,
+  setRadio,
+  clearAll,
+} = useShopData();
 
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const shopRef = useRef(null);
+const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+const navigate = useNavigate();
+const location = useLocation();
+const shopRef = useRef(null);
+
+const categoryId = new URLSearchParams(location.search).get("categoryId");
+
+const filteredProducts = useMemo(() => {
+  if (!categoryId) {
+    return products;
+  }
+
+  return products.filter((product) => {
+    const productCategoryId =
+      typeof product.categoryId === "object"
+        ? product.categoryId?._id
+        : product.categoryId;
+
+    return String(productCategoryId) === String(categoryId);
+  });
+}, [products, categoryId]);
+>>>>>>> 2191eeafe58802b925d62416bd735d4534577b1d
+
 
   useEffect(() => {
     const scrollToTop = () => {
@@ -497,7 +546,7 @@ export default function ShopPage() {
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />
         <ProductGrid
-          products={products}
+          products={filteredProducts}
           total={total}
           loading={loading}
           error={error}
