@@ -160,7 +160,9 @@
   overflow: hidden;
   background: #d1c5bd;
   border: 2px solid transparent;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -528,14 +530,82 @@
   }
 }
 
+/* ============================================================
+   MOBILE VIEW (<= 480px) - FLIPKART STYLE 2-COLUMN PRODUCT GRID
+   ============================================================ */
+
 @media (max-width: 480px) {
+  /* 2 equal columns (minmax(0,1fr) stops big images / long text from
+     stretching one column wider than the other) */
   .grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: start; /* cards keep their own height, no empty stretch */
   }
 
+  .main-scroll {
+    padding: 10px 8px;
+  }
+
+  /* tighter card so two fit side by side */
+  .card {
+    padding: 5px 5px 8px 5px;
+    border-radius: 8px;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* image box takes the image's own ratio - nothing is cropped */
   .card-image {
-    height: 260px;
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  /* full image, full width, full height (no cropping) */
+  .card-img-content {
+    position: static;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  /* smaller text for half-width cards */
+  .card-body {
+    padding: 8px 2px 2px 2px;
+  }
+
+  .card-name {
+    font-size: 12px;
+  }
+
+  .card-subtitle {
+    font-size: 9px;
+    margin-bottom: 5px;
+  }
+
+  .card-rating {
+    font-size: 10px;
+    margin-bottom: 5px;
+  }
+
+  .card-price {
+    font-size: 13px;
+  }
+
+  .wishlist-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    top: 6px;
+    right: 6px;
   }
 
   .sidebar {
