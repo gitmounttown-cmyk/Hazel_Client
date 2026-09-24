@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import "./Hero.css";
 
 import slide1 from "../../assets/Heroslide/slide1.png";
-import slide2 from "../../assets/Heroslide/slide2.png";
-import slide3 from "../../assets/Heroslide/slide3.png";
-import slide4 from "../../assets/Heroslide/slide4.png";
+import slide2 from "../../assets/Heroslide/slide2.jpg";
+import slide3 from "../../assets/Heroslide/slide3.jpg";
+import slide4 from "../../assets/Heroslide/slide4.jpg";
 
 const slides = [
   { id: 1, tag: "PREMIUM COTTON NIGHTWEAR", image: slide1 },
