@@ -723,14 +723,26 @@
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 10px;
+  line-height: 0;
 }
 
+/* full image, no cropping */
 .pp-related-image-ph {
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  object-position: top;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
   display: block;
+}
+
+/* wishlist heart floats on top of the image */
+.pp-related-image .pp-wish {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  z-index: 2;
 }
 
 .pp-wish--onimage {
@@ -1231,8 +1243,37 @@
   .pp {
     padding: 16px;
   }
+  /* related products: 2-column grid on mobile */
   .pp-related-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .pp-related-card {
+    padding: 8px;
+    border-radius: 10px;
+  }
+  .pp-related-image {
+    margin-bottom: 8px;
+  }
+  .pp-related-image .pp-wish {
+    width: 28px;
+    height: 28px;
+    top: 6px;
+    right: 6px;
+  }
+  .pp-related-name {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .pp-related-sub {
+    font-size: 9px;
+  }
+  .pp-related-rating {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .pp-related-price {
+    font-size: 14px;
   }
   .pp-actions {
     flex-direction: column;
