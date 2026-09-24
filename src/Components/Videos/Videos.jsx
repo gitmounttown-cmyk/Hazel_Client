@@ -57,7 +57,7 @@ export default function ShopTheLookSection() {
     fetchShopTheLooks();
   }, []);
 
-  // Autoplay observer
+
   useEffect(() => {
     const observerCallback = (entries) => {
       entries.forEach((entry) => {
