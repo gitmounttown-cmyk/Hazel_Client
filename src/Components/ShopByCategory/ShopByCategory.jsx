@@ -1,19 +1,17 @@
-import  { useState, useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectCreative } from "swiper/modules";
-// import API from "../../services/api";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 
-import "swiper/css";
 import "./ShopByCategory.css";
 
 const ShopByCategory = () => {
-  const [subCategories, setSubCategories] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSubCategories = async () => {
+    const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get("/subcategories/all");
+        const response = await axiosInstance.get("/categories/all");
         const rawData = response.data.data || response.data;
 
         if (rawData && rawData.length > 0) {
@@ -21,80 +19,86 @@ const ShopByCategory = () => {
             (a, b) => (a.displayOrder || 0) - (b.displayOrder || 0),
           );
 
-          const formattedData = sortedData.map((subCat) => ({
-            ...subCat,
-            image: subCat.imageURL?.startsWith("http")
-              ? subCat.imageURL
-              : `http://localhost:5004${subCat.imageURL}`,
-            prints: `${subCat.displayOrder || 5} PRINTS`,
-          }));
+          const formattedData = sortedData.map((cat) => {
+            const baseUrl = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
+            const imageUrl = cat.imageURL?.startsWith("http")
+              ? cat.imageURL
+              : `${baseUrl}${cat.imageURL}`;
 
-          setSubCategories(formattedData);
+            return {
+              ...cat,
+              image: imageUrl,
+              prints: `${cat.displayOrder || 5} PRINTS`,
+            };
+          });
+
+          setCategories(formattedData);
         }
       } catch (error) {
-        console.error("Error fetching subcategories from backend:", error.message);
+        console.error("Error fetching categories from backend:", error.message);
       }
     };
-    fetchSubCategories();
+    fetchCategories();
   }, []);
 
-  if (subCategories.length === 0) {
+  const handleCategoryClick = (catId) => {
+    // Navigates to the Shop page and passes the category filter via query params or route
+    navigate(`/shop?categoryId=${catId}`);
+  };
+
+  if (categories.length === 0) {
     return (
       <section className="shop-category-section">
-        <h2 className="section-heading">Loading subcategories...</h2>
+        <h2 className="section-heading">Loading categories...</h2>
       </section>
     );
   }
 
   return (
     <section className="shop-category-section">
-      <h2 className="section-heading">Shop By Category </h2>
+      <h2 className="section-heading">Shop By Category</h2>
 
-      <div className="category-carousel-viewport">
-        <Swiper
-          modules={[Autoplay]}
-          centeredSlides={true}
-          loop={true}
-          slidesPerView={5}
-          spaceBetween={25}
-          speed={800}
-          autoplay={{
-            delay: 1500,
-            disableOnInteraction: false,
-          }}
-          breakpoints={{
-            320: { slidesPerView: 2, spaceBetween:10},
-            640: { slidesPerView: 3, spaceBetween: 15 },
-            1024: { slidesPerView: 5, spaceBetween: 25 },
-          }}
-          className="category-swiper-track"
-        >
-          {subCategories.map((subCat, index) => (
-            <SwiperSlide key={subCat._id || index}>
-              {({ isActive }) => (
-                <div className={`category-card ${isActive ? "active-card" : ""}`}>
-                  <div className="category-img-container">
-                    <img src={subCat.image} alt={subCat.name} className="category-img" />
-                  </div>
+      <div className="category-grid-viewport">
+        <div className="category-grid-track">
+          {categories.map((cat, index) => (
+            <div 
+              key={cat._id || index} 
+              className="category-card"
+              onClick={() => handleCategoryClick(cat._id)}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="category-img-container">
+                <img 
+                  src={cat.image} 
+                  alt={cat.name} 
+                  className={`category-img category-img-${index}`} 
+                />
+              </div>
 
-                  <div className="category-details">
-                    <div className="category-header-row">
-                      <h3 className="category-title">{subCat.name}</h3>
-                      <span className="category-prints">{subCat.prints}</span>
-                    </div>
-                    <p className="category-desc">
-                      {subCat.description ||
-                        "Flattering empire waist with practical side pockets."}
-                    </p>
-                    <button className="category-explore-btn">
-                      EXPLORE <span>→</span>
-                    </button>
-                  </div>
+              <div className="category-details">
+                <div className="category-header-row">
+                  <h3 className="category-title" title={cat.name}>
+                    {cat.name}
+                  </h3>
+                  <span className="category-prints">{cat.prints}</span>
                 </div>
-              )}
-            </SwiperSlide>
+                <p className="category-desc" title={cat.description}>
+                  {cat.description ||
+                    "Flattering empire waist with practical side pockets."}
+                </p>
+                <button 
+                  className="category-explore-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCategoryClick(cat._id);
+                  }}
+                >
+                  EXPLORE <span>→</span>
+                </button>
+              </div>
+            </div>
           ))}
-        </Swiper>
+        </div>
       </div>
     </section>
   );

@@ -2,7 +2,8 @@
   box-sizing: border-box;
 }
 
-.about-page {.t-family: "Plus Jakarta Sans", sans-serif;
+.about-page {
+  font-family: "Plus Jakarta Sans", sans-serif;
   color: #2c2c2a;
   overflow-x: hidden;
   background-color: #fdf9f4;

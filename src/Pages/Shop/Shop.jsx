@@ -9,6 +9,7 @@ import {
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
+import { useMemo } from "react";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -38,30 +39,12 @@ const STATIC_FILTER_GROUPS = [
     ],
   },
   {
-    key: "price_range_option",
+    key: "price_sort",
     label: "Price",
-    type: "price_range_module",
-    min: 500,
-    max: 5000,
-    step: 100,
-    priceOptions: [
-      { value: "under_1000", label: "Under ₹1,000" },
-      { value: "1000_1500", label: "₹1,000–₹1,500" },
-      { value: "1500_2000", label: "₹1,500–₹2,000" },
-      { value: "above_2000", label: "₹2,000+" },
-    ],
-  },
-  {
-    key: "features",
-    label: "Features",
     type: "checkbox",
     options: [
-      { value: "Side Pocket", label: "Side Pocket" },
-      { value: "Cotton Lining", label: "Cotton Lining" },
-      { value: "Feeding Friendly", label: "Feeding Friendly" },
-      { value: "Invisible Zipper", label: "Invisible Zipper" },
-      { value: "Adjustable Rope", label: "Adjustable Rope" },
-      { value: "Breathable", label: "Breathable" },
+      { value: "price_low", label: "Price: Low to High" },
+      { value: "price_high", label: "Price: High to Low" },
     ],
   },
   {
@@ -71,25 +54,6 @@ const STATIC_FILTER_GROUPS = [
     options: [
       { value: "Puff Sleeve", label: "Puff Sleeve" },
       { value: "Ruched Sleeve", label: "Ruched Sleeve" },
-    ],
-  },
-  {
-    key: "availability",
-    label: "Availability",
-    type: "checkbox",
-    options: [
-      { value: "in-stock", label: "In Stock" },
-      { value: "new-arrivals", label: "New Arrivals" },
-    ],
-  },
-  {
-    key: "rating",
-    label: "Rating",
-    type: "radio",
-    options: [
-      { value: "4", label: "4★ & above" },
-      { value: "3", label: "3★ & above" },
-      { value: "any", label: "Any Rating" },
     ],
   },
 ];
@@ -103,52 +67,48 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
-const BACKEND_BASE_URL = "http://localhost:5004";
+const BACKEND_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 function useShopData() {
-  const [filters, setFilters] = useState({});
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialSubCat = searchParams.get("subCategoryId");
+  const initialCategory = searchParams.get("category");
+
+  const [filters, setFilters] = useState(() => {
+    const initial = {};
+    if (initialSubCat) initial.subCategoryId = [initialSubCat];
+    if (initialCategory) initial.category = [initialCategory];
+    return initial;
+  });
+
   const [sort, setSort] = useState("recommended");
   const [page, setPage] = useState(1);
-  const [maxPrice, setMaxPrice] = useState(5000);
-
   const [products, setProducts] = useState([]);
-  const [collections, setCollections] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const debounceRef = useRef(null);
 
-  const location = useLocation();
-
-  //go to start of page on route change
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    const params = new URLSearchParams(location.search);
+    const subCat = params.get("subCategoryId");
+    const cat = params.get("category");
+
+    setFilters((prev) => ({
+      ...prev,
+      subCategoryId: subCat ? [subCat] : prev.subCategoryId,
+      category: cat ? [cat] : prev.category,
+    }));
+  }, [location.search]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
-  useEffect(() => {
-    API.get("/subcategories/all")
-      .then((res) => {
-        const raw = res.data;
-        const subCategoriesList = Array.isArray(raw)
-          ? raw
-          : raw?.data || raw?.subCategories || [];
-        const formattedCollections = subCategoriesList
-          .map((sub) => ({
-            value: sub._id || sub.id,
-            label: sub.name,
-          }))
-          .filter((item) => item.value);
-        setCollections(formattedCollections);
-      })
-      .catch(() => {});
-  }, []);
-
   const fetchProductsFromBackend = useCallback(
-    async (activeFilters, currentSort, currentPage, currentMaxPrice) => {
+    async (activeFilters, currentSort, currentPage) => {
       try {
         setLoading(true);
         setError(null);
@@ -156,14 +116,15 @@ function useShopData() {
         const params = new URLSearchParams();
         params.append("page", currentPage);
         params.append("limit", PAGE_SIZE);
-        params.append("sort", currentSort);
 
-        if (currentMaxPrice && !activeFilters.price_range_option) {
-          params.append("max_price", currentMaxPrice);
+        let effectiveSort = currentSort;
+        if (activeFilters.price_sort) {
+          effectiveSort = activeFilters.price_sort[0];
         }
+        params.append("sort", effectiveSort);
 
         Object.entries(activeFilters).forEach(([key, val]) => {
-          if (!val) return;
+          if (!val || key === "price_sort") return;
           if (Array.isArray(val)) {
             if (val.length > 0 && val[0]) {
               params.append(key, val[0]);
@@ -198,6 +159,7 @@ function useShopData() {
             rating: item.rating || 4.2,
             price: price,
             image: rawImage ? imageUrl : "",
+            categoryId: item.categoryId?._id || null,
           };
         });
 
@@ -216,11 +178,11 @@ function useShopData() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
-      fetchProductsFromBackend(filters, sort, 1, maxPrice);
+      fetchProductsFromBackend(filters, sort, 1);
     }, 300);
 
     return () => clearTimeout(debounceRef.current);
-  }, [filters, sort, maxPrice, fetchProductsFromBackend]);
+  }, [filters, sort, fetchProductsFromBackend]);
 
   const toggleCheckbox = useCallback((key, value) => {
     setFilters((prev) => {
@@ -228,27 +190,11 @@ function useShopData() {
     });
   }, []);
 
-  const setRadio = useCallback((key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === "any" ? undefined : value,
-    }));
-  }, []);
-
   const clearAll = useCallback(() => {
     setFilters({});
-    setMaxPrice(5000);
   }, []);
 
-  const filterGroups = [
-    {
-      key: "subCategoryId",
-      label: "Collection",
-      type: "checkbox",
-      options: collections,
-    },
-    ...STATIC_FILTER_GROUPS,
-  ];
+  const filterGroups = STATIC_FILTER_GROUPS;
 
   return {
     filterGroups,
@@ -259,30 +205,15 @@ function useShopData() {
     total,
     loading,
     error,
-    maxPrice,
-    setMaxPrice,
     toggleCheckbox,
-    setRadio,
     clearAll,
   };
 }
 
-function FilterGroup({
-  group,
-  filters,
-  onToggleCheckbox,
-  onSetRadio,
-  maxPrice,
-  setMaxPrice,
-}) {
+function FilterGroup({ group, filters, onToggleCheckbox }) {
   const [open, setOpen] = useState(true);
 
-  if (
-    group.type !== "price_range_module" &&
-    group.type !== "range" &&
-    (!group.options || group.options.length === 0)
-  )
-    return null;
+  if (!group.options || group.options.length === 0) return null;
 
   return (
     <div className="filter-group">
@@ -312,54 +243,6 @@ function FilterGroup({
                 </label>
               );
             })}
-
-          {group.type === "radio" &&
-            group.options.map((opt) => (
-              <label key={opt.value} className="checkbox-row">
-                <input
-                  type="radio"
-                  name={group.key}
-                  checked={(filters[group.key] || "any") === opt.value}
-                  onChange={() => onSetRadio(group.key, opt.value)}
-                  className="checkbox-input"
-                />
-                <span className="checkbox-label">{opt.label}</span>
-              </label>
-            ))}
-
-          {group.type === "price_range_module" && (
-            <div className="range-block">
-              <input
-                type="range"
-                min={group.min}
-                max={group.max}
-                step={group.step}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="range-input"
-              />
-              <div className="range-labels">
-                <span>₹{group.min.toLocaleString("en-IN")}</span>
-                <span>Max: ₹{maxPrice.toLocaleString("en-IN")}</span>
-              </div>
-              <div style={{ marginTop: "12px" }}>
-                {group.priceOptions.map((opt) => {
-                  const checked = filters[group.key]?.[0] === opt.value;
-                  return (
-                    <label key={opt.value} className="checkbox-row">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => onToggleCheckbox(group.key, opt.value)}
-                        className="checkbox-input"
-                      />
-                      <span className="checkbox-label">{opt.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -370,10 +253,7 @@ function Sidebar({
   filterGroups,
   filters,
   onToggleCheckbox,
-  onSetRadio,
   onClearAll,
-  maxPrice,
-  setMaxPrice,
   mobileOpen,
   onCloseMobile,
 }) {
@@ -386,14 +266,11 @@ function Sidebar({
         <div className="sidebar-scroll">
           <div className="sidebar-title-block">
             <div className="title-header-row">
-              <h2 className="sidebar-title">Shop Nightwear</h2>
+              <h2 className="sidebar-title">Filters</h2>
               <button className="clear-all-top" onClick={onClearAll}>
                 Clear All
               </button>
             </div>
-            <p className="sidebar-subtitle">
-              Thoughtfully designed cotton nightwear for everyday comfort.
-            </p>
             <button
               className="sidebar-close-mobile"
               onClick={onCloseMobile}
@@ -409,9 +286,6 @@ function Sidebar({
               group={group}
               filters={filters}
               onToggleCheckbox={onToggleCheckbox}
-              onSetRadio={onSetRadio}
-              maxPrice={maxPrice}
-              setMaxPrice={setMaxPrice}
             />
           ))}
         </div>
@@ -425,44 +299,26 @@ function ProductCard({ product, navigate }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
-  // useEffect(() => {
-  //   const checkProductWishlist = async () => {
-  //     if (!product?.id) return;
+  useEffect(() => {
+    const checkProductWishlist = async () => {
+      if (!product?.id) return;
 
-  //     try {
-  //       const response = await checkWishlist(product.id);
-  //       setIsWishlisted(response?.data?.isWishlisted || false);
-  //     } catch (err) {
-  //       console.error("CHECK WISHLIST ERROR:", err);
-  //     }
-  //   };
+      if (!isUserLoggedIn()) {
+        setIsWishlisted(false);
+        return;
+      }
 
-  //   checkProductWishlist();
-  // }, [product?.id]);
+      try {
+        const response = await checkWishlist(product.id);
+        setIsWishlisted(response?.data?.isWishlisted || false);
+      } catch (err) {
+        console.error("CHECK WISHLIST ERROR:", err);
+        setIsWishlisted(false);
+      }
+    };
 
- useEffect(() => {
-  const checkProductWishlist = async () => {
-    if (!product?.id) return;
-
-    if (!isUserLoggedIn()) {
-      setIsWishlisted(false);
-      return;
-    }
-
-    try {
-      const response = await checkWishlist(product.id);
-
-      setIsWishlisted(
-        response?.data?.isWishlisted || false
-      );
-    } catch (err) {
-      console.error("CHECK WISHLIST ERROR:", err);
-      setIsWishlisted(false);
-    }
-  };
-
-  checkProductWishlist();
-}, [product?.id]);
+    checkProductWishlist();
+  }, [product?.id]);
 
   const handleWishlist = async () => {
     if (!product?.id || wishlistLoading) return;
@@ -486,7 +342,6 @@ function ProductCard({ product, navigate }) {
       }
     } catch (err) {
       console.error("WISHLIST ERROR:", err);
-
       if (err?.response?.status === 409) {
         setIsWishlisted(true);
       }
@@ -536,9 +391,15 @@ function ProductCard({ product, navigate }) {
       </div>
 
       <div className="card-body">
-        <p className="card-name">{product.name}</p>
-        <p className="card-subtitle">{product.subtitle}</p>
-        <p className="card-rating">{product.rating} ★</p>
+        <p className="card-name" title={product?.name}>
+          {product.name}
+        </p>
+        <p className="card-subtitle" title={product?.subtitle}>
+          {product.subtitle}
+        </p>
+        <p className="card-rating" title={`Rating: ${product.rating}`}>
+          {product.rating} ★
+        </p>
         <p className="card-price">₹{product.price.toLocaleString("en-IN")}</p>
       </div>
     </div>
@@ -581,6 +442,9 @@ function ProductGrid({
         {error && <p className="error-text">{error}</p>}
 
         <div className="grid">
+          {products.length === 0 && !loading && (
+            <p className="no-results-text">No styles found for the selected filters.</p>
+          )}
           {products.map((p) => (
             <ProductCard key={p.id} product={p} navigate={navigate} />
           ))}
@@ -602,46 +466,53 @@ export default function ShopPage() {
     total,
     loading,
     error,
-    maxPrice,
-    setMaxPrice,
     toggleCheckbox,
-    setRadio,
     clearAll,
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
   const navigate = useNavigate();
-const location = useLocation();
-const shopRef = useRef(null);
+  const location = useLocation();
+  const shopRef = useRef(null);
 
-useEffect(() => {
-  const scrollToTop = () => {
-    // 1. Browser/document scroll
-    window.scrollTo(0, 0);
+  const categoryId = new URLSearchParams(location.search).get("categoryId");
 
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-
-    // 2. Shop body scroll
-    if (shopRef.current) {
-      shopRef.current.scrollTop = 0;
-      shopRef.current.scrollLeft = 0;
-
-      // 3. Product grid scroll
-      const mainScroll =
-        shopRef.current.querySelector(".main-scroll");
-
-      if (mainScroll) {
-        mainScroll.scrollTop = 0;
-        mainScroll.scrollLeft = 0;
-      }
+  const filteredProducts = useMemo(() => {
+    if (!categoryId) {
+      return products;
     }
-  };
 
-  // Run after React has rendered the new page
-  requestAnimationFrame(scrollToTop);
+    return products.filter((product) => {
+      const productCategoryId =
+        typeof product.categoryId === "object"
+          ? product.categoryId?._id
+          : product.categoryId;
 
-}, [location.pathname, location.search]);
+      return String(productCategoryId) === String(categoryId);
+    });
+  }, [products, categoryId]);
+
+  useEffect(() => {
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
+      if (shopRef.current) {
+        shopRef.current.scrollTop = 0;
+        shopRef.current.scrollLeft = 0;
+
+        const mainScroll = shopRef.current.querySelector(".main-scroll");
+        if (mainScroll) {
+          mainScroll.scrollTop = 0;
+          mainScroll.scrollLeft = 0;
+        }
+      }
+    };
+
+    requestAnimationFrame(scrollToTop);
+  }, [location.pathname, location.search]);
 
   return (
     <div className="shop-page">
@@ -650,15 +521,12 @@ useEffect(() => {
           filterGroups={filterGroups}
           filters={filters}
           onToggleCheckbox={toggleCheckbox}
-          onSetRadio={setRadio}
           onClearAll={clearAll}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />
         <ProductGrid
-          products={products}
+          products={filteredProducts}
           total={total}
           loading={loading}
           error={error}

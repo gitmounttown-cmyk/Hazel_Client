@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import API from "../../services/api";
 import axiosInstance from "../../api/axiosInstance";
 import "./DailyUsageBanner.css";
 
@@ -14,20 +13,31 @@ const DailyUsageBanner = () => {
         const rawData = response.data.data || response.data;
 
         if (Array.isArray(rawData) && rawData.length > 0) {
-          const firstBanner = rawData[1] || rawData[0];
+          // Explicitly filter for dailyUsage banner type
+          const dailyBanners = rawData.filter(
+            (b) => b && b.bannerType && b.bannerType.toLowerCase() === "dailyusage"
+          );
 
-          const bannerImg = firstBanner.imageURL?.startsWith("http")
-            ? firstBanner.imageURL
-            : `http://localhost:5004${firstBanner.imageURL}`;
+          if (dailyBanners.length > 0) {
+            const firstBanner = dailyBanners[0];
 
-          setBanner({
-            id: firstBanner._id,
-            image: bannerImg,
-            redirectUrl: firstBanner.redirectUrl || "#",
-          });
+            const backendBaseURL = axiosInstance.defaults.baseURL 
+              ? axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "") 
+              : "http://localhost:5000";
+
+            const bannerImg = firstBanner.imageURL?.startsWith("http")
+              ? firstBanner.imageURL
+              : `${import.meta.env.VITE_UPLOAD_URL || backendBaseURL}${firstBanner.imageURL}`;
+
+            setBanner({
+              id: firstBanner._id,
+              image: bannerImg,
+              redirectUrl: firstBanner.redirectUrl || "#",
+            });
+          }
         }
       } catch (error) {
-        console.error("Error fetching banner from backend:", error.message);
+        console.error("Error fetching daily usage banner from backend:", error.message);
       } finally {
         setLoading(false);
       }

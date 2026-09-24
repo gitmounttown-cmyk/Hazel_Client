@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Videos.css";
+import { getVideos } from "../../Services/productService";
+import { formatCurrency } from "../../Utils/currencyFormat";
 
 export default function ShopTheLookSection() {
   const [looks, setLooks] = useState([]);
@@ -13,22 +15,34 @@ export default function ShopTheLookSection() {
     async function fetchShopTheLooks() {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5004/api/videos/all");
+        const response = await getVideos();
         
-        if (!response.ok) {
+        if (!response?.data?.success) {
           throw new Error("Failed to fetch videos from server");
         }
         
-        const result = await response.json();
+        const result = response?.data;
         
         if (result.success && Array.isArray(result.data)) {
-          // Map real title and price coming from your database backend
-          const formattedData = result.data.map((item) => ({
-            _id: item._id,
-            title: item.title,      // <--- fetched from backend
-            price: item.price,      // <--- fetched from backend
-            videoUrl: `http://localhost:5004${item.videoUrl}`,
-          }));
+          const formattedData = result.data.map((item) => {
+            const rawUrl = item.videoUrl || "";
+            const videoSource = rawUrl.startsWith("http")
+              ? rawUrl
+              : `${import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004"}${rawUrl}`;
+
+           
+            let cleanPrice = item.price;
+            if (typeof item.price === "string") {
+              cleanPrice = Number(item.price.replace(/[^0-9.-]+/g, "")) || 0;
+            }
+
+            return {
+              _id: item._id,
+              title: item.title,
+              price: cleanPrice,
+              videoUrl: videoSource,
+            };
+          });
           setLooks(formattedData);
         } else {
           setLooks([]);
@@ -96,11 +110,13 @@ export default function ShopTheLookSection() {
                 muted 
                 loop 
                 playsInline
+                autoPlay
               />
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
-                <p className="look-price">{item.price}</p>
+                {/* Ensure formatCurrency handles the number cleanly, or fallback to standard display */}
+                <p className="look-price">₹ {formatCurrency(item.price)}</p>
               </div>
             </div>
           ))}

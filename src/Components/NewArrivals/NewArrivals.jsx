@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import "./NewArrivals.css";
-
-// import API from "../../Services/api";
 import axiosInstance from "../../api/axiosInstance";
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
   const getImageUrl = (image) => {
     if (!image) {
       return "";
@@ -15,11 +15,17 @@ const NewArrivals = () => {
       return image;
     }
 
+    const backendBaseURL = axiosInstance.defaults.baseURL
+      ? axiosInstance.defaults.baseURL.replace(/\/api\/?$/, "")
+      : "http://localhost:5000";
+
+    const uploadBase = import.meta.env.VITE_UPLOAD_URL || backendBaseURL;
+
     if (image.startsWith("/")) {
-      return `http://localhost:5004${image}`;
+      return `${uploadBase}${image}`;
     }
 
-    return `http://localhost:5004/${image}`;
+    return `${uploadBase}/${image}`;
   };
 
   const getVariantImage = (product) => {
@@ -72,11 +78,11 @@ const NewArrivals = () => {
         const response = await axiosInstance.get("/newArrivals/all");
 
         if (!response.data?.success) {
+          setLoading(false);
           return;
         }
 
         const arrivals = response.data.data || [];
-
         const formattedProducts = [];
 
         arrivals.forEach((arrival) => {
@@ -88,26 +94,22 @@ const NewArrivals = () => {
           }
 
           arrival.products.forEach((item, index) => {
-            const product = item?.product;
+            const product = item?.product || item;
 
             if (!product) {
               return;
             }
 
             const variant = getActiveVariant(product);
-            const descriptionAbout = product.description?.about || "";
-
-            // const descriptionItemDetails =
-            //   product.description?.itemDetails || "";
-
-            const description =
-              descriptionAbout || descriptionItemDetails || "";
+            const descriptionItemDetails =
+              product.description?.itemDetails || "";
+            const description = descriptionItemDetails || "";
 
             const price =
               variant?.discountPrice !== null &&
               variant?.discountPrice !== undefined
                 ? variant.discountPrice
-                : (variant?.price ?? 0);
+                : (variant?.price ?? product?.price ?? 0);
 
             const sizes = Array.isArray(variant?.sizes)
               ? variant.sizes
@@ -119,10 +121,9 @@ const NewArrivals = () => {
                   .join(" | ")
               : "";
 
-            const backendImage = item?.image || getVariantImage(product);
-
+            const backendImage =
+              item?.image || getVariantImage(product) || product.imageURL;
             const rating = product.rating ?? product.averageRating ?? null;
-
             const prints = variant?.prints ?? product?.prints ?? null;
 
             formattedProducts.push({
@@ -130,21 +131,12 @@ const NewArrivals = () => {
                 item?._id ||
                 product?._id ||
                 `${arrival?._id || "arrival"}-${index}`,
-
               name: product.name || "New Arrival",
-
-              tagline: arrival.subtitle || "LATEST COLLECTION",
-
               description,
-
               rating,
-
               prints,
-
               sizes,
-
               price,
-
               image: getImageUrl(backendImage),
             });
           });
@@ -154,6 +146,8 @@ const NewArrivals = () => {
         setSelectedIndex(0);
       } catch (error) {
         console.error("Failed to fetch New Arrivals:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -172,11 +166,21 @@ const NewArrivals = () => {
     return () => clearInterval(interval);
   }, [products.length]);
 
+  if (loading) {
+    return (
+      <section className="new-arrivals-section">
+        <div style={{ textAlign: "center", padding: "40px", color: "#5A1827" }}>
+          Loading new arrivals...
+        </div>
+      </section>
+    );
+  }
+
   if (products.length === 0) {
     return null;
   }
 
-  const activeProduct = products[selectedIndex];
+  const activeProduct = products[selectedIndex] || products[0];
 
   const thumbnailProducts = products
     .map((product, index) => ({
@@ -235,71 +239,77 @@ const NewArrivals = () => {
           </div>
         </div>
 
-        <div className="feature-details-pane">
-          <span className="product-tagline">{activeProduct.tagline}</span>
+        {/* Right column: details + thumbnails flow together at every width */}
+        <div className="right-column">
+          <div className="feature-details-pane">
+            <span className="product-tagline">{activeProduct.tagline}</span>
 
-          <h3 className="product-title">{activeProduct.name}</h3>
+            <h3 className="product-title">{activeProduct.name}</h3>
 
-          <p className="product-desc">{activeProduct.description}</p>
+            <p className="product-desc">{activeProduct.description}</p>
 
-          {metaItems.length > 0 && (
-            <div className="product-meta">
-              {metaItems.map((item, index) => (
-                <span key={`${item}-${index}`}>
-                  {index > 0 && <span className="meta-dot"> • </span>}
+            {metaItems.length > 0 && (
+              <div className="product-meta">
+                {metaItems.map((item, index) => (
+                  <span key={`${item}-${index}`}>
+                    {index > 0 && <span className="meta-dot"> • </span>}
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
 
-                  {item}
-                </span>
-              ))}
+            <div className="product-price">
+              ₹{Number(activeProduct.price || 0).toLocaleString("en-IN")}
             </div>
-          )}
 
-          <div className="product-price">
-            ₹{Number(activeProduct.price || 0).toLocaleString("en-IN")}
+            <button className="shop-now-btn" type="button">
+              SHOP NOW
+            </button>
           </div>
 
-          <button className="shop-now-btn" type="button">
-            SHOP NOW
-          </button>
-        </div>
-      </div>
-
-      <div className="thumbnail-slots-row">
-        {thumbnailProducts.map((item) => (
-          <div
-            key={item.id}
-            className="thumbnail-slot-card"
-            onClick={() => setSelectedIndex(item.originalIndex)}
-          >
-            <div className="thumb-img-box">
-              {item.image ? (
-                <img src={item.image} alt={item.name} className="thumb-img" />
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#5A1827",
-                    fontSize: "12px",
-                  }}
-                >
-                  No Image
+          <div className="thumbnail-slots-row">
+            {thumbnailProducts.map((item) => (
+              <div
+                key={item.id}
+                className="thumbnail-slot-card"
+                onClick={() => setSelectedIndex(item.originalIndex)}
+              >
+                <div className="thumb-img-box">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="thumb-img"
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#5A1827",
+                        fontSize: "12px",
+                      }}
+                    >
+                      No Image
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="thumb-info">
-              <h4 className="thumb-title">{item.name}</h4>
+                <div className="thumb-info">
+                  <h4 className="thumb-title">{item.name}</h4>
 
-              <span className="thumb-price">
-                ₹{Number(item.price || 0).toLocaleString("en-IN")}
-              </span>
-            </div>
+                  <span className="thumb-price">
+                    ₹{Number(item.price || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );

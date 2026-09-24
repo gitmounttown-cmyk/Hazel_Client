@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./TrendingProducts.css";
-// import api from "../../Services/api";
 import axiosInstance from "../../api/axiosInstance";
 
 const TrendingProducts = () => {
@@ -10,272 +9,134 @@ const TrendingProducts = () => {
   const sliderRef = useRef(null);
 
   useEffect(() => {
-    const fetchTrendingProducts = async () => {
+    const fetchTrendingAndProducts = async () => {
       try {
-        const trendingResponse = await axiosInstance.get("/trending-products/all");
+        // 1. Fetch Trending Configurations (Custom image & display order)
+        const trendingRes = await axiosInstance.get("/trending-products/all");
+        const trendingRaw = trendingRes.data?.data || trendingRes.data || [];
+        const trendingList = Array.isArray(trendingRaw) ? trendingRaw : [trendingRaw];
 
-        const trendingData = trendingResponse.data?.data || [];
-
-        const activeTrending = trendingData.find(
-          (item) => item.isActive !== false,
-        );
-console.log("Active Trending Data:", activeTrending);
-        if (!activeTrending || !Array.isArray(activeTrending.products)) {
-          setProducts([]);
-          return;
-        }
-
-        const productResponse = await axiosInstance.get("/products/all");
-
-        const productData = productResponse.data?.data || [];
-
+        // 2. Fetch Master Product Catalog (Dynamic name & pricing from backend)
+        const productRes = await axiosInstance.get("/products/all");
+        const productRaw = productRes.data?.data || productRes.data || [];
+        
         const productMap = new Map();
-
-        if (Array.isArray(productData)) {
-          productData.forEach((product) => {
-            if (product?._id) {
-              productMap.set(String(product._id), product);
+        if (Array.isArray(productRaw)) {
+          productRaw.forEach((prod) => {
+            const pId = prod?._id || prod?.id;
+            if (pId) {
+              productMap.set(String(pId), prod);
             }
           });
         }
 
-        const formattedProducts = activeTrending.products
-          .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-          .map((trendingItem) => {
-            const productId =
-              trendingItem?.product?._id || trendingItem?.product;
+        const extractedProducts = [];
 
-            const product = productMap.get(String(productId)) || {};
+        trendingList.forEach((trendingGroup) => {
+          if (trendingGroup?.isActive !== false && Array.isArray(trendingGroup?.products)) {
+            trendingGroup.products.forEach((item) => {
+              const rawProductId = typeof item?.product === "object" && item?.product !== null
+                ? (item.product._id || item.product.id)
+                : item?.product;
 
-            const variant = Array.isArray(product?.variants)
-              ? product.variants.find((item) => item?.isActive !== false) ||
-                product.variants[0]
-              : null;
+              // Pull dynamically from master product map or populated item object
+              const masterProduct = productMap.get(String(rawProductId)) || 
+                (typeof item?.product === "object" && item?.product !== null ? item.product : {});
 
-            const currentPrice = Number(variant?.price) || 0;
-
-            const originalPrice =
-              variant?.discountPrice !== null &&
-              variant?.discountPrice !== undefined &&
-              variant?.discountPrice !== ""
-                ? Number(variant.discountPrice)
+              const variant = Array.isArray(masterProduct?.variants)
+                ? masterProduct.variants.find((v) => v?.isActive !== false) || masterProduct.variants[0]
                 : null;
 
-            const hasDiscount = originalPrice !== null && originalPrice > 0;
+              const currentPrice = Number(variant?.price) || Number(masterProduct?.price) || Number(masterProduct?.regularPrice) || 0;
+              const originalPrice = variant?.discountPrice !== null && variant?.discountPrice !== undefined && variant?.discountPrice !== "" 
+                ? Number(variant.discountPrice) 
+                : (masterProduct?.discountPrice ? Number(masterProduct.discountPrice) : null);
 
-            let discountText = "";
+              const hasDiscount = originalPrice !== null && originalPrice > currentPrice;
 
-            if (
-              hasDiscount &&
-              currentPrice > 0 &&
-              originalPrice > currentPrice
-            ) {
-              const percentage = Math.round(
-                ((originalPrice - currentPrice) / originalPrice) * 100,
-              );
-
-              if (percentage > 0) {
-                discountText = `${percentage}% OFF`;
+              let discountText = "";
+              if (hasDiscount) {
+                const percentage = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+                if (percentage > 0) discountText = `${percentage}% OFF`;
               }
-            }
 
-            const backendOffer = variant?.offer || null;
+              const name = masterProduct?.name || masterProduct?.title || masterProduct?.productName || masterProduct?.productTitle;
+              const image = item?.image || masterProduct?.image || masterProduct?.productImage || null;
 
-            let offerText = "";
+              extractedProducts.push({
+                id: masterProduct?._id || masterProduct?.id || rawProductId || item?._id,
+                name: name || "Product",
+                currentPrice,
+                originalPrice,
+                hasDiscount,
+                discountText,
+                offerText: variant?.offer?.type && variant.offer.type !== "none" ? `${variant.offer.value}% OFF` : "",
+                image,
+                displayOrder: item?.displayOrder || 1,
+              });
+            });
+          }
+        });
 
-            if (
-              backendOffer &&
-              backendOffer.type &&
-              backendOffer.type !== "none"
-            ) {
-              const now = new Date();
-
-              const startDate = backendOffer.startDate
-                ? new Date(backendOffer.startDate)
-                : null;
-
-              const endDate = backendOffer.endDate
-                ? new Date(backendOffer.endDate)
-                : null;
-
-              const isStarted = !startDate || now >= startDate;
-
-              const isNotExpired = !endDate || now <= endDate;
-
-              if (isStarted && isNotExpired) {
-                if (backendOffer.type === "percentage") {
-                  offerText = `${backendOffer.value}% OFF`;
-                }
-
-                if (backendOffer.type === "fixed") {
-                  offerText = `₹${backendOffer.value} OFF`;
-                }
-              }
-            }
-
-            let image = trendingItem?.image || null;
-
-            if (image && image.startsWith("/")) {
-              const baseURL =
-                axiosInstance.defaults.baseURL
-                  ?.replace(/\/api\/?$/, "")
-                  .replace(/\/$/, "") || "";
-
-              image = `${baseURL}${image}`;
-            }
-
-            return {
-              id: product._id || productId,
-
-              name: product.name || "Exclusive Item",
-
-              currentPrice,
-              originalPrice,
-              hasDiscount,
-
-              discountText,
-              offerText,
-
-              image,
-
-              displayOrder: trendingItem.displayOrder || 0,
-            };
-          });
-
-        setProducts(formattedProducts);
+        extractedProducts.sort((a, b) => a.displayOrder - b.displayOrder);
+        setProducts(extractedProducts);
         setCurrentIndex(0);
       } catch (error) {
-        console.error("Failed to fetch trending products:", error);
-
+        console.error("Failed to fetch trending and product data:", error);
         setProducts([]);
       }
     };
 
-    fetchTrendingProducts();
+    fetchTrendingAndProducts();
   }, []);
-
-  const getCardStep = () => {
-    const slider = sliderRef.current;
-
-    if (!slider) {
-      return 0;
-    }
-
-    const card = slider.querySelector(".trending-card");
-
-    if (!card) {
-      return 0;
-    }
-
-    const styles = window.getComputedStyle(slider);
-
-    const gap = parseFloat(styles.gap) || 0;
-
-    return card.offsetWidth + gap;
-  };
 
   const scrollToProduct = (index) => {
     const slider = sliderRef.current;
-
-    if (!slider || products.length === 0) {
-      return;
-    }
-
+    if (!slider || products.length === 0) return;
     const cards = slider.querySelectorAll(".trending-card");
-
     const card = cards[index];
-
-    if (!card) {
-      return;
-    }
-
-    slider.scrollTo({
-      left: card.offsetLeft,
-      behavior: "smooth",
-    });
+    if (!card) return;
+    slider.scrollTo({ left: card.offsetLeft, behavior: "smooth" });
   };
 
   const slideNext = () => {
-    if (products.length === 0) {
-      return;
-    }
-
-    const nextIndex =
-      currentIndex >= products.length - 1 ? 0 : currentIndex + 1;
-
+    if (products.length === 0) return;
+    const nextIndex = currentIndex >= products.length - 1 ? 0 : currentIndex + 1;
     setCurrentIndex(nextIndex);
-
     if (currentIndex === products.length - 1) {
-      const slider = sliderRef.current;
-
-      if (!slider) {
-        return;
-      }
-
-      slider.scrollTo({
-        left: 0,
-        behavior: "smooth",
-      });
-
+      sliderRef.current?.scrollTo({ left: 0, behavior: "smooth" });
       return;
     }
-
     scrollToProduct(nextIndex);
   };
 
   const slidePrevious = () => {
-    if (products.length === 0) {
-      return;
-    }
-
-    const previousIndex =
-      currentIndex <= 0 ? products.length - 1 : currentIndex - 1;
-
+    if (products.length === 0) return;
+    const previousIndex = currentIndex <= 0 ? products.length - 1 : currentIndex - 1;
     setCurrentIndex(previousIndex);
-
     if (currentIndex === 0) {
       const slider = sliderRef.current;
-
-      if (!slider) {
-        return;
-      }
-
-      const cards = slider.querySelectorAll(".trending-card");
-
-      const lastCard = cards[products.length - 1];
-
+      const cards = slider?.querySelectorAll(".trending-card");
+      const lastCard = cards?.[products.length - 1];
       if (lastCard) {
-        slider.scrollTo({
-          left: lastCard.offsetLeft,
-          behavior: "smooth",
-        });
+        slider.scrollTo({ left: lastCard.offsetLeft, behavior: "smooth" });
       }
-
       return;
     }
-
     scrollToProduct(previousIndex);
   };
 
   const handleManualScroll = () => {
     const slider = sliderRef.current;
-
-    if (!slider || products.length === 0) {
-      return;
-    }
-
+    if (!slider || products.length === 0) return;
     const cards = slider.querySelectorAll(".trending-card");
-
-    if (!cards.length) {
-      return;
-    }
+    if (!cards.length) return;
 
     let closestIndex = 0;
     let closestDistance = Infinity;
 
     cards.forEach((card, index) => {
       const distance = Math.abs(card.offsetLeft - slider.scrollLeft);
-
       if (distance < closestDistance) {
         closestDistance = distance;
         closestIndex = index;
@@ -284,6 +145,10 @@ console.log("Active Trending Data:", activeTrending);
 
     setCurrentIndex(closestIndex);
   };
+
+  if (products.length === 0) {
+    return null;
+  }
 
   const renderProductCard = (product, index) => {
     return (
@@ -295,6 +160,10 @@ console.log("Active Trending Data:", activeTrending);
               alt={product.name}
               className="trending-image"
               loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/400x500/f3f3f3/666666?text=Hazel+Cart";
+              }}
             />
           ) : (
             <div className="trending-no-image">No Image</div>
@@ -324,19 +193,10 @@ console.log("Active Trending Data:", activeTrending);
             </div>
 
             <div className="trending-actions">
-              <button
-                type="button"
-                className="trending-wishlist-btn"
-                aria-label="Add to wishlist"
-              >
+              <button type="button" className="trending-wishlist-btn" aria-label="Add to wishlist">
                 ♡
               </button>
-
-              <button
-                type="button"
-                className="trending-cart-btn"
-                aria-label="Add to cart"
-              >
+              <button type="button" className="trending-cart-btn" aria-label="Add to cart">
                 🛍
               </button>
             </div>
@@ -358,37 +218,31 @@ console.log("Active Trending Data:", activeTrending);
         </div>
 
         <div className="trending-slider-wrapper">
-          {products.length > 0 && (
-            <button
-              type="button"
-              className="trending-slider-btn trending-prev-btn"
-              onClick={slidePrevious}
-              aria-label="Previous product"
-            >
-              ‹
-            </button>
-          )}
+          <button
+            type="button"
+            className="trending-slider-btn trending-prev-btn"
+            onClick={slidePrevious}
+            aria-label="Previous product"
+          >
+            ‹
+          </button>
 
           <div
             className="trending-grid"
             ref={sliderRef}
             onScroll={handleManualScroll}
           >
-            {products.map((product, index) =>
-              renderProductCard(product, index),
-            )}
+            {products.map((product, index) => renderProductCard(product, index))}
           </div>
 
-          {products.length > 0 && (
-            <button
-              type="button"
-              className="trending-slider-btn trending-next-btn"
-              onClick={slideNext}
-              aria-label="Next product"
-            >
-              ›
-            </button>
-          )}
+          <button
+            type="button"
+            className="trending-slider-btn trending-next-btn"
+            onClick={slideNext}
+            aria-label="Next product"
+          >
+            ›
+          </button>
         </div>
       </div>
     </section>

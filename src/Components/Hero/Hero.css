@@ -10,7 +10,7 @@ html, body {
   position: relative;
   width: 100%;
   height: calc(100vh - 48px);
-  min-height: 230px;
+  min-height: 650px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -31,8 +31,8 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: top center; 
+  background-size: contain;
+  background-position: right center; 
   background-repeat: no-repeat;
   opacity: 0;
   transition: opacity 1.2s ease-in-out, transform 1.2s ease-in-out;
@@ -49,7 +49,7 @@ html, body {
   max-width: 1450px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 5rem 0rem 1rem;
+  padding: 0 80px 0px 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
@@ -60,20 +60,20 @@ html, body {
   flex-direction: column;
   justify-content: center;
   max-width: 520px;
-  padding: 2.5rem;
+  padding: 40px;
   background: transparent;
   border-radius: 0;
 }
 
 .hero-tag {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 2.5px;
   color: #642A30;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
-  padding-left:65px;
+  margin-bottom: 24px;
+  padding-left: 65px;
 }
 
 .hero-title1 {
@@ -82,26 +82,26 @@ html, body {
   font-weight: 500;
   color: #780524;
   line-height: 1.15;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 24px 0;
   padding-left: 60px;
 }
 
 .hero-description {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  padding-left:60px;
-  font-size: 0.95rem;
+  padding-left: 60px;
+  font-size: 15.2px;
   color: #352926;
   line-height: 1.6;
   max-width: 380px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 40px;
   font-weight: 500;
 }
 
 .hero-buttons {
-  padding-left:55px;
-  width:600px;
+  padding-left: 55px;
+  width: 600px;
   display: flex;
-  gap: 1.2rem;
+  gap: 19.2px;
   align-items: center;
   flex-wrap: nowrap;
 }
@@ -110,7 +110,7 @@ html, body {
   background-color: #5A1827;
   color: #FFFFFF;
   border: 1px solid #5A1827;
-  padding: 0.9rem 2rem;
+  padding: 14.4px 32px;
   border-radius: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 15px;
@@ -128,16 +128,16 @@ html, body {
   background-color: transparent;
   color: #5A1827;
   border: 1px solid #5A1827;
-  padding: 0.9rem 1.8rem;
+  padding: 14.4px 28.8px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 14px;
-  border-radius:10px;
+  border-radius: 10px;
   font-weight: 600;
   letter-spacing: 1px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 9.6px;
   transition: all 0.3s ease;
 }
 
@@ -147,22 +147,22 @@ html, body {
 }
 
 .arrow-icon {
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .hero-dots {
   position: absolute;
-  bottom: 25px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
+  gap: 6px;
   z-index: 10;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background-color: rgba(90, 24, 39, 0.3);
   border-radius: 50%;
   cursor: pointer;
@@ -171,115 +171,127 @@ html, body {
 
 .dot.active {
   background-color: #5A1827;
-  width: 20px;
+  width: 16px;
   border-radius: 4px;
 }
 
-.mobile-text{
-  display:none;
+.mobile-text {
+  display: none;
 }
-.desktop-text{
-  display:inline;
+.desktop-text {
+  display: inline;
 }
 
 @media screen and (max-width: 1024px) {
+  .hero-section {
+    height: calc(50vh - 100px);
+    min-height: 450px;
+  }
   .hero-container {
-    padding: 0 2rem;
+    padding: 0 32px;
   }
 }
 
 @media screen and (max-width: 768px) {
   .hero-section {
-    height: 200px;
-    /* height: auto; */
-    padding: 2rem 0;
+    height: calc(40vh - 100px); 
+    min-height: 220px;
+    padding: 3.2px 0;
   }
 
- 
   .hero-bg-img {
+    background-size: cover;
     background-position: 65% center; 
-    height:343px;
-    width:453px;
   }
 
   .hero-container {
-    padding: 0 0.8rem;
-    grid-template-columns: 1.2fr 0.8fr; 
+    padding: 0 8px; 
+    grid-template-columns: 1.1fr 0.9fr; 
   }
 
-  
   .hero-text-content {
     background: transparent;
-    padding: 0rem;
+    padding: 0px;
+    margin-left: -10px; 
+  }
+
+  .hero-tag,
+  .hero-title1,
+  .hero-description,
+  .hero-buttons {
+    padding-left: 0px !important;
   }
 
   .hero-tag {
-    font-size: 0.55rem;
-    letter-spacing: 1.2px;
-    margin-bottom: 0.4rem;
+    font-size: 7.2px;
+    letter-spacing: 1px;
+    margin-bottom: 2.4px;
   }
 
   .hero-title1 {
-    font-size: 1.6rem; 
-    margin-bottom: 0.6rem;
+    font-size: 1.2rem; 
+    margin-bottom: 4.8px;
     line-height: 1.15;
   }
 
   .hero-description {
-    font-size: 10px;
-    margin-bottom: 1rem;
+    font-size: 9px;
+    margin-bottom: 6.4px;
     max-width: 100%;
-    line-height: 1.4;
+    line-height: 1.2;
   }
 
   .hero-buttons {
     flex-direction: row;
     width: 100%;
-    gap: 0.5rem;
+    gap: 4.8px;
     align-items: center;
     flex-wrap: nowrap;
   }
-   .mobile-text{
+
+  .mobile-text {
     display: contents;
-   }
-   .desktop-text{
-    display:none;
-   }
-  .btn-shop {
-    width: 100px;
-        justify-content: center;
-        padding: 8px 3px;
-        /* margin-right: 74px; */
-        margin-top: 15px;
-        font-size: 10px;
-        height: 30px;
   }
-   .btn-explore{
-   width: 100px;
-   justify-content: center;
-   align-items: center;
-        padding: 8px 3px;
-        height: 30px;
-        /* margin-right: 74px; */
-        margin-top: 15px;
-        font-size: 10px;
-}
+  .desktop-text {
+    display: none;
+  }
+
+  .btn-shop {
+    width: 80px;
+    justify-content: center;
+    padding: 4px 2px;
+    margin-top: 2px;
+    font-size: 8.5px;
+    height: 22px;
+  }
+
+  .btn-explore {
+    width: 80px;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 2px;
+    height: 22px;
+    margin-top: 2px;
+    font-size: 8.5px;
+  }
 }
 
 @media screen and (max-width: 480px) {
+  .hero-section {
+    height: calc(38vh - 100px);
+    min-height: 200px;
+  }
+
   .hero-bg-img {
     background-position: 63% center;
-    height:343px;
-    width:482px;
-  } 
-
+  }  
 
   .hero-title1 {
-    font-size: 1.35rem;
+    font-size: 1.1rem;
   }
   
   .hero-text-content {
-    /* margin-bottom:206px; */
-    padding: 0.3rem;
+    padding: 1.6px;
+    margin-left: 5px; 
   }
 }

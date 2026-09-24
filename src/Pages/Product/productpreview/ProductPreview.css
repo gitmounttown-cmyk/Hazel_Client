@@ -45,41 +45,76 @@
 /* ============ PRODUCT GRID ============ */
 .pp-grid {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 48px;
+  grid-template-columns: minmax(0, 400px) 1fr;
+  gap: 56px;
   align-items: start;
 }
 
-/* ---- gallery ---- */
+/* ---- gallery (background removed, full-size image, thumbs below) ---- */
 .pp-gallery-panel {
-  background: var(--deep-red);
-  border-radius: 16px;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 60px 1fr;
-  gap: 16px;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 400px;
+  position: sticky;
+  top: 24px;
+}
+
+.pp-main-image {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: none;
+  line-height: 0;
+}
+
+.pp-main-image-ph {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 520px;
+  margin: 0;
+  border-radius: 12px;
 }
 
 .pp-thumbs {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 540px;
-  overflow-y: auto;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  overflow-x: auto;
+  width: 100%;
+  padding: 2px 0 6px;
 }
 
 .pp-thumbs::-webkit-scrollbar {
-  width: 0;
+  height: 4px;
+}
+
+.pp-thumbs::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
 }
 
 .pp-thumb {
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: 8px;
   padding: 0;
   background: none;
   cursor: pointer;
   flex-shrink: 0;
   overflow: hidden;
+  width: 60px;
 }
 
 .pp-thumb-img {
@@ -92,27 +127,16 @@
   transition: opacity 0.2s ease;
 }
 
+.pp-thumb:hover .pp-thumb-img {
+  opacity: 0.9;
+}
+
 .pp-thumb.is-active {
-  border-color: var(--white);
+  border-color: var(--red);
 }
 
 .pp-thumb.is-active .pp-thumb-img {
   opacity: 1;
-}
-
-.pp-main-image {
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--white);
-  height: 540px;
-}
-
-.pp-main-image-ph {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  display: block;
 }
 
 /* ---- info column ---- */
@@ -699,14 +723,26 @@
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 10px;
+  line-height: 0;
 }
 
+/* full image, no cropping */
 .pp-related-image-ph {
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  object-position: top;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
   display: block;
+}
+
+/* wishlist heart floats on top of the image */
+.pp-related-image .pp-wish {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  z-index: 2;
 }
 
 .pp-wish--onimage {
@@ -791,7 +827,6 @@
   font-size: 13px;
 }
 
-
 /* ========================================
    LOCATION OVERLAY
 ======================================== */
@@ -811,7 +846,6 @@
   background: rgba(0, 0, 0, 0.45);
 }
 
-
 /* ========================================
    LOCATION MODAL
 ======================================== */
@@ -826,10 +860,8 @@
 
   overflow: hidden;
 
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
-
 
 /* ========================================
    LOCATION HEADER
@@ -872,7 +904,6 @@
   cursor: pointer;
 }
 
-
 /* ========================================
    ADDRESS LIST
 ======================================== */
@@ -884,7 +915,6 @@
 
   padding: 15px 18px;
 }
-
 
 /* ========================================
    ADDRESS CARD
@@ -925,7 +955,6 @@
   background: #fdfaf5;
 }
 
-
 /* ========================================
    ADDRESS ICON
 ======================================== */
@@ -943,7 +972,6 @@
   width: 100%;
   height: 100%;
 }
-
 
 /* ========================================
    ADDRESS INFO
@@ -973,7 +1001,6 @@
 
   font-weight: 500;
 }
-
 
 /* ========================================
    RADIO
@@ -1008,7 +1035,6 @@
 
   background: #b18443;
 }
-
 
 /* ========================================
    ADD ADDRESS
@@ -1141,13 +1167,11 @@
   }
 }
 
-
 /* ========================================
    MOBILE
 ======================================== */
 
 @media (max-width: 600px) {
-
   .pp-delivery-content {
     flex-wrap: wrap;
   }
@@ -1183,7 +1207,334 @@
   .pp-address-card {
     padding: 14px;
   }
+}
 
+/* ========================================
+   WRITE A REVIEW POPUP
+======================================== */
+
+.pp-rvm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.pp-rvm {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-body);
+}
+
+.pp-rvm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.pp-rvm-header h3 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--red);
+}
+
+.pp-rvm-close {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pp-rvm-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.pp-rvm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 22px;
+  overflow-y: auto;
+}
+
+.pp-rvm-product {
+  font-size: 13px;
+  color: var(--gray);
+  background: var(--lite-yellow);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.pp-rvm-product strong {
+  color: var(--black);
+  font-weight: 600;
+}
+
+.pp-rvm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pp-rvm-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.pp-rvm-label em {
+  font-style: normal;
+  color: var(--red);
+}
+
+.pp-rvm-label small {
+  font-weight: 400;
+  color: var(--gray);
+}
+
+.pp-rvm-hint {
+  font-size: 11px;
+  color: var(--gray);
+}
+
+/* ---- star rating ---- */
+.pp-rvm-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pp-rvm-star {
+  padding: 2px;
+  border: none;
+  background: none;
+  color: #e0e0e0;
+  line-height: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.pp-rvm-star:hover {
+  transform: scale(1.12);
+}
+
+.pp-rvm-star svg {
+  width: 30px;
+  height: 30px;
+}
+
+.pp-rvm-rating-text {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+}
+
+/* ---- photo tiles (small squares) ---- */
+.pp-rvm-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pp-rvm-photo,
+.pp-rvm-add {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+}
+
+.pp-rvm-photo {
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.pp-rvm-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+
+.pp-rvm-photo-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pp-rvm-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1.5px dashed #c9b8a6;
+  background: var(--lite-yellow);
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.pp-rvm-add:hover {
+  border-color: var(--red);
+  background: #f6ecdc;
+}
+
+.pp-rvm-add input {
+  display: none;
+}
+
+/* ---- profile name ---- */
+.pp-rvm-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pp-rvm-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---- inputs ---- */
+.pp-rvm-input {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #ddd6d0;
+  border-radius: 6px;
+  background: var(--white);
+  color: #333;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.pp-rvm-input:focus {
+  border-color: var(--red);
+}
+
+.pp-rvm-textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.pp-rvm-count {
+  text-align: right;
+  font-size: 11px;
+  color: var(--gray);
+}
+
+/* ---- footer ---- */
+.pp-rvm-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 22px;
+  border-top: 1px solid #eee;
+  background: var(--white);
+}
+
+.pp-rvm-footer .btn {
+  flex: 1;
+}
+
+.pp-rvm-footer .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- popup: mobile bottom sheet ---- */
+@media (max-width: 600px) {
+  .pp-rvm-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .pp-rvm {
+    max-width: none;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .pp-rvm-header {
+    padding: 16px 18px;
+  }
+
+  .pp-rvm-header h3 {
+    font-size: 20px;
+  }
+
+  .pp-rvm-body {
+    gap: 18px;
+    padding: 16px 18px;
+  }
+
+  .pp-rvm-star svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pp-rvm-photos {
+    gap: 8px;
+  }
+
+  .pp-rvm-photo,
+  .pp-rvm-add {
+    width: 68px;
+    height: 68px;
+  }
+
+  .pp-rvm-footer {
+    padding: 12px 18px;
+  }
 }
 
 /* ============ RESPONSIVE ============ */
@@ -1191,6 +1542,22 @@
   .pp-grid,
   .pp-lower {
     grid-template-columns: 1fr;
+  }
+  .pp-gallery-panel {
+    position: static;
+    max-width: 420px;
+    margin: 0;
+  }
+  .pp-gallery-panel {
+    max-width: 100%;
+  }
+  /* mobile / tablet: centre the main image */
+  .pp-main-image {
+    margin: 0 auto;
+  }
+  .pp-main-image-ph {
+    max-height: 480px;
+    margin: 0 auto;
   }
   .pp-review-grid {
     grid-template-columns: 1fr;
@@ -1204,10 +1571,42 @@
   .pp {
     padding: 16px;
   }
+  /* related products: 2-column grid on mobile */
   .pp-related-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .pp-related-card {
+    padding: 8px;
+    border-radius: 10px;
+  }
+  .pp-related-image {
+    margin-bottom: 8px;
+  }
+  .pp-related-image .pp-wish {
+    width: 28px;
+    height: 28px;
+    top: 6px;
+    right: 6px;
+  }
+  .pp-related-name {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .pp-related-sub {
+    font-size: 9px;
+  }
+  .pp-related-rating {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .pp-related-price {
+    font-size: 14px;
   }
   .pp-actions {
     flex-direction: column;
+  }
+  .pp-thumb {
+    width: 60px;
   }
 }

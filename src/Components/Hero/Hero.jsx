@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import "./Hero.css";
 
 import slide1 from "../../assets/Heroslide/slide1.png";
-import slide2 from "../../assets/Heroslide/slide2.png";
-import slide3 from "../../assets/Heroslide/slide3.png";
-import slide4 from "../../assets/Heroslide/slide4.png";
+import slide2 from "../../assets/Heroslide/slide2.jpg";
+import slide3 from "../../assets/Heroslide/slide3.jpg";
+import slide4 from "../../assets/Heroslide/slide4.jpg";
 
 const slides = [
   { id: 1, tag: "PREMIUM COTTON NIGHTWEAR", image: slide1 },
@@ -27,10 +27,11 @@ const Hero = () => {
     <section className="hero-section">
       <div className="hero-background-wrapper">
         {slides.map((slide, index) => (
-          <div
+          <img
             key={slide.id}
+            src={slide.image}
+            alt="Hero Slide"
             className={`hero-bg-img ${index === currentIndex ? "active" : ""}`}
-            style={{ backgroundImage: `url(${slide.image})` }}
           />
         ))}
       </div>
@@ -40,8 +41,7 @@ const Hero = () => {
           <span className="hero-tag">{slides[currentIndex].tag}</span>
 
           <h1 className="hero-title1">
-            Comfort
-             That Feels Beautiful.
+            Comfort That Feels Beautiful.
           </h1>
 
           <p className="hero-description">
@@ -52,7 +52,8 @@ const Hero = () => {
           <div className="hero-buttons">
             <button className="btn-shop">
               <span className="desktop-text">SHOP NIGHTWEAR</span>
-              <span className="mobile-text">SHOP</span></button>
+              <span className="mobile-text">SHOP</span>
+            </button>
             <button className="btn-explore">
                <span className="desktop-text">
               EXPLORE COLLECTIONS <span className="arrow-icon">→</span>

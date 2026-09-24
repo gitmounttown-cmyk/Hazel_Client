@@ -129,6 +129,23 @@ const QualityIcon = () => (
   </svg>
 );
 
+/* camera / plus icon used in the review popup photo tile */
+const CameraPlusIcon = () => (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 8a2 2 0 0 1 2-2h2.2l1.3-2h7l1.3 2H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z" />
+    <circle cx="12" cy="13" r="3.5" />
+  </svg>
+);
+
 /* ---------- content ---------- */
 const THUMBS = [thumb1, thumb2, thumb3, thumb4, thumb5, thumb6, thumb7, thumb8];
 
@@ -273,6 +290,12 @@ const DELIVERY_ADDRESSES = [
   },
 ];
 
+/* ---------- write-a-review popup settings ---------- */
+const REVIEW_MAX_IMAGES = 5;
+const REVIEW_MAX_IMAGE_MB = 5;
+const REVIEW_MAX_CHARS = 500;
+const RATING_LABELS = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+
 export default function ProductPage() {
   const storedUser = localStorage.getItem("hazelUser");
   const userId = storedUser ? JSON.parse(storedUser)?.id : null;
@@ -316,6 +339,16 @@ export default function ProductPage() {
       pincode: "641001",
     },
   ]);
+
+  /* ---------- write-a-review popup state ---------- */
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewName, setReviewName] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewImages, setReviewImages] = useState([]); // [{ file, preview }]
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
   const { id } = useParams();
   console.log("Product ID:", id); // Log the product ID to the console
 
@@ -492,22 +525,21 @@ export default function ProductPage() {
       });
   }, []);
 
-
-//get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
-useEffect(() => {
-  console.log("Fetching user addresses for user ID:", userId);
-  if (userId) {
-    getUserAddresses(userId)
-      .then((response) => {
-        console.log("User addresses:", response.data?.data);
-        // Update state with user addresses here
-        setUserAddresses(response.data?.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user addresses:", error);
-      });
-  }
-}, [userId]);
+  //get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
+  useEffect(() => {
+    console.log("Fetching user addresses for user ID:", userId);
+    if (userId) {
+      getUserAddresses(userId)
+        .then((response) => {
+          console.log("User addresses:", response.data?.data);
+          // Update state with user addresses here
+          setUserAddresses(response.data?.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user addresses:", error);
+        });
+    }
+  }, [userId]);
 
   console.log("Variant media state:", variantMedia); // Log the variant media state to the console
 
@@ -572,10 +604,10 @@ useEffect(() => {
     ["Sleeves", selectedVariant?.sleeves || "-"],
     ["Finishing", selectedVariant?.finishing || "-"],
     ["Pocket", selectedVariant?.pocket || "-"],
-    [
-      "Available Sizes",
-      selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
-    ],
+    // [
+    //   "Available Sizes",
+    //   selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
+    // ],
   ];
 
   const handleWishlist = async (e) => {
@@ -707,6 +739,144 @@ useEffect(() => {
     toast.success("Address added successfully");
   };
 
+  /* ---------- write-a-review popup handlers ---------- */
+  const handleOpenReviewModal = () => {
+    if (!isLoggedIn()) {
+      toast.error("Please log in to write a review.");
+      return;
+    }
+
+    // pre-fill the reviewer name from the logged in user (if available)
+    let savedName = "";
+    try {
+      savedName = storedUser ? JSON.parse(storedUser)?.name || "" : "";
+    } catch (error) {
+      savedName = "";
+    }
+
+    setReviewName(savedName);
+    setShowReviewModal(true);
+  };
+
+  const closeReviewModal = () => {
+    // free the temporary image previews
+    reviewImages.forEach((img) => URL.revokeObjectURL(img.preview));
+
+    setReviewImages([]);
+    setReviewRating(0);
+    setReviewHover(0);
+    setReviewName("");
+    setReviewComment("");
+    setReviewSubmitting(false);
+    setShowReviewModal(false);
+  };
+
+  const handleReviewImages = (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = ""; // allow picking the same file again
+
+    if (!files.length) return;
+
+    const remaining = REVIEW_MAX_IMAGES - reviewImages.length;
+
+    if (remaining <= 0) {
+      toast.error(`You can add up to ${REVIEW_MAX_IMAGES} photos`);
+      return;
+    }
+
+    const valid = files.filter((file) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Only image files are allowed");
+        return false;
+      }
+
+      if (file.size > REVIEW_MAX_IMAGE_MB * 1024 * 1024) {
+        toast.error(`${file.name} is larger than ${REVIEW_MAX_IMAGE_MB}MB`);
+        return false;
+      }
+
+      return true;
+    });
+
+    if (valid.length > remaining) {
+      toast.error(`You can add up to ${REVIEW_MAX_IMAGES} photos`);
+    }
+
+    const accepted = valid.slice(0, remaining).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setReviewImages((prev) => [...prev, ...accepted]);
+  };
+
+  const handleRemoveReviewImage = (index) => {
+    const target = reviewImages[index];
+
+    if (target) URL.revokeObjectURL(target.preview);
+
+    setReviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+
+    if (!reviewRating) {
+      toast.error("Please select a star rating");
+      return;
+    }
+
+    if (!reviewName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    if (reviewComment.trim().length < 10) {
+      toast.error("Please write at least 10 characters in your review");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("product", id);
+    formData.append("rating", reviewRating);
+    formData.append("name", reviewName.trim());
+    formData.append("comment", reviewComment.trim());
+    reviewImages.forEach((img) => formData.append("images", img.file));
+
+    try {
+      setReviewSubmitting(true);
+
+      // TODO: send `formData` to your create-review API here, for example:
+      // await createReview(formData);
+      console.log("Review payload:", Object.fromEntries(formData.entries()));
+
+      toast.success("Thank you! Your review has been submitted");
+      closeReviewModal();
+    } catch (error) {
+      console.error("SUBMIT REVIEW ERROR:", error);
+      toast.error(error?.response?.data?.message || "Failed to submit review");
+      setReviewSubmitting(false);
+    }
+  };
+
+  // lock page scroll + close on Escape while the review popup is open
+  useEffect(() => {
+    if (!showReviewModal) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") closeReviewModal();
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showReviewModal]);
+
   const RELATED = products.map((product) => {
     const variant = product.variants?.[0];
 
@@ -756,6 +926,21 @@ useEffect(() => {
     checkRelatedWishlist();
   }, [products, id]);
 
+  /* ---------- gallery auto-slide ----------
+     Uses the existing activeThumb/variantMedia state — no new data logic,
+     just automatically advances the main image every 6 seconds. */
+  useEffect(() => {
+    if (!variantMedia.length || variantMedia.length <= 1) return;
+
+    const slideInterval = setInterval(() => {
+      setActiveThumb((prev) =>
+        prev === variantMedia.length - 1 ? 0 : prev + 1,
+      );
+    }, 6000); // rotates every 6 seconds (within the 5-7s range)
+
+    return () => clearInterval(slideInterval);
+  }, [variantMedia]);
+
   return (
     <div className="pp">
       {/* ============ PRODUCT SECTION ============ */}
@@ -768,6 +953,20 @@ useEffect(() => {
         <div className="pp-grid">
           {/* ---- gallery ---- */}
           <div className="pp-gallery-panel">
+            <div className="pp-main-image">
+              <img
+                className="pp-main-image-ph"
+                src={
+                  import.meta.env.VITE_UPLOAD_URL +
+                  (variantMedia[activeThumb] || mainPhoto)
+                }
+                alt={productDetails?.name || "Admire Maxi"}
+                onError={(e) => {
+                  console.error(`Error loading main image:`, e);
+                  e.target.src = mainPhoto; // Fallback to main photo on error
+                }}
+              />
+            </div>
             <div className="pp-thumbs">
               {variantMedia.map((src, i) => (
                 <button
@@ -787,20 +986,6 @@ useEffect(() => {
                   />
                 </button>
               ))}
-            </div>
-            <div className="pp-main-image">
-              <img
-                className="pp-main-image-ph"
-                src={
-                  import.meta.env.VITE_UPLOAD_URL +
-                  (variantMedia[activeThumb] || mainPhoto)
-                }
-                alt={productDetails?.name || "Admire Maxi"}
-                onError={(e) => {
-                  console.error(`Error loading main image:`, e);
-                  e.target.src = mainPhoto; // Fallback to main photo on error
-                }}
-              />
             </div>
           </div>
 
@@ -953,7 +1138,13 @@ useEffect(() => {
           <div className="pp-details">
             <h2 className="pp-h2">Product Details</h2>
             <dl className="pp-details-table">
-              {DETAILS.map(([k, v]) => (
+              {DETAILS.filter(([k, v]) => {
+                if (k === "Lining") {
+                  return v?.trim() && v !== "N/A" && v !== "-";
+                }
+
+                return true;
+              }).map(([k, v]) => (
                 <div className="pp-details-row" key={k}>
                   <dt>{k}</dt>
                   <dd>{v}</dd>
@@ -1358,7 +1549,12 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <button className="btn btn--primary btn--pill">Write A Review</button>
+          <button
+            className="btn btn--primary btn--pill"
+            onClick={handleOpenReviewModal}
+          >
+            Write A Review
+          </button>
         </div>
 
         <div className="pp-filters">
@@ -1460,6 +1656,184 @@ useEffect(() => {
           ))}
         </div>
       </section>
+
+      {/* ================= WRITE A REVIEW POPUP ================= */}
+      {showReviewModal && (
+        <div className="pp-rvm-overlay" onClick={closeReviewModal}>
+          <div
+            className="pp-rvm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pp-rvm-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="pp-rvm-header">
+              <h3 id="pp-rvm-title">Write A Review</h3>
+
+              <button
+                type="button"
+                className="pp-rvm-close"
+                onClick={closeReviewModal}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <form className="pp-rvm-form" onSubmit={handleSubmitReview}>
+              <div className="pp-rvm-body">
+                {/* Product being reviewed */}
+                {productDetails?.name && (
+                  <div className="pp-rvm-product">
+                    Reviewing <strong>{productDetails.name}</strong>
+                  </div>
+                )}
+
+                {/* Rating */}
+                <div className="pp-rvm-field">
+                  <span className="pp-rvm-label">
+                    Your Rating <em>*</em>
+                  </span>
+
+                  <div
+                    className="pp-rvm-stars"
+                    onMouseLeave={() => setReviewHover(0)}
+                  >
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        type="button"
+                        key={n}
+                        className="pp-rvm-star"
+                        onClick={() => setReviewRating(n)}
+                        onMouseEnter={() => setReviewHover(n)}
+                        aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                      >
+                        <Star filled={n <= (reviewHover || reviewRating)} />
+                      </button>
+                    ))}
+
+                    <span className="pp-rvm-rating-text">
+                      {RATING_LABELS[reviewHover || reviewRating]}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Photos */}
+                <div className="pp-rvm-field">
+                  <span className="pp-rvm-label">
+                    Add Photos{" "}
+                    <small>
+                      ({reviewImages.length}/{REVIEW_MAX_IMAGES})
+                    </small>
+                  </span>
+
+                  <div className="pp-rvm-photos">
+                    {reviewImages.map((img, i) => (
+                      <div className="pp-rvm-photo" key={img.preview}>
+                        <img src={img.preview} alt={`Review upload ${i + 1}`} />
+
+                        <button
+                          type="button"
+                          className="pp-rvm-photo-remove"
+                          onClick={() => handleRemoveReviewImage(i)}
+                          aria-label={`Remove photo ${i + 1}`}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+
+                    {reviewImages.length < REVIEW_MAX_IMAGES && (
+                      <label className="pp-rvm-add" htmlFor="pp-rvm-file">
+                        <CameraPlusIcon />
+                        <span>Add</span>
+
+                        <input
+                          id="pp-rvm-file"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleReviewImages}
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  <span className="pp-rvm-hint">
+                    Up to {REVIEW_MAX_IMAGES} photos, {REVIEW_MAX_IMAGE_MB}MB
+                    each.
+                  </span>
+                </div>
+
+                {/* Reviewer profile name */}
+                <div className="pp-rvm-field">
+                  <label className="pp-rvm-label" htmlFor="pp-rvm-name">
+                    Your Name <em>*</em>
+                  </label>
+
+                  <div className="pp-rvm-profile">
+                    <div className="pp-rvm-avatar" aria-hidden="true">
+                      {(reviewName.trim().charAt(0) || "?").toUpperCase()}
+                    </div>
+
+                    <input
+                      id="pp-rvm-name"
+                      className="pp-rvm-input"
+                      type="text"
+                      placeholder="Enter your name"
+                      value={reviewName}
+                      onChange={(e) => setReviewName(e.target.value)}
+                      maxLength={60}
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="pp-rvm-field">
+                  <label className="pp-rvm-label" htmlFor="pp-rvm-comment">
+                    Your Review <em>*</em>
+                  </label>
+
+                  <textarea
+                    id="pp-rvm-comment"
+                    className="pp-rvm-input pp-rvm-textarea"
+                    rows="4"
+                    placeholder="Tell us about the fabric, fit and comfort..."
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    maxLength={REVIEW_MAX_CHARS}
+                  />
+
+                  <span className="pp-rvm-count">
+                    {reviewComment.length}/{REVIEW_MAX_CHARS}
+                  </span>
+                </div>
+              </div>
+
+              {/* Footer actions */}
+              <div className="pp-rvm-footer">
+                <button
+                  type="button"
+                  className="btn btn--outline"
+                  onClick={closeReviewModal}
+                  disabled={reviewSubmitting}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="btn btn--primary"
+                  disabled={reviewSubmitting}
+                >
+                  {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

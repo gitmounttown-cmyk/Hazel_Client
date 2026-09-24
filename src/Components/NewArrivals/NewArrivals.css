@@ -1,35 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap");
+
+/* ================= DESKTOP ================= */
 
 .new-arrivals-section {
   width: 100%;
   box-sizing: border-box;
   background-color: #5a1827;
-  padding: 20px 32px 212px 32px;
+  padding: 20px 32px 50px 32px;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-.thumbnail-slots-row {
-  display: flex;
-  gap: 53px;
-  position: absolute;
-  left: 386px;
-  bottom: 35px;
-  z-index: 10;
-}
-
 .new-arrivals-heading {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 45px;
   font-weight: 500;
   color: #edc484;
-  margin: 0 0 50px 0;
+  margin: 0 0 26px 0;
 }
 
 .loading-text {
   color: #edc484;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .new-arrivals-container {
@@ -39,53 +32,34 @@
   align-items: center;
   justify-content: flex-start;
   gap: 81px;
-
   text-align: left;
-
-  position: relative;
-
   padding-left: 64px;
-
   box-sizing: border-box;
 }
 
 .main-feature-card {
   border-radius: 8px;
-
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-
-  width: 546px;
-
+  width: 346px;
   flex-shrink: 0;
-
   animation: fadeIn 0.5s ease-in-out;
 }
 
 .main-img-wrapper {
   width: 100%;
-
-  height: 460px;
-
+  height: 510px;
   overflow: hidden;
-
   background-color: #ede6df;
-
   border-radius: 10px;
 }
 
 .main-feature-img {
   border-radius: 10px;
-
   width: 100%;
-
   height: 100%;
-
   display: block;
-
   object-fit: cover;
-
   object-position: top center;
-
   transition: transform 0.5s ease;
 }
 
@@ -93,87 +67,65 @@
   transform: scale(1.03);
 }
 
-.feature-details-pane {
+/* Right column: details + thumbnails stacked */
+.right-column {
   flex: 1;
-
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
 
+.feature-details-pane {
+  min-width: 0;
   color: #f5f0eb;
-
   max-width: 480px;
-
   animation: fadeIn 0.5s ease-in-out;
 }
 
 .product-tagline {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 12px;
-
   letter-spacing: 2px;
-
   color: #edc484;
-
   text-transform: uppercase;
-
   display: block;
-
   margin-bottom: 13px;
 }
 
 .product-title {
-  font-family: 'Playfair Display', serif;
-
+  font-family: "Playfair Display", serif;
   font-size: 38px;
-
   font-weight: 600;
-
   line-height: 1.15;
-
   color: #edc484;
-
-  margin: 0 0 19px 0;
+  margin-top: 0;
+  margin-bottom: 10px;
 }
 
 .product-desc {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 15px;
-
   color: #e2d6ce;
-
   line-height: 1.6;
-
-  margin-bottom: 29px;
-
+  margin-bottom: 10px;
   font-weight: 300;
 }
 
 .product-meta {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 14px;
-
   color: #d1c5bd;
-
   display: flex;
-
   align-items: center;
-
+  margin-bottom: 10px;
   gap: 10px;
-
-  margin-bottom: 29px;
-
   flex-wrap: wrap;
 }
 
 .meta-rating {
   padding: 3px 8px;
-
   border-radius: 4px;
-
   font-weight: 600;
-
   color: #ffffff;
 }
 
@@ -182,681 +134,422 @@
 }
 
 .product-price {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 29px;
-
   font-weight: 700;
-
+  margin-bottom: 10px;
   color: #f5f0eb;
-
-  margin-bottom: 100px;
 }
 
 .shop-now-btn {
-  position: absolute;
-
-  bottom: 60px;
-
+  display: inline-block;
   background-color: #ffffff;
-
   color: #5a1827;
-
   border: none;
-
   padding: 10px 20px;
-
   border-radius: 6px;
-
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 14px;
-
   font-weight: 700;
-
   letter-spacing: 1.5px;
-
   cursor: pointer;
-
   transition: all 0.3s ease;
-
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .shop-now-btn:hover {
   background-color: #f5f0eb;
-
   transform: translateY(-2px);
+}
+
+.thumbnail-slots-row {
+  display: flex;
+  gap: 53px;
+  margin-top: 24px;
+  margin-left: 14px;
 }
 
 .thumbnail-slot-card {
   background: #ffffff;
-
   padding: 10px 10px 0px 10px;
-
   border-radius: 6px;
-
   overflow: hidden;
-
   width: 175px;
-
   flex-shrink: 0;
-
   cursor: pointer;
-
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-
   text-align: left;
-
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .thumbnail-slot-card:hover {
   transform: translateY(-4px);
-
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
 }
 
 .thumb-img-box {
   width: 100%;
-
   height: 150px;
-
   background-color: #ffffff;
-
   overflow: hidden;
 }
 
 .thumb-img {
   width: 100%;
-
   height: 100%;
-
   display: block;
-
   object-fit: cover;
-
   object-position: top center;
 }
 
 .thumb-info {
   padding: 10px 13px;
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   gap: 6px;
-
   min-width: 0;
 }
 
 .thumb-title {
-  font-family: 'Playfair Display', serif;
-
+  font-family: "Playfair Display", serif;
   font-size: 14px;
-
   color: #2c221e;
-
   margin: 0;
-
   font-weight: 600;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
-
   white-space: nowrap;
-
   min-width: 0;
 }
 
 .thumb-price {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
-
   font-weight: 700;
-
   color: #5a1827;
-
   white-space: nowrap;
 }
 
+/* ================= SMALL LAPTOP / LARGE TABLET ================= */
+
 @media screen and (max-width: 1200px) {
   .new-arrivals-section {
-    padding-left: 25px;
-    padding-right: 25px;
-    padding-bottom: 185px;
+    padding: 20px 25px 50px;
   }
-
   .new-arrivals-container {
     max-width: 1050px;
-
-    padding-left: 32px;
-
-    gap: 45px;
+    padding-left: 0;
+    gap: 50px;
   }
-
   .main-feature-card {
-    width: 500px;
+    width: 380px;
   }
-
   .main-img-wrapper {
-    height: 440px;
+    height: 500px;
   }
-
   .feature-details-pane {
-    max-width: 430px;
+    max-width: 440px;
   }
-
   .product-title {
     font-size: 34px;
   }
-
   .thumbnail-slots-row {
-    left: 386px;
-    bottom: 21px;
     gap: 30px;
+    margin-left: 10px;
   }
-
   .thumbnail-slot-card {
     width: 155px;
   }
-
   .thumb-img-box {
     height: 135px;
   }
 }
 
+/* ================= TABLET (same look as desktop) ================= */
+
 @media screen and (max-width: 1024px) {
   .new-arrivals-section {
-    padding: 20px 20px 175px 20px;
+    padding: 20px 20px 50px;
   }
-
   .new-arrivals-heading {
     font-size: 38px;
-
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
-
   .new-arrivals-container {
     max-width: 900px;
-
-    padding-left: 0;
-
-    gap: 30px;
+    gap: 36px;
   }
-
   .main-feature-card {
-    width: 430px;
+    width: 330px;
   }
-
   .main-img-wrapper {
-    height: 400px;
+    height: 470px;
   }
-
   .feature-details-pane {
-    max-width: 400px;
+    max-width: 100%;
   }
-
   .product-title {
-    font-size: 31px;
+    font-size: 28px;
   }
-
   .product-desc {
     font-size: 14px;
   }
-
   .product-price {
     font-size: 26px;
-
-    margin-bottom: 80px;
   }
-
   .thumbnail-slots-row {
-    left: 300px;
-    bottom: 28px;
     gap: 20px;
+    margin-left: 0;
   }
-
   .thumbnail-slot-card {
-    width: 140px;
+    width: 130px;
   }
-
   .thumb-img-box {
-    height: 120px;
+    height: 115px;
   }
 }
 
-@media screen and (max-width: 768px) {
-  .new-arrivals-section {
-    width: 100%;
+/* ================= SMALL TABLET / iPAD PORTRAIT ================= */
 
-    padding: 25px 18px 40px 18px;
-
-    overflow: hidden;
-
-    display: grid;
-
-    grid-template-columns: 1fr;
-
-    justify-items: center;
-  }
-
-  .new-arrivals-heading {
-    grid-column: 1;
-
-    font-size: 32px;
-
-    margin: 0 0 30px 0;
-
-    width: 100%;
-
-    order: 1;
-  }
-
+@media screen and (min-width: 768px) and (max-width: 860px) {
   .new-arrivals-container {
-    display: contents;
+    gap: 24px;
   }
-
   .main-feature-card {
-    order: 2;
-
-    width: 100%;
-
-    max-width: 500px;
-
-    margin: 0 auto;
-
-    box-sizing: border-box;
+    width: 280px;
   }
-
   .main-img-wrapper {
-    width: 100%;
-
-    height: auto;
-
-    aspect-ratio: 1.187 / 1;
+    height: 420px;
   }
-
-  .main-feature-img {
-    width: 100%;
-
-    height: 100%;
-
-    object-fit: cover;
-
-    object-position: top center;
-  }
-
-  .thumbnail-slots-row {
-    order: 3;
-
-    position: static;
-
-    left: auto;
-
-    bottom: auto;
-
-    width: 100%;
-
-    max-width: 500px;
-
-    margin: -8px auto 0 auto;
-
-    padding: 0 4px;
-
-    box-sizing: border-box;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: flex-start;
-
-    gap: 10px;
-
-    z-index: 10;
-  }
-
-  .thumbnail-slot-card {
-    width: 0;
-
-    min-width: 0;
-
-    flex: 1 1 0;
-
-    max-width: 150px;
-
-    padding: 7px 7px 0 7px;
-
-    box-sizing: border-box;
-  }
-
-  .thumb-img-box {
-    width: 100%;
-
-    height: 105px;
-  }
-
-  .thumb-info {
-    padding: 7px 8px;
-
-    gap: 4px;
-  }
-
-  .thumb-title {
-    font-size: 11px;
-  }
-
-  .thumb-price {
-    font-size: 10px;
-  }
-
-  .feature-details-pane {
-    order: 4;
-
-    width: 100%;
-
-    max-width: 500px;
-
-    margin: 32px auto 0 auto;
-
-    text-align: center;
-
-    box-sizing: border-box;
-  }
-
-  .product-tagline {
-    font-size: 10px;
-
-    letter-spacing: 1.6px;
-
-    margin-bottom: 10px;
-  }
-
   .product-title {
-    font-size: 29px;
-
-    line-height: 1.15;
-
-    margin-bottom: 13px;
-  }
-
-  .product-desc {
-    font-size: 13px;
-
-    line-height: 1.5;
-
-    max-width: 450px;
-
-    margin: 0 auto 19px;
-  }
-
-  .product-meta {
-    justify-content: center;
-
-    font-size: 12px;
-
-    gap: 7px;
-
-    margin-bottom: 19px;
-  }
-
-  .product-price {
     font-size: 24px;
-
-    margin: 0 0 20px 0;
   }
-
-  .shop-now-btn {
-    position: static;
-    width: 222px;
-    display: block;
-
-    margin: 0 auto;
-
-    padding: 9px 18px;
-
-    font-size: 12px;
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .new-arrivals-section {
-    padding: 22px 15px 35px 15px;
-  }
-
-  .new-arrivals-heading {
-    font-size: 29px;
-
-    margin-bottom: 25px;
-  }
-
-  .main-feature-card {
-    max-width: 450px;
-  }
-
-  .thumbnail-slots-row {
-    max-width: 450px;
-
-    gap: 8px;
-
-    margin-top: -7px;
-  }
-
-  .thumbnail-slot-card {
-    max-width: 135px;
-
-    padding: 6px 6px 0 6px;
-  }
-
-  .thumb-img-box {
-    height: 95px;
-  }
-
-  .product-title {
-    font-size: 27px;
-  }
-
   .product-desc {
     font-size: 13px;
   }
-
   .product-price {
     font-size: 22px;
   }
+  .thumbnail-slots-row {
+    gap: 12px;
+  }
+  .thumbnail-slot-card {
+    width: 112px;
+    padding: 8px 8px 0;
+  }
+  .thumb-img-box {
+    height: 100px;
+  }
+  .thumb-title {
+    font-size: 12px;
+  }
+  .thumb-price {
+    font-size: 11px;
+  }
 }
 
-@media screen and (max-width: 480px) {
+/* ================= SMALL TABLET (601px - 767px) ================= */
+
+@media screen and (min-width: 601px) and (max-width: 767px) {
   .new-arrivals-section {
-    padding: 20px 12px 30px 12px;
+    padding: 20px 16px 40px;
   }
-
   .new-arrivals-heading {
-    font-size: 25px;
-
-    margin-bottom: 22px;
+    font-size: 32px;
+    margin-bottom: 24px;
   }
-
+  .new-arrivals-container {
+    gap: 20px;
+  }
   .main-feature-card {
-    width: 100%;
-
-    max-width: 100%;
+    width: 220px;
   }
-
   .main-img-wrapper {
-    width: 100%;
-
-    aspect-ratio: 1.187 / 1;
-
-    height: auto;
+    height: 340px;
   }
-
-  .thumbnail-slots-row {
-    width: 100%;
-
-    max-width: 100%;
-
-    gap: 6px;
-
-    margin-top: -6px;
-
-    padding: 0 2px;
-  }
-
-  .thumbnail-slot-card {
-    width: 0;
-
-    min-width: 0;
-
-    flex: 1 1 0;
-
-    max-width: none;
-
-    padding: 5px 5px 0 5px;
-  }
-
-  .thumb-img-box {
-    height: 80px;
-  }
-
-  .thumb-info {
-    padding: 5px 6px;
-
-    gap: 3px;
-  }
-
-  .thumb-title {
-    font-size: 9px;
-  }
-
-  .thumb-price {
-    font-size: 8px;
-  }
-
-  .feature-details-pane {
-    margin-top: 28px;
-  }
-
-  .product-tagline {
-    font-size: 9px;
-
-    letter-spacing: 1.3px;
-  }
-
   .product-title {
-    font-size: 24px;
-
-    margin-bottom: 11px;
+    font-size: 20px;
   }
-
   .product-desc {
-    font-size: 10px;
-
-    line-height: 1.45;
-
-    margin-bottom: 17px;
+    font-size: 12px;
   }
-
   .product-meta {
-    font-size: 10px;
-
-    gap: 5px;
-
-    margin-bottom: 16px;
+    font-size: 12px;
   }
-
   .product-price {
     font-size: 20px;
-
-    margin-bottom: 18px;
   }
-
   .shop-now-btn {
     padding: 8px 16px;
-    width: 222px;
+    font-size: 12px;
+  }
+  .thumbnail-slots-row {
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .thumbnail-slot-card {
+    width: 95px;
+    padding: 6px 6px 0;
+  }
+  .thumb-img-box {
+    height: 85px;
+  }
+  .thumb-info {
+    padding: 6px 4px;
+  }
+  .thumb-title {
+    font-size: 10px;
+  }
+  .thumb-price {
+    font-size: 9px;
+  }
+}
+
+/* ================= MOBILE ================= */
+
+@media screen and (max-width: 600px) {
+  .new-arrivals-section {
+    width: 100%;
+    padding: 20px 12px 30px 12px;
+    overflow: hidden;
+  }
+  .new-arrivals-heading {
+    font-size: 28px;
+    margin: 0 0 16px 0;
+    padding: 0;
+    text-align: center;
+  }
+  .new-arrivals-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    gap: 16px;
+  }
+  /* lets order: 1/2/3 apply to the children on mobile */
+  .right-column {
+    display: contents;
+  }
+  .main-feature-card {
+    width: 300px;
+    max-width: 100%;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: transparent;
+    order: 1;
+  }
+  .main-img-wrapper {
+    width: 100%;
+    height: 310px;
+    background-color: transparent;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .main-feature-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    border-radius: 8px;
+  }
+  .thumbnail-slots-row {
+    width: 300px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    order: 2;
+  }
+  .thumbnail-slot-card {
+    flex: 0 0 calc(33.333% - 4px);
+    width: calc(33.333% - 4px);
+    max-width: 96px;
+    padding: 6px 6px 0 6px;
+    box-sizing: border-box;
+  }
+  .thumb-img-box {
+    width: 100%;
+    height: 85px;
+  }
+  .thumb-info {
+    padding: 6px 2px;
+    gap: 2px;
+  }
+  .thumb-title {
+    font-size: 10px;
+  }
+  .thumb-price {
+    font-size: 9px;
+  }
+  .feature-details-pane {
+    width: 100%;
+    max-width: 320px;
+    margin: 8px auto 0 auto;
+    padding: 0;
+    text-align: center;
+    box-sizing: border-box;
+    order: 3;
+  }
+  .product-tagline {
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    margin-bottom: 6px;
+  }
+  .product-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .product-desc {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0 auto 12px;
+  }
+  .product-meta {
+    justify-content: center;
+    font-size: 11px;
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+  .product-price {
+    font-size: 20px;
+    margin: 0 0 15px 0;
+  }
+  .shop-now-btn {
+    width: 100%;
+    max-width: 200px;
+    display: block;
+    margin: 0 auto;
+    padding: 10px 16px;
     font-size: 11px;
   }
 }
 
 @media screen and (max-width: 360px) {
-  .new-arrivals-section {
-    padding: 18px 8px 28px 8px;
-  }
-
-  .new-arrivals-heading {
-    font-size: 22px;
-
-    margin-bottom: 20px;
-  }
-
-  .main-img-wrapper {
-    aspect-ratio: 1.187 / 1;
-  }
-
+  .main-feature-card,
   .thumbnail-slots-row {
-    gap: 4px;
-
-    margin-top: -5px;
+    width: 100% !important;
   }
-
-  .thumbnail-slot-card {
-    padding: 4px 4px 0 4px;
-  }
-
-  .thumb-img-box {
-    height: 70px;
-  }
-
-  .thumb-info {
-    padding: 4px;
-
-    gap: 2px;
-  }
-
-  .thumb-title {
-    font-size: 8px;
-  }
-
-  .thumb-price {
-    font-size: 8px;
-  }
-
-  .feature-details-pane {
-    margin-top: 24px;
-  }
-
-  .product-title {
-    font-size: 21px;
-  }
-
-  .product-desc {
-    font-size: 11px;
-  }
-
-  .product-meta {
-    font-size: 9px;
-  }
-
-  .product-price {
-    font-size: 18px;
+  .main-img-wrapper {
+    height: 280px;
   }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0.4;
-
     transform: translateY(4px);
   }
-
   to {
     opacity: 1;
-
     transform: translateY(0);
   }
 }

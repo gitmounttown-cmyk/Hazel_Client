@@ -140,7 +140,7 @@
   width: 100%;
   margin: 0 auto;
   overflow-x: auto;
-  padding: 10px 10px 20px 38px;
+  padding: 10px 10px 20px 150px;
   scroll-behavior: smooth;
   scrollbar-width: none; /* Hide scrollbar for Firefox */
 }
