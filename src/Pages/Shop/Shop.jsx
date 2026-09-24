@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import API from "../../services/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Shop.css";
@@ -9,7 +9,6 @@ import {
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
-import { useMemo } from "react";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -67,7 +66,8 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
-const BACKEND_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
+const BACKEND_BASE_URL =
+  import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 function useShopData() {
   const location = useLocation();
@@ -139,7 +139,7 @@ function useShopData() {
 
         const formatted = rawData.map((item, idx) => {
           const firstVariant = item.variants?.[0] || {};
-          let rawImage =
+          const rawImage =
             firstVariant.media?.[0]?.imageURL || firstVariant.images?.[0] || "";
           const imageUrl = rawImage.startsWith("http")
             ? rawImage
@@ -361,19 +361,7 @@ function ProductCard({ product, navigate }) {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              background: "#f5f5f5",
-              color: "#666",
-              fontSize: "12px",
-            }}
-          >
-            No Image Available
-          </div>
+          <div className="card-no-image">No Image Available</div>
         )}
 
         <button
@@ -443,7 +431,9 @@ function ProductGrid({
 
         <div className="grid">
           {products.length === 0 && !loading && (
-            <p className="no-results-text">No styles found for the selected filters.</p>
+            <p className="no-results-text">
+              No styles found for the selected filters.
+            </p>
           )}
           {products.map((p) => (
             <ProductCard key={p.id} product={p} navigate={navigate} />
@@ -458,20 +448,17 @@ function ProductGrid({
 
 export default function ShopPage() {
   const {
-  filterGroups,
-  filters,
-  sort,
-  setSort,
-  products,
-  total,
-  loading,
-  error,
-  maxPrice,
-  setMaxPrice,
-  toggleCheckbox,
-  setRadio,
-  clearAll,
-} = useShopData();
+    filterGroups,
+    filters,
+    sort,
+    setSort,
+    products,
+    total,
+    loading,
+    error,
+    toggleCheckbox,
+    clearAll,
+  } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -482,20 +469,12 @@ export default function ShopPage() {
   const categoryId = new URLSearchParams(location.search).get("categoryId");
 
   const filteredProducts = useMemo(() => {
-    if (!categoryId) {
-      return products;
-    }
+    if (!categoryId) return products;
 
-  return products.filter((product) => {
-    const productCategoryId =
-      typeof product.categoryId === "object"
-        ? product.categoryId?._id
-        : product.categoryId;
-
-    return String(productCategoryId) === String(categoryId);
-  });
-}, [products, categoryId]);
-
+    return products.filter(
+      (product) => String(product.categoryId) === String(categoryId),
+    );
+  }, [products, categoryId]);
 
   useEffect(() => {
     const scrollToTop = () => {
