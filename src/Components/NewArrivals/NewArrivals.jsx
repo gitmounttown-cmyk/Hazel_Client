@@ -91,7 +91,7 @@ const NewArrivals = () => {
           }
 
           arrival.products.forEach((item, index) => {
-            // Support both populated item.product and direct item objects
+          
             const product = item?.product || item;
 
             if (!product) {
@@ -99,9 +99,9 @@ const NewArrivals = () => {
             }
 
             const variant = getActiveVariant(product);
-            const descriptionAbout = product.description?.about || product.description || "";
+            // const descriptionAbout = product.description?.about || product.description || "";
             const descriptionItemDetails = product.description?.itemDetails || "";
-            const description = descriptionAbout || descriptionItemDetails || "";
+            const description = descriptionItemDetails || "";
 
             const price =
               variant?.discountPrice !== null &&
@@ -129,7 +129,6 @@ const NewArrivals = () => {
                 product?._id ||
                 `${arrival?._id || "arrival"}-${index}`,
               name: product.name || "New Arrival",
-              tagline: arrival.subtitle || "LATEST COLLECTION",
               description,
               rating,
               prints,
