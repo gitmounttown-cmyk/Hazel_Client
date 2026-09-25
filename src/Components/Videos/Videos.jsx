@@ -57,7 +57,7 @@ export default function ShopTheLookSection() {
     fetchShopTheLooks();
   }, []);
 
-  // Autoplay observer
+
   useEffect(() => {
     const observerCallback = (entries) => {
       entries.forEach((entry) => {
@@ -115,7 +115,9 @@ export default function ShopTheLookSection() {
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
-                <p className="look-price">₹ { formatCurrency(item.price)}</p>
+                <p className="look-price">₹ {formatCurrency(item.price)}</p>
+
+
               </div>
             </div>
           ))}
