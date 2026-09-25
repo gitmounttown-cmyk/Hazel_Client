@@ -6,10 +6,28 @@ import {
 } from "../../../../services/productService";
 import { getCategories } from "../../../../services/categoryService";
 import { getBrands } from "../../../../services/brandService";
-import { getSubCategories } from "../../../../services/subCategoryService";
 import "./productForm.css";
 
-const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
+// Helper function to resolve cleaned image URLs
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return "";
+
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  const baseUrl = import.meta.env.VITE_UPLOAD_URL || import.meta.env.VITE_API_URL || "http://localhost:5004";
+
+  let cleanPath = imagePath;
+  if (cleanPath.includes("uploads")) {
+    cleanPath = "/uploads/" + cleanPath.split("uploads").pop().replace(/\\/g, "/").replace(/^\//, "");
+  } else if (!cleanPath.startsWith("/")) {
+    cleanPath = `/${cleanPath}`;
+  }
+
+  const normalizedBase = baseUrl.replace(/\/+$/, "");
+  return `${normalizedBase}${cleanPath}`;
+};
 
 const ALLOWED_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
 
@@ -40,12 +58,11 @@ const emptyVariant = () => ({
   offerEndDate: "",
   isActive: true,
   sizes: [emptySize()],
-  existingMedia: [], // media already saved on the server (view-only)
-  pendingFiles: [], // new files picked for THIS color, not yet uploaded
-  pendingPreviews: [], // object URLs for the files above
+  existingMedia: [],
+  pendingFiles: [],
+  pendingPreviews: [],
 });
 
-// Map a product coming back from the API into the editable shape above
 const variantsFromProduct = (product) => {
   if (!product?.variants?.length) return [emptyVariant()];
 
@@ -82,7 +99,6 @@ const variantsFromProduct = (product) => {
 
 const ProductForm = ({ product, onClose, onSuccess }) => {
   const [categoryId, setCategoryId] = useState(product?.categoryId?._id || "");
-  const [subCategoryId, setSubCategoryId] = useState(product?.subCategoryId?._id || "");
   const [brandId, setBrandId] = useState(product?.brandId?._id || "");
   const [name, setName] = useState(product?.name || "");
   const [about, setAbout] = useState(product?.description?.about || "");
@@ -92,26 +108,22 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
   const [variants, setVariants] = useState(variantsFromProduct(product));
 
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch dropdown options on mount
   useEffect(() => {
     let ignore = false;
 
     const fetchOptions = async () => {
       try {
-        const [catRes, subCatRes, brandRes] = await Promise.all([
+        const [catRes, brandRes] = await Promise.all([
           getCategories({ limit: 100, status: "active" }),
-          getSubCategories(),
           getBrands({ limit: 100, status: "active" }),
         ]);
 
         if (!ignore) {
           setCategories(catRes?.data?.data || []);
-          setSubCategories(subCatRes?.data?.data || []);
           setBrands(brandRes?.data?.data || []);
         }
       } catch (err) {
@@ -127,10 +139,6 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
       ignore = true;
     };
   }, []);
-
-  // ----------------------------------------------------------
-  // VARIANT HELPERS
-  // ----------------------------------------------------------
 
   const updateVariantField = (index, field, value) => {
     setVariants((prev) =>
@@ -176,10 +184,6 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
     );
   };
 
-  // ----------------------------------------------------------
-  // PER-COLOR MEDIA
-  // ----------------------------------------------------------
-
   const handleVariantMediaChange = (variantIndex, e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -197,18 +201,10 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
     );
   };
 
-  // ----------------------------------------------------------
-  // SUBMIT
-  // ----------------------------------------------------------
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
 
-    // Build the variants payload the backend expects.
-    // No files are attached to this request — each color's new media is
-    // uploaded separately afterwards via addVariantMedia, once we know
-    // each color's real variant _id from the server.
     const variantsPayload = variants.map((v) => ({
       color: v.color,
       fabric: v.fabric,
@@ -238,7 +234,6 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
 
     const formData = new FormData();
     formData.append("categoryId", categoryId);
-    formData.append("subCategoryId", subCategoryId);
     formData.append("brandId", brandId);
     formData.append("name", name);
     formData.append("description", JSON.stringify({ about, itemDetails }));
@@ -251,19 +246,25 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
         : await createProduct(formData);
 
       const savedProduct = res?.data?.data;
-
-      // Upload each color's new media (if any) to its matching saved variant.
-      // Variant order in the response mirrors the order we submitted.
       const mediaErrors = [];
 
       for (let i = 0; i < variants.length; i++) {
-        const pendingFiles = variants[i].pendingFiles;
-        const serverVariant = savedProduct?.variants?.[i];
+        const formVariant = variants[i];
+        const pendingFiles = formVariant.pendingFiles;
 
-        if (pendingFiles.length === 0) continue;
+        if (!pendingFiles || pendingFiles.length === 0) continue;
+
+        const serverVariant =
+          savedProduct?.variants?.find(
+            (sv) =>
+              sv.color?.trim().toLowerCase() ===
+              formVariant.color?.trim().toLowerCase()
+          ) || savedProduct?.variants?.[i];
 
         if (!serverVariant?._id) {
-          mediaErrors.push(`Could not match color "${variants[i].color}" to a saved variant.`);
+          mediaErrors.push(
+            `${formVariant.color || `Variant ${i + 1}`}: Variant color not found on saved product`
+          );
           continue;
         }
 
@@ -271,10 +272,14 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
         pendingFiles.forEach((file) => mediaFormData.append("media", file));
 
         try {
-          await addVariantMedia(savedProduct._id, serverVariant._id, mediaFormData);
+          await addVariantMedia(
+            savedProduct._id,
+            serverVariant._id,
+            mediaFormData
+          );
         } catch (mediaErr) {
           mediaErrors.push(
-            `${variants[i].color || `Color ${i + 1}`}: ${
+            `${formVariant.color || `Color ${i + 1}`}: ${
               mediaErr.response?.data?.message || "media upload failed"
             }`
           );
@@ -339,34 +344,16 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
               />
             </div>
 
-            <div className="prod-form-row">
-              <div className="prod-form-group">
-                <label>Category (optional)</label>
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                  <option value="">Select category</option>
-                  {categories.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="prod-form-group">
-                <label>Sub Category</label>
-                <select
-                  value={subCategoryId}
-                  onChange={(e) => setSubCategoryId(e.target.value)}
-                  required
-                >
-                  <option value="">Select sub category</option>
-                  {subCategories.map((sc) => (
-                    <option key={sc._id} value={sc._id}>
-                      {sc.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="prod-form-group">
+              <label>Category (optional)</label>
+              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                <option value="">Select category</option>
+                {categories.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="prod-form-group">
@@ -390,10 +377,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
               Active
             </label>
 
-            {/* ============================================== */}
             {/* COLOR VARIANTS */}
-            {/* ============================================== */}
-
             <div className="prod-form-group">
               <label>Color Variants</label>
               <div className="prod-variant-section">
@@ -608,7 +592,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                       </button>
                     </div>
 
-                    {/* Media — specific to THIS color */}
+                    {/* Media */}
                     <div className="prod-form-group">
                       <label>
                         Media for {variant.color || `Color ${vIndex + 1}`}{" "}
@@ -620,7 +604,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                             {variant.existingMedia.map((m, mi) => (
                               <img
                                 key={m._id || `existing-${mi}`}
-                                src={`${IMAGE_BASE_URL}${m.imageURL}`}
+                                src={getImageUrl(m.imageURL)}
                                 alt={`${variant.color} media ${mi + 1}`}
                                 className="prod-form-image-preview"
                               />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Hero.css";
 
 import slide1 from "../../assets/Heroslide/slide1.png";
@@ -15,6 +16,7 @@ const slides = [
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,11 +52,11 @@ const Hero = () => {
           </p>
 
           <div className="hero-buttons">
-            <button className="btn-shop">
+            <button className="btn-shop" onClick={() => navigate("/shop")}>
               <span className="desktop-text">SHOP NIGHTWEAR</span>
               <span className="mobile-text">SHOP</span>
             </button>
-            <button className="btn-explore">
+            <button className="btn-explore" onClick={() => navigate("/shop")}>
                <span className="desktop-text">
               EXPLORE COLLECTIONS <span className="arrow-icon">→</span>
               </span>

@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import "./NewArrivals.css";
 import axiosInstance from "../../api/axiosInstance";
+import {useNavigate} from "react-router-dom";
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const navigate = useNavigate();
 
   const getImageUrl = (image) => {
     if (!image) {
@@ -138,6 +140,7 @@ const NewArrivals = () => {
               sizes,
               price,
               image: getImageUrl(backendImage),
+              productId: product?._id || null,
             });
           });
         });
@@ -263,7 +266,7 @@ const NewArrivals = () => {
               ₹{Number(activeProduct.price || 0).toLocaleString("en-IN")}
             </div>
 
-            <button className="shop-now-btn" type="button">
+            <button className="shop-now-btn" type="button" onClick={() => navigate(`/product/${activeProduct.productId}`)}>
               SHOP NOW
             </button>
           </div>

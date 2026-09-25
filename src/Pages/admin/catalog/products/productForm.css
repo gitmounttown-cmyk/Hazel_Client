@@ -11,7 +11,7 @@
 
 .prod-form-card {
   background: #fff;
-  width: 560px;
+  width: 580px;
   max-width: 92vw;
   max-height: 90vh;
   overflow-y: auto;
@@ -28,14 +28,15 @@
   position: sticky;
   top: 0;
   background: #fff;
-  z-index: 1;
+  z-index: 10;
 }
 
 .prod-form-header h3 {
   margin: 0;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: #222;
+  font-family: serif, sans-serif; /* Matches header font style in screenshot */
 }
 
 .prod-form-close {
@@ -70,6 +71,7 @@
   flex-direction: column;
   gap: 6px;
   flex: 1;
+  min-width: 0; /* Prevents input overflow inside flex containers */
 }
 
 .prod-form-group label {
@@ -81,6 +83,8 @@
 .prod-form-group input,
 .prod-form-group textarea,
 .prod-form-group select {
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid #d8d8d8;
   border-radius: 8px;
   padding: 10px 12px;
@@ -88,6 +92,7 @@
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   font-family: inherit;
+  background-color: #fff;
 }
 
 .prod-form-group input:focus,
@@ -101,16 +106,16 @@
   resize: vertical;
 }
 
+/* Row for multi-column grid layouts */
 .prod-form-row {
   display: flex;
-  gap: 16px;
+  gap: 12px;
+  width: 100%;
 }
 
-.prod-form-checkboxes {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding: 4px 0;
+/* Force equal widths for fields in rows */
+.prod-form-row .prod-form-group {
+  flex: 1;
 }
 
 .prod-checkbox-label {
@@ -118,7 +123,7 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: #444;
   cursor: pointer;
 }
@@ -173,15 +178,17 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 10px;
   position: sticky;
   bottom: 0;
   background: #fff;
-  padding-top: 6px;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  z-index: 5;
 }
 
 .prod-btn {
-  padding: 10px 20px;
+  padding: 10px 22px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -214,7 +221,7 @@
 }
 
 /* ============================================================
-   COLOR VARIANT SECTION (new)
+   COLOR VARIANT SECTION
    ============================================================ */
 
 .prod-variant-section {
@@ -224,13 +231,13 @@
 }
 
 .prod-variant-card {
-  border: 1px solid #e2e2e2;
+  border: 1px solid #e8e8e8;
   border-radius: 10px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #fbfaf8;
+  background: #fdfcfb;
 }
 
 .prod-variant-card-header {
@@ -241,9 +248,10 @@
 
 .prod-variant-card-header h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #780524;
+  font-family: serif, sans-serif;
 }
 
 .prod-variant-remove-btn {
@@ -296,7 +304,7 @@
 }
 
 /* ============================================================
-   SIZE ROWS (new)
+   SIZE ROWS
    ============================================================ */
 
 .prod-size-list {
@@ -333,7 +341,7 @@
 }
 
 .prod-size-row input[type="number"] {
-  width: 90px;
+  width: 100px;
 }
 
 .prod-size-remove-btn {

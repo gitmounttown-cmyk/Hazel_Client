@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import API from "../../services/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Shop.css";
@@ -9,7 +9,6 @@ import {
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
-import { useMemo } from "react";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -33,9 +32,11 @@ const STATIC_FILTER_GROUPS = [
       { value: "Pure Cambric Cotton", label: "Pure Cambric Cotton" },
       { value: "Pure Cotton Flex", label: "Pure Cotton Flex" },
       { value: "Pure Cotton", label: "Pure Cotton" },
-      { value: "Cotton Flex", label: "Cotton Flex" },
+      // { value: "Cotton Flex", label: "Cotton Flex" },
       { value: "Alpine", label: "Alpine" },
-      { value: "Pure Flex Cotton", label: "Pure Flex Cotton" },
+      { value: "Rayon", label: "Rayon" },
+
+      // { value: "Pure Flex Cotton", label: "Pure Flex Cotton" },
     ],
   },
   {
@@ -67,7 +68,8 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
-const BACKEND_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
+const BACKEND_BASE_URL =
+  import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 function useShopData() {
   const location = useLocation();
@@ -75,7 +77,14 @@ function useShopData() {
   const initialSubCat = searchParams.get("subCategoryId");
   const initialCategory = searchParams.get("category");
 
-  const [filters, setFilters] = useState(() => {
+  const [stagedFilters, setStagedFilters] = useState(() => {
+    const initial = {};
+    if (initialSubCat) initial.subCategoryId = [initialSubCat];
+    if (initialCategory) initial.category = [initialCategory];
+    return initial;
+  });
+
+  const [activeFilters, setActiveFilters] = useState(() => {
     const initial = {};
     if (initialSubCat) initial.subCategoryId = [initialSubCat];
     if (initialCategory) initial.category = [initialCategory];
@@ -89,18 +98,18 @@ function useShopData() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const debounceRef = useRef(null);
-
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const subCat = params.get("subCategoryId");
     const cat = params.get("category");
 
-    setFilters((prev) => ({
-      ...prev,
-      subCategoryId: subCat ? [subCat] : prev.subCategoryId,
-      category: cat ? [cat] : prev.category,
-    }));
+    const newFilters = {
+      subCategoryId: subCat ? [subCat] : undefined,
+      category: cat ? [cat] : undefined,
+    };
+
+    setStagedFilters((prev) => ({ ...prev, ...newFilters }));
+    setActiveFilters((prev) => ({ ...prev, ...newFilters }));
   }, [location.search]);
 
   useEffect(() => {
@@ -108,7 +117,7 @@ function useShopData() {
   }, [location.pathname]);
 
   const fetchProductsFromBackend = useCallback(
-    async (activeFilters, currentSort, currentPage) => {
+    async (appliedFilters, currentSort, currentPage) => {
       try {
         setLoading(true);
         setError(null);
@@ -118,12 +127,12 @@ function useShopData() {
         params.append("limit", PAGE_SIZE);
 
         let effectiveSort = currentSort;
-        if (activeFilters.price_sort) {
-          effectiveSort = activeFilters.price_sort[0];
+        if (appliedFilters.price_sort) {
+          effectiveSort = appliedFilters.price_sort[0];
         }
         params.append("sort", effectiveSort);
 
-        Object.entries(activeFilters).forEach(([key, val]) => {
+        Object.entries(appliedFilters).forEach(([key, val]) => {
           if (!val || key === "price_sort") return;
           if (Array.isArray(val)) {
             if (val.length > 0 && val[0]) {
@@ -139,7 +148,7 @@ function useShopData() {
 
         const formatted = rawData.map((item, idx) => {
           const firstVariant = item.variants?.[0] || {};
-          let rawImage =
+          const rawImage =
             firstVariant.media?.[0]?.imageURL || firstVariant.images?.[0] || "";
           const imageUrl = rawImage.startsWith("http")
             ? rawImage
@@ -157,7 +166,7 @@ function useShopData() {
               ? `${firstVariant.fabric} • Hand Block Print`
               : "Cambric Cotton • Hand Block Print",
             rating: item.rating || 4.2,
-            price: price,
+            price: Number(price),
             image: rawImage ? imageUrl : "",
             categoryId: item.categoryId?._id || null,
           };
@@ -175,37 +184,42 @@ function useShopData() {
   );
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setPage(1);
-      fetchProductsFromBackend(filters, sort, 1);
-    }, 300);
+    setPage(1);
+    fetchProductsFromBackend(activeFilters, sort, 1);
+  }, [activeFilters, sort, fetchProductsFromBackend]);
 
-    return () => clearTimeout(debounceRef.current);
-  }, [filters, sort, fetchProductsFromBackend]);
-
-  const toggleCheckbox = useCallback((key, value) => {
-    setFilters((prev) => {
+  const toggleStagedCheckbox = useCallback((key, value) => {
+    setStagedFilters((prev) => {
+      if (key === "price_sort") {
+        return { ...prev, [key]: prev[key]?.[0] === value ? undefined : [value] };
+      }
       return { ...prev, [key]: prev[key]?.[0] === value ? undefined : [value] };
     });
   }, []);
 
+  const applyFilters = useCallback(() => {
+    setActiveFilters({ ...stagedFilters });
+  }, [stagedFilters]);
+
   const clearAll = useCallback(() => {
-    setFilters({});
+    setStagedFilters({});
+    setActiveFilters({});
   }, []);
 
   const filterGroups = STATIC_FILTER_GROUPS;
 
   return {
     filterGroups,
-    filters,
+    stagedFilters,
+    activeFilters,
     sort,
     setSort,
     products,
     total,
     loading,
     error,
-    toggleCheckbox,
+    toggleStagedCheckbox,
+    applyFilters,
     clearAll,
   };
 }
@@ -253,6 +267,7 @@ function Sidebar({
   filterGroups,
   filters,
   onToggleCheckbox,
+  onApplyFilters,
   onClearAll,
   mobileOpen,
   onCloseMobile,
@@ -267,9 +282,6 @@ function Sidebar({
           <div className="sidebar-title-block">
             <div className="title-header-row">
               <h2 className="sidebar-title">Filters</h2>
-              <button className="clear-all-top" onClick={onClearAll}>
-                Clear All
-              </button>
             </div>
             <button
               className="sidebar-close-mobile"
@@ -288,6 +300,55 @@ function Sidebar({
               onToggleCheckbox={onToggleCheckbox}
             />
           ))}
+
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginTop: "24px",
+              paddingBottom: "16px",
+            }}
+          >
+            <button
+              onClick={onClearAll}
+              style={{
+                flex: 1,
+                backgroundColor: "#edc484",
+                color: "#5a1827",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                fontWeight: "700",
+                fontSize: "12px",
+                cursor: "pointer",
+                letterSpacing: "1px",
+              }}
+            >
+              Remove All
+            </button>
+
+            <button
+              className="apply-filter-btn"
+              onClick={() => {
+                onApplyFilters();
+                if (mobileOpen && onCloseMobile) onCloseMobile();
+              }}
+              style={{
+                flex: 1,
+                backgroundColor: "#edc484",
+                color: "#5a1827",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                fontWeight: "700",
+                fontSize: "12px",
+                cursor: "pointer",
+                letterSpacing: "1px",
+              }}
+            >
+              Apply
+            </button>
+          </div>
         </div>
       </aside>
     </>
@@ -361,19 +422,7 @@ function ProductCard({ product, navigate }) {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              background: "#f5f5f5",
-              color: "#666",
-              fontSize: "12px",
-            }}
-          >
-            No Image Available
-          </div>
+          <div className="card-no-image">No Image Available</div>
         )}
 
         <button
@@ -443,7 +492,9 @@ function ProductGrid({
 
         <div className="grid">
           {products.length === 0 && !loading && (
-            <p className="no-results-text">No styles found for the selected filters.</p>
+            <p className="no-results-text">
+              No styles found for the selected filters.
+            </p>
           )}
           {products.map((p) => (
             <ProductCard key={p.id} product={p} navigate={navigate} />
@@ -459,14 +510,16 @@ function ProductGrid({
 export default function ShopPage() {
   const {
     filterGroups,
-    filters,
+    stagedFilters,
+    activeFilters,
     sort,
     setSort,
     products,
     total,
     loading,
     error,
-    toggleCheckbox,
+    toggleStagedCheckbox,
+    applyFilters,
     clearAll,
   } = useShopData();
 
@@ -477,21 +530,38 @@ export default function ShopPage() {
   const shopRef = useRef(null);
 
   const categoryId = new URLSearchParams(location.search).get("categoryId");
+  const productId = new URLSearchParams(location.search).get("productId");
+// console.log('products:', products); // Debugging log
+// console.log('productId:', productId); // Debugging log
 
   const filteredProducts = useMemo(() => {
-    if (!categoryId) {
-      return products;
+    let result = [...products];
+
+    // Product ID filter
+    if (productId) {
+      result = result.filter(
+        (product) => String(product.id) === String(productId)
+      );
     }
 
-    return products.filter((product) => {
-      const productCategoryId =
-        typeof product.categoryId === "object"
-          ? product.categoryId?._id
-          : product.categoryId;
+    // Category ID filter
+    if (categoryId) {
+      result = result.filter(
+        (product) => String(product.categoryId) === String(categoryId)
+      );
+    }
 
-      return String(productCategoryId) === String(categoryId);
-    });
-  }, [products, categoryId]);
+    // Price sorting
+    const priceSort = activeFilters?.price_sort?.[0];
+
+    if (priceSort === "price_low") {
+      result.sort((a, b) => Number(a.price) - Number(b.price));
+    } else if (priceSort === "price_high") {
+      result.sort((a, b) => Number(b.price) - Number(a.price));
+    }
+
+    return result;
+  }, [products, categoryId, productId, activeFilters]);
 
   useEffect(() => {
     const scrollToTop = () => {
@@ -519,8 +589,9 @@ export default function ShopPage() {
       <div ref={shopRef} className="shop-body">
         <Sidebar
           filterGroups={filterGroups}
-          filters={filters}
-          onToggleCheckbox={toggleCheckbox}
+          filters={stagedFilters}
+          onToggleCheckbox={toggleStagedCheckbox}
+          onApplyFilters={applyFilters}
           onClearAll={clearAll}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}

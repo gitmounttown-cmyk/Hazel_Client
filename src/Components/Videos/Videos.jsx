@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import "./Videos.css";
 import { getVideos } from "../../Services/productService";
 import { formatCurrency } from "../../Utils/currencyFormat";
+import { useNavigate } from "react-router-dom";
 
 export default function ShopTheLookSection() {
   const [looks, setLooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
@@ -57,7 +59,7 @@ export default function ShopTheLookSection() {
     fetchShopTheLooks();
   }, []);
 
-  // Autoplay observer
+
   useEffect(() => {
     const observerCallback = (entries) => {
       entries.forEach((entry) => {
@@ -103,7 +105,8 @@ export default function ShopTheLookSection() {
 
         <div className="looks-container" ref={containerRef}>
           {looks.map((item) => (
-            <div key={item._id} className="look-card">
+            <div key={item._id} className="look-card" onClick={() => navigate("/shop")}
+      style={{ cursor: "pointer" }}>
               <video 
                 src={item.videoUrl} 
                 className="look-video-bg" 
@@ -115,8 +118,9 @@ export default function ShopTheLookSection() {
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
-                {/* Ensure formatCurrency handles the number cleanly, or fallback to standard display */}
                 <p className="look-price">₹ {formatCurrency(item.price)}</p>
+
+
               </div>
             </div>
           ))}
