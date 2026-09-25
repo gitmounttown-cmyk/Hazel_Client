@@ -348,6 +348,7 @@ export default function ProductPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewImages, setReviewImages] = useState([]); // [{ file, preview }]
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState([]); // State to hold related products
 
   const { id } = useParams();
   console.log("Product ID:", id); // Log the product ID to the console
@@ -361,6 +362,9 @@ export default function ProductPage() {
         console.log("Product details:", response.data);
         // Update state with product details here
         setProductDetails(response?.data?.data);
+        if(response?.data?.data?.relatedProducts?.length > 0) {
+          setRelatedProducts(response?.data?.data?.relatedProducts);
+        }
       })
       .catch((error) => {
         // Handle error if the API call fails
@@ -513,17 +517,17 @@ export default function ProductPage() {
   }, [id]);
 
   //get products using the backend API and display them on the page. You can use useEffect to fetch the products when the component mounts.
-  useEffect(() => {
-    getProducts()
-      .then((response) => {
-        console.log("Products:", response.data?.data);
-        // Update state with products here
-        setProducts(response.data?.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
-  }, []);
+  // useEffect(() => {
+  //   getProducts()
+  //     .then((response) => {
+  //       console.log("Products:", response.data?.data);
+  //       // Update state with products here
+  //       setProducts(response.data?.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching products:", error);
+  //     });
+  // }, []);
 
   //get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
   useEffect(() => {
@@ -877,7 +881,7 @@ export default function ProductPage() {
     };
   }, [showReviewModal]);
 
-  const RELATED = products.map((product) => {
+  const RELATED = relatedProducts.map((product) => {
     const variant = product.variants?.[0];
 
     return {
@@ -924,7 +928,7 @@ export default function ProductPage() {
     };
 
     checkRelatedWishlist();
-  }, [products, id]);
+  }, [relatedProducts, id]);
 
   /* ---------- gallery auto-slide ----------
      Uses the existing activeThumb/variantMedia state — no new data logic,
@@ -1643,6 +1647,10 @@ export default function ProductPage() {
                   className="pp-related-image-ph"
                   src={p.image}
                   alt={p.name}
+                  onError={(e) => {
+                    console.error(`Error loading related product image:`, e);
+                    e.target.src = mainPhoto; // Fallback to main photo on error
+                  }}
                 />
               </div>
               <h3 className="pp-related-name">{p.name}</h3>

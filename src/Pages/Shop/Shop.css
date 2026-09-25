@@ -225,6 +225,8 @@
   align-items: stretch;
 }
 
+/* ---------------- PRODUCT CARD (FULL IMAGE) ---------------- */
+
 .card {
   background: #5a1827;
   border-radius: 10px;
@@ -234,7 +236,7 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  height: 440px; /* Fixed uniform height for every card */
+  height: 100%; /* sizes to content; cards in a row stay equal */
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -248,19 +250,29 @@
 .card-image {
   position: relative;
   width: 100%;
-  height: 260px; /* Fixed height for product thumbnail */
+  height: auto; /* container wraps the image's natural size */
   background: #ede6df;
   border-radius: 6px;
   overflow: hidden;
-  width: 100%;
-  aspect-ratio: 3 / 4;
+  line-height: 0;
 }
 
 .card-img-content {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* Fills width entirely to eliminate side spaces */
-  object-position: center 25%; /* Centers framing to keep both head and feet visible */
+  height: auto; /* keeps original ratio, no side bars, no cropping */
+  display: block;
+}
+
+.card-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 3 / 4; /* only for the placeholder */
+  line-height: normal;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 12px;
 }
 
 .wishlist-btn {
@@ -286,13 +298,14 @@
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
+  gap: 6px;
 }
 
 .card-name {
   color: #edc484;
   font-size: 14px;
   font-weight: 600;
-  /* margin: 0 0 3px; */
+  margin: 0;
   font-family: serif;
   white-space: nowrap;
   overflow: hidden;
@@ -306,7 +319,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  
   width: 100%;
   min-width: 0;
 }
@@ -352,7 +364,7 @@
 }
 
 /* ============================================================
-   RESPONSIVE BREAKPOINTS FOR ALL DEVICES (UNTOUCHED)
+   RESPONSIVE BREAKPOINTS
    ============================================================ */
 
 @media (max-width: 1280px) {
@@ -446,7 +458,7 @@
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    align-items: start;
+    align-items: stretch;
   }
 
   .main-scroll {
@@ -454,7 +466,7 @@
   }
 
   .card {
-    height: 420px;
+    height: 100%;
     padding: 5px 5px 8px 5px;
     border-radius: 8px;
     min-width: 0;
@@ -463,7 +475,7 @@
   }
 
   .card-image {
-    height: 260px;
+    height: auto;
   }
 
   .sidebar {
