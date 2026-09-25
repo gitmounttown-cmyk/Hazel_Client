@@ -32,9 +32,11 @@ const STATIC_FILTER_GROUPS = [
       { value: "Pure Cambric Cotton", label: "Pure Cambric Cotton" },
       { value: "Pure Cotton Flex", label: "Pure Cotton Flex" },
       { value: "Pure Cotton", label: "Pure Cotton" },
-      { value: "Cotton Flex", label: "Cotton Flex" },
+      // { value: "Cotton Flex", label: "Cotton Flex" },
       { value: "Alpine", label: "Alpine" },
-      { value: "Pure Flex Cotton", label: "Pure Flex Cotton" },
+      { value: "Rayon", label: "Rayon" },
+
+      // { value: "Pure Flex Cotton", label: "Pure Flex Cotton" },
     ],
   },
   {
