@@ -1627,7 +1627,7 @@ export default function ProductPage() {
         <div className="pp-related-grid">
           {/* show only 4 data */}
           {RELATED?.slice(0, 4).map((p) => (
-            <article className="pp-related-card" key={p.id}>
+            <article className="pp-related-card" key={p.id} onClick={() => navigate(`/product/${p.id}`)}>
               <div className="pp-related-image">
                 <button
                   className={`pp-wish ${
