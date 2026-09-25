@@ -28,7 +28,7 @@ const ShopByCategory = () => {
             return {
               ...cat,
               image: imageUrl,
-              prints: `${cat.displayOrder || 5} PRINTS`,
+              // prints: `${cat.displayOrder || 5} PRINTS`,
             };
           });
 
@@ -82,19 +82,19 @@ const ShopByCategory = () => {
                   </h3>
                   <span className="category-prints">{cat.prints}</span>
                 </div>
-                <p className="category-desc" title={cat.description}>
+                {/* <p className="category-desc" title={cat.description}>
                   {cat.description ||
                     "Flattering empire waist with practical side pockets."}
-                </p>
-                <button 
+                </p> */}
+                {/* <button 
                   className="category-explore-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleCategoryClick(cat._id);
                   }}
                 >
-                  EXPLORE <span>→</span>
-                </button>
+                  <span>→</span>
+                </button> */}
               </div>
             </div>
           ))}
