@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./TrendingProducts.css";
 import axiosInstance from "../../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const TrendingProducts = () => {
   const [products, setProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
   const sliderRef = useRef(null);
 
@@ -73,6 +75,7 @@ const TrendingProducts = () => {
                 offerText: variant?.offer?.type && variant.offer.type !== "none" ? `${variant.offer.value}% OFF` : "",
                 image,
                 displayOrder: item?.displayOrder || 1,
+                categoryId: masterProduct?.categoryId || item?.categoryId || null
               });
             });
           }
@@ -153,7 +156,9 @@ const TrendingProducts = () => {
   const renderProductCard = (product, index) => {
     return (
       <article key={`${product.id}-${index}`} className="trending-card">
-        <div className="trending-image-wrapper">
+        {/* send params product id to shop page */}
+         <div className="trending-image-wrapper" onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: "pointer" }}>
+        {/* <div className="trending-image-wrapper" onClick={() => navigate(`/shop?productId=${product.id}`)} style={{ cursor: "pointer" }}> */}
           {product.image ? (
             <img
               src={product.image}

@@ -528,25 +528,38 @@ export default function ShopPage() {
   const shopRef = useRef(null);
 
   const categoryId = new URLSearchParams(location.search).get("categoryId");
+  const productId = new URLSearchParams(location.search).get("productId");
+// console.log('products:', products); // Debugging log
+// console.log('productId:', productId); // Debugging log
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    if (categoryId) {
+    // Product ID filter
+    if (productId) {
       result = result.filter(
-        (product) => String(product.categoryId) === String(categoryId),
+        (product) => String(product.id) === String(productId)
       );
     }
 
+    // Category ID filter
+    if (categoryId) {
+      result = result.filter(
+        (product) => String(product.categoryId) === String(categoryId)
+      );
+    }
+
+    // Price sorting
     const priceSort = activeFilters?.price_sort?.[0];
+
     if (priceSort === "price_low") {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => Number(a.price) - Number(b.price));
     } else if (priceSort === "price_high") {
-      result.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => Number(b.price) - Number(a.price));
     }
 
     return result;
-  }, [products, categoryId, activeFilters]);
+  }, [products, categoryId, productId, activeFilters]);
 
   useEffect(() => {
     const scrollToTop = () => {

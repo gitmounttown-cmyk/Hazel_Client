@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
 
+
+/* html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+} */
+
 :root {
   --primary-maroon: #5A1827;
   --accent-gold: #C5A880;
