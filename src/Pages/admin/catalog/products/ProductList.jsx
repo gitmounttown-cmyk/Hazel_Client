@@ -7,15 +7,12 @@ import "./productList.css";
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "";
 
-  // Return full HTTP/HTTPS URLs directly
   if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
     return imagePath;
   }
 
-  // Base URL fallback
   const baseUrl = import.meta.env.VITE_UPLOAD_URL || import.meta.env.VITE_API_URL || "http://localhost:5004";
 
-  // Clean Windows/OS paths (e.g. c:/Users/.../uploads/file.png)
   let cleanPath = imagePath;
   if (cleanPath.includes("uploads")) {
     cleanPath = "/uploads/" + cleanPath.split("uploads").pop().replace(/\\/g, "/").replace(/^\//, "");
@@ -23,7 +20,6 @@ const getImageUrl = (imagePath) => {
     cleanPath = `/${cleanPath}`;
   }
 
-  // Strip duplicate slashes at the join boundary
   const normalizedBase = baseUrl.replace(/\/+$/, "");
   return `${normalizedBase}${cleanPath}`;
 };
@@ -92,7 +88,7 @@ const ProductList = () => {
   // DELETE / DEACTIVATE PRODUCT
   // ============================================================
   const handleDelete = async (id) => {
-    if (!window.confirm("Deactivate this product?")) {
+    if (!window.confirm("Are you sure you want to delete/deactivate this product?")) {
       return;
     }
     try {

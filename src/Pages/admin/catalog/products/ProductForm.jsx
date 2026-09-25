@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  createProduct,
-  updateProduct,
-  addVariantMedia,
-} from "../../../../services/productService";
+import { createProduct, updateProduct } from "../../../../services/productService";
 import { getCategories } from "../../../../services/categoryService";
 import { getBrands } from "../../../../services/brandService";
 import "./productForm.css";
@@ -98,8 +94,8 @@ const variantsFromProduct = (product) => {
 };
 
 const ProductForm = ({ product, onClose, onSuccess }) => {
-  const [categoryId, setCategoryId] = useState(product?.categoryId?._id || "");
-  const [brandId, setBrandId] = useState(product?.brandId?._id || "");
+  const [categoryId, setCategoryId] = useState(product?.categoryId?._id || product?.categoryId || "");
+  const [brandId, setBrandId] = useState(product?.brandId?._id || product?.brandId || "");
   const [name, setName] = useState(product?.name || "");
   const [about, setAbout] = useState(product?.description?.about || "");
   const [itemDetails, setItemDetails] = useState(product?.description?.itemDetails || "");
@@ -233,68 +229,31 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
     }));
 
     const formData = new FormData();
-    formData.append("categoryId", categoryId);
-    formData.append("brandId", brandId);
+    if (categoryId) formData.append("categoryId", categoryId);
+    if (brandId) formData.append("brandId", brandId);
     formData.append("name", name);
     formData.append("description", JSON.stringify({ about, itemDetails }));
     formData.append("variants", JSON.stringify(variantsPayload));
     formData.append("isActive", isActive);
 
+    // Append pending files directly to Multipart Form under 'media'
+    variants.forEach((v) => {
+      if (v.pendingFiles && v.pendingFiles.length > 0) {
+        v.pendingFiles.forEach((file) => {
+          formData.append("media", file);
+        });
+      }
+    });
+
     try {
-      const res = product
-        ? await updateProduct(product._id, formData)
-        : await createProduct(formData);
-
-      const savedProduct = res?.data?.data;
-      const mediaErrors = [];
-
-      for (let i = 0; i < variants.length; i++) {
-        const formVariant = variants[i];
-        const pendingFiles = formVariant.pendingFiles;
-
-        if (!pendingFiles || pendingFiles.length === 0) continue;
-
-        const serverVariant =
-          savedProduct?.variants?.find(
-            (sv) =>
-              sv.color?.trim().toLowerCase() ===
-              formVariant.color?.trim().toLowerCase()
-          ) || savedProduct?.variants?.[i];
-
-        if (!serverVariant?._id) {
-          mediaErrors.push(
-            `${formVariant.color || `Variant ${i + 1}`}: Variant color not found on saved product`
-          );
-          continue;
-        }
-
-        const mediaFormData = new FormData();
-        pendingFiles.forEach((file) => mediaFormData.append("media", file));
-
-        try {
-          await addVariantMedia(
-            savedProduct._id,
-            serverVariant._id,
-            mediaFormData
-          );
-        } catch (mediaErr) {
-          mediaErrors.push(
-            `${formVariant.color || `Color ${i + 1}`}: ${
-              mediaErr.response?.data?.message || "media upload failed"
-            }`
-          );
-        }
+      if (product?._id) {
+        await updateProduct(product._id, formData);
+      } else {
+        await createProduct(formData);
       }
-
-      if (mediaErrors.length > 0) {
-        alert(
-          `Product saved, but some media uploads failed:\n${mediaErrors.join("\n")}`
-        );
-      }
-
       onSuccess();
     } catch (err) {
-      alert(err.response?.data?.message || "Something went wrong");
+      alert(err.response?.data?.message || "Failed to save product.");
     } finally {
       setSubmitting(false);
     }
@@ -532,7 +491,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                       Color is active
                     </label>
 
-                    {/* Sizes */}
+                    {/* SIZES */}
                     <div className="prod-form-group">
                       <label>Sizes</label>
                       <div className="prod-size-list">
@@ -592,11 +551,11 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                       </button>
                     </div>
 
-                    {/* Media */}
+                    {/* MEDIA */}
                     <div className="prod-form-group">
                       <label>
                         Media for {variant.color || `Color ${vIndex + 1}`}{" "}
-                        {product && "(adds to this color's existing media, up to 10 total)"}
+                        {product && "(adds to this color's existing media)"}
                       </label>
                       <div className="prod-form-image-upload">
                         {(variant.existingMedia.length > 0 || variant.pendingPreviews.length > 0) && (
