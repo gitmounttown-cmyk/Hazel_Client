@@ -1,8 +1,3 @@
-/* ============================================================
-   HAZEL AUTH
-   COLOR PALETTE
-   ============================================================ */
-
 :root {
   --hazel-light: #f3d9b4;
   --hazel-gold: #edc484;
@@ -16,9 +11,6 @@
   --success: #16803c;
 }
 
-/* ============================================================
-   PAGE
-   ============================================================ */
 
 .auth-page {
   min-height: 100vh;
@@ -32,9 +24,6 @@
   font-family: "Poppins", Arial, sans-serif;
 }
 
-/* ============================================================
-   LEFT IMAGE
-   ============================================================ */
 
 .auth-image-section {
   position: relative;
@@ -88,9 +77,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;       /* shows the FULL image */
+  object-fit: contain;      
   object-position: center;
-  background-color: #2b1b1b; /* fills empty space if aspect ratio differs */
+  background-color: #2b1b1b; 
 }
 
 .auth-form-section {
@@ -175,9 +164,6 @@
   font-size: 14px;
 }
 
-/* ============================================================
-   RIGHT SIDE
-   ============================================================ */
 
 .auth-form-section {
   display: flex;
@@ -191,9 +177,6 @@
   background-color: #f3d9b4;
 }
 
-/* ============================================================
-   CARD
-   ============================================================ */
 
 .auth-card {
   width: 100%;
@@ -208,10 +191,6 @@
 
   box-shadow: 0 15px 45px rgba(35, 25, 24, 0.15);
 }
-
-/* ============================================================
-   LOGO
-   ============================================================ */
 
 .hazel-logo {
   display: flex;
@@ -306,14 +285,10 @@
   left: 50%;
   transform: translateX(-50%);
   bottom: 0;
-  width: 180px; /* 👈 underline length */
-  height: 2px; /* underline thickness */
+  width: 180px; 
+  height: 2px; 
   background-color: #edc484;
 }
-
-/* ============================================================
-   FORM
-   ============================================================ */
 
 .form-group {
   margin-bottom: 20px;
@@ -327,10 +302,6 @@
   font-weight: 500;
   color: #ffffff;
 }
-
-/* ============================================================
-   MOBILE INPUT
-   ============================================================ */
 
 .mobile-input-wrapper {
   display: flex;
@@ -366,10 +337,6 @@
   color: #ffffff;
 }
 
-/* ============================================================
-   PRIMARY BUTTON
-   ============================================================ */
-
 .auth-primary-button {
   width: 100%;
   height: 50px;
@@ -394,10 +361,6 @@
   transform: none;
 }
 
-/* ============================================================
-   ERROR
-   ============================================================ */
-
 .auth-error {
   margin-bottom: 15px;
   padding: 11px;
@@ -418,9 +381,6 @@
   text-align: center;
 }
 
-/* ============================================================
-   DIVIDER
-   ============================================================ */
 
 .auth-divider {
   display: flex;
@@ -446,10 +406,6 @@
 
   background: #e5e5e5;
 }
-
-/* ============================================================
-   GOOGLE
-   ============================================================ */
 
 .google-button {
   width: 100%;
@@ -483,10 +439,6 @@
   color: #4285f4;
 }
 
-/* ============================================================
-   BENEFITS
-   ============================================================ */
-
 .auth-benefits {
   display: flex;
   justify-content: space-between;
@@ -512,10 +464,6 @@
   font-size: 9px;
 }
 
-/* ============================================================
-   OTP MOBILE
-   ============================================================ */
-
 .otp-mobile {
   text-align: center;
   padding: 13px;
@@ -535,9 +483,6 @@
   cursor: pointer;
 }
 
-/* ============================================================
-   OTP INPUT
-   ============================================================ */
 
 .otp-label {
   text-align: center;
@@ -568,9 +513,6 @@
   box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.08);
 }
 
-/* ============================================================
-   TIMER
-   ============================================================ */
 
 .otp-timer {
   text-align: center;
@@ -591,9 +533,6 @@
   cursor: pointer;
 }
 
-/* ============================================================
-   SECURITY
-   ============================================================ */
 
 .security-message {
   display: flex;
@@ -611,10 +550,6 @@
   font-size: 10px;
   line-height: 1.5;
 }
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 
 @media (max-width: 900px) {
   .auth-page {
@@ -651,9 +586,6 @@
     gap: 6px;
   }
 }
-/* ============================================================
-   GOOGLE LOGIN
-============================================================ */
 
 .google-login-container {
   width: 100%;
@@ -671,8 +603,6 @@
   display: flex;
   justify-content: center;
 }
-
-/* Loading button */
 
 .google-login-container .google-button {
   width: 100%;
@@ -796,13 +726,488 @@
   }
 }
 
+@media (min-width: 1441px) {
+  .auth-image-content {
+    padding: 100px;
+  }
+
+  .auth-image-content h1 {
+    font-size: 60px;
+  }
+
+  .auth-card {
+    max-width: 480px;
+    padding: 50px 45px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .auth-image-content {
+    padding: 60px;
+  }
+
+  .auth-image-content h1 {
+    font-size: 50px;
+  }
+
+  .auth-card {
+    max-width: 440px;
+    padding: 40px 38px;
+  }
+
+  .auth-form-section {
+    padding: 30px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .auth-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .auth-image-section {
+    display: none;
+  }
+
+  .auth-form-section {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    padding: 30px;
+    box-sizing: border-box;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 500px;
+    padding: 40px 35px;
+    box-sizing: border-box;
+  }
+
+  .auth-heading h1 {
+    font-size: 28px;
+  }
+
+  .form-group label,
+  .otp-label {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .auth-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .auth-image-section {
+    display: none;
+  }
+
+  .auth-form-section {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    padding: 25px;
+    box-sizing: border-box;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 38px 30px;
+    box-sizing: border-box;
+  }
+
+  .brand-logo {
+    height: 60px;
+    width: 95px;
+  }
+
+  .auth-heading {
+    margin-bottom: 25px;
+  }
+
+  .auth-heading h1 {
+    font-size: 26px;
+  }
+
+  .auth-heading p {
+    font-size: 14px;
+  }
+
+  .form-group label,
+  .otp-label {
+    font-size: 16px;
+  }
+
+  .mobile-input-wrapper {
+    height: 50px;
+  }
+
+  .auth-primary-button {
+    height: 48px;
+    font-size: 17px;
+  }
+
+  .google-login-container .google-button {
+    height: 44px;
+  }
+
+  .otp-input {
+    width: 42px;
+    height: 48px;
+  }
+
+  .auth-benefits {
+    margin-top: 25px;
+    padding-top: 20px;
+  }
+}
+
+@media (min-width: 376px) and (max-width: 480px) {
+  .auth-page {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .auth-image-section {
+    display: none;
+  }
+
+  .auth-form-section {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    padding: 18px;
+    box-sizing: border-box;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 30px 20px;
+    box-sizing: border-box;
+  }
+
+  .brand-logo {
+    height: 55px;
+    width: 90px;
+  }
+
+  .hazel-logo {
+    margin-bottom: 25px;
+  }
+
+  .auth-heading {
+    margin-bottom: 22px;
+  }
+
+  .auth-heading h1 {
+    font-size: 22px;
+  }
+
+  .auth-heading p {
+    font-size: 13px;
+  }
+
+  .login-tab::after {
+    width: 150px;
+  }
+
+  .form-group {
+    margin-bottom: 17px;
+  }
+
+  .form-group label,
+  .otp-label {
+    font-size: 15px;
+  }
+
+  .mobile-input-wrapper {
+    height: 48px;
+  }
+
+  .country-code {
+    padding: 0 11px;
+  }
+
+  .mobile-input-wrapper input {
+    padding: 0 11px;
+    font-size: 13px;
+  }
+
+  .auth-primary-button {
+    height: 47px;
+    font-size: 16px;
+  }
+
+  .google-login-container .google-button {
+    height: 43px;
+    font-size: 13px;
+  }
+
+  .auth-divider {
+    margin: 18px 0;
+  }
+
+  .otp-input-container {
+    gap: 5px;
+  }
+
+  .otp-input {
+    width: 39px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .auth-benefits {
+    margin-top: 22px;
+    padding-top: 18px;
+  }
+
+  .auth-benefits small {
+    font-size: 8px;
+  }
+
+  .security-message {
+    margin-top: 20px;
+  }
+}
+
+
+/* Mobile - Small */
+@media (max-width: 375px) {
+  .auth-page {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .auth-image-section {
+    display: none;
+  }
+
+  .auth-form-section {
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 25px 16px;
+    box-sizing: border-box;
+    border-radius: 10px;
+  }
+
+  .brand-logo {
+    height: 50px;
+    width: 82px;
+  }
+
+  .hazel-logo {
+    margin-bottom: 22px;
+  }
+
+  .auth-heading {
+    margin-bottom: 20px;
+  }
+
+  .auth-heading h1 {
+    font-size: 20px;
+  }
+
+  .auth-heading p {
+    font-size: 12px;
+  }
+
+  .login-tab {
+    padding-bottom: 12px;
+  }
+
+  .login-tab::after {
+    width: 130px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label,
+  .otp-label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .mobile-input-wrapper {
+    height: 45px;
+  }
+
+  .country-code {
+    padding: 0 9px;
+    font-size: 13px;
+  }
+
+  .mobile-input-wrapper input {
+    padding: 0 9px;
+    font-size: 12px;
+  }
+
+  .auth-primary-button {
+    height: 45px;
+    font-size: 15px;
+  }
+
+  .google-login-container .google-button {
+    height: 41px;
+    font-size: 12px;
+  }
+
+  .auth-divider {
+    margin: 16px 0;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .otp-input-container {
+    gap: 4px;
+  }
+
+  .otp-input {
+    width: 36px;
+    height: 42px;
+    font-size: 17px;
+  }
+
+  .otp-timer {
+    font-size: 11px;
+  }
+
+  .auth-benefits {
+    margin-top: 18px;
+    padding-top: 15px;
+  }
+
+  .auth-benefits span {
+    font-size: 16px;
+  }
+
+  .auth-benefits small {
+    font-size: 7px;
+  }
+
+  .security-message {
+    margin-top: 18px;
+    padding: 10px;
+  }
+
+  .security-message p {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 320px) {
+  .auth-form-section {
+    padding: 8px;
+  }
+
+  .auth-card {
+    padding: 22px 13px;
+  }
+
+  .auth-heading h1 {
+    font-size: 18px;
+  }
+
+  .auth-heading p {
+    font-size: 11px;
+  }
+
+  .otp-input-container {
+    gap: 3px;
+  }
+
+  .otp-input {
+    width: 33px;
+    height: 40px;
+  }
+
+  .auth-benefits small {
+    font-size: 6px;
+  }
+}
+
+
+@media (min-width: 769px) {
+  .hazel-dev-otp-popup {
+    margin-right: 70px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .hazel-dev-otp-popup {
+    width: 280px;
+    height: auto;
+    min-height: 200px;
+    margin-right: 0;
+  }
+}
+
 @media (max-width: 480px) {
+  .hazel-dev-otp-overlay {
+    padding: 15px;
+    margin-right: 0;
+  }
+
   .hazel-dev-otp-popup {
     width: 100%;
-    padding: 25px 20px;
+    max-width: 340px;
+    height: auto;
+    min-height: 190px;
+    margin-right: 0;
+    padding: 22px 18px;
+  }
+
+  .hazel-dev-otp-popup h2 {
+    font-size: 18px;
+  }
+
+  .hazel-dev-otp-popup p {
+    font-size: 12px;
   }
 
   .hazel-dev-otp-code {
-    font-size: 26px;
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+
+  .hazel-dev-otp-button {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 320px) {
+  .hazel-dev-otp-popup {
+    max-width: 290px;
+    padding: 20px 15px;
+  }
+
+  .hazel-dev-otp-code {
+    font-size: 21px;
+    letter-spacing: 3px;
   }
 }
