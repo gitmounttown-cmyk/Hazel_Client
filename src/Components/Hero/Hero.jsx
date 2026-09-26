@@ -1,36 +1,50 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./Hero.css";
 
-import slide1 from "../../assets/Heroslide/slide1.png";
-import slide2 from "../../assets/Heroslide/slide2.jpg";
-import slide3 from "../../assets/Heroslide/slide3.jpg";
-import slide4 from "../../assets/Heroslide/slide4.jpg";
-
-const slides = [
-  { id: 1, tag: "PREMIUM COTTON NIGHTWEAR", image: slide1 },
-  { id: 2, tag: "PREMIUM COTTON NIGHTWEAR", image: slide2 },
-  { id: 3, tag: "PREMIUM COTTON NIGHTWEAR", image: slide3 },
-  { id: 4, tag: "PREMIUM COTTON NIGHTWEAR", image: slide4 },
-];
-
 const Hero = () => {
+  const [slides, setSlides] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const response = await axios.get("http://localhost:5004/api/hero");
+        if (response.data.success && response.data.data.length > 0) {
+          setSlides(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch hero slides:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSlides();
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-    }, 2000);
+    }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
+
+  if (loading || slides.length === 0) {
+    return <section className="hero-section loading"></section>;
+  }
+
+  const currentSlide = slides[currentIndex] || slides[0];
 
   return (
     <section className="hero-section">
       <div className="hero-background-wrapper">
         {slides.map((slide, index) => (
           <img
-            key={slide.id}
+            key={slide._id}
             src={slide.image}
             alt="Hero Slide"
             className={`hero-bg-img ${index === currentIndex ? "active" : ""}`}
@@ -40,7 +54,7 @@ const Hero = () => {
 
       <div className="hero-container">
         <div className="hero-text-content">
-          <span className="hero-tag">{slides[currentIndex].tag}</span>
+          <span className="hero-tag">{currentSlide.tag}</span>
 
           <h1 className="hero-title1">
             Comfort That Feels Beautiful.
@@ -57,11 +71,11 @@ const Hero = () => {
               <span className="mobile-text">SHOP</span>
             </button>
             <button className="btn-explore" onClick={() => navigate("/shop")}>
-               <span className="desktop-text">
-              EXPLORE COLLECTIONS <span className="arrow-icon">→</span>
+              <span className="desktop-text">
+                EXPLORE COLLECTIONS <span className="arrow-icon">→</span>
               </span>
               <span className="mobile-text">
-              EXPLORE <span className="arrow-icon">→</span>
+                EXPLORE <span className="arrow-icon">→</span>
               </span>
             </button>
           </div>

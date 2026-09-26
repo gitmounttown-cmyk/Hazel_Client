@@ -34,7 +34,7 @@ import NewArrival from "../Pages/admin/newarrival/NewArrival";
 import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
 import AdminTrendingProducts from "../Pages/admin/admintrendingproducts/admintrendingproducts";
-
+import AdminHero from "../Pages/admin/hero/AdminHero";
 // Import your AccountOverview page component
 import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
 
@@ -103,7 +103,7 @@ const AppRoutes = () => {
           <Route path="/admin/newArrivals" element={<NewArrival />} />
           <Route path="/admin/addresses" element={<Address />} />
           <Route path="/admin/reviews" element={<Review />} />
-
+           <Route path="/admin/hero-slider" element={<AdminHero />} />
           <Route path="/admin/myprofile" element={<Profile />} />
           <Route
             path="/admin/trending-products"
