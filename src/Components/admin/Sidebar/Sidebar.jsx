@@ -44,7 +44,7 @@ const navConfig = [
     icon: Archive,
     children: [
       { label: "Banners", icon: Image, path: "/admin/banners" },
-
+      { label: "Hero Slider", icon: Image, path: "/admin/hero-slider" },
       {
         label: "Trending Products",
         icon: CreditCard,
