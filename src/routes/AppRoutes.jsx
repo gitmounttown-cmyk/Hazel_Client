@@ -37,6 +37,7 @@ import AdminTrendingProducts from "../Pages/admin/admintrendingproducts/admintre
 
 // Import your AccountOverview page component
 import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
+import Video from "../Pages/admin/videos/Video";
 
 const AppRoutes = () => {
   return (
@@ -109,6 +110,7 @@ const AppRoutes = () => {
             path="/admin/trending-products"
             element={<AdminTrendingProducts />}
           />
+          <Route path="/admin/videos" element={<Video />} />
           {/* add more admin routes here, all under this same AdminLayout wrapper */}
         </Route>
 

@@ -50,6 +50,7 @@ const navConfig = [
         icon: CreditCard,
         path: "/admin/trending-products",
       },
+      { label: "Videos", icon: CreditCard, path: "/admin/videos" },
     ],
   },
   { label: "Orders", icon: ClipboardList, path: "/admin/orders" },
