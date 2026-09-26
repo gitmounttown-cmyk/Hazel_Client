@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { getHeroSlides, getImageUrl } from "../../Services/heroService";
 import "./Hero.css";
 
 const Hero = () => {
@@ -12,9 +12,9 @@ const Hero = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await axios.get("http://localhost:5004/api/hero");
-        if (response.data.success && response.data.data.length > 0) {
-          setSlides(response.data.data);
+        const response = await getHeroSlides();
+        if (response.success && response.data.length > 0) {
+          setSlides(response.data);
         }
       } catch (error) {
         console.error("Failed to fetch hero slides:", error);
@@ -29,7 +29,7 @@ const Hero = () => {
     if (slides.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-    }, 4000);
+    }, 2500);
     return () => clearInterval(interval);
   }, [slides.length]);
 
@@ -42,14 +42,17 @@ const Hero = () => {
   return (
     <section className="hero-section">
       <div className="hero-background-wrapper">
-        {slides.map((slide, index) => (
-          <img
-            key={slide._id}
-            src={slide.image}
-            alt="Hero Slide"
-            className={`hero-bg-img ${index === currentIndex ? "active" : ""}`}
-          />
-        ))}
+        {slides.map((slide, index) => {
+          const imageUrl = getImageUrl(slide.image);
+          return (
+            <img
+              key={slide._id}
+              src={imageUrl}
+              alt="Hero Slide"
+              className={`hero-bg-img ${index === currentIndex ? "active" : ""}`}
+            />
+          );
+        })}
       </div>
 
       <div className="hero-container">
