@@ -106,10 +106,11 @@ const NewArrivals = () => {
             const descriptionItemDetails =
               product.description?.itemDetails || "";
             const description = descriptionItemDetails || "";
-
+            //check null,undefined,empty and 0
             const price =
               variant?.discountPrice !== null &&
-              variant?.discountPrice !== undefined
+              variant?.discountPrice !== undefined &&
+              variant?.discountPrice !== 0
                 ? variant.discountPrice
                 : (variant?.price ?? product?.price ?? 0);
 
