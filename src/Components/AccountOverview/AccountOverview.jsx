@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosInstance";
 import "./AccountOverview.css";
 
 export default function AccountOverview() {
@@ -11,22 +12,16 @@ export default function AccountOverview() {
   });
   const [loading, setLoading] = useState(true);
 
-
   const [currentView, setCurrentView] = useState("overview");
-
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
     email: "",
   });
-  const [isPhoneEditable, setIsPhoneEditable] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
 
   const [addresses, setAddresses] = useState([]);
 
- 
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   
@@ -39,7 +34,7 @@ export default function AccountOverview() {
     city: "",
     state: "",
     pincode: "",
-    addressType: "home",
+    addressType: "Home",
   });
 
   useEffect(() => {
@@ -53,7 +48,10 @@ export default function AccountOverview() {
           phone: parsedUser.phone || parsedUser.mobileNumber || "",
         };
         setUser(userData);
-        setFormData(userData);
+        setFormData({
+          name: userData.name,
+          email: userData.email,
+        });
       } catch (error) {
         console.error("Failed to parse stored user:", error);
       }
@@ -66,18 +64,10 @@ export default function AccountOverview() {
     setLoading(false);
   }, [navigate]);
 
- 
   const fetchAddresses = async () => {
-    const token = localStorage.getItem("hazelToken");
-    if (!token) return;
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/addresses/all`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const result = await response.json();
+      const response = await axiosInstance.get("/addresses/all");
+      const result = response.data;
       if (result.success) {
         setAddresses(result.addresses || []);
       }
@@ -86,45 +76,47 @@ export default function AccountOverview() {
     }
   };
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRequestOtp = async () => {
-    if (!isPhoneEditable) {
-      setIsPhoneEditable(true);
-    } else {
-      try {
-        setOtpSent(true);
-        alert(`OTP sent successfully to ${formData.phone}`);
-      } catch (err) {
-        console.error("Failed to send OTP", err);
-      }
-    }
-  };
-
-
-  const handleSaveChanges = (e) => {
+  const handleSaveChanges = async (e) => {
     e.preventDefault();
-    setUser(formData);
-    const storedUser = localStorage.getItem("hazelUser");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
+
+    try {
+      await axiosInstance.put("/users/update/profile", {
+        name: formData.name,
+        email: formData.email,
+      });
+
       const updatedUser = { 
-        ...parsedUser, 
+        ...user, 
         name: formData.name, 
         email: formData.email, 
-        phone: formData.phone 
       };
-      localStorage.setItem("hazelUser", JSON.stringify(updatedUser));
-    }
-    setIsEditModalOpen(false);
-    setIsPhoneEditable(false);
-    setOtpSent(false);
-  };
+      setUser(updatedUser);
 
+      const storedUser = localStorage.getItem("hazelUser");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        const newStoredUser = { 
+          ...parsedUser, 
+          name: formData.name, 
+          fullName: formData.name,
+          email: formData.email,
+        };
+        localStorage.setItem("hazelUser", JSON.stringify(newStoredUser));
+        window.dispatchEvent(new Event("storage"));
+      }
+
+      setIsEditModalOpen(false);
+      alert("Profile updated successfully in database!");
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      alert("Failed to save changes to database.");
+    }
+  };
 
   const handleOpenAddAddress = () => {
     setEditingAddressId(null);
@@ -137,7 +129,7 @@ export default function AccountOverview() {
       city: "",
       state: "",
       pincode: "",
-      addressType: "home",
+      addressType: "Home",
     });
     setIsAddressModalOpen(true);
   };
@@ -153,7 +145,7 @@ export default function AccountOverview() {
       city: addr.city || "",
       state: addr.state || "",
       pincode: addr.pincode || "",
-      addressType: addr.addressType || "home",
+      addressType: addr.addressType || "Home",
     });
     setIsAddressModalOpen(true);
   };
@@ -163,28 +155,19 @@ export default function AccountOverview() {
     setAddressFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const handleSaveAddress = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("hazelToken");
-    if (!token) return;
 
     try {
-      const url = editingAddressId
-        ? `${import.meta.env.VITE_API_URL}/addresses/update/${editingAddressId}`
-        : `${import.meta.env.VITE_API_URL}/addresses/create`;
+      let response;
+      if (editingAddressId) {
+        response = await axiosInstance.put(`/addresses/update/${editingAddressId}`, addressFormData);
+      } else {
+        response = await axiosInstance.post("/addresses/create", addressFormData);
+      }
 
-      const method = editingAddressId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(addressFormData),
-      });
-
-      const result = await response.json();
+      const result = response.data;
       if (result.success) {
         fetchAddresses();
         setIsAddressModalOpen(false);
@@ -193,21 +176,14 @@ export default function AccountOverview() {
       }
     } catch (err) {
       console.error("Error saving address:", err);
+      alert("Failed to save address to database.");
     }
   };
 
   const handleRemoveAddress = async (id) => {
-    const token = localStorage.getItem("hazelToken");
-    if (!token) return;
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/addresses/delete/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const result = await response.json();
+      const response = await axiosInstance.delete(`/addresses/delete/${id}`);
+      const result = response.data;
       if (result.success) {
         fetchAddresses();
       }
@@ -217,17 +193,9 @@ export default function AccountOverview() {
   };
 
   const handleSetDefaultAddress = async (id) => {
-    const token = localStorage.getItem("hazelToken");
-    if (!token) return;
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/addresses/${id}/default`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const result = await response.json();
+      const response = await axiosInstance.put(`/addresses/default/${id}`);
+      const result = response.data;
       if (result.success) {
         fetchAddresses();
       }
@@ -265,7 +233,10 @@ export default function AccountOverview() {
           <div className="info-card">
             <div className="card-header-flex">
               <h3 className="card-title">Your details</h3>
-              <button className="btn-text-link" onClick={() => setIsEditModalOpen(true)}>
+              <button className="btn-text-link" onClick={() => {
+                setFormData({ name: user.name, email: user.email });
+                setIsEditModalOpen(true);
+              }}>
                 Edit details &rarr;
               </button>
             </div>
@@ -285,7 +256,7 @@ export default function AccountOverview() {
 
             <div className="detail-group">
               <span className="detail-label">EMAIL</span>
-              <p className="detail-value">{user.email}</p>
+              <p className="detail-value">{user.email || "Not provided"}</p>
             </div>
           </div>
 
@@ -391,22 +362,6 @@ export default function AccountOverview() {
               </div>
 
               <div className="modal-field">
-                <label className="modal-label">MOBILE NUMBER</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={`modal-input ${!isPhoneEditable ? "disabled-bg" : ""}`}
-                  disabled={!isPhoneEditable}
-                  required
-                />
-                <span className="change-number-link" onClick={handleRequestOtp}>
-                  {!isPhoneEditable ? "Change number →" : otpSent ? "Resend OTP →" : "Send OTP →"}
-                </span>
-              </div>
-
-              <div className="modal-field">
                 <label className="modal-label">EMAIL ADDRESS <span className="optional-text">(optional)</span></label>
                 <input
                   type="email"
@@ -421,11 +376,7 @@ export default function AccountOverview() {
                 <button
                   type="button"
                   className="modal-btn-cancel"
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setIsPhoneEditable(false);
-                    setOtpSent(false);
-                  }}
+                  onClick={() => setIsEditModalOpen(false)}
                 >
                   Cancel
                 </button>
@@ -550,9 +501,9 @@ export default function AccountOverview() {
                   onChange={handleAddressInputChange}
                   className="modal-input modal-select"
                 >
-                  <option value="home">Home</option>
-                  <option value="work">Work</option>
-                  <option value="other">Other</option>
+                  <option value="Home">Home</option>
+                  <option value="Work">Work</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 
