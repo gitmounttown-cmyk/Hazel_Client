@@ -87,14 +87,14 @@ const Footer = () => {
   <span>+91 86673 01625</span>
 </a>
 
-          <a href="mailto:support@hazel.co.in">
+          <a href="mailto:hazelcart.com@gmail.com">
             <span className="contact-icon">
               <svg viewBox="0 0 24 24">
                 <rect x="3" y="5" width="18" height="14" rx="1" />
                 <path d="m4 7 8 6 8-6" />
               </svg>
             </span>
-            <span>support@hazel.co.in</span>
+            <span>hazelcart.com@gmail.com</span>
           </a>
         </div>
       </div>

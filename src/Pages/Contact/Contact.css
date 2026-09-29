@@ -301,7 +301,11 @@ html {
   color: var(--contact-black);
   opacity: 0.6;
 }
-
+a.contact-channel-item {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
 /* ---------------- BOTTOM CTA BANNER ---------------- */
 .contact-footer-banner {
   background-color: var(--contact-burgundy);

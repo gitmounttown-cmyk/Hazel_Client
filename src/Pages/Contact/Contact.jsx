@@ -116,26 +116,39 @@ const ContactPage = () => {
 
       {/* DIRECT CONTACT CHANNELS */}
       <section className="contact-channels-bar">
-        <div className="contact-channel-item">
+        <a
+          className="contact-channel-item"
+          href="https://wa.me/918667301625"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <h3>WhatsApp</h3>
-          <p className="contact-channel-primary">+1 (555) 234 8890</p>
+          <p className="contact-channel-primary">+91 86673 01625</p>
           <p className="contact-channel-secondary">Avg. response: 15 mins</p>
-        </div>
-        <div className="contact-channel-item">
+        </a>
+
+        <a className="contact-channel-item" href="tel:+918667301625">
           <h3>Call Us</h3>
-          <p className="contact-channel-primary">+1 (555) LUNA LACE</p>
+          <p className="contact-channel-primary">+91 86673 01625</p>
           <p className="contact-channel-secondary">Mon-Fri, 9am - 6pm EST</p>
-        </div>
-        <div className="contact-channel-item">
+        </a>
+
+        <a className="contact-channel-item" href="mailto:hazelcart.com@gmail.com">
           <h3>Email</h3>
-          <p className="contact-channel-primary">support@lunalace.com</p>
+          <p className="contact-channel-primary">hazelcart.com@gmail.com</p>
           <p className="contact-channel-secondary">Always here to listen</p>
-        </div>
-        <div className="contact-channel-item">
+        </a>
+
+        <a
+          className="contact-channel-item"
+          href="https://www.instagram.com/hazelcart.com1?stkn=MWxiOHRpbm81Mmk5bw=="
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <h3>Instagram</h3>
-          <p className="contact-channel-primary">@lunaandlace</p>
+          <p className="contact-channel-primary">@hazelcart.com1</p>
           <p className="contact-channel-secondary">Slide into our DMs</p>
-        </div>
+        </a>
       </section>
 
       {/* BOTTOM CTA BANNER */}
@@ -201,7 +214,7 @@ const ContactPage = () => {
                     id="contact-phone"
                     name="phone"
                     required
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 98765 43210"
                     value={formData.phone}
                     onChange={handleInputChange}
                   />

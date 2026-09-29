@@ -222,7 +222,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
 }
 
 /* ---------------- PRODUCT CARD (FULL IMAGE) ---------------- */
@@ -297,9 +297,10 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 6px;
 }
+
 
 .card-name {
   color: #edc484;
@@ -307,9 +308,11 @@
   font-weight: 600;
   margin: 0;
   font-family: serif;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  line-height: 1.3;
 }
 
 .card-subtitle {
