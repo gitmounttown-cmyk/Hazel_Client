@@ -172,11 +172,39 @@ const handleCloseOtpPopup = () => {
           );
         }
 
-        // Save user
+        // =====================================================
+        // SAVE USER (Preserves custom name if already edited!)
+        // =====================================================
         if (response.user) {
+          const existingUserStr = localStorage.getItem("hazelUser");
+          let customName = "";
+
+          if (existingUserStr) {
+            try {
+              const parsedExisting = JSON.parse(existingUserStr);
+              // Preserve name if phone matches or general session exists
+              if (
+                parsedExisting.phone === mobileNumber || 
+                parsedExisting.mobileNumber === mobileNumber ||
+                parsedExisting.name && parsedExisting.name !== "Customer"
+              ) {
+                customName = parsedExisting.name || parsedExisting.fullName;
+              }
+            } catch (err) {
+              console.error("Error reading existing user:", err);
+            }
+          }
+
+          const finalUserToSave = {
+            ...response.user,
+            name: customName || response.user.name || "Customer",
+            fullName: customName || response.user.fullName || response.user.name || "Customer",
+            phone: response.user.phone || response.user.mobileNumber || mobileNumber
+          };
+
           localStorage.setItem(
             "hazelUser",
-            JSON.stringify(response.user)
+            JSON.stringify(finalUserToSave)
           );
         }
 
