@@ -189,6 +189,8 @@
   line-height: 1.5;
   color: #4f4f4f;
   margin: 10px 0 0;
+  white-space: pre-line;
+  line-height: 1.7;
 }
 
 .pp-rating {

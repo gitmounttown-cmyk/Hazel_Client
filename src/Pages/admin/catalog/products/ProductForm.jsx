@@ -57,6 +57,7 @@ const emptyVariant = () => ({
   existingMedia: [],
   pendingFiles: [],
   pendingPreviews: [],
+  details: []
 });
 
 const variantsFromProduct = (product) => {
@@ -90,6 +91,13 @@ const variantsFromProduct = (product) => {
     existingMedia: v.media || [],
     pendingFiles: [],
     pendingPreviews: [],
+    details: v.details?.length > 0
+      ? v.details.map((d) => ({
+          localId: nextLocalId(),
+          key: d.key || "",
+          value: d.value || "",
+        }))
+      : [],
   }));
 };
 
@@ -226,6 +234,10 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
           isActive: s.isActive,
         })),
       media: v.existingMedia,
+      details: (v.details || []).filter((d) => d.key && d.value).map((d) => ({
+        key: d.key,
+        value: d.value,
+      })),
     }));
 
     const formData = new FormData();
@@ -258,6 +270,61 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
       setSubmitting(false);
     }
   };
+
+  const addDetail = (vIndex) => {
+  setVariants((prev) =>
+    prev.map((variant, index) =>
+      index === vIndex
+        ? {
+            ...variant,
+            details: [
+              ...(variant.details || []),
+              {
+                localId: `detail-${Date.now()}-${Math.random()}`,
+                key: "",
+                value: "",
+              },
+            ],
+          }
+        : variant
+    )
+  );
+};
+
+const updateDetailField = (vIndex, dIndex, field, value) => {
+  setVariants((prev) =>
+    prev.map((variant, index) =>
+      index === vIndex
+        ? {
+            ...variant,
+            details: (variant.details || []).map((detail, index2) =>
+              index2 === dIndex
+                ? {
+                    ...detail,
+                    [field]: value,
+                  }
+                : detail
+            ),
+          }
+        : variant
+    )
+  );
+};
+
+const removeDetail = (vIndex, dIndex) => {
+  setVariants((prev) =>
+    prev.map((variant, index) =>
+      index === vIndex
+        ? {
+            ...variant,
+            details: (variant.details || []).filter(
+              (_, index2) => index2 !== dIndex
+            ),
+          }
+        : variant
+    )
+  );
+};
 
   return (
     <div className="prod-form-overlay">
@@ -391,7 +458,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                       </div>
                     </div>
 
-                    <div className="prod-form-row">
+                    {/* <div className="prod-form-row">
                       <div className="prod-form-group">
                         <label>Fabric</label>
                         <input
@@ -436,6 +503,71 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                           value={variant.pocket}
                           onChange={(e) => updateVariantField(vIndex, "pocket", e.target.value)}
                         />
+                      </div>
+                    </div> */}
+
+                    {/* PRODUCT DETAILS */}
+                    <div className="prod-form-group">
+                      <label>Product Details</label>
+
+                      <div className="prod-details-section">
+
+                        {(variant.details || []).map((detail, dIndex) => (
+                          <div
+                            className="prod-detail-row"
+                            key={detail.localId || `detail-${dIndex}`}
+                          >
+
+                            {/* KEY */}
+                            <input
+                              type="text"
+                              value={detail.key}
+                              onChange={(e) =>
+                                updateDetailField(
+                                  vIndex,
+                                  dIndex,
+                                  "key",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Key e.g. Fabric"
+                            />
+
+                            {/* VALUE */}
+                            <input
+                              type="text"
+                              value={detail.value}
+                              onChange={(e) =>
+                                updateDetailField(
+                                  vIndex,
+                                  dIndex,
+                                  "value",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Value e.g. Pure Cambric Cotton"
+                            />
+
+                            {/* REMOVE */}
+                            <button
+                              type="button"
+                              className="prod-detail-remove-btn"
+                              onClick={() => removeDetail(vIndex, dIndex)}
+                            >
+                              &times;
+                            </button>
+
+                          </div>
+                        ))}
+
+                        <button
+                          type="button"
+                          className="prod-add-detail-btn"
+                          onClick={() => addDetail(vIndex)}
+                        >
+                          + Add Product Detail
+                        </button>
+
                       </div>
                     </div>
 

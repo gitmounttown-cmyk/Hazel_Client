@@ -166,7 +166,8 @@ function useShopData() {
               ? `${firstVariant.fabric} • Hand Block Print`
               : "Cambric Cotton • Hand Block Print",
             rating: item.rating || 4.2,
-            price: Number(price),
+            price: Number(firstVariant.price),
+            discountPrice: Number(firstVariant.discountPrice),
             image: rawImage ? imageUrl : "",
             categoryId: item.categoryId?._id || null,
           };
@@ -449,7 +450,26 @@ function ProductCard({ product, navigate }) {
         <p className="card-rating" title={`Rating: ${product.rating}`}>
           {product.rating} ★
         </p>
-        <p className="card-price">₹{product.price.toLocaleString("en-IN")}</p>
+        {/* <p className="card-price">₹{product.discountPrice?.toLocaleString("en-IN")}</p>
+        <p className="card-price">₹{product.price?.toLocaleString("en-IN")}</p> */}
+
+        <div className="card-price">
+          {product.discountPrice > 0 ? (
+            <>
+              <span className="discount-price">
+                ₹{product.discountPrice.toLocaleString("en-IN")}
+              </span>
+
+              <span className="original-price">
+                ₹{product.price?.toLocaleString("en-IN")}
+              </span>
+            </>
+          ) : (
+            <span className="regular-price">
+              ₹{product.price?.toLocaleString("en-IN")}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

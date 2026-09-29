@@ -601,18 +601,30 @@ export default function ProductPage() {
     productDetails?.variants?.find((variant) => variant.isActive) ||
     productDetails?.variants?.[0];
 
-  const DETAILS = [
-    ["Fabric", selectedVariant?.fabric || "-"],
-    ["Feel", selectedVariant?.feel || "-"],
-    ["Lining", selectedVariant?.lining || "-"],
-    ["Sleeves", selectedVariant?.sleeves || "-"],
-    ["Finishing", selectedVariant?.finishing || "-"],
-    ["Pocket", selectedVariant?.pocket || "-"],
-    // [
-    //   "Available Sizes",
-    //   selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
-    // ],
-  ];
+  // const DETAILS = [
+  //   ["Fabric", selectedVariant?.fabric || "-"],
+  //   ["Feel", selectedVariant?.feel || "-"],
+  //   ["Lining", selectedVariant?.lining || "-"],
+  //   ["Sleeves", selectedVariant?.sleeves || "-"],
+  //   ["Finishing", selectedVariant?.finishing || "-"],
+  //   ["Pocket", selectedVariant?.pocket || "-"],
+  //   // [
+  //   //   "Available Sizes",
+  //   //   selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
+  //   // ],
+  // ];
+
+const DETAILS =
+  selectedVariant?.details
+    ?.filter(
+      (item) =>
+        item?.key &&
+        item?.value &&
+        item.value.trim() !== "" &&
+        item.value !== "N/A" &&
+        item.value !== "-"
+    )
+    .map((item) => [item.key, item.value]) || [];
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
