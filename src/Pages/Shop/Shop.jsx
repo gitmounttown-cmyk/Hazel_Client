@@ -32,11 +32,8 @@ const STATIC_FILTER_GROUPS = [
       { value: "Pure Cambric Cotton", label: "Pure Cambric Cotton" },
       { value: "Pure Cotton Flex", label: "Pure Cotton Flex" },
       { value: "Pure Cotton", label: "Pure Cotton" },
-      // { value: "Cotton Flex", label: "Cotton Flex" },
       { value: "Alpine", label: "Alpine" },
       { value: "Rayon", label: "Rayon" },
-
-      // { value: "Pure Flex Cotton", label: "Pure Flex Cotton" },
     ],
   },
   {
@@ -67,7 +64,7 @@ const SORT_OPTIONS = [
   { value: "rating", label: "Rating" },
 ];
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 24;
 const BACKEND_BASE_URL =
   import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -112,10 +109,6 @@ function useShopData() {
     setActiveFilters((prev) => ({ ...prev, ...newFilters }));
   }, [location.search]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [location.pathname]);
-
   const fetchProductsFromBackend = useCallback(
     async (appliedFilters, currentSort, currentPage) => {
       try {
@@ -123,28 +116,23 @@ function useShopData() {
         setError(null);
 
         const params = new URLSearchParams();
-        params.append("page", currentPage);
-        params.append("limit", PAGE_SIZE);
+        params.append("page", 1);
+        params.append("limit", 200);
+
+        if (appliedFilters.subCategoryId?.[0]) {
+          params.append("subCategoryId", appliedFilters.subCategoryId[0]);
+        }
+        if (appliedFilters.category?.[0]) {
+          params.append("categoryId", appliedFilters.category[0]);
+        }
 
         let effectiveSort = currentSort;
-        if (appliedFilters.price_sort) {
+        if (appliedFilters.price_sort?.[0]) {
           effectiveSort = appliedFilters.price_sort[0];
         }
-        params.append("sort", effectiveSort);
-
-        Object.entries(appliedFilters).forEach(([key, val]) => {
-          if (!val || key === "price_sort") return;
-          if (Array.isArray(val)) {
-            if (val.length > 0 && val[0]) {
-              params.append(key, val[0]);
-            }
-          } else {
-            params.append(key, val);
-          }
-        });
 
         const response = await API.get(`/products/all?${params.toString()}`);
-        const rawData = response.data?.data || [];
+        const rawData = response.data?.data || response.data?.products || [];
 
         const formatted = rawData.map((item, idx) => {
           const firstVariant = item.variants?.[0] || {};
@@ -153,11 +141,23 @@ function useShopData() {
           const imageUrl = rawImage.startsWith("http")
             ? rawImage
             : `${BACKEND_BASE_URL}${rawImage}`;
-          const price =
-            firstVariant.discountPrice ??
-            firstVariant.price ??
-            item.price ??
-            1299;
+
+            const allVariantSizes = [];
+          const allVariantFabrics = [];
+          const allVariantSleeves = [];
+
+          if (Array.isArray(item.variants)) {
+            item.variants.forEach((v) => {
+              if (v.fabric) allVariantFabrics.push(v.fabric);
+              if (v.sleeveStyle) allVariantSleeves.push(v.sleeveStyle);
+              if (Array.isArray(v.sizes)) {
+                v.sizes.forEach((sz) => {
+                  if (sz.size) allVariantSizes.push(sz.size);
+                });
+              }
+              if (v.size) allVariantSizes.push(v.size);
+            });
+          }
 
           return {
             id: item._id || idx,
@@ -166,57 +166,68 @@ function useShopData() {
               ? `${firstVariant.fabric} • Hand Block Print`
               : "Cambric Cotton • Hand Block Print",
             rating: item.rating || 4.2,
-            price: Number(firstVariant.price),
-            discountPrice: Number(firstVariant.discountPrice),
+            price: Number(firstVariant.price || item.price || 1299),
+            discountPrice: Number(firstVariant.discountPrice || 0),
             image: rawImage ? imageUrl : "",
-            categoryId: item.categoryId?._id || null,
+            categoryId: item.categoryId?._id || item.categoryId || null,
+            sizes: [...new Set(allVariantSizes)],
+            fabrics: [...new Set(allVariantFabrics)],
+            sleeves: [...new Set(allVariantSleeves)],
           };
         });
 
         setProducts(formatted);
-        setTotal(response.data?.pagination?.total || formatted.length);
       } catch (err) {
         setError("Failed to load products from server.");
       } finally {
         setLoading(false);
       }
     },
-    [],
+    []
   );
 
   useEffect(() => {
-    setPage(1);
-    fetchProductsFromBackend(activeFilters, sort, 1);
+    fetchProductsFromBackend(activeFilters, sort, page);
   }, [activeFilters, sort, fetchProductsFromBackend]);
 
   const toggleStagedCheckbox = useCallback((key, value) => {
     setStagedFilters((prev) => {
+      const currentList = prev[key] || [];
       if (key === "price_sort") {
-        return { ...prev, [key]: prev[key]?.[0] === value ? undefined : [value] };
+        return { ...prev, [key]: currentList.includes(value) ? [] : [value] };
       }
-      return { ...prev, [key]: prev[key]?.[0] === value ? undefined : [value] };
+      if (currentList.includes(value)) {
+        const updated = currentList.filter((item) => item !== value);
+        return updated.length > 0
+          ? { ...prev, [key]: updated }
+          : { ...prev, [key]: undefined };
+      } else {
+        return { ...prev, [key]: [...currentList, value] };
+      }
     });
   }, []);
 
   const applyFilters = useCallback(() => {
+    setPage(1);
     setActiveFilters({ ...stagedFilters });
   }, [stagedFilters]);
 
   const clearAll = useCallback(() => {
     setStagedFilters({});
     setActiveFilters({});
+    setPage(1);
   }, []);
 
-  const filterGroups = STATIC_FILTER_GROUPS;
-
   return {
-    filterGroups,
+    filterGroups: STATIC_FILTER_GROUPS,
     stagedFilters,
     activeFilters,
     sort,
     setSort,
+    page,
+    setPage,
     products,
-    total,
+    total: products.length,
     loading,
     error,
     toggleStagedCheckbox,
@@ -244,7 +255,7 @@ function FilterGroup({ group, filters, onToggleCheckbox }) {
         <div className="filter-group-body">
           {group.type === "checkbox" &&
             group.options.map((opt) => {
-              const checked = filters[group.key]?.[0] === opt.value;
+              const checked = filters[group.key]?.includes(opt.value) || false;
 
               return (
                 <label key={opt.value} className="checkbox-row">
@@ -364,7 +375,6 @@ function ProductCard({ product, navigate }) {
   useEffect(() => {
     const checkProductWishlist = async () => {
       if (!product?.id) return;
-
       if (!isUserLoggedIn()) {
         setIsWishlisted(false);
         return;
@@ -374,7 +384,6 @@ function ProductCard({ product, navigate }) {
         const response = await checkWishlist(product.id);
         setIsWishlisted(response?.data?.isWishlisted || false);
       } catch (err) {
-        console.error("CHECK WISHLIST ERROR:", err);
         setIsWishlisted(false);
       }
     };
@@ -392,18 +401,14 @@ function ProductCard({ product, navigate }) {
 
     try {
       setWishlistLoading(true);
-
       if (isWishlisted) {
         await removeWishlistItem(product.id);
         setIsWishlisted(false);
       } else {
-        await addToWishlist({
-          productId: product.id,
-        });
+        await addToWishlist({ productId: product.id });
         setIsWishlisted(true);
       }
     } catch (err) {
-      console.error("WISHLIST ERROR:", err);
       if (err?.response?.status === 409) {
         setIsWishlisted(true);
       }
@@ -432,7 +437,7 @@ function ProductCard({ product, navigate }) {
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           onClick={(e) => {
             e.stopPropagation();
-            handleWishlist(e);
+            handleWishlist();
           }}
           disabled={wishlistLoading}
         >
@@ -450,16 +455,12 @@ function ProductCard({ product, navigate }) {
         <p className="card-rating" title={`Rating: ${product.rating}`}>
           {product.rating} ★
         </p>
-        {/* <p className="card-price">₹{product.discountPrice?.toLocaleString("en-IN")}</p>
-        <p className="card-price">₹{product.price?.toLocaleString("en-IN")}</p> */}
-
         <div className="card-price">
           {product.discountPrice > 0 ? (
             <>
               <span className="discount-price">
                 ₹{product.discountPrice.toLocaleString("en-IN")}
               </span>
-
               <span className="original-price">
                 ₹{product.price?.toLocaleString("en-IN")}
               </span>
@@ -482,9 +483,13 @@ function ProductGrid({
   error,
   sort,
   setSort,
+  page,
+  setPage,
   onOpenMobileFilters,
   navigate,
 }) {
+  const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
+
   return (
     <main className="main">
       <div className="main-scroll">
@@ -522,6 +527,66 @@ function ProductGrid({
         </div>
 
         {loading && <p className="loading-text">Loading styles from server…</p>}
+
+        {!loading && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "16px",
+              marginTop: "40px",
+              marginBottom: "20px",
+              paddingBottom: "20px",
+              borderTop: "1px solid rgba(90, 24, 39, 0.1)",
+              paddingTop: "24px",
+            }}
+          >
+            <button
+              onClick={() => {
+                setPage((prev) => Math.max(prev - 1, 1));
+                const mainScroll = document.querySelector(".main-scroll");
+                if (mainScroll) mainScroll.scrollTop = 0;
+              }}
+              disabled={page === 1}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: page === 1 ? "#f0f0f0" : "#edc484",
+                color: page === 1 ? "#aaa" : "#5a1827",
+                border: "none",
+                borderRadius: "6px",
+                cursor: page === 1 ? "not-allowed" : "pointer",
+                fontWeight: "700",
+                fontSize: "13px",
+              }}
+            >
+              Previous
+            </button>
+            <span style={{ fontSize: "14px", fontWeight: "700", color: "#5a1827" }}>
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={() => {
+                setPage((prev) => Math.min(prev + 1, totalPages));
+                const mainScroll = document.querySelector(".main-scroll");
+                if (mainScroll) mainScroll.scrollTop = 0;
+              }}
+              disabled={page >= totalPages}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: page >= totalPages ? "#f0f0f0" : "#edc484",
+                color: page >= totalPages ? "#aaa" : "#5a1827",
+                border: "none",
+                borderRadius: "6px",
+                cursor: page >= totalPages ? "not-allowed" : "pointer",
+                fontWeight: "700",
+                fontSize: "13px",
+              }}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );
@@ -534,8 +599,9 @@ export default function ShopPage() {
     activeFilters,
     sort,
     setSort,
+    page,
+    setPage,
     products,
-    total,
     loading,
     error,
     toggleStagedCheckbox,
@@ -544,65 +610,76 @@ export default function ShopPage() {
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
   const navigate = useNavigate();
   const location = useLocation();
   const shopRef = useRef(null);
 
   const categoryId = new URLSearchParams(location.search).get("categoryId");
   const productId = new URLSearchParams(location.search).get("productId");
-// console.log('products:', products); // Debugging log
-// console.log('productId:', productId); // Debugging log
 
-  const filteredProducts = useMemo(() => {
+  const paginatedData = useMemo(() => {
     let result = [...products];
 
-    // Product ID filter
     if (productId) {
       result = result.filter(
         (product) => String(product.id) === String(productId)
       );
     }
 
-    // Category ID filter
     if (categoryId) {
       result = result.filter(
         (product) => String(product.categoryId) === String(categoryId)
       );
     }
 
-    // Price sorting
-    const priceSort = activeFilters?.price_sort?.[0];
+    const selectedSizes = activeFilters?.size;
+    if (selectedSizes && selectedSizes.length > 0) {
+      result = result.filter((product) =>
+        product.sizes.some((s) =>
+          selectedSizes.some(
+            (sel) => String(sel).trim().toUpperCase() === String(s).trim().toUpperCase()
+          )
+        )
+      );
+    }
 
+    const selectedFabrics = activeFilters?.fabric;
+    if (selectedFabrics && selectedFabrics.length > 0) {
+      result = result.filter((product) =>
+        product.fabrics.some((f) =>
+          selectedFabrics.some(
+            (sel) => String(sel).trim().toLowerCase() === String(f).trim().toLowerCase()
+          )
+        )
+      );
+    }
+
+
+    const selectedSleeves = activeFilters?.sleeve;
+    if (selectedSleeves && selectedSleeves.length > 0) {
+      result = result.filter((product) =>
+        product.sleeves.some((sl) =>
+          selectedSleeves.some(
+            (sel) => String(sel).trim().toLowerCase() === String(sl).trim().toLowerCase()
+          )
+        )
+      );
+    }
+
+    // Price Sorting
+    const priceSort = activeFilters?.price_sort?.[0] || sort;
     if (priceSort === "price_low") {
       result.sort((a, b) => Number(a.price) - Number(b.price));
     } else if (priceSort === "price_high") {
       result.sort((a, b) => Number(b.price) - Number(a.price));
     }
 
-    return result;
-  }, [products, categoryId, productId, activeFilters]);
+    const totalFiltered = result.length;
+    const startIndex = (page - 1) * PAGE_SIZE;
+    const currentProducts = result.slice(startIndex, startIndex + PAGE_SIZE);
 
-  useEffect(() => {
-    const scrollToTop = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-
-      if (shopRef.current) {
-        shopRef.current.scrollTop = 0;
-        shopRef.current.scrollLeft = 0;
-
-        const mainScroll = shopRef.current.querySelector(".main-scroll");
-        if (mainScroll) {
-          mainScroll.scrollTop = 0;
-          mainScroll.scrollLeft = 0;
-        }
-      }
-    };
-
-    requestAnimationFrame(scrollToTop);
-  }, [location.pathname, location.search]);
+    return { currentProducts, totalFiltered };
+  }, [products, categoryId, productId, activeFilters, sort, page]);
 
   return (
     <div className="shop-page">
@@ -617,12 +694,14 @@ export default function ShopPage() {
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />
         <ProductGrid
-          products={filteredProducts}
-          total={total}
+          products={paginatedData.currentProducts}
+          total={paginatedData.totalFiltered}
           loading={loading}
           error={error}
           sort={sort}
           setSort={setSort}
+          page={page}
+          setPage={setPage}
           onOpenMobileFilters={() => setMobileFiltersOpen(true)}
           navigate={navigate}
         />
