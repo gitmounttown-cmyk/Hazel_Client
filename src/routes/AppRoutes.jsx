@@ -35,6 +35,7 @@ import Address from "../Pages/admin/address/Address";
 import Review from "../Pages/admin/review/Review";
 import AdminTrendingProducts from "../Pages/admin/admintrendingproducts/admintrendingproducts";
 import AdminHero from "../Pages/admin/hero/AdminHero";
+import Inventory from "../Pages/admin/Inventory/Inventory";
 // Import your AccountOverview page component
 import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
 import Video from "../Pages/admin/videos/Video";
@@ -104,13 +105,15 @@ const AppRoutes = () => {
           <Route path="/admin/newArrivals" element={<NewArrival />} />
           <Route path="/admin/addresses" element={<Address />} />
           <Route path="/admin/reviews" element={<Review />} />
-           <Route path="/admin/hero-slider" element={<AdminHero />} />
+          <Route path="/admin/hero-slider" element={<AdminHero />} />
           <Route path="/admin/myprofile" element={<Profile />} />
           <Route
             path="/admin/trending-products"
             element={<AdminTrendingProducts />}
           />
           <Route path="/admin/videos" element={<Video />} />
+          <Route path="/admin/inventory" element={<Inventory />} />
+
           {/* add more admin routes here, all under this same AdminLayout wrapper */}
         </Route>
 
