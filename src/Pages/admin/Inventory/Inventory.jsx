@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./Inventory.css";
 
 
@@ -101,22 +101,17 @@ const PRODUCTS = [
   },
 ];
 
-const STATS = [
-  { key: "total", value: 245, label: "Total Products", icon: "box" },
-  {
-    key: "low",
-    value: 18,
-    label: "Low Stock Items",
-    icon: "boxSolid",
-    active: true,
-  },
-  { key: "out", value: 12, label: "Out of Stock", icon: "cart" },
-  { key: "pending", value: 3, label: "Pending Stock", icon: "truck" },
-];
-
-const TOTAL_ITEMS = 18;
+const CATEGORIES = ["Men", "Women", "Kids"];
+const TOTAL_ITEMS = 18; // demo total across all pages
 const PER_PAGE = 8;
 const TOTAL_PAGES = Math.ceil(TOTAL_ITEMS / PER_PAGE);
+
+const statusOf = (r) =>
+  r.stock === 0
+    ? { label: "Out of Stock", cls: "badge--out", stock: "stock--out" }
+    : r.stock < r.threshold
+      ? { label: "Low Stock", cls: "", stock: "" }
+      : { label: "In Stock", cls: "badge--ok", stock: "stock--ok" };
 
 /* ---------- Icons (inline SVG, no dependencies) ---------- */
 const p = {
@@ -189,6 +184,12 @@ function Icon({ name }) {
           <path {...p} strokeWidth="2.2" d="M12 5v14M5 12h14" />
         </svg>
       );
+    case "minus":
+      return (
+        <svg {...props}>
+          <path {...p} strokeWidth="2.2" d="M5 12h14" />
+        </svg>
+      );
     case "search":
       return (
         <svg {...props}>
@@ -232,6 +233,36 @@ function Icon({ name }) {
           <path {...p} strokeWidth="2.2" d="m9 5 7 7-7 7" />
         </svg>
       );
+    case "edit":
+      return (
+        <svg {...props}>
+          <path {...p} d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3ZM14 8l3 3" />
+        </svg>
+      );
+    case "refresh":
+      return (
+        <svg {...props}>
+          <path
+            {...p}
+            d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"
+          />
+        </svg>
+      );
+    case "trash":
+      return (
+        <svg {...props}>
+          <path
+            {...p}
+            d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"
+          />
+        </svg>
+      );
+    case "close":
+      return (
+        <svg {...props}>
+          <path {...p} strokeWidth="2" d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -259,20 +290,439 @@ function Thumb({ item }) {
   );
 }
 
+/* ---------- Generic modal (Esc / backdrop closes, locks body scroll) ---------- */
+function Modal({ title, subtitle, onClose, children }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="overlay"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
+        <div className="modal__head">
+          <div>
+            <h2 className="modal__title">{title}</h2>
+            {subtitle && <p className="modal__sub">{subtitle}</p>}
+          </div>
+          <button
+            type="button"
+            className="modal__close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <Icon name="close" />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Edit product ---------- */
+function EditModal({ product, onSave, onClose }) {
+  const [d, setD] = useState({
+    name: product.name,
+    note: product.note,
+    sku: product.sku,
+    category: product.category,
+    size: product.size,
+    threshold: String(product.threshold),
+  });
+  const [err, setErr] = useState({});
+  const set = (k) => (e) => setD((v) => ({ ...v, [k]: e.target.value }));
+
+  const submit = (e) => {
+    e.preventDefault();
+    const errors = {};
+    if (!d.name.trim()) errors.name = "Product name is required";
+    if (!d.sku.trim()) errors.sku = "SKU is required";
+    const t = Number(d.threshold);
+    if (d.threshold === "" || !Number.isInteger(t) || t < 0)
+      errors.threshold = "Enter a whole number (0 or more)";
+    setErr(errors);
+    if (Object.keys(errors).length) return;
+    onSave({
+      ...d,
+      name: d.name.trim(),
+      note: d.note.trim(),
+      sku: d.sku.trim().toUpperCase(),
+      size: d.size.trim(),
+      threshold: t,
+    });
+  };
+
+  return (
+    <Modal
+      title="Edit Product"
+      subtitle={`Update the details for ${product.name}.`}
+      onClose={onClose}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className={`field ${err.name ? "field--error" : ""}`}>
+          <label htmlFor="e-name">Product name</label>
+          <input id="e-name" value={d.name} onChange={set("name")} />
+          {err.name && <span className="field__error">{err.name}</span>}
+        </div>
+        <div className="field">
+          <label htmlFor="e-note">Description</label>
+          <input id="e-note" value={d.note} onChange={set("note")} />
+        </div>
+        <div className="grid-2">
+          <div className={`field ${err.sku ? "field--error" : ""}`}>
+            <label htmlFor="e-sku">SKU</label>
+            <input
+              id="e-sku"
+              value={d.sku}
+              onChange={set("sku")}
+              autoCapitalize="characters"
+            />
+            {err.sku && <span className="field__error">{err.sku}</span>}
+          </div>
+          <div className="field">
+            <label htmlFor="e-cat">Category</label>
+            <select id="e-cat" value={d.category} onChange={set("category")}>
+              {CATEGORIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="e-size">Size / Variant</label>
+            <input id="e-size" value={d.size} onChange={set("size")} />
+          </div>
+          <div className={`field ${err.threshold ? "field--error" : ""}`}>
+            <label htmlFor="e-th">Low stock threshold</label>
+            <input
+              id="e-th"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={d.threshold}
+              onChange={set("threshold")}
+            />
+            {err.threshold && (
+              <span className="field__error">{err.threshold}</span>
+            )}
+          </div>
+        </div>
+        <div className="modal__foot">
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn--primary">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+/* ---------- Update stock ---------- */
+function UpdateModal({ product, onSave, onClose }) {
+  const [qty, setQty] = useState(String(product.stock));
+  const n = Number(qty);
+  const valid = qty !== "" && Number.isInteger(n) && n >= 0;
+  const next = valid
+    ? statusOf({ stock: n, threshold: product.threshold })
+    : null;
+  const bump = (by) => setQty(String(Math.max(0, (valid ? n : 0) + by)));
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (valid) onSave(n);
+  };
+
+  return (
+    <Modal
+      title="Update Stock"
+      subtitle={`${product.name} · ${product.sku}`}
+      onClose={onClose}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className={`field ${!valid ? "field--error" : ""}`}>
+          <label htmlFor="u-qty">Current stock</label>
+          <div className="qty">
+            <button
+              type="button"
+              className="qty__btn"
+              onClick={() => bump(-1)}
+              aria-label="Decrease"
+            >
+              <Icon name="minus" />
+            </button>
+            <input
+              id="u-qty"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={qty}
+              onChange={(e) => setQty(e.target.value)}
+            />
+            <button
+              type="button"
+              className="qty__btn"
+              onClick={() => bump(1)}
+              aria-label="Increase"
+            >
+              <Icon name="plus" />
+            </button>
+          </div>
+          {!valid && (
+            <span className="field__error">
+              Enter a whole number (0 or more)
+            </span>
+          )}
+        </div>
+        <div className="chips" aria-label="Quick add">
+          {[5, 10, 20].map((v) => (
+            <button
+              type="button"
+              key={v}
+              className="chip"
+              onClick={() => bump(v)}
+            >
+              +{v}
+            </button>
+          ))}
+        </div>
+        <p className="hint">
+          Threshold: {product.threshold}
+          {next && (
+            <>
+              {" "}
+              · New status: <strong>{next.label}</strong>
+            </>
+          )}
+        </p>
+        <div className="modal__foot">
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn--primary" disabled={!valid}>
+            Update Stock
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+/* ---------- Delete confirm ---------- */
+function DeleteModal({ product, onConfirm, onClose }) {
+  return (
+    <Modal title="Delete Product?" onClose={onClose}>
+      <p className="modal__text">
+        <strong>{product.name}</strong> ({product.sku}) will be removed from
+        your inventory. This can't be undone.
+      </p>
+      <div className="modal__foot">
+        <button type="button" className="btn btn--ghost" onClick={onClose}>
+          Cancel
+        </button>
+        <button type="button" className="btn btn--danger" onClick={onConfirm}>
+          <Icon name="trash" />
+          <span>Delete</span>
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ---------- Add product ---------- */
+const SWATCHES = [
+  "#E8DCC8",
+  "#A3122F",
+  "#2F5D8C",
+  "#E58C9A",
+  "#231918",
+  "#D9B98F",
+  "#E3A93B",
+  "#2E6B3F",
+];
+
+function AddModal({ existingSkus, onSave, onClose }) {
+  const [d, setD] = useState({
+    name: "",
+    note: "",
+    sku: "",
+    category: CATEGORIES[0],
+    size: "",
+    stock: "",
+    threshold: "10",
+    image: "",
+  });
+  const [err, setErr] = useState({});
+  const set = (k) => (e) => setD((v) => ({ ...v, [k]: e.target.value }));
+  const isCount = (v) =>
+    v !== "" && Number.isInteger(Number(v)) && Number(v) >= 0;
+
+  const submit = (e) => {
+    e.preventDefault();
+    const errors = {};
+    const sku = d.sku.trim().toUpperCase();
+    if (!d.name.trim()) errors.name = "Product name is required";
+    if (!sku) errors.sku = "SKU is required";
+    else if (existingSkus.includes(sku)) errors.sku = "This SKU already exists";
+    if (!isCount(d.stock)) errors.stock = "Enter a whole number (0 or more)";
+    if (!isCount(d.threshold))
+      errors.threshold = "Enter a whole number (0 or more)";
+    if (d.image.trim() && !/^https?:\/\//i.test(d.image.trim()))
+      errors.image = "Use a full link starting with http(s)://";
+    setErr(errors);
+    if (Object.keys(errors).length) return;
+    onSave({
+      name: d.name.trim(),
+      note: d.note.trim(),
+      sku,
+      category: d.category,
+      size: d.size.trim() || "-",
+      stock: Number(d.stock),
+      threshold: Number(d.threshold),
+      image: d.image.trim(),
+      color: SWATCHES[Math.floor(Math.random() * SWATCHES.length)],
+    });
+  };
+
+  return (
+    <Modal
+      title="Add Product"
+      subtitle="Fill in the details to add a new product."
+      onClose={onClose}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className={`field ${err.name ? "field--error" : ""}`}>
+          <label htmlFor="a-name">Product name</label>
+          <input
+            id="a-name"
+            value={d.name}
+            onChange={set("name")}
+            placeholder="e.g. Men's Formal Shirt"
+          />
+          {err.name && <span className="field__error">{err.name}</span>}
+        </div>
+        <div className="field">
+          <label htmlFor="a-note">Description</label>
+          <input
+            id="a-note"
+            value={d.note}
+            onChange={set("note")}
+            placeholder="e.g. Cotton Regular Fit"
+          />
+        </div>
+        <div className="grid-2">
+          <div className={`field ${err.sku ? "field--error" : ""}`}>
+            <label htmlFor="a-sku">SKU</label>
+            <input
+              id="a-sku"
+              value={d.sku}
+              onChange={set("sku")}
+              autoCapitalize="characters"
+              placeholder="MS002"
+            />
+            {err.sku && <span className="field__error">{err.sku}</span>}
+          </div>
+          <div className="field">
+            <label htmlFor="a-cat">Category</label>
+            <select id="a-cat" value={d.category} onChange={set("category")}>
+              {CATEGORIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="a-size">Size / Variant</label>
+            <input
+              id="a-size"
+              value={d.size}
+              onChange={set("size")}
+              placeholder="M, 32, Free Size"
+            />
+          </div>
+          <div className={`field ${err.stock ? "field--error" : ""}`}>
+            <label htmlFor="a-stock">Current stock</label>
+            <input
+              id="a-stock"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={d.stock}
+              onChange={set("stock")}
+            />
+            {err.stock && <span className="field__error">{err.stock}</span>}
+          </div>
+          <div className={`field ${err.threshold ? "field--error" : ""}`}>
+            <label htmlFor="a-th">Low stock threshold</label>
+            <input
+              id="a-th"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={d.threshold}
+              onChange={set("threshold")}
+            />
+            {err.threshold && (
+              <span className="field__error">{err.threshold}</span>
+            )}
+          </div>
+          <div className={`field ${err.image ? "field--error" : ""}`}>
+            <label htmlFor="a-img">Image link (optional)</label>
+            <input
+              id="a-img"
+              type="url"
+              inputMode="url"
+              value={d.image}
+              onChange={set("image")}
+              placeholder="https://..."
+            />
+            {err.image && <span className="field__error">{err.image}</span>}
+          </div>
+        </div>
+        <div className="modal__foot">
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn--primary">
+            Add Product
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+/* ================== Main screen ================== */
 export default function Inventory() {
+  const [products, setProducts] = useState(PRODUCTS);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(() => new Set());
   const [page, setPage] = useState(1);
+  const [menu, setMenu] = useState(null); // { id, x, y }
+  const [modal, setModal] = useState(null); // { type, id }
+  const [toast, setToast] = useState("");
+  const triggerRef = useRef(null);
+  const firstItemRef = useRef(null);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return PRODUCTS;
-    return PRODUCTS.filter((r) =>
+    if (!q) return products;
+    return products.filter((r) =>
       [r.name, r.sku, r.category, r.note].some((v) =>
         v.toLowerCase().includes(q),
       ),
     );
-  }, [query]);
+  }, [query, products]);
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
 
@@ -293,8 +743,133 @@ export default function Inventory() {
     });
   };
 
-  const start = (page - 1) * PER_PAGE + 1;
-  const end = Math.min(page * PER_PAGE, TOTAL_ITEMS);
+  /* ----- action menu ----- */
+  const MENU_W = 184;
+  const MENU_H = 160;
+
+  const openMenu = (e, id) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    triggerRef.current = e.currentTarget;
+    const x = Math.min(
+      Math.max(8, rect.right - MENU_W),
+      window.innerWidth - MENU_W - 8,
+    );
+    let y = rect.bottom + 6;
+    if (y + MENU_H > window.innerHeight - 8)
+      y = Math.max(8, rect.top - MENU_H - 6);
+    setMenu({ id, x, y });
+  };
+
+  const closeMenu = useCallback((restoreFocus = false) => {
+    setMenu(null);
+    if (restoreFocus && triggerRef.current) triggerRef.current.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!menu) return undefined;
+    const onKey = (e) => e.key === "Escape" && closeMenu(true);
+    const onAway = () => closeMenu();
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onAway, true);
+    window.addEventListener("resize", onAway);
+    if (firstItemRef.current) firstItemRef.current.focus();
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onAway, true);
+      window.removeEventListener("resize", onAway);
+    };
+  }, [menu, closeMenu]);
+
+  const onMenuKeys = (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const items = [...e.currentTarget.querySelectorAll('[role="menuitem"]')];
+    const i = items.indexOf(document.activeElement);
+    const nextI =
+      e.key === "ArrowDown"
+        ? (i + 1) % items.length
+        : (i - 1 + items.length) % items.length;
+    items[nextI].focus();
+  };
+
+  const choose = (type) => {
+    setModal({ type, id: menu.id });
+    setMenu(null);
+  };
+
+  const closeModal = useCallback(() => {
+    setModal(null);
+    if (triggerRef.current) triggerRef.current.focus();
+  }, []);
+
+  /* ----- toast ----- */
+  useEffect(() => {
+    if (!toast) return undefined;
+    const t = setTimeout(() => setToast(""), 2800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  /* ----- mutations ----- */
+  const saveEdit = (id, data) => {
+    setProducts((list) =>
+      list.map((r) => (r.id === id ? { ...r, ...data } : r)),
+    );
+    setModal(null);
+    setToast("Product details updated");
+  };
+
+  const saveStock = (id, stock) => {
+    setProducts((list) => list.map((r) => (r.id === id ? { ...r, stock } : r)));
+    setModal(null);
+    setToast("Stock updated");
+  };
+
+  const addProduct = (data) => {
+    setProducts((list) => [{ id: Date.now(), ...data }, ...list]);
+    setQuery("");
+    setPage(1);
+    setModal(null);
+    setToast("Product added");
+  };
+
+  const removeProduct = (id) => {
+    setProducts((list) => list.filter((r) => r.id !== id));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setModal(null);
+    setToast("Product deleted");
+  };
+
+  /* ----- derived numbers ----- */
+  const net = products.length - PRODUCTS.length; // added minus deleted
+  const totalItems = TOTAL_ITEMS + net;
+  const lowCount =
+    TOTAL_ITEMS -
+    PRODUCTS.length +
+    products.filter((r) => r.stock > 0 && r.stock < r.threshold).length;
+  const outCount = 12 + products.filter((r) => r.stock === 0).length;
+
+  const STATS = [
+    { key: "total", value: 245 + net, label: "Total Products", icon: "box" },
+    {
+      key: "low",
+      value: lowCount,
+      label: "Low Stock Items",
+      icon: "boxSolid",
+      active: true,
+    },
+    { key: "out", value: outCount, label: "Out of Stock", icon: "cart" },
+    { key: "pending", value: 3, label: "Pending Stock", icon: "truck" },
+  ];
+
+  const start = totalItems === 0 ? 0 : (page - 1) * PER_PAGE + 1;
+  const end = Math.min(page * PER_PAGE, totalItems);
+
+  const modalProduct = modal ? products.find((r) => r.id === modal.id) : null;
+  const menuProduct = menu ? products.find((r) => r.id === menu.id) : null;
 
   return (
     <div className="inv">
@@ -307,11 +882,18 @@ export default function Inventory() {
               <a href="#home">Home</a>
               <span aria-hidden="true">&gt;</span>
               <a href="#inventory">Inventory</a>
-              <span aria-hidden="true">&gt;</span>
-              <span aria-current="page">Low Stock</span>
+              {/* <span aria-hidden="true">&gt;</span>
+              <span aria-current="page">Low Stock</span> */}
             </nav>
           </div>
-          <button type="button" className="btn btn--primary btn--add">
+          <button
+            type="button"
+            className="btn btn--primary btn--add"
+            onClick={(e) => {
+              triggerRef.current = e.currentTarget;
+              setModal({ type: "add" });
+            }}
+          >
             <Icon name="plus" />
             <span>Add Product</span>
           </button>
@@ -393,63 +975,70 @@ export default function Inventory() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr
-                    key={r.id}
-                    className={selected.has(r.id) ? "is-selected" : ""}
-                  >
-                    <td className="col-check">
-                      <input
-                        type="checkbox"
-                        className="check"
-                        checked={selected.has(r.id)}
-                        onChange={() => toggleOne(r.id)}
-                        aria-label={`Select ${r.name}`}
-                      />
-                    </td>
-                    <td className="col-product">
-                      <div className="product">
-                        <Thumb item={r} />
-                        <div className="product__text">
-                          <strong>{r.name}</strong>
-                          <span>{r.note}</span>
+                {rows.map((r) => {
+                  const st = statusOf(r);
+                  return (
+                    <tr
+                      key={r.id}
+                      className={selected.has(r.id) ? "is-selected" : ""}
+                    >
+                      <td className="col-check">
+                        <input
+                          type="checkbox"
+                          className="check"
+                          checked={selected.has(r.id)}
+                          onChange={() => toggleOne(r.id)}
+                          aria-label={`Select ${r.name}`}
+                        />
+                      </td>
+                      <td className="col-product">
+                        <div className="product">
+                          <Thumb item={r} />
+                          <div className="product__text">
+                            <strong>{r.name}</strong>
+                            <span>{r.note}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td data-label="SKU">{r.sku}</td>
-                    <td data-label="Category">{r.category}</td>
-                    <td data-label="Size">{r.size}</td>
-                    <td data-label="Stock" className="stock">
-                      {r.stock}
-                    </td>
-                    <td data-label="Threshold">{r.threshold}</td>
-                    <td className="col-status">
-                      <span className="badge">Low Stock</span>
-                    </td>
-                    <td className="col-action">
-                      <div className="actions">
-                        <button
-                          type="button"
-                          className="btn btn--primary btn--reorder"
-                        >
-                          Reorder
-                        </button>
-                        <button
-                          type="button"
-                          className="more"
-                          aria-label={`More options for ${r.name}`}
-                        >
-                          <Icon name="dots" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td data-label="SKU">{r.sku}</td>
+                      <td data-label="Category">{r.category}</td>
+                      <td data-label="Size">{r.size}</td>
+                      <td data-label="Stock" className={`stock ${st.stock}`}>
+                        {r.stock}
+                      </td>
+                      <td data-label="Threshold">{r.threshold}</td>
+                      <td className="col-status">
+                        <span className={`badge ${st.cls}`}>{st.label}</span>
+                      </td>
+                      <td className="col-action">
+                        <div className="actions">
+                          {/* <button
+                            type="button"
+                            className="btn btn--primary btn--reorder"
+                          >
+                            Reorder
+                          </button> */}
+                          <button
+                            type="button"
+                            className={`more ${menu && menu.id === r.id ? "is-open" : ""}`}
+                            aria-label={`More options for ${r.name}`}
+                            aria-haspopup="menu"
+                            aria-expanded={!!menu && menu.id === r.id}
+                            onClick={(e) => openMenu(e, r.id)}
+                          >
+                            <Icon name="dots" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {rows.length === 0 && (
                   <tr className="empty">
                     <td colSpan={9}>
-                      No products match “{query}”. Try a different name, SKU or
-                      category.
+                      {query
+                        ? `No products match “${query}”. Try a different name, SKU or category.`
+                        : "No products to show."}
                     </td>
                   </tr>
                 )}
@@ -459,7 +1048,7 @@ export default function Inventory() {
 
           <footer className="panel__foot">
             <p className="count">
-              Showing {start} to {end} of {TOTAL_ITEMS} items
+              Showing {start} to {end} of {totalItems} items
             </p>
             <nav className="pager" aria-label="Pagination">
               <button
@@ -495,6 +1084,86 @@ export default function Inventory() {
           </footer>
         </section>
       </div>
+
+      {/* Action menu (dropdown on desktop, bottom sheet on phones) */}
+      {menu && menuProduct && (
+        <>
+          <div className="menu-backdrop" onClick={() => closeMenu()} />
+          <div
+            className="menu"
+            role="menu"
+            aria-label={`Actions for ${menuProduct.name}`}
+            style={{ "--mx": `${menu.x}px`, "--my": `${menu.y}px` }}
+            onKeyDown={onMenuKeys}
+          >
+            <p className="menu__title">{menuProduct.name}</p>
+            <button
+              type="button"
+              role="menuitem"
+              ref={firstItemRef}
+              className="menu__item"
+              onClick={() => choose("edit")}
+            >
+              <Icon name="edit" />
+              <span>Edit</span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="menu__item"
+              onClick={() => choose("update")}
+            >
+              <Icon name="refresh" />
+              <span>Update Stock</span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="menu__item menu__item--danger"
+              onClick={() => choose("delete")}
+            >
+              <Icon name="trash" />
+              <span>Delete</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Modals */}
+      {modal && modal.type === "add" && (
+        <AddModal
+          existingSkus={products.map((r) => r.sku.toUpperCase())}
+          onClose={closeModal}
+          onSave={addProduct}
+        />
+      )}
+      {modal && modalProduct && modal.type === "edit" && (
+        <EditModal
+          product={modalProduct}
+          onClose={closeModal}
+          onSave={(data) => saveEdit(modalProduct.id, data)}
+        />
+      )}
+      {modal && modalProduct && modal.type === "update" && (
+        <UpdateModal
+          product={modalProduct}
+          onClose={closeModal}
+          onSave={(stock) => saveStock(modalProduct.id, stock)}
+        />
+      )}
+      {modal && modalProduct && modal.type === "delete" && (
+        <DeleteModal
+          product={modalProduct}
+          onClose={closeModal}
+          onConfirm={() => removeProduct(modalProduct.id)}
+        />
+      )}
+
+      {toast && (
+        <div className="toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
