@@ -3,7 +3,7 @@ import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { removeCartItem } from "../../Services/cartService";
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5004/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5004/api";
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
 const formatINR = (amount) =>

@@ -295,7 +295,7 @@ if (response.success) {
                 size="large"
                 text="continue_with"
                 shape="rectangular"
-                width="337"
+                width="305"
               />
             )}
           </div>

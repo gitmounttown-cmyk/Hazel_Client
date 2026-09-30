@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Videos.css";
-import { getVideos } from "../../Services/productService";
+// import { getVideos } from "../../Services/productService";
 import { formatCurrency } from "../../Utils/currencyFormat";
 import { useNavigate } from "react-router-dom";
+import { getVideos } from "../../Services/videoService";
 
 export default function ShopTheLookSection() {
   const [looks, setLooks] = useState([]);

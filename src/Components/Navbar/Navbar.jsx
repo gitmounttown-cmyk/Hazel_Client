@@ -74,7 +74,7 @@ const Navbar = () => {
 
     // Admin
     if (loggedInUser.role === "admin" || loggedInUser.role === "superadmin") {
-      navigate("/admin");
+      navigate("/admin/dashboard");
       return;
     }
 

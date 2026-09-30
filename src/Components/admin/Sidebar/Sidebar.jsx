@@ -50,6 +50,7 @@ const navConfig = [
         icon: CreditCard,
         path: "/admin/trending-products",
       },
+      { label: "Videos", icon: CreditCard, path: "/admin/videos" },
     ],
   },
   { label: "Orders", icon: ClipboardList, path: "/admin/orders" },
@@ -59,6 +60,21 @@ const navConfig = [
   // { label: "Banners", icon: Image, path: "/admin/banners" },
   { label: "Reviews", icon: Star, path: "/admin/reviews" },
   { label: "Payments", icon: CreditCard, path: "/admin/payments" },
+  {
+    label: "Inventory",
+    icon: Archive,
+    path: "/admin/inventory",
+    // children: [
+    //   {
+    //     label: "Stock Overview",
+    //     path: "/admin/inventory/stock",
+    //   },
+    //   {
+    //     label: "Low Stock",
+    //     path: "/admin/inventory/low-stock",
+    //   },
+    // ],
+  },
   // {
   //   label: "Reports",
   //   icon: BarChart2,

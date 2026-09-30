@@ -21,7 +21,7 @@
   font-weight: bolder;
   padding-bottom: 25px;
   padding-left: 173px;
-  color: #71431B;
+  color: #71431b;
 }
 
 .center {
@@ -30,7 +30,7 @@
 
 .section-title {
   font-family: serif;
-  color: #52131E;
+  color: #52131e;
   font-size: 46px;
   line-height: 1.3;
   margin: 0 0 20px;
@@ -67,7 +67,7 @@
 .btn-link {
   background: none;
   border: none;
-  color: #A35461;
+  color: #a35461;
   font-size: 13px;
   font-weight: 600;
   text-decoration: underline;
@@ -98,7 +98,7 @@
   font-family: serif;
   font-size: 48px;
   line-height: 1.25;
-  color: #52131E;
+  color: #52131e;
   margin: 0 0 20px;
 }
 
@@ -126,7 +126,7 @@
   justify-content: space-between;
   gap: 60px;
   padding: 100px 60px;
-  background: #F9EEDD;
+  background: #f9eedd;
 }
 
 .intro-text {
@@ -169,7 +169,7 @@
 
 .evolution {
   padding: 50px 60px 80px 121px;
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .timeline {
@@ -189,10 +189,10 @@
   flex-direction: row-reverse;
 }
 
- .timeline-image {
+.timeline-image {
   flex: 1;
   height: 350px;
-  width: 100%; 
+  width: 100%;
 }
 
 .timeline-text {
@@ -240,7 +240,7 @@
 }
 
 .manifesto {
-  background: #52131E;
+  background: #52131e;
   padding: 30px 60px 100px 60px;
 }
 
@@ -254,7 +254,7 @@
 
 .manifesto .section-title {
   font-family: serif;
-  color: #EDC484;
+  color: #edc484;
   font-size: 46px;
   margin-bottom: 60px;
 }
@@ -267,7 +267,8 @@
   margin: 0 auto;
 }
 
-.manifesto-card1, .manifesto-card3 {
+.manifesto-card1,
+.manifesto-card3 {
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -304,14 +305,14 @@
 .manifesto-title {
   padding-top: 17px;
   position: relative;
-  color: #F3D9B4;
+  color: #f3d9b4;
   font-size: 23px;
   margin: 0;
   z-index: 2;
 }
 
 .manifesto-copy {
-  color: #A2757F;
+  color: #a2757f;
   font-size: 14px;
   line-height: 1.6;
   margin: 0 auto 24px auto;
@@ -319,18 +320,19 @@
   text-align: center;
 }
 
-.manifesto-image1, .manifesto-image3 {
+.manifesto-image1,
+.manifesto-image3 {
   height: 240px;
   width: 100%;
   border-radius: 8px;
 }
-.manifesto-image2{
-    padding-top:20px;
-     height: 240px;
+
+.manifesto-image2 {
+  padding-top: 20px;
+  height: 240px;
   width: 100%;
   border-radius: 8px;
 }
-
 
 .customers {
   padding: 80px 60px;
@@ -357,27 +359,33 @@
   height: 365px;
   width: 100%;
 }
+
 .collage-tall2 {
   height: 398px;
   width: 100%;
 }
+
 .collage-tall3 {
-  height:400px;
+  height: 400px;
   width: 100%;
 }
+
 .collage-tall4 {
   height: 364px;
   width: 100%;
 }
+
 .collage-center {
   height: 781px;
   width: 480px;
 }
-.mobile-text{
-  display:none;
+
+.mobile-text {
+  display: none;
 }
-.desktop-text{
-  display:inline;
+
+.desktop-text {
+  display: inline;
 }
 
 .quote-card {
@@ -404,11 +412,10 @@
   position: relative;
   height: 800px;
   width: 100%;
-  
 }
 
 .final-cta-image {
-  background-size:contain;
+  background-size: contain;
   width: 100%;
   height: 800px;
 }
@@ -433,6 +440,7 @@
   line-height: 1.4;
   margin: 0;
 }
+
 .btn-filled1 {
   background: #780524;
   color: #fff;
@@ -450,6 +458,9 @@
   background: #431319;
 }
 
+/* =========================================================
+   DESKTOP / TABLET RESPONSIVE BREAKPOINTS
+   ========================================================= */
 @media (max-width: 1200px) {
   .hero {
     padding: 40px 40px 40px 100px;
@@ -472,13 +483,12 @@
     padding-left: 189px;
     justify-content: center;
   }
-    .hero-bg-image{
-     background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
- background-position: 0% center; 
-    height:343px;
-    width:453px;
+  .hero-bg-image {
+    background-size: cover;
+    background-position: 0% center;
+    background-repeat: no-repeat;
+    height: 343px;
+    width: 453px;
   }
   .intro,
   .evolution,
@@ -497,12 +507,12 @@
     grid-column: span 2;
     height: 320px;
   }
-   .mobile-text{
+  .mobile-text {
     display: contents;
-   }
-   .desktop-text{
-    display:none;
-   }
+  }
+  .desktop-text {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -516,14 +526,12 @@
     justify-content: center;
   }
 
-  .hero-bg-image{
-     background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
- background-position: 0% center; 
-    height:343px;
-    /* width:453px; */
-    width:100%;
+  .hero-bg-image {
+    background-size: cover;
+    background-position: 0% center;
+    background-repeat: no-repeat;
+    height: 343px;
+    width: 100%;
   }
   .btn-filled {
     width: 107px;
@@ -537,30 +545,29 @@
     letter-spacing: 0.5px;
     cursor: pointer;
     transition: background 0.3s ease;
-}
-.btn-link {
-  background: none;
-  border: none;
-  color: #A35461;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-left: 0px;
-}
-    .hero-copy {
-        padding-left: 181px;
-        font-size: 10px;
-        line-height: 1.7;
-        margin: 0 0 28px;
-        max-width: 480px;
-        Padding-right: 29px;
-    }
+  }
+  .btn-link {
+    background: none;
+    border: none;
+    color: #a35461;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 0px;
+  }
+  .hero-copy {
+    padding-left: 181px;
+    font-size: 10px;
+    line-height: 1.7;
+    margin: 0 0 28px;
+    max-width: 480px;
+    padding-right: 29px;
+  }
   .eyebrow-light {
     font-weight: bolder;
-    /* padding-bottom: 25px; */
     padding-left: 173px;
-    color: #71431B;
+    color: #71431b;
   }
   .hero-title {
     font-size: 36px;
@@ -568,13 +575,13 @@
     margin-bottom: 0.6rem;
     line-height: 1.15;
   }
-   .section-title {
+  .section-title {
     font-family: serif;
-    color: #52131E;
-    font-size:30px;
+    color: #52131e;
+    font-size: 30px;
     line-height: 1.3;
     margin: 0 0 20px;
-   }
+  }
   .intro {
     flex-direction: column;
     padding: 50px 20px;
@@ -583,7 +590,8 @@
   }
   .timeline-image {
     flex: 1;
-    height: 350px;}
+    height: 350px;
+  }
 
   .intro-images-wrapper {
     width: 100%;
@@ -601,29 +609,25 @@
     right: 20px;
     top: -20px;
   }
-.evolution {
+  .evolution {
     padding: 40px 20px;
   }
-  
+
   .timeline {
     gap: 40px;
   }
 
-  /* Force standard column stacking and reset reverse direction on mobile */
   .timeline-row,
   .timeline-row-reverse {
     flex-direction: column !important;
     gap: 15px;
   }
 
-
-
   .timeline-image {
-    height: 280px !important; /* Force a visible height on mobile devices */
+    height: 280px !important;
     min-height: 280px;
   }
 
-  /* Make sure text elements stack cleanly in a column view */
   .timeline-text {
     flex-direction: row;
     gap: 15px;
@@ -671,9 +675,9 @@
     gap: 15px;
   }
 
-  .collage-tall1, 
-  .collage-tall2, 
-  .collage-tall3, 
+  .collage-tall1,
+  .collage-tall2,
+  .collage-tall3,
   .collage-tall4 {
     height: 220px;
     width: 100%;
@@ -684,38 +688,24 @@
     width: 100%;
     max-width: 100%;
   }
-  /* .final-cta {
-    height: 350px;
-  }
-  .final-cta-title {
-    font-size: 24px;
-    padding: 0 20px;
-  }
-   .mobile-text{
-    display: contents;
-   }
-   .desktop-text{
-    display:none;
-   } */
 
-   .final-cta {
+  .final-cta {
     height: 350px;
   }
 
   .final-cta-image,
   .final-cta-overlay {
-     background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
- background-position: 20% center; 
-    height:343px;
-    width:640px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 20% center;
+    height: 343px;
+    width: 640px;
   }
   .final-cta-title {
     font-size: 17px;
     padding: 0 20px;
   }
-    .btn-filled {
+  .btn-filled {
     width: 137px;
     background: #780524;
     color: #fff;
@@ -727,12 +717,13 @@
     letter-spacing: 0.5px;
     cursor: pointer;
     transition: background 0.3s ease;
+  }
 }
-}
+
 @media (min-width: 769px) and (max-width: 1200px) {
   .hero {
     padding: 20px 20px 20px 420px;
-    width:100%;
+    width: 100%;
   }
   .hero-content {
     max-width: 560px;
@@ -764,5 +755,169 @@
     grid-column: span 1;
     height: 781px;
     width: 480px;
+  }
+}
+
+/* =========================================================
+   320px EXTRA-SMALL MOBILE FIX
+   Consolidated styling for layout, whitespace, text & buttons
+   ========================================================= */
+@media (max-width: 360px) {
+  /* 1. HERO BUTTONS & ACTION LAYOUT FIX */
+  .hero-actions {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .btn-filled,
+  .btn-filled1 {
+    width: auto !important;
+    padding: 8px 14px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.2px !important;
+    white-space: nowrap !important;
+  }
+
+  .btn-link {
+    margin-left: 0 !important;
+    font-size: 11px !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* 2. HERO TEXT SPACING & COLOR FIX */
+  .hero-title {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .hero-copy {
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    padding: 0 5px !important;
+    margin-bottom: 16px !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .hero-copy-light {
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  .eyebrow-light {
+    padding: 0 0 8px 0 !important;
+    font-size: 10px !important;
+  }
+
+  /* 3. INTRO SECTION & IMAGE LAYOUT (WHITESPACE FIXED) */
+  .intro {
+    padding: 20px 10px 30px 10px !important;
+    gap: 10px !important;
+    height: auto !important;
+  }
+
+  .intro-images-wrapper {
+    height: 210px !important;
+    min-height: 210px !important;
+    width: 100% !important;
+    position: relative !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    margin-bottom: 0px !important;
+  }
+
+  .intro-main-img {
+    width: 170px !important;
+    height: 200px !important;
+    position: absolute !important;
+    left: 60px !important;
+    top: 30px !important;
+    bottom: auto !important;
+    z-index: 2 !important;
+  }
+
+  .intro-thumb-img {
+    width: 85px !important;
+    height: 100px !important;
+    position: absolute !important;
+    left: 170px !important;
+    top: -8px !important;
+    z-index: 1 !important;
+  }
+
+  /* 4. SECTION HEADING SIZES */
+  .section-title {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+  }
+
+  .body-copy {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* 5. FINAL CTA OVERLAY & BUTTON FIX */
+  .final-cta {
+    position: relative !important;
+    width: 100% !important;
+    height: 280px !important;
+    overflow: hidden !important;
+  }
+
+  .final-cta-image,
+  .final-cta-overlay {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
+  .final-cta-overlay {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 16px !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .final-cta-title {
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 280px !important;
+    margin: 0 auto !important;
+    word-break: normal !important;
+  }
+}
+@media (max-width: 360px) {
+  /* ... keep your other 360px rules ... */
+
+  .final-cta {
+    position: relative !important;
+    width: 100% !important;
+    height: 280px !important;
+    overflow: hidden !important;
+  }
+
+  .final-cta-image,
+  .final-cta-overlay {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background-size: cover !important;
+    background-position: left center !important; /* Starts image from the beginning */
   }
 }
