@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../services/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Shop.css";
@@ -107,6 +107,7 @@ function useShopData() {
 
     setStagedFilters((prev) => ({ ...prev, ...newFilters }));
     setActiveFilters((prev) => ({ ...prev, ...newFilters }));
+    setPage(1);
   }, [location.search]);
 
   const fetchProductsFromBackend = useCallback(
@@ -116,8 +117,8 @@ function useShopData() {
         setError(null);
 
         const params = new URLSearchParams();
-        params.append("page", 1);
-        params.append("limit", 200);
+        params.append("page", currentPage);
+        params.append("limit", PAGE_SIZE);
 
         if (appliedFilters.subCategoryId?.[0]) {
           params.append("subCategoryId", appliedFilters.subCategoryId[0]);
@@ -130,9 +131,13 @@ function useShopData() {
         if (appliedFilters.price_sort?.[0]) {
           effectiveSort = appliedFilters.price_sort[0];
         }
+        params.append("sort", effectiveSort);
 
         const response = await API.get(`/products/all?${params.toString()}`);
         const rawData = response.data?.data || response.data?.products || [];
+        
+        const totalCount = response.data?.total || response.data?.totalProducts || rawData.length;
+        setTotal(totalCount);
 
         const formatted = rawData.map((item, idx) => {
           const firstVariant = item.variants?.[0] || {};
@@ -142,7 +147,7 @@ function useShopData() {
             ? rawImage
             : `${BACKEND_BASE_URL}${rawImage}`;
 
-            const allVariantSizes = [];
+          const allVariantSizes = [];
           const allVariantFabrics = [];
           const allVariantSleeves = [];
 
@@ -163,7 +168,7 @@ function useShopData() {
             id: item._id || idx,
             name: item.name || "Exclusive Item",
             subtitle: firstVariant.fabric
-              ? `${firstVariant.fabric} • Hand Block Print`
+              ? `${firstVariant.fabric} Hand Block Print`
               : "Cambric Cotton • Hand Block Print",
             rating: item.rating || 4.2,
             price: Number(firstVariant.price || item.price || 1299),
@@ -188,7 +193,7 @@ function useShopData() {
 
   useEffect(() => {
     fetchProductsFromBackend(activeFilters, sort, page);
-  }, [activeFilters, sort, fetchProductsFromBackend]);
+  }, [activeFilters, sort, page, fetchProductsFromBackend]);
 
   const toggleStagedCheckbox = useCallback((key, value) => {
     setStagedFilters((prev) => {
@@ -227,7 +232,7 @@ function useShopData() {
     page,
     setPage,
     products,
-    total: products.length,
+    total,
     loading,
     error,
     toggleStagedCheckbox,
@@ -325,8 +330,8 @@ function Sidebar({
               onClick={onClearAll}
               style={{
                 flex: 1,
-                backgroundColor: "#edc484",
-                color: "#5a1827",
+                backgroundColor: "#F1CB62",
+                color: "black",
                 border: "none",
                 padding: "10px",
                 borderRadius: "6px",
@@ -347,8 +352,8 @@ function Sidebar({
               }}
               style={{
                 flex: 1,
-                backgroundColor: "#edc484",
-                color: "#5a1827",
+                backgroundColor: "#F1CB62",
+                color: "black",
                 border: "none",
                 padding: "10px",
                 borderRadius: "6px",
@@ -528,7 +533,7 @@ function ProductGrid({
 
         {loading && <p className="loading-text">Loading styles from server…</p>}
 
-        {!loading && (
+        {!loading && totalPages > 1 && (
           <div
             style={{
               display: "flex",
@@ -551,8 +556,8 @@ function ProductGrid({
               disabled={page === 1}
               style={{
                 padding: "8px 16px",
-                backgroundColor: page === 1 ? "#f0f0f0" : "#edc484",
-                color: page === 1 ? "#aaa" : "#5a1827",
+                backgroundColor: page === 1 ? "#f0f0f0" : "#F1CB62",
+                color: page === 1 ? "#aaa" : "black",
                 border: "none",
                 borderRadius: "6px",
                 cursor: page === 1 ? "not-allowed" : "pointer",
@@ -562,7 +567,7 @@ function ProductGrid({
             >
               Previous
             </button>
-            <span style={{ fontSize: "14px", fontWeight: "700", color: "#5a1827" }}>
+            <span style={{ fontSize: "14px", fontWeight: "700", color: "black" }}>
               Page {page} of {totalPages}
             </span>
             <button
@@ -574,8 +579,8 @@ function ProductGrid({
               disabled={page >= totalPages}
               style={{
                 padding: "8px 16px",
-                backgroundColor: page >= totalPages ? "#f0f0f0" : "#edc484",
-                color: page >= totalPages ? "#aaa" : "#5a1827",
+                backgroundColor: page >= totalPages ? "#f0f0f0" : "#F1CB62",
+                color: page >= totalPages ? "#aaa" : "black",
                 border: "none",
                 borderRadius: "6px",
                 cursor: page >= totalPages ? "not-allowed" : "pointer",
@@ -602,6 +607,7 @@ export default function ShopPage() {
     page,
     setPage,
     products,
+    total,
     loading,
     error,
     toggleStagedCheckbox,
@@ -611,75 +617,7 @@ export default function ShopPage() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const shopRef = useRef(null);
-
-  const categoryId = new URLSearchParams(location.search).get("categoryId");
-  const productId = new URLSearchParams(location.search).get("productId");
-
-  const paginatedData = useMemo(() => {
-    let result = [...products];
-
-    if (productId) {
-      result = result.filter(
-        (product) => String(product.id) === String(productId)
-      );
-    }
-
-    if (categoryId) {
-      result = result.filter(
-        (product) => String(product.categoryId) === String(categoryId)
-      );
-    }
-
-    const selectedSizes = activeFilters?.size;
-    if (selectedSizes && selectedSizes.length > 0) {
-      result = result.filter((product) =>
-        product.sizes.some((s) =>
-          selectedSizes.some(
-            (sel) => String(sel).trim().toUpperCase() === String(s).trim().toUpperCase()
-          )
-        )
-      );
-    }
-
-    const selectedFabrics = activeFilters?.fabric;
-    if (selectedFabrics && selectedFabrics.length > 0) {
-      result = result.filter((product) =>
-        product.fabrics.some((f) =>
-          selectedFabrics.some(
-            (sel) => String(sel).trim().toLowerCase() === String(f).trim().toLowerCase()
-          )
-        )
-      );
-    }
-
-
-    const selectedSleeves = activeFilters?.sleeve;
-    if (selectedSleeves && selectedSleeves.length > 0) {
-      result = result.filter((product) =>
-        product.sleeves.some((sl) =>
-          selectedSleeves.some(
-            (sel) => String(sel).trim().toLowerCase() === String(sl).trim().toLowerCase()
-          )
-        )
-      );
-    }
-
-    // Price Sorting
-    const priceSort = activeFilters?.price_sort?.[0] || sort;
-    if (priceSort === "price_low") {
-      result.sort((a, b) => Number(a.price) - Number(b.price));
-    } else if (priceSort === "price_high") {
-      result.sort((a, b) => Number(b.price) - Number(a.price));
-    }
-
-    const totalFiltered = result.length;
-    const startIndex = (page - 1) * PAGE_SIZE;
-    const currentProducts = result.slice(startIndex, startIndex + PAGE_SIZE);
-
-    return { currentProducts, totalFiltered };
-  }, [products, categoryId, productId, activeFilters, sort, page]);
 
   return (
     <div className="shop-page">
@@ -694,8 +632,8 @@ export default function ShopPage() {
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />
         <ProductGrid
-          products={paginatedData.currentProducts}
-          total={paginatedData.totalFiltered}
+          products={products}
+          total={total}
           loading={loading}
           error={error}
           sort={sort}

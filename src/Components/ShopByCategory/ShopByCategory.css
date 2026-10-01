@@ -2,7 +2,7 @@
 
 .shop-category-section {
   padding: 15px 0px 20px 0px;
-  background: white;
+  background: #FCFBF8;
   text-align: center;
   overflow: hidden;
   width: 100%;
@@ -117,7 +117,7 @@
 .category-title {
   font-family: "Playfair Display", serif;
   font-size: 16px;
-  color: #5a1827;
+  color: #292626;
   margin: 0;
   font-weight: 600;
   white-space: normal;

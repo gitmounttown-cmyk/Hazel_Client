@@ -3,7 +3,6 @@ import { getProducts, deleteProduct } from "../../../../services/productService"
 import ProductForm from "./ProductForm";
 import "./productList.css";
 
-// Helper function to resolve cleaned image URLs
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "";
 
@@ -24,7 +23,7 @@ const getImageUrl = (imagePath) => {
   return `${normalizedBase}${cleanPath}`;
 };
 
-const PAGE_SIZE = 10; // Set items per page to 10
+const PAGE_SIZE = 10; 
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -33,11 +32,10 @@ const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [page, setPage] = useState(1); // Pagination state
+  
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // ============================================================
-  // FETCH PRODUCTS
-  // ============================================================
   useEffect(() => {
     let ignore = false;
 
@@ -46,19 +44,21 @@ const ProductList = () => {
         setLoading(true);
         setError(null);
 
-        // Fetching more items to handle pagination client-side, or adjust limit as needed
-        const res = await getProducts({
-          page: 1,
-          limit: 100, 
-        });
+        const params = {
+          page: page,
+          limit: PAGE_SIZE,
+        };
+
+        const res = await getProducts(params);
 
         const list = res?.data?.data;
+        const totalPagesCount = res?.data?.pages || 1;
 
         if (!ignore) {
           setProducts(Array.isArray(list) ? list : []);
+          setTotalPages(totalPagesCount);
         }
       } catch (err) {
-        console.error("Failed to fetch products:", err);
         if (!ignore) {
           setError(
             err?.response?.data?.message ||
@@ -79,18 +79,12 @@ const ProductList = () => {
     return () => {
       ignore = true;
     };
-  }, [refreshKey]);
-
-  // ============================================================
-  // REFRESH
-  // ============================================================
+  }, [page, refreshKey]); 
+  
   const refresh = useCallback(() => {
     setRefreshKey((k) => k + 1);
   }, []);
 
-  // ============================================================
-  // DELETE / DEACTIVATE PRODUCT
-  // ============================================================
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete/deactivate this product?")) {
       return;
@@ -99,30 +93,20 @@ const ProductList = () => {
       await deleteProduct(id);
       refresh();
     } catch (err) {
-      console.error("Delete failed:", err);
       alert(err?.response?.data?.message || "Failed to delete product");
     }
   };
 
-  // ============================================================
-  // EDIT PRODUCT
-  // ============================================================
   const handleEdit = (product) => {
     setEditingProduct(product);
     setShowForm(true);
   };
 
-  // ============================================================
-  // ADD PRODUCT
-  // ============================================================
   const handleAddNew = () => {
     setEditingProduct(null);
     setShowForm(true);
   };
 
-  // ============================================================
-  // GET THUMBNAIL
-  // ============================================================
   const getThumbnail = (product) => {
     for (const variant of product.variants || []) {
       const media =
@@ -135,9 +119,6 @@ const ProductList = () => {
     return null;
   };
 
-  // ============================================================
-  // GET COLORS
-  // ============================================================
   const getColorList = (product) => {
     return (
       (product.variants || [])
@@ -147,19 +128,8 @@ const ProductList = () => {
     );
   };
 
-  // ============================================================
-  // PAGINATION COMPUTATION
-  // ============================================================
-  const totalPages = Math.max(Math.ceil(products.length / PAGE_SIZE), 1);
-  const startIndex = (page - 1) * PAGE_SIZE;
-  const paginatedProducts = products.slice(startIndex, startIndex + PAGE_SIZE);
-
-  // ============================================================
-  // RENDER
-  // ============================================================
   return (
     <div className="prod-page">
-      {/* HEADER */}
       <div className="prod-page-header">
         <h2>Products</h2>
         <button className="prod-add-btn" onClick={handleAddNew}>
@@ -167,7 +137,6 @@ const ProductList = () => {
         </button>
       </div>
 
-      {/* PRODUCT FORM */}
       {showForm && (
         <ProductForm
           product={editingProduct}
@@ -183,10 +152,8 @@ const ProductList = () => {
         />
       )}
 
-      {/* ERROR */}
       {error && <div className="prod-error">Error: {error}</div>}
 
-      {/* PRODUCT TABLE */}
       <div className="prod-table-card">
         {loading ? (
           <p className="prod-loading">Loading...</p>
@@ -204,22 +171,21 @@ const ProductList = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedProducts.length === 0 ? (
+                {products.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="prod-empty">
                       No products found.
                     </td>
                   </tr>
                 ) : (
-                  paginatedProducts.map((product, index) => {
+                  products.map((product, index) => {
                     const thumbnail = getThumbnail(product);
-                    const absoluteIndex = startIndex + index + 1; // Correct S.No across pages
+                    const absoluteIndex = (page - 1) * PAGE_SIZE + index + 1;
+                    
                     return (
                       <tr key={product._id}>
-                        {/* S.NO */}
                         <td className="prod-sno">{absoluteIndex}</td>
 
-                        {/* PRODUCT */}
                         <td>
                           <div className="prod-name-cell">
                             {thumbnail ? (
@@ -243,15 +209,12 @@ const ProductList = () => {
                           </div>
                         </td>
 
-                        {/* BRAND */}
                         <td className="prod-meta">
                           {product.brandId?.name || "—"}
                         </td>
 
-                        {/* COLORS */}
                         <td className="prod-meta">{getColorList(product)}</td>
 
-                        {/* STATUS */}
                         <td>
                           <span
                             className={`prod-status-badge ${
@@ -262,7 +225,6 @@ const ProductList = () => {
                           </span>
                         </td>
 
-                        {/* ACTIONS */}
                         <td>
                           <div className="prod-actions">
                             <button
@@ -286,7 +248,6 @@ const ProductList = () => {
               </tbody>
             </table>
 
-            {/* PAGINATION CONTROLS */}
             <div
               style={{
                 display: "flex",
