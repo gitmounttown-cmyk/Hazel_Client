@@ -40,6 +40,9 @@ import Inventory from "../Pages/admin/Inventory/Inventory";
 import AccountOverview from "../Components/AccountOverview/AccountOverview"; // Adjust the import path if needed
 import Video from "../Pages/admin/videos/Video";
 
+import Checkout from "../Pages/Payment/Checkout";
+
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -60,6 +63,8 @@ const AppRoutes = () => {
           <Route path="/cartpage" element={<Cartpage />} />
           <Route path="/Wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />
+          <Route path="/checkout" element={<Checkout />} />
+
         </Route>
 
         {/* =================================
