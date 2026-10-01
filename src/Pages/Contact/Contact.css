@@ -77,7 +77,7 @@ html {
   font-family: var(--contact-font-serif);
   font-size: clamp(34px, 5.6vw, 56px);
   line-height: 1.1;
-  color: var(--contact-heading-red);
+  color: #F1CB62;
   font-weight: 400;
   margin-bottom: 24px;
 }
@@ -108,9 +108,9 @@ html {
 }
 
 .contact-btn-talk {
-  background-color: var(--contact-burgundy);
+  background-color: #F1CB62;
   color: #fff;
-  border: 1px solid var(--contact-burgundy);
+  border: 1px solid #F1CB62;
 }
 
 .contact-btn-talk:hover {

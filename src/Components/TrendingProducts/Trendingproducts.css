@@ -2,7 +2,7 @@
 
 .trending-section {
   width: 100%;
-  background: #5a1827;
+  background: #FCFBF8;
 
   padding: 50px 0 55px;
 
@@ -33,7 +33,7 @@
 .trending-heading {
   margin: 0;
 
-  color: #edc484;
+  color: black;
 
   font-family: "Playfair Display", serif;
 
@@ -130,7 +130,7 @@
 
   overflow: hidden;
 
-  background: #eee7e0;
+  background: white;
 }
 
 .trending-image {
@@ -320,29 +320,29 @@
 
   border: 1px solid #d8ccc4;
 
-  color: #5a1827;
+  color: black;
 }
 
 .trending-wishlist-btn:hover {
-  border-color: #8c1d40;
+  border-color: #F1CB62;
 
-  color: #8c1d40;
+  color: #F1CB62;
 
   transform: translateY(-1px);
 }
 
 .trending-cart-btn {
-  background: #5a1827;
+  background: #F1CB62;
 
-  border: 1px solid #5a1827;
+  border: 1px solid #F1CB62;
 
-  color: #ffffff;
+  color: black;
 }
 
 .trending-cart-btn:hover {
-  background: #43121c;
+  background: #F1CB62;
 
-  border-color: #43121c;
+  border-color: #F1CB62;
 
   transform: translateY(-1px);
 }
@@ -392,9 +392,9 @@
 
   border-radius: 50%;
 
-  background: #ffffff;
+  background: #F1CB62;
 
-  color: #5a1827;
+  color: black;
 
   font-family: Arial, sans-serif;
 

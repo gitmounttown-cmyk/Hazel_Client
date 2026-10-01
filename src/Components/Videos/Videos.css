@@ -6,7 +6,7 @@
   font-family: "Plus Jakarta Sans", sans-serif;
   color: #2c2c2a;
   overflow-x: hidden;
-  background-color: #F1D0A0;
+  background-color: #FCFBF8;
 }
 
 .eyebrow {
@@ -83,7 +83,7 @@
 
 /* ---------------- SHOP THE LOOK SECTION (VIDEOS CAROUSEL) ---------------- */
 .shop-the-look-section {
-  background-color: #F1D0A0; 
+  background-color: #FAF4E2; 
   padding: 60px 40px;
   overflow-x: hidden;
   width: 100%;
@@ -91,7 +91,7 @@
 
 .shop-the-look-section .section-title {
   font-family: serif;
-  color: #5C1F26;
+  color: black;
   font-size: 38px;
   text-align: center;
   margin-bottom: 40px;
