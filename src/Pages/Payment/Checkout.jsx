@@ -120,12 +120,13 @@ const validate = (v) => {
 };
 
 /* ---------- Product thumbnail (clickable) ---------- */
-function Thumb({ item, onOpen }) {
+function Thumb({ item, onOpen, productId, navigate }) {
+  console.log("Thumb component - productId:", productId);
   const [failed, setFailed] = useState(false);
 
   if (failed) {
     return (
-      <div className="summary__img summary__img--fallback" aria-hidden="true">
+      <div className="summary__img summary__img--fallback" aria-hidden="true" onClick={() => navigate(`/product/${productId}`)}>
         <ShoppingBag size={22} strokeWidth={1.5} />
       </div>
     );
@@ -135,7 +136,9 @@ function Thumb({ item, onOpen }) {
     <button
       type="button"
       className="summary__imgbtn"
-      onClick={() => onOpen(item)}
+      // onClick={() => onOpen(item)}
+      onClick={() => navigate(`/product/${productId}`)}
+      
       aria-label={`View ${item.name} image`}
     >
       <img
@@ -669,8 +672,8 @@ console.log("User_address:", userAddress);
                     const maxQty = Number(item.stockQuantity || 0);
 
                     return (
-                      <div className="summary__item" key={`${item.id}-${index}`} onClick={() => navigate(`/product/${item.productId}`)}>
-                        <Thumb item={item} onOpen={setPreview} />
+                      <div className="summary__item" key={`${item.id}-${index}`}>
+                        <Thumb item={item} onOpen={setPreview}  productId ={item.productId} navigate={navigate}/>
 
                         <div className="summary__info">
                           <h3 className="summary__name">{item.name}</h3>
