@@ -42,7 +42,7 @@ import Video from "../Pages/admin/videos/Video";
 
 import Checkout from "../Pages/Payment/Checkout";
 import OrderConfiramation from "../Pages/OrderConfiramation/OrderConfiramation";
-
+import OrderFailure from "../Pages/OrderFailure/OrderFailure";
 
 const AppRoutes = () => {
   return (
@@ -66,6 +66,7 @@ const AppRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confiramation" element={<OrderConfiramation />} />
+          <Route path="/order-failure" element={<OrderFailure />} />
 
         </Route>
 
