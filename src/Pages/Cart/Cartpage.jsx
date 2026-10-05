@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { removeCartItem } from "../../Services/cartService";
+import { getCart, removeCartItem } from "../../Services/cartService";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5004/api";
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
+
 
 const formatINR = (amount) =>
   `₹${Number(amount || 0).toLocaleString("en-IN", {
@@ -15,17 +16,54 @@ const getImageUrl = (image) => {
   if (!image) return "";
 
   if (
-    image.startsWith("http://") ||
-    image.startsWith("https://") ||
-    image.startsWith("blob:")
+    image?.startsWith("http://") ||
+    image?.startsWith("https://") ||
+    image?.startsWith("blob:")
   ) {
     return image;
   }
 
-  return `${UPLOAD_URL}${image.startsWith("/") ? image : `/${image}`}`;
+  return `${UPLOAD_URL}${image?.startsWith("/") ? image : `/${image}`}`;
 };
 
-function QuantityStepper({ value, onDecrease, onIncrease, disabled }) {
+// function QuantityStepper({ value, onDecrease, onIncrease, disabled }) {
+//   return (
+//     <div className="quantity-stepper">
+//       <button
+//         type="button"
+//         className="quantity-btn"
+//         onClick={onDecrease}
+//         disabled={disabled || value <= 1}
+//         aria-label="Decrease quantity"
+//       >
+//         −
+//       </button>
+
+//       <span className="quantity-value">{value}</span>
+
+//       <button
+//         type="button"
+//         className="quantity-btn"
+//         onClick={onIncrease}
+//         disabled={disabled}
+//         aria-label="Increase quantity"
+//       >
+//         +
+//       </button>
+//     </div>
+//   );
+// }
+
+function QuantityStepper({
+  value,
+  onDecrease,
+  onIncrease,
+  disabled,
+  maxQuantity,
+}) {
+  const isMaxReached =
+    maxQuantity != null && value >= maxQuantity;
+
   return (
     <div className="quantity-stepper">
       <button
@@ -44,7 +82,7 @@ function QuantityStepper({ value, onDecrease, onIncrease, disabled }) {
         type="button"
         className="quantity-btn"
         onClick={onIncrease}
-        disabled={disabled}
+        disabled={disabled || isMaxReached}
         aria-label="Increase quantity"
       >
         +
@@ -53,20 +91,29 @@ function QuantityStepper({ value, onDecrease, onIncrease, disabled }) {
   );
 }
 
-function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem }) {
+function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem, getCartItemStock, navigate }) {
+  const {
+  stockQuantity,
+  isStockAvailable,
+  selectedVariant,
+  selectedSize,
+} = getCartItemStock(item);
   const product = item.product || {};
-
+console.log("CartItemRow product:", product);
   const productName =
     item.productName || product.name || product.productName || "Product";
 
+    const productMedia = product?.variants?.filter((variant) => variant.media && variant.media.length > 0);
+console.log("productMedia:", productMedia);
   const productImage =
     item.image ||
     product.image ||
     product.productImage ||
     product.images?.[0] ||
+    productMedia?.[0]?.media?.[0]?.imageURL ||
     "";
-
-  const size = item.size || item.variant?.size || item.variant?.sizeName || "";
+console.log("productImage:", productImage);
+  const size = item.selectedSize || item.variant?.size || item.variant?.sizeName || "";
 
   const color =
     item.color || item.variant?.color || item.variant?.colorName || "";
@@ -81,7 +128,7 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem }) {
       : originalPrice;
 
   return (
-    <div className="cart-item">
+    <div className="cart-item" onClick={() => navigate(`/product/${product._id}`)}>
       <div className="cart-item-image">
         {productImage ? (
           <img src={getImageUrl(productImage)} alt={productName} />
@@ -134,7 +181,8 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem }) {
               value={item.quantity}
               onDecrease={() => onDecrease(item._id)}
               onIncrease={() => onIncrease(item._id)}
-              disabled={loadingItem === item._id}
+              disabled={loadingItem === item._id || !isStockAvailable}
+              maxQuantity={stockQuantity}
             />
           </div>
         </div>
@@ -167,7 +215,7 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem }) {
   );
 }
 
-function OrderSummary({ subtotal, discount, shipping, tax, total }) {
+function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
   const [promoOpen, setPromoOpen] = useState(false);
 
   const [promoCode, setPromoCode] = useState("");
@@ -237,12 +285,12 @@ function OrderSummary({ subtotal, discount, shipping, tax, total }) {
         </div>
       )}
 
-      <button type="button" className="checkout-btn">
+      <button type="button" className="checkout-btn" onClick = {() => navigate("/checkout")} >
         Proceed To Checkout
         <span className="checkout-arrow">→</span>
       </button>
 
-      <button type="button" className="continue-shopping-btn">
+      <button type="button" className="continue-shopping-btn" onClick={() => navigate("/shop")}>
         Continue Shopping
       </button>
 
@@ -453,10 +501,10 @@ export default function CartPage() {
         return;
       }
 
-      const response = await api.get("/cart/all");
-
-      if (response.data.success) {
-        const cart = response.data.cart;
+      const response = await getCart();
+console.log("GET CART RESPONSE:", response);
+      if (response?.success) {
+        const cart = response?.cart;
 
         setItems(cart?.items || []);
 
@@ -536,11 +584,13 @@ export default function CartPage() {
       const response = await removeCartItem(itemId);
 
       if (response.data.success) {
-        const cart = response.data.cart;
+        // const cart = response.data.cart;
 
-        setItems(cart?.items || []);
+        // setItems(cart?.items || []);
+        // fetch the cart again to get the updated items and total
+        await fetchCart();
 
-        setCartTotal(Number(cart?.totalAmount || 0));
+        // setCartTotal(Number(cart?.totalAmount || 0));
       }
     } catch (err) {
       console.error("REMOVE CART ERROR:", err.response?.data || err);
@@ -607,6 +657,75 @@ export default function CartPage() {
     return <div className="profile-loading">Loading cart...</div>;
   }
 
+  const getStockForCartItem = (item) => {
+    const product = item?.product;
+
+    if (!product?.variants?.length) {
+      return {
+        stockQuantity: 0,
+        isStockAvailable: false,
+        selectedVariant: null,
+        selectedSize: null,
+      };
+    }
+
+    const color = item?.color || "";
+    const size = item?.size || "";
+
+    const selectedVariant = product.variants.find(
+      (variant) =>
+        variant.color?.trim().toLowerCase() ===
+        color.trim().toLowerCase()
+    );
+
+    if (!selectedVariant) {
+      return {
+        stockQuantity: 0,
+        isStockAvailable: false,
+        selectedVariant: null,
+        selectedSize: null,
+      };
+    }
+
+    const selectedSize = selectedVariant.sizes?.find(
+      (sizeItem) =>
+        sizeItem.size?.trim().toUpperCase() ===
+        size.trim().toUpperCase()
+    );
+
+    const stockQuantity = Number(
+      selectedSize?.stockQuantity || 0
+    );
+
+    const isStockAvailable =
+      selectedSize?.isActive === true &&
+      stockQuantity > 0;
+
+    return {
+      stockQuantity,
+      isStockAvailable,
+      selectedVariant,
+      selectedSize,
+    };
+  };
+  
+
+//   const selectedVariant = product?.variants?.find(
+//   (variant) =>
+//     variant.color?.toLowerCase() === color?.toLowerCase()
+// );
+
+// const selectedSize = selectedVariant?.sizes?.find(
+//   (sizeItem) =>
+//     sizeItem.size?.toUpperCase() === size?.toUpperCase()
+// );
+
+// const stockQuantity = selectedSize?.stockQuantity ?? 0;
+
+// const isStockAvailable =
+//   selectedSize?.isActive === true &&
+//   stockQuantity > 0;
+
   return (
     <div className="cart-page">
       <div className="cart-page-inner">
@@ -654,6 +773,8 @@ export default function CartPage() {
                     onIncrease={handleIncrease}
                     onRemove={handleRemove}
                     loadingItem={loadingItem}
+                    getCartItemStock={getStockForCartItem}
+                    navigate={navigate}
                   />
                 ))}
 
@@ -675,6 +796,7 @@ export default function CartPage() {
                 shipping={shipping}
                 tax={tax}
                 total={total}
+                navigate={navigate}
               />
             </div>
           </>

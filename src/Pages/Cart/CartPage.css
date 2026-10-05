@@ -94,6 +94,7 @@ h4 {
   padding-bottom: 36px;
   margin-bottom: 36px;
   border-bottom: 1px solid var(--line);
+  cursor: pointer;
 }
 
 .cart-item-image {

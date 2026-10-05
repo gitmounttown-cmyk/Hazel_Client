@@ -16,3 +16,7 @@ export const updatePaymentStatus = (paymentId, data) =>
 
 export const deletePayment = (paymentId) =>
   axiosInstance.delete(`${BASE}/delete/${paymentId}`);
+
+// create order
+export const createOrder = (data) =>
+  axiosInstance.post(`${BASE}/create-order`, data);
