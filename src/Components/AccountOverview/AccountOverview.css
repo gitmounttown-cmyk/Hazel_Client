@@ -20,7 +20,7 @@
 }
 
 .eyebrow {
-  color: #780524;
+  color: #F1CB62;
   font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -31,7 +31,7 @@
 
 .section-title {
   font-family: serif;
-  color: #52131E;
+  color: #F1CB62;
   font-size: 42px;
   line-height: 1.2;
   margin: 0 0 10px;
@@ -80,7 +80,7 @@
 .btn-text-link {
   background: none;
   border: none;
-  color: #780524;
+  color: #F1CB62;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -154,8 +154,8 @@
 
 .default-badge {
   font-size: 9px;
-  background-color: #f7e7d0;
-  color: #71431B;
+  background-color: #fcf6ef;
+  color: #F1CB62;
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 700;
@@ -195,13 +195,13 @@
   border: none;
   font-size: 13px;
   font-weight: 600;
-  color: #780524;
+  color: #F1CB62;
   cursor: pointer;
   padding: 0;
 }
 
 .action-link.danger {
-  color: #a83232;
+  color: #F1CB62;
 }
 
 .action-link:hover {
@@ -322,7 +322,7 @@
 .modal-title {
   font-family: serif;
   font-size: 26px;
-  color: #52131E;
+  color: black;
   margin: 0 0 20px 0;
 }
 
@@ -335,7 +335,7 @@
 .modal-label {
   font-size: 10px;
   letter-spacing: 1.2px;
-  color: #71431B;
+  color: black;
   text-transform: uppercase;
   font-weight: 700;
   margin-bottom: 6px;
@@ -360,7 +360,7 @@
 }
 
 .modal-input:focus {
-  border-color: #780524;
+  border-color: #F1CB62;
 }
 
 .disabled-bg {
@@ -422,9 +422,9 @@
 }
 
 .modal-btn-save {
-  background: #9c4b5e;
+  background: #F1CB62;
   border: none;
-  color: #fff;
+  color: black;
   padding: 10px;
   border-radius: 8px;
   font-weight: 600;
@@ -434,7 +434,7 @@
 }
 
 .modal-btn-save:hover {
-  background: #780524;
+  background: #F1CB62;
 }
 
 @media (max-width: 768px) {

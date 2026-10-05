@@ -323,14 +323,14 @@
   color: black;
 }
 
-.trending-wishlist-btn:hover {
-  border-color: #F1CB62;
-
-  color: #F1CB62;
-
-  transform: translateY(-1px);
-}
-
+/* .trending-wishlist-btn:hover { */
+  /* border-color: #F1CB62; */
+/*  */
+  /* color: black; */
+/*  */
+  /* transform: translateY(-1px); */
+/* } */
+/*  */
 .trending-cart-btn {
   background: #F1CB62;
 

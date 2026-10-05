@@ -1142,7 +1142,7 @@ const DETAILS =
               >
                 {addedToCart ? "Go to Cart" : "Add To Cart"}
               </button>
-              <button className="btn btn--outline" onClick={handleBuyNow}>
+              <button className=" btn--outline" onClick={handleBuyNow}>
                 Buy Now
               </button>
             </div>

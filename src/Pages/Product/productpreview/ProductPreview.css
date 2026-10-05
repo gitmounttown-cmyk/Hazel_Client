@@ -21,7 +21,7 @@
 .pp {
   font-family: var(--font-body);
   color: var(--black);
-  background: var(--white);
+  background:FBF6E9;
   max-width: 1200px;
   margin: 0 auto;
   padding: 32px 24px 96px;
@@ -32,7 +32,7 @@
 .pp h3 {
   font-family: var(--font-display);
   font-weight: 400;
-  margin: 0;
+  margin-right: 20px;
 }
 
 /* ============ BREADCRUMB ============ */
@@ -132,7 +132,7 @@
 }
 
 .pp-thumb.is-active {
-  border-color: var(--red);
+  border-color: #F1CB62;
 }
 
 .pp-thumb.is-active .pp-thumb-img {
@@ -160,15 +160,15 @@
 
 .pp-title {
   font-size: 36px;
-  color: var(--red);
+  color: #F1CB62;
   line-height: 1.15;
 }
 
 .pp-wish {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 30px;
   border-radius: 50%;
-  border: 1px solid var(--line);
+  border: 1px solid #F1CB62;
   background: var(--white);
   color: var(--black);
   display: flex;
@@ -179,9 +179,9 @@
 }
 
 .pp-wish.is-active {
-  color: var(--red);
-  background: var(--lite-yellow);
-  border-color: var(--red);
+  color: black;
+  background: #F1CB62;
+  border-color: #F1CB62;
 }
 
 .pp-desc {
@@ -211,7 +211,7 @@
 }
 
 .star--filled {
-  color: #f2994a;
+  color: #F1CB62;
 }
 
 .pp-rating-num {
@@ -277,7 +277,7 @@
 }
 
 .pp-color.is-active {
-  outline: 2px solid var(--red);
+  outline: 2px solid #F1CB62;
   outline-offset: 1px;
 }
 
@@ -291,7 +291,7 @@
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--line);
-  background: var(--white);
+  background: #FCFBF8;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -309,8 +309,8 @@
 }
 
 .pp-size.is-active {
-  border-color: var(--red);
-  color: var(--red);
+  border-color: #F1CB62;
+  color: #F1CB62;
 }
 
 .pp-size.is-disabled {
@@ -338,7 +338,7 @@
 
 .pp-qty button {
   border: none;
-  background: none;
+  background: #F5EEED;
   font-size: 14px;
   cursor: pointer;
   padding: 0;
@@ -347,6 +347,8 @@
 .pp-qty span.pp-qty-num {
   font-size: 13px;
   font-weight: 500;
+  color:#F1CB62;
+  background-color:#FCFBF8;
 }
 
 /* ============ FIT / MODEL BOX ============ */
@@ -354,7 +356,7 @@
   display: flex;
   align-items: flex-start;
   gap: 40px;
-  background-color: var(--lite-yellow);
+  background-color: #FBF6E9;
   border-radius: 12px;
   padding: 16px 20px;
   flex: 1;
@@ -393,24 +395,34 @@
   padding: 12px 24px;
   border-radius: 6px;
   cursor: pointer;
-  border: 1px solid var(--red);
+  border: 1px solid #F1CB62;
   flex: 1;
   transition: all 0.2s ease;
 }
-
+.btn--outline {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #F1CB62;
+  flex: 1;
+  transition: all 0.2s ease;
+}
 .btn--primary {
-  background: var(--red);
-  color: var(--white);
+  background: #F1CB62;
+  color: black;
 }
 
 .btn--primary:hover {
-  background: var(--deep-red);
+  background: #F1CB62;
 }
 
 .btn--outline {
   background: var(--white);
   color: var(--black);
-  border-color: var(--line);
+  border: 1px solid var(--black);
 }
 
 .btn--outline:hover {
@@ -437,7 +449,7 @@
 }
 
 .pp-details-table {
-  background: var(--lite-yellow);
+  background: #FBF6E9;
   border-radius: 12px;
   padding: 16px 24px;
   margin: 0;
@@ -488,8 +500,8 @@
 .pp-delivery-icon {
   width: 32px;
   height: 32px;
-  background: var(--red);
-  color: var(--white);
+  background: #F1CB62;
+  color: black;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -498,7 +510,7 @@
 }
 
 .pp-delivery-row a {
-  color: var(--red);
+  color: #F1CB62;
   font-weight: 500;
   text-decoration: underline;
 }
@@ -527,7 +539,7 @@
 }
 
 .pp-perk svg {
-  color: var(--red);
+  color: #F1CB62;
 }
 
 /* ============ REVIEWS SECTION ============ */
@@ -550,7 +562,7 @@
 
 .pp-h1-serif {
   font-size: 28px;
-  color: var(--red);
+  color: black;
   margin-bottom: 8px;
 }
 
@@ -568,7 +580,7 @@
 .pp-score-num {
   font-family: var(--font-display);
   font-size: 32px;
-  color: var(--black);
+  color: #F1CB62;
 }
 
 .pp-reviews-score-meta {
@@ -596,9 +608,9 @@
 }
 
 .pp-filter.is-active {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--white);
+  background: #F1CB62;
+  border-color: #F1CB62;
+  color: black;
 }
 
 .pp-review-grid {
@@ -609,7 +621,7 @@
 }
 
 .pp-review-card {
-  background: var(--lite-yellow);
+  background: #FBF6E9;
   border-radius: 12px;
   padding: 18px;
   display: flex;
@@ -702,7 +714,7 @@
 
 .pp-explore {
   font-size: 12px;
-  color: var(--red);
+  color: #F1CB62;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -714,10 +726,10 @@
 }
 
 .pp-related-card {
-  background: var(--red);
+  background: white;
   border-radius: 12px;
   padding: 12px;
-  color: var(--white);
+  color: black;
 }
 
 .pp-related-image {
@@ -761,13 +773,13 @@
 
 .pp-related-name {
   font-size: 14px;
-  color: var(--white);
+  color: black;
   margin-bottom: 2px;
 }
 
 .pp-related-sub {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.7);
+  color: black;
   margin: 0 0 6px;
 }
 
@@ -776,7 +788,7 @@
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: var(--white);
+  color: black;
   margin-bottom: 6px;
 }
 
@@ -1250,7 +1262,7 @@
 .pp-rvm-header h3 {
   margin: 0;
   font-size: 22px;
-  color: var(--red);
+  color: #F1CB62;
 }
 
 .pp-rvm-close {
@@ -1307,7 +1319,7 @@
 
 .pp-rvm-label em {
   font-style: normal;
-  color: var(--red);
+  color: #F1CB62;
 }
 
 .pp-rvm-label small {
@@ -1350,7 +1362,7 @@
   margin-left: 8px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--red);
+  color: #F1CB62;
 }
 
 /* ---- photo tiles (small squares) ---- */
@@ -1408,7 +1420,7 @@
   gap: 4px;
   border: 1.5px dashed #c9b8a6;
   background: var(--lite-yellow);
-  color: var(--red);
+  color: #F1CB62;
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -1418,7 +1430,7 @@
 }
 
 .pp-rvm-add:hover {
-  border-color: var(--red);
+  border-color: #F1CB62;
   background: #f6ecdc;
 }
 
@@ -1441,7 +1453,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--red);
+  background: #F1CB62;
   color: var(--white);
   font-size: 15px;
   font-weight: 600;
@@ -1461,7 +1473,7 @@
 }
 
 .pp-rvm-input:focus {
-  border-color: var(--red);
+  border-color: #F1CB62;
 }
 
 .pp-rvm-textarea {
