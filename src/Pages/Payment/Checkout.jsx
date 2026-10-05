@@ -239,6 +239,7 @@ const [userAddress, setUserAddress] = useState([]); // State to hold user addres
         console.log("Selected size:", selectedSize);
         let productDetails = {
           id: item?._id || item?.product?._id,
+          productId: item?.product?._id,
           name: item.product?.name || item.productName,
           print: item.print || item.variant?.print,
           price: item.price || item.variant?.price,
@@ -668,7 +669,7 @@ console.log("User_address:", userAddress);
                     const maxQty = Number(item.stockQuantity || 0);
 
                     return (
-                      <div className="summary__item" key={`${item.id}-${index}`}>
+                      <div className="summary__item" key={`${item.id}-${index}`} onClick={() => navigate(`/product/${item.productId}`)}>
                         <Thumb item={item} onOpen={setPreview} />
 
                         <div className="summary__info">

@@ -739,6 +739,10 @@ const DETAILS =
       toast.error("Please log in to proceed with the purchase.");
       return;
     }
+    // add to cart and then navigate to the checkout page
+    handleAddToCart().then(() => {
+      navigate("/checkout");
+    });
   };
 
   const handleSaveAddress = () => {
