@@ -1272,8 +1272,12 @@ const addedToCart = !!existingCartItem;
                 }
               >
                 {addedToCart ? "Go to Cart" : "Add To Cart"}
-              </button> */}
-              <button className="btn btn--outline" onClick={handleBuyNow}>
+
+              </button>
+              <button className=" btn--outline" onClick={handleBuyNow}>
+
+              </button>
+
                 Buy Now
               </button>
             </div>

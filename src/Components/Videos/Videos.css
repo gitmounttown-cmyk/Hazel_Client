@@ -140,7 +140,7 @@
   width: 100%;
   margin: 0 auto;
   overflow-x: auto;
-  padding: 10px 10px 20px 150px;
+  padding: 10px 10px 20px 48px;
   scroll-behavior: smooth;
   scrollbar-width: none; /* Hide scrollbar for Firefox */
 }
@@ -236,7 +236,7 @@
 
 .look-price {
   font-family: "Plus Jakarta Sans", sans-serif;
-  color: #d8b25c;
+  color: #F1CB62;
   font-size: 11px;
   margin: 0;
 }

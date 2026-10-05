@@ -57,7 +57,7 @@ h4 {
 .cart-title {
   font-size: 48px;
   line-height: 1.05;
-  color: var(--maroon);
+  color: #F1CB62;
   margin-bottom: 10px;
 }
 
@@ -135,7 +135,7 @@ h4 {
 
 .cart-item-name {
   font-size: 24px;
-  color: var(--maroon);
+  color: #F1CB62;
   margin-bottom: 4px;
 }
 
@@ -239,7 +239,7 @@ h4 {
 }
 
 .text-action:hover {
-  color: var(--maroon);
+  color: #F1CB62;
 }
 
 /* Delivery & Availability */
@@ -267,7 +267,7 @@ h4 {
 }
 
 .delivery-truck-icon {
-  color: var(--maroon);
+  color: #F1CB62;
 }
 
 .delivery-check {
@@ -293,7 +293,7 @@ h4 {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--maroon);
+  color: #F1CB62;
   cursor: pointer;
   padding: 0;
 }
@@ -383,7 +383,7 @@ h4 {
 .summary-total span:last-child {
   font-family: "DM Serif Display", serif;
   font-size: 22px;
-  color: var(--maroon);
+  color:#F1CB62;
 }
 
 .promo-toggle {
@@ -403,7 +403,7 @@ h4 {
 
 .promo-toggle-icon {
   font-size: 16px;
-  color: var(--maroon);
+  color: #F1CB62;
 }
 
 .promo-field {
@@ -423,9 +423,9 @@ h4 {
 }
 
 .promo-apply-btn {
-  border: 1px solid var(--maroon);
+  border: 1px solid #F1CB62;
   background: transparent;
-  color: var(--maroon);
+  color: #F1CB62;
   border-radius: 4px;
   padding: 0 14px;
   font-size: 12px;
@@ -435,7 +435,7 @@ h4 {
 
 .checkout-btn {
   width: 100%;
-  background: var(--maroon);
+  background: #F1CB62;
   color: var(--white);
   border: none;
   border-radius: 24px;
@@ -452,7 +452,7 @@ h4 {
 }
 
 .checkout-btn:hover {
-  background: var(--maroon-dark);
+  background: #F1CB62;
 }
 
 .checkout-arrow {
@@ -496,10 +496,10 @@ h4 {
 }
 
 .rec-card {
-  background: var(--maroon);
+  background: #F1CB62;
   border-radius: 12px;
   padding: 12px;
-  color: var(--white);
+  color: black;
   display: flex;
   flex-direction: column;
 }
@@ -510,7 +510,7 @@ h4 {
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 14px;
-  background-color: #580c21;
+  background-color: #F1CB62;
 }
 
 .rec-card-image img {
@@ -531,8 +531,8 @@ h4 {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: var(--maroon-dark);
-  color: var(--white);
+  background: #F1CB62;
+  color: black;
   font-size: 9px;
   font-weight: 600;
   padding: 4px 10px;

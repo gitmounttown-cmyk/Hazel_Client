@@ -24,7 +24,7 @@ html, body {
   display: flex;
   align-items: center;
   overflow: hidden;
-  background-color: #f6f1eb; 
+  background-color :white; 
 }
 .hero-bg-img {
   position: absolute;
