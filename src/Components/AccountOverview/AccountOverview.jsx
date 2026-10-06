@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState } from "react";
 import * as Lucide from "lucide-react";
 import "./AccountOverview.css";
@@ -9,7 +10,6 @@ const pick = (...names) => {
 };
 const LayoutGrid = pick("LayoutGrid", "LayoutDashboard");
 const Archive = pick("Archive");
-const Heart = pick("Heart");
 const MapPin = pick("MapPin");
 const User = pick("User", "CircleUser");
 const HelpCircle = pick("CircleHelp", "HelpCircle");
@@ -63,15 +63,12 @@ const IMG = {
   robe: "/images/mulberry-silk-robe.jpg",
   avatar: "/images/priya.jpg",
   pj: "/images/satin-pj-set.jpg",
-  gown: "/images/lace-nightgown.jpg",
-  shirt: "/images/cotton-sleep-shirt.jpg",
   slippers: "/images/velvet-slippers.jpg",
 };
 
 const NAV = [
   { key: "overview", label: "Overview", icon: LayoutGrid },
   { key: "orders", label: "Orders", icon: Archive },
-  { key: "wishlist", label: "Wishlist", icon: Heart },
   { key: "addresses", label: "Addresses", icon: MapPin },
   { key: "profile", label: "Profile", icon: User },
 ];
@@ -110,13 +107,6 @@ const ORDERS = [
   },
 ];
 
-const WISHLIST = [
-  { id: 1, name: "Satin PJ Set", price: "₹5,900", img: IMG.pj },
-  { id: 2, name: "Lace Nightgown", price: "₹8,200", img: IMG.gown },
-  { id: 3, name: "Cotton Sleep Shirt", price: "₹3,400", img: IMG.shirt },
-  { id: 4, name: "Velvet Slippers", price: "₹2,800", img: IMG.slippers },
-];
-
 const mask = (p) => `+91 XXXXX ${p.slice(-5)}`;
 const fmt = (p) => `+91 ${p.slice(0, 5)} ${p.slice(5)}`;
 const digits = (v, n) => v.replace(/\D/g, "").slice(0, n);
@@ -150,39 +140,75 @@ function Img({ src, alt, className = "" }) {
 }
 
 function Modal({ title, onClose, children }) {
-  const box = useRef(null);
+  const dlg = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
+    const el = dlg.current;
+    if (!el) return undefined;
+    const native = typeof el.showModal === "function";
+    // A native <dialog> lives in the browser's "top layer": it is always centred on the real
+    // screen, whatever transforms / overflow / z-index / layout the surrounding page has.
+    if (native) {
+      if (!el.open) el.showModal();
+    } else el.setAttribute("open", "");
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    box.current?.querySelector("input, button.btn")?.focus();
+    el.querySelector("input, button.btn")?.focus();
+
+    const onCancel = (e) => {
+      e.preventDefault();
+      closeRef.current();
+    }; // Esc key
+    const onKey = (e) => e.key === "Escape" && closeRef.current(); // fallback browsers
+    el.addEventListener("cancel", onCancel);
+    if (!native) document.addEventListener("keydown", onKey);
     return () => {
+      el.removeEventListener("cancel", onCancel);
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
-    <div
+    <dialog
+      ref={dlg}
       className="modal"
+      aria-label={title}
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        className="modal__box"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        ref={box}
-      >
+      <div className="modal__box">
         <div className="modal__head">
-          <h2 className="card__title">{title}</h2>
+          <h2 className="modal__title">{title}</h2>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             <X size={20} />
           </button>
         </div>
         {children}
       </div>
+    </dialog>
+  );
+}
+
+function Toast({ toast }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    try {
+      ref.current?.showPopover?.();
+    } catch (e) {
+      /* already open */
+    }
+  }, []);
+  return (
+    <div
+      ref={ref}
+      popover="manual"
+      className="toast"
+      role="status"
+      aria-live="polite"
+    >
+      <span>{toast.msg}</span>
     </div>
   );
 }
@@ -331,8 +357,8 @@ function AddressForm({ address, onSave, onCancel }) {
           type="checkbox"
           checked={f.isDefault}
           onChange={(e) => set("isDefault", e.target.checked)}
-        />{" "}
-        Make this my default shipping address
+        />
+        <span>Make this my default shipping address</span>
       </label>
       <div className="form__actions span2">
         <button type="button" className="btn btn--ghost" onClick={onCancel}>
@@ -369,7 +395,6 @@ export default function AccountDashboard() {
       isDefault: true,
     },
   ]);
-  const [saved, setSaved] = useState(WISHLIST.map((w) => w.id));
 
   useEffect(() => {
     if (!toast) return;
@@ -378,7 +403,7 @@ export default function AccountDashboard() {
   }, [toast]);
 
   const close = () => setModal(null);
-  const say = (msg, undo) => setToast({ msg, undo });
+  const say = (msg) => setToast({ msg });
 
   const saveProfile = (p) => {
     setProfile(p);
@@ -403,12 +428,6 @@ export default function AccountDashboard() {
     setAddresses((l) => normalise(l, id));
     say("Default address changed");
   };
-  const toggleSaved = (id, name) => {
-    if (saved.includes(id)) {
-      setSaved((s) => s.filter((x) => x !== id));
-      say(`${name} removed from wishlist`, () => setSaved((s) => [...s, id]));
-    } else setSaved((s) => [...s, id]);
-  };
 
   if (loggedOut) {
     return (
@@ -427,7 +446,6 @@ export default function AccountDashboard() {
   const show = (k) => view === "overview" || view === k;
   const single = view !== "overview";
   const order = ORDERS[0];
-  const wish = WISHLIST.filter((w) => saved.includes(w.id));
 
   const AddressCard = ({ a, actions }) => (
     <div className="addr">
@@ -653,43 +671,6 @@ export default function AccountDashboard() {
             </div>
           )}
 
-          {show("wishlist") && (
-            <section className="card">
-              <div className="card__head">
-                <h2 className="card__title">Saved For Later</h2>
-                {view === "overview" && (
-                  <button className="link" onClick={() => setView("wishlist")}>
-                    View Wishlist
-                  </button>
-                )}
-              </div>
-              {wish.length === 0 ? (
-                <p className="muted">
-                  Nothing saved yet. Tap the heart on any piece to keep it here.
-                </p>
-              ) : (
-                <ul className="grid">
-                  {wish.map((p) => (
-                    <li key={p.id} className="prod">
-                      <div className="prod__media">
-                        <Img src={p.img} alt={p.name} />
-                        <button
-                          className="prod__heart"
-                          aria-label={`Remove ${p.name} from wishlist`}
-                          onClick={() => toggleSaved(p.id, p.name)}
-                        >
-                          <Heart size={16} fill="currentColor" />
-                        </button>
-                      </div>
-                      <p className="prod__name">{p.name}</p>
-                      <p className="prod__price">{p.price}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          )}
-
           <footer className="foot">
             <nav className="foot__links">
               <button
@@ -814,7 +795,7 @@ export default function AccountDashboard() {
       {modal?.type === "logout" && (
         <Modal title="Log out?" onClose={close}>
           <p className="muted">
-            You'll need to sign in again to see your orders and wishlist.
+            You'll need to sign in again to see your orders and addresses.
           </p>
           <div className="form__actions">
             <button className="btn btn--ghost" onClick={close}>
@@ -833,21 +814,7 @@ export default function AccountDashboard() {
         </Modal>
       )}
 
-      {toast && (
-        <div className="toast" role="status" aria-live="polite">
-          <span>{toast.msg}</span>
-          {toast.undo && (
-            <button
-              onClick={() => {
-                toast.undo();
-                setToast(null);
-              }}
-            >
-              Undo
-            </button>
-          )}
-        </div>
-      )}
+      {toast && <Toast toast={toast} />}
     </div>
   );
 }
