@@ -41,7 +41,7 @@ import AccountOverview from "../Components/AccountOverview/AccountOverview"; // 
 import Video from "../Pages/admin/videos/Video";
 
 import Checkout from "../Pages/Payment/Checkout";
-import OrderConfiramation from "../Pages/OrderConfiramation/OrderConfiramation";
+import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
 
 
 const AppRoutes = () => {
@@ -65,7 +65,7 @@ const AppRoutes = () => {
           <Route path="/Wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-confiramation" element={<OrderConfiramation />} />
+          <Route path="/order-confirmation" element={<OrderConfirmation />} />
 
         </Route>
 
