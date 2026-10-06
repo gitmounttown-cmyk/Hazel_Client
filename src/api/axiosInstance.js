@@ -25,7 +25,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("[API SUCCESS]", response.config.url, response.data);
+    // console.log("[API SUCCESS]", response.config.url, response.data);
     return response;
   },
   (error) => {

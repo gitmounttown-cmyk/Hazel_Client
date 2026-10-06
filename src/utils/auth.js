@@ -1,5 +1,5 @@
 export const isUserLoggedIn = () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("hazelToken");
 
   return !!token;
 };

@@ -30,9 +30,9 @@ import { getProductById, getProducts } from "../../../services/productService";
 import toast from "react-hot-toast";
 import { getAllReviews } from "../../../Services/reviewService";
 import { formatCurrency } from "../../../utils/currencyFormat";
-import { formatTimeAgo } from "../../../utils/dateFormat";
+import { formatTimeAgo, getDeliveryDate, formatCountdown } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
-import { getUserAddresses } from "../../../Services/addressService";
+import { getUserAddresses, getAddresses } from "../../../Services/addressService";
 
 /* ---------- inline icons ---------- */
 const Star = ({ filled = true }) => (
@@ -300,7 +300,7 @@ export default function ProductPage() {
   const storedUser = localStorage.getItem("hazelUser");
   const userId = storedUser ? JSON.parse(storedUser)?.id : null;
   const navigate = useNavigate();
-  const [addedToCart, setAddedToCart] = useState(false);
+  // const [addedToCart, setAddedToCart] = useState(false);
   const [products, setProducts] = useState([]);
   const [activeThumb, setActiveThumb] = useState(0);
   const [activeColor, setActiveColor] = useState("rose");
@@ -319,6 +319,7 @@ export default function ProductPage() {
   const [showLocations, setShowLocations] = useState(false);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [userDeliveryAddress, setUserDeliveryAddress] = useState(null);
   const [newAddress, setNewAddress] = useState({
     name: "",
     phone: "",
@@ -349,9 +350,59 @@ export default function ProductPage() {
   const [reviewImages, setReviewImages] = useState([]); // [{ file, preview }]
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]); // State to hold related products
+  const [cartItems, setCartItems] = useState([]); // State to hold cart items
 
   const { id } = useParams();
   console.log("Product ID:", id); // Log the product ID to the console
+
+
+  const [countdown, setCountdown] = useState("");
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+
+      const cutoff = new Date();
+      cutoff.setHours(18, 0, 0, 0); // 6 PM
+
+      // If today's cutoff has passed,
+      // count down to tomorrow's cutoff
+      if (now >= cutoff) {
+        cutoff.setDate(cutoff.getDate() + 1);
+      }
+
+      const difference = Math.max(
+        0,
+        Math.floor((cutoff - now) / 1000)
+      );
+
+      setCountdown(formatCountdown(difference));
+    };
+
+    updateCountdown();
+
+    const timer = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+
+  useEffect(() => {
+    // Fetch cart items from the backend API when the component mounts
+    const fetchCartItems = async () => {
+      try {
+        const response = await getCart();
+        console.log("Fetched cart items:", response); // Log the response to the console
+        const cart = response?.data?.cart || response?.cart;
+        const items = cart?.items || [];
+        setCartItems(items);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    };
+
+    fetchCartItems();
+  }, []);
 
   // get product details using the id from the backend API and display them on the page. You can use useEffect to fetch the product details when the component mounts or when the id changes.
   useEffect(() => {
@@ -388,7 +439,7 @@ export default function ProductPage() {
             String(item?.product?._id || item?.productId) === String(id),
         );
 
-        setAddedToCart(exists);
+        // setAddedToCart(exists);
       } catch (error) {
         console.error("CHECK CART ERROR:", error);
       }
@@ -533,11 +584,14 @@ export default function ProductPage() {
   useEffect(() => {
     console.log("Fetching user addresses for user ID:", userId);
     if (userId) {
-      getUserAddresses(userId)
+      getAddresses()
         .then((response) => {
-          console.log("User addresses:", response.data?.data);
+          console.log("User addresses:", response);
+          const addresses = response?.data?.addresses || [];
+          const userDefaultAddress = addresses.find((addr) => addr.isDefault);
           // Update state with user addresses here
-          setUserAddresses(response.data?.data);
+          setUserDeliveryAddress(userDefaultAddress || null);
+          // setUserAddresses(addresses);
         })
         .catch((error) => {
           console.error("Error fetching user addresses:", error);
@@ -592,11 +646,30 @@ export default function ProductPage() {
         id: item.size,
         label: inStock ? "In Stock" : "Out of Stock",
         disabled: !inStock,
+        stockQuantity: item.stockQuantity,
       };
     }) || [];
 
   console.log("Sizes derived from product details:", SIZES); // Log the sizes derived from product details
 
+  const selectedSize = SIZES.find(
+  (size) => size.id === activeSize
+);
+
+const maxQty = selectedSize?.stockQuantity || 0;
+
+  useEffect(() => {
+  const firstAvailableSize = SIZES.find((size) => !size.disabled);
+
+  if (firstAvailableSize) {
+    setActiveSize(firstAvailableSize.id);
+    setQty(1);
+  } else {
+    setActiveSize(null);
+    setQty(1);
+  }
+}, [productDetails]);
+  
   const selectedVariant =
     productDetails?.variants?.find((variant) => variant.isActive) ||
     productDetails?.variants?.[0];
@@ -678,22 +751,44 @@ const DETAILS =
       variantId: selectedVariant._id,
       quantity: qty,
       price: selectedVariant.discountPrice || selectedVariant.price,
+      selectedSize: activeSize,
     };
     console.log("Cart item:", cartItem);
     const response = await addToCart(cartItem);
     console.log("Add to Cart response:", response);
     if (response.success) {
-      setAddedToCart(true);
+      // setAddedToCart(true);
+      // fetch cart items again to update the cart state
+      const updatedCartResponse = await getCart();
+      const updatedCart = updatedCartResponse?.data?.cart || updatedCartResponse?.cart;
+      const updatedItems = updatedCart?.items || [];
+      setCartItems(updatedItems);
       toast.success("Product added");
     } else {
       toast.error(response?.message || "Failed to add item to cart.");
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = (productId, variantId) => {
+    console.log("productId:", productId, "variantId:", variantId);
     if (!isLoggedIn()) {
       toast.error("Please log in to proceed with the purchase.");
       return;
+    }
+    // check product id exsit in the cart or not, if not then add to cart and then navigate to the checkout page
+      const itemExistsInCart = cartItems.some(
+        (item) =>
+          String(item?.product?._id || item?.productId) === String(productId) 
+        // &&          String(item?.variantId) === String(variantId)
+      );
+      console.log("itemExistsInCart:", itemExistsInCart);
+    // add to cart and then navigate to the checkout page
+    if (!itemExistsInCart) {
+      handleAddToCart().then(() => {
+        navigate("/checkout");
+      });
+    } else {
+      navigate("/checkout");
     }
   };
 
@@ -957,6 +1052,35 @@ const DETAILS =
     return () => clearInterval(slideInterval);
   }, [variantMedia]);
 
+  const existingCartItem = cartItems?.find(
+  (item) =>
+    String(item.product?._id) ===
+      String(productDetails?._id) &&
+    // item.color?.toLowerCase() ===      selectedColor?.toLowerCase() &&
+    item.selectedSize?.toUpperCase() ===
+      activeSize?.toUpperCase()
+);
+
+const addedToCart = !!existingCartItem;
+
+  console.log('cart_items:', cartItems); // Log the cart items to the console
+
+  const selectUserDeliveryAddress = (address) => {
+    if(!isLoggedIn()) {
+      toast.error("Please log in to select a delivery address.");
+      return;
+    }
+
+    navigate("/account", {
+      state: {
+        selectedAddress: address,
+        productId: productDetails?._id,
+        variantId: selectedVariant?._id,
+      }
+    });
+
+  }
+
   return (
     <div className="pp">
       {/* ============ PRODUCT SECTION ============ */}
@@ -1066,10 +1190,29 @@ const DETAILS =
             <div className="pp-block">
               <div className="pp-label-row">
                 <span className="pp-label">Select Size</span>
-                <button className="pp-size-guide">Size Guide</button>
+                {/* <button className="pp-size-guide">Size Guide</button> */}
               </div>
               <div className="pp-sizes">
                 {SIZES.map((s) => (
+                  <button
+                    key={s.id}
+                    disabled={s.disabled}
+                    className={`pp-size ${activeSize === s.id ? "is-active" : ""
+                      } ${s.disabled ? "is-disabled" : ""}`}
+                    onClick={() => {
+                      if (!s.disabled) {
+                        setActiveSize(s.id);
+                        setQty(1); // important
+                      }
+                    }}
+                  >
+                    <span className="pp-size-id">{s.id}</span>
+                    <span className="pp-size-note">
+                      {s.label}
+                    </span>
+                  </button>
+                ))}
+                {/* {SIZES.map((s) => (
                   <button
                     key={s.id}
                     disabled={s.disabled}
@@ -1081,7 +1224,7 @@ const DETAILS =
                     <span className="pp-size-id">{s.id}</span>
                     <span className="pp-size-note">{s.label}</span>
                   </button>
-                ))}
+                ))} */}
                 {/* {productDetails?.variants?.[0]?.sizes?.map((s) => (
                   <button
                     key={s?._id}
@@ -1099,7 +1242,44 @@ const DETAILS =
             </div>
 
             <div className="pp-block pp-qty-row">
-              <div>
+              {selectedSize && (
+                <div>
+                  <span className="pp-label">Quantity</span>
+
+                  <div className="pp-qty">
+                    <button
+                      onClick={() =>
+                        setQty((q) => Math.max(1, q - 1))
+                      }
+                      disabled={qty <= 1}
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+
+                    <span className="pp-qty-num">
+                      {qty}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        setQty((q) => Math.min(maxQty, q + 1))
+                      }
+                      disabled={qty >= maxQty}
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {maxQty > 1 && (
+                    <small>
+                      {maxQty} available
+                    </small>
+                  )}
+                </div>
+              )}
+              {/* <div>
                 <span className="pp-label">Quantity</span>
                 <div className="pp-qty">
                   <button
@@ -1116,7 +1296,7 @@ const DETAILS =
                     +
                   </button>
                 </div>
-              </div>
+              </div> */}
               <div className="pp-fitmodel">
                 <div>
                   <span className="pp-fitmodel-k">Sleeves</span>
@@ -1134,15 +1314,31 @@ const DETAILS =
             </div>
 
             <div className="pp-actions">
+
               <button
+                className="btn btn--primary"
+                onClick={() => {
+                  if (addedToCart) {
+                    navigate("/cartpage");
+                  } else {
+                    handleAddToCart();
+                  }
+                }}
+              >
+                {addedToCart ? "Go to Cart" : "Add To Cart"}
+              </button>
+
+              {/* <button
                 className="btn btn--primary"
                 onClick={
                   addedToCart ? () => navigate("/cartpage") : handleAddToCart
                 }
               >
                 {addedToCart ? "Go to Cart" : "Add To Cart"}
-              </button>
-              <button className="btn btn--outline" onClick={handleBuyNow}>
+
+              </button>*/}
+              <button className="btn--outline" onClick={() => handleBuyNow(productDetails?._id, selectedVariant?._id)}>
+
                 Buy Now
               </button>
             </div>
@@ -1263,19 +1459,20 @@ const DETAILS =
                 </span>
 
                 <div className="pp-delivery-content">
-                  {selectedAddress ? (
+                  {userDeliveryAddress ? (
                     <>
                       <span className="pp-delivery-text">
                         Deliver to{" "}
                         <strong>
-                          {selectedAddress.city} - {selectedAddress.pincode}
+                          {userDeliveryAddress.city} - {userDeliveryAddress.pincode}
                         </strong>
                       </span>
 
                       <button
                         type="button"
                         className="pp-change-location"
-                        onClick={() => setShowLocations(true)}
+                        // onClick={() => setShowLocations(true)}
+                        onClick={()=> selectUserDeliveryAddress()}
                       >
                         Change
                       </button>
@@ -1286,7 +1483,8 @@ const DETAILS =
                       <button
                         type="button"
                         className="pp-location-link"
-                        onClick={() => setShowLocations(true)}
+                        // onClick={() => setShowLocations(true)}
+                        onClick={()=> selectUserDeliveryAddress()}
                       >
                         Select delivery location
                       </button>
@@ -1302,9 +1500,9 @@ const DETAILS =
                 </span>
 
                 <span>
-                  Delivery by 11 Sep, Fri
+                  Delivery by {getDeliveryDate(7)}
                   <br />
-                  <em>Order in 00h 00m 00s</em>
+                  <em>Order in {countdown}</em>
                 </span>
               </div>
             </div>

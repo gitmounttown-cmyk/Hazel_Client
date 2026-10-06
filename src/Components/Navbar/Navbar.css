@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
 
 .navbar {
-  background-color: #5A1827;
+  background-color: #F1CB62;
   padding: 1rem 3.5rem;
   display: flex;
   align-items: center;
@@ -39,7 +39,7 @@
 }
 
 .nav-links a {
-  color: #FFFFFF;
+  color: #6E6139;
   text-decoration: none;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.95rem;
@@ -55,7 +55,7 @@
 }
 
 .nav-links a.active-link {
-  color: #C5A880;
+  color:black;
   font-weight: 500;
   border-bottom: 2px solid #C5A880;
 }
@@ -69,7 +69,7 @@
 .nav-icon {
   width: 20px;
   height: 20px;
-  color: #C5A880;
+  color: #6E6139;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
@@ -84,7 +84,7 @@
   display: flex;
   align-items: center;
   position: relative;
-  background: rgba(255, 255, 255, 0.08);
+  background: #F6F1EB;
   border: 1px solid rgba(197, 168, 128, 0.4);
   border-radius: 20px;
   padding: 4px 10px;
@@ -95,7 +95,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #FFFFFF;
+  color: black;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.85rem;
   width: 140px;
@@ -103,7 +103,7 @@
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: #6E6139;
 }
 
 .nav-right-section a {
@@ -127,7 +127,7 @@
 .hamburger-line {
   width: 100%;
   height: 2.5px;
-  background-color: #C5A880;
+  background-color:#24211C;
   border-radius: 2px;
   transition: all 0.3s ease-in-out;
 }
@@ -163,18 +163,18 @@
   justify-content: center;
   gap: 3px;
   cursor: pointer;
-  color: #edc484;
+  color:#24211C;
 }
 
 .navbar-user-button .nav-icon {
-  color: #edc484;
+  color: #24211C;
   cursor: pointer;
 }
 
 .user-chevron {
   width: 14px;
   height: 14px;
-  color: #edc484;
+  color:#433E2C;
   transition: transform 0.25s ease;
 }
 
@@ -193,7 +193,7 @@
   right: 0;
   width: 270px;
 
-  background-color: #5A1827;
+  background-color: #F6F1EB;
   border: 1px solid rgba(237, 196, 132, 0.45);
   border-radius: 4px;
 
@@ -240,8 +240,8 @@
 
   border-radius: 50%;
 
-  background-color: #edc484;
-  color: #5A1827;
+  background-color: #F1CB62;
+  color:#6E6139 ;
 
   display: flex;
   align-items: center;
@@ -251,7 +251,7 @@
   font-size: 18px;
   font-weight: 600;
 
-  border: 1px solid rgba(237, 196, 132, 0.8);
+  border: 1px solid #F1CB62;
 }
 
 .user-info {
@@ -262,7 +262,7 @@
 .user-name {
   margin: 0 0 4px;
 
-  color: #edc484;
+  color: #6E6139;
 
   font-family: 'Playfair Display', serif;
   font-size: 15px;
@@ -276,7 +276,7 @@
 .user-email {
   margin: 0;
 
-  color: rgba(237, 196, 132, 0.72);
+  color: #6E6139;
 
   font-family: 'Playfair Display', serif;
   font-size: 12px;
@@ -319,7 +319,7 @@
 
   cursor: pointer;
 
-  color: #edc484;
+  color: #6E6139;
 
   font-family: 'Playfair Display', serif;
   font-size: 14px;
@@ -336,16 +336,17 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  color:#6E6139;
 }
 
 .user-dropdown-item:hover {
   background-color: rgba(237, 196, 132, 0.12);
-  color: #ffffff;
+  color: #6E6139;
   padding-left: 21px;
 }
 
 .user-dropdown-item:hover svg {
-  color: #edc484;
+  color: #6E6139;
 }
 
 
@@ -354,12 +355,12 @@
 ========================================================= */
 
 .logout-item {
-  color: #edc484;
+  color: #6E6139;
 }
 
 .logout-item:hover {
   background-color: rgba(237, 196, 132, 0.15);
-  color: #ffffff;
+  color: #6E6139;
 }
 
 
