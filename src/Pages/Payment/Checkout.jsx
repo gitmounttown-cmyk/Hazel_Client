@@ -126,7 +126,16 @@ function Thumb({ item, onOpen, productId, navigate }) {
 
   if (failed) {
     return (
+      //show product image if not show shopping bag icon
       <div className="summary__img summary__img--fallback" aria-hidden="true" onClick={() => navigate(`/product/${productId}`)}>
+        {item.mediaImageUrl && (
+          <img
+            className="summary__img"
+            src={import.meta.env.VITE_UPLOAD_URL + item.mediaImageUrl}
+            alt={item.name}
+            onError={() => setFailed(true)}
+          />
+        )}
         <ShoppingBag size={22} strokeWidth={1.5} />
       </div>
     );
@@ -143,7 +152,7 @@ function Thumb({ item, onOpen, productId, navigate }) {
     >
       <img
         className="summary__img"
-        src={import.meta.env.VITE_API_URL + item.mediaImageUrl}
+        src={import.meta.env.VITE_UPLOAD_URL + item.mediaImageUrl}
         alt={item.name}
         onError={() => setFailed(true)}
       />
