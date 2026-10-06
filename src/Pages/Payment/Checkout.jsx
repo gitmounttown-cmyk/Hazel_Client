@@ -14,7 +14,11 @@ import {
 import "./Checkout.css";
 
 import img1 from "../../assets/Trending/img1.png";
-
+import { getCart, removeCartItem } from "../../services/cartService";
+import { useNavigate } from "react-router-dom"; 
+import { getAddresses } from "../../Services/addressService";
+import { createOrder } from "../../Services/paymentService";
+import toast from "react-hot-toast";
 const formatINR = (n) => `₹${n.toLocaleString("en-IN")}`;
 
 /* ---------- Sample data (replace with your cart + saved addresses) ---------- */
@@ -116,12 +120,13 @@ const validate = (v) => {
 };
 
 /* ---------- Product thumbnail (clickable) ---------- */
-function Thumb({ item, onOpen }) {
+function Thumb({ item, onOpen, productId, navigate }) {
+  console.log("Thumb component - productId:", productId);
   const [failed, setFailed] = useState(false);
 
   if (failed) {
     return (
-      <div className="summary__img summary__img--fallback" aria-hidden="true">
+      <div className="summary__img summary__img--fallback" aria-hidden="true" onClick={() => navigate(`/product/${productId}`)}>
         <ShoppingBag size={22} strokeWidth={1.5} />
       </div>
     );
@@ -131,12 +136,14 @@ function Thumb({ item, onOpen }) {
     <button
       type="button"
       className="summary__imgbtn"
-      onClick={() => onOpen(item)}
+      // onClick={() => onOpen(item)}
+      onClick={() => navigate(`/product/${productId}`)}
+      
       aria-label={`View ${item.name} image`}
     >
       <img
         className="summary__img"
-        src={item.image}
+        src={import.meta.env.VITE_API_URL + item.mediaImageUrl}
         alt={item.name}
         onError={() => setFailed(true)}
       />
@@ -152,10 +159,11 @@ export default function Checkout({
   onAddAddress = () => {},
   onSelectAddress = () => {},
   onQtyChange = () => {}, // (itemId, newQty)
-  onRemoveItem = () => {}, // (item)
+  onRemoveItem = () => {}, // (item, index)
   onAddProduct = () => {}, // e.g. navigate("/shop")
   onPay = () => {}, // call your Razorpay open/redirect logic here
 }) {
+  const navigate = useNavigate(); // Initialize the navigate function from react-router-dom
   const { shipping } = order;
 
   /* cart state */
@@ -163,33 +171,115 @@ export default function Checkout({
 
   /* address state */
   const [addresses, setAddresses] = useState(order.addresses);
-  const [selectedId, setSelectedId] = useState(order.addresses[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState(null);
   const [pendingId, setPendingId] = useState(selectedId);
   const [mode, setMode] = useState(order.addresses.length ? "view" : "add"); // view | select | add
   const [draft, setDraft] = useState(emptyAddress);
   const [errors, setErrors] = useState({});
-
+  const [cartItems, setCartItems] = useState([]); // State to hold cart items
+const [userAddress, setUserAddress] = useState([]); // State to hold user address
   /* image preview */
   const [preview, setPreview] = useState(null);
 
-  const address = addresses.find((a) => a.id === selectedId);
-  const itemCount = items.reduce((n, i) => n + i.qty, 0);
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const discount =
-    typeof order.discount === "function"
-      ? order.discount(subtotal, items)
-      : items.length
-        ? order.discount
-        : 0;
+  //get user address by login user id
+  useEffect(() => {
+    const fetchAddress = async () =>  {
+      try {
+        const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id; // Assuming you have the user ID stored in localStorage
+        console.log("User ID from localStorage:", userId);
+        if (userId) {
+          const response = await getAddresses();
+          console.log("Fetched user address:", response);
+          if (response && response.data) {
+            let userAddresses = [];
+            // setAddresses(response?.data?.addresses);
+            response?.data?.addresses.forEach((address) => {
+              if (address.isDefault) {
+                setSelectedId(address._id);
+              }
+                let userAddress = {
+                  id: address._id,
+                  fullName: address.fullName,
+                  houseNo: address.houseNo,
+                  isDefault: address.isDefault,
+                  addressType: address.addressType,
+                  mobileNumber: address.mobileNumber,
+                  city: address.city,
+                  state: address.state,
+                  country: address.country,
+                  pincode: address.pincode,
+                };
+                userAddresses.push(userAddress);
+                
+                // setUserAddress((prev) => [...prev, userAddress]);
+              // }
+            })
+            setUserAddress(userAddresses);
+          }
+        }
+      }
+         catch (error) {
+        console.error("Error fetching user address:", error);
+      }
+    };
+
+    fetchAddress();
+  }, []);
+
+  // getcart items from backend and set to cartItems state
+  const getCartItems = async () => {
+    try {
+      const cartData = await getCart();
+      console.log("Fetched cart data:", cartData);
+      const cartItems = cartData?.cart?.items;
+      let productDetailsList = [];
+      cartItems?.forEach((item) => {
+        const variant = item?.product?.variants || {};
+        const mediaImageUrl = variant?.[0]?.media?.[0]?.imageURL || [];
+        const size = variant?.[0]?.sizes || [];
+        console.log("Variant sizes:", size);
+        const selectedSize = size.filter((s) => s.size === item.selectedSize);
+        console.log("Selected size:", selectedSize);
+        let productDetails = {
+          id: item?._id || item?.product?._id,
+          productId: item?.product?._id,
+          name: item.product?.name || item.productName,
+          print: item.print || item.variant?.print,
+          price: item.price || item.variant?.price,
+          size: item.selectedSize || item.variant?.size || item.variant?.sizeName,
+          qty: item.qty || item.quantity,
+          mediaImageUrl: mediaImageUrl,
+          discountPrice: variant?.[0]?.discountPrice || 0,
+          selectedSizeStockQuantity: selectedSize[0]?.stockQuantity || 0,
+        }
+        productDetailsList.push(productDetails);
+      });
+      setCartItems(productDetailsList);
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+    }
+  };
+
+  //get cart items for checkout
+  useEffect(() => {
+    getCartItems();
+  }, []);
+console.log("Checkout items:", cartItems);
+  const address = userAddress.find((a) => a.id === selectedId) || null;
+  console.log("Default address:", address);
+  const itemCount = cartItems.reduce((n, i) => n + i.qty, 0);
+  const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const discount = cartItems.length ? cartItems.reduce((sum, i) => sum + (i.discountPrice || 0) * i.qty, 0) : 0;
+  console.log("Subtotal:", subtotal, "Discount:", discount, "Shipping:", shipping);
   const tax =
     typeof order.tax === "function"
-      ? order.tax(subtotal, discount, items)
-      : items.length
+      ? order.tax(subtotal, discount, cartItems)
+      : cartItems.length
         ? order.tax
         : 0;
-  const total = subtotal - discount + (items.length ? shipping : 0) + tax;
-  const canPay = items.length > 0 && mode === "view" && !!address;
-
+  const total = subtotal - discount + (cartItems.length ? shipping : 0) + tax;
+  const canPay = cartItems.length > 0 && mode === "view" && !!address;
+console.log("User_address:", userAddress);
   /* Esc closes preview + lock scroll */
   useEffect(() => {
     if (!preview) return;
@@ -214,15 +304,21 @@ export default function Checkout({
           : i,
       ),
     );
-    const current = items.find((i) => i.id === id);
+    const current = cartItems.find((i) => i.id === id);
     if (current) {
       onQtyChange(id, Math.min(MAX_QTY, Math.max(1, current.qty + delta)));
     }
   };
 
-  const removeItem = (item) => {
-    setItems((list) => list.filter((i) => i.id !== item.id));
-    onRemoveItem(item);
+  // remove based on cart items index
+  const removeItem = async(item, index) => {
+    // setCartItems((list) => list.filter((i, iIndex) => iIndex !== index));
+    await removeCartItem(item.id).catch((error) => {
+      console.error("Error removing item from cart:", error);
+    });
+    await getCartItems(); // Refresh cart items after removal
+
+    // onRemoveItem(item, index);
   };
 
   /* ---------- address handlers ---------- */
@@ -233,7 +329,7 @@ export default function Checkout({
 
   const deliverHere = () => {
     setSelectedId(pendingId);
-    onSelectAddress(addresses.find((a) => a.id === pendingId));
+    onSelectAddress(userAddress.find((a) => a.id === pendingId));
     setMode("view");
   };
 
@@ -245,7 +341,7 @@ export default function Checkout({
 
   const cancelAdd = () => {
     setErrors({});
-    setMode(addresses.length ? "select" : "add");
+    setMode(userAddress.length ? "select" : "add");
   };
 
   const handleChange = (key, value) => {
@@ -266,12 +362,52 @@ export default function Checkout({
       Object.entries(draft).map(([k, v]) => [k, v.trim()]),
     );
     const created = { ...cleaned, id: `a${Date.now()}` };
-    setAddresses((list) => [...list, created]);
+    setUserAddress((list) => [...list, created]);
     setSelectedId(created.id);
     setPendingId(created.id);
     onAddAddress(created);
     setMode("view");
   };
+
+  // send products details,delivery address , total amount and uerId to backend for payment processing
+  onPay = async (total, address) => {
+    try {
+      if (!address) {
+        toast.error("Please select a delivery address before proceeding to payment.");
+        return;
+      }
+    const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id; // Assuming you have the user ID stored in localStorage
+    const orderDetails = {
+      userId: userId,
+      products: cartItems.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        print: item.print,
+        size: item.size,
+        qty: item.qty,
+        price: item.price,
+      })),
+      deliveryAddress: address,
+      amount: total,
+    };
+    console.log("Order details to send for payment:", orderDetails);
+    // call create order api
+    await createOrder(orderDetails)
+      .then((response) => {
+        console.log("Order created successfully:", response);
+        // Redirect to payment gateway or handle payment logic here
+      })
+      .catch((error) => {
+        console.error("Error creating order:", error);
+        toast.error("Failed to create order. Please try again.");
+      });
+    } catch (error) {
+      console.error("Error preparing order details for payment:", error);
+    }
+  }
+
+  console.log("cartItems in checkout:", cartItems);
+  console.log("userAddress in checkout:", userAddress);
 
   return (
     <div className="checkout">
@@ -303,16 +439,16 @@ export default function Checkout({
             {mode === "view" && address && (
               <div className="delivery__body">
                 <h2 className="delivery__name">
-                  {address.name}
-                  <span className="badge">{address.type}</span>
+                  {address.fullName}
+                  <span className="badge">{address.addressType}</span>
                 </h2>
                 <p className="delivery__address">
-                  <span>{address.line1},</span>
+                  <span>{address.houseNo},</span>
                   <span>
                     {address.city}, {address.state} - {address.pincode}
                   </span>
                 </p>
-                <p className="delivery__phone">+91 {address.phone}</p>
+                <p className="delivery__phone">+91 {address.mobileNumber}</p>
               </div>
             )}
 
@@ -323,8 +459,9 @@ export default function Checkout({
                 role="radiogroup"
                 aria-label="Select delivery address"
               >
-                {addresses.map((a) => {
+                {userAddress.map((a) => {
                   const active = a.id === pendingId;
+                  console.log("Address ID:", a.id, "Pending ID:", pendingId, "Is Default:", a.isDefault, "Active:", active);
                   return (
                     <div
                       key={a.id}
@@ -344,14 +481,14 @@ export default function Checkout({
                         />
                         <span className="addr-option__text">
                           <span className="addr-option__top">
-                            <strong>{a.name}</strong>
-                            <span className="badge">{a.type}</span>
+                            <strong>{a.fullName}</strong>
+                            <span className="badge">{a.addressType}</span>
                             <span className="addr-option__phone">
-                              +91 {a.phone}
+                              +91 {a.mobileNumber}
                             </span>
                           </span>
                           <span className="addr-option__addr">
-                            {a.line1}, {a.city}, {a.state} -{" "}
+                            {a.houseNo}, {a.city}, {a.state} -{" "}
                             <strong>{a.pincode}</strong>
                           </span>
                         </span>
@@ -470,7 +607,7 @@ export default function Checkout({
               <button
                 type="button"
                 className="btn-outline"
-                onClick={onAddProduct}
+                onClick={() => navigate("/shop")}
               >
                 Browse products
               </button>
@@ -478,8 +615,8 @@ export default function Checkout({
           ) : (
             <>
               <div className="summary__items">
-                {items.map((item) => (
-                  <div className="summary__item" key={item.id}>
+                {/* {cartItems?.map((item, index) => (
+                  <div className="summary__item" key={`${item.id}-${index}`}>
                     <Thumb item={item} onOpen={setPreview} />
                     <div className="summary__info">
                       <h3 className="summary__name">{item.name}</h3>
@@ -523,19 +660,93 @@ export default function Checkout({
                       <button
                         type="button"
                         className="summary__remove"
-                        onClick={() => removeItem(item)}
+                        onClick={() => removeItem(item, index)}
                       >
                         <Trash2 size={13} strokeWidth={1.8} />
                         Remove
                       </button>
                     </div>
                   </div>
-                ))}
+                ))} */}
+                  {cartItems?.map((item, index) => {
+                    const maxQty = Number(item.stockQuantity || 0);
+
+                    return (
+                      <div className="summary__item" key={`${item.id}-${index}`}>
+                        <Thumb item={item} onOpen={setPreview}  productId ={item.productId} navigate={navigate}/>
+
+                        <div className="summary__info">
+                          <h3 className="summary__name">{item.name}</h3>
+
+                          <p className="summary__meta">
+                            Size: {item.size}
+                          </p>
+
+                          <div className="summary__bottom">
+                            <div
+                              className="qty"
+                              role="group"
+                              aria-label={`Quantity for ${item.name}`}
+                            >
+                              {/* Decrease */}
+                              <button
+                                type="button"
+                                className="qty__btn"
+                                onClick={() => changeQty(item.id, -1)}
+                                disabled={item.qty <= 1}
+                                aria-label="Decrease quantity"
+                              >
+                                <Minus size={12} strokeWidth={2.2} />
+                              </button>
+
+                              {/* Quantity */}
+                              <span className="qty__value" aria-live="polite">
+                                {item.qty}
+                              </span>
+
+                              {/* Increase */}
+                              <button
+                                type="button"
+                                className="qty__btn"
+                                onClick={() => changeQty(item.id, 1)}
+                                disabled={item.qty >= maxQty}
+                                aria-label="Increase quantity"
+                              >
+                                <Plus size={12} strokeWidth={2.2} />
+                              </button>
+                            </div>
+
+                            <p className="summary__price">
+                              {formatINR(item.price * item.qty)}
+                            </p>
+                          </div>
+
+                          {/* Stock message */}
+                          {maxQty > 0 && (
+                            <small className="summary__stock">
+                              {item.qty >= maxQty
+                                ? `Only ${maxQty} available`
+                                : `${maxQty} available`}
+                            </small>
+                          )}
+
+                          <button
+                            type="button"
+                            className="summary__remove"
+                            onClick={() => removeItem(item, index)}
+                          >
+                            <Trash2 size={13} strokeWidth={1.8} />
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </>
           )}
 
-          <button type="button" className="summary__add" onClick={onAddProduct}>
+          <button type="button" className="summary__add" onClick={() => navigate("/shop")}>
             <Plus size={15} strokeWidth={2} />
             Add more products
           </button>

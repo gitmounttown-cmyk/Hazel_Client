@@ -5,6 +5,8 @@ import {
   removeWishlistItem,
 } from "../../Services/wishlistService";
 
+import { useNavigate } from "react-router-dom";
+
 const HeartIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -153,7 +155,7 @@ const getImageUrl = (image) => {
   return `${import.meta.env.VITE_UPLOAD_URL}${image.startsWith("/") ? image : `/${image}`}`;
 };
 
-function WishlistCard({ item, onRemove, removing }) {
+function WishlistCard({ item, onRemove, removing, navigate }) {
   const product = item?.product;
 
   if (!product) {
@@ -167,7 +169,7 @@ function WishlistCard({ item, onRemove, removing }) {
   const image = getProductImage(product);
 
   return (
-    <div className="wl-card">
+    <div className="wl-card" onClick={() => navigate(`/product/${product._id}`)}>
       <div className="wl-card__image">
         {product?.isNew && <span className="wl-card__badge">New</span>}
 
@@ -270,6 +272,7 @@ function SortDropdown({ selected, setSelected }) {
 }
 
 export default function Wishlist() {
+  const navigate = useNavigate();
   const [wishlistItems, setWishlistItems] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -352,7 +355,7 @@ export default function Wishlist() {
       new Date(a.createdAt || 0).getTime()
     );
   });
-
+console.log("sortedItems:", sortedItems);
   return (
     <div className="wl-page">
       <section className="wl-hero">
@@ -403,6 +406,7 @@ export default function Wishlist() {
               item={item}
               onRemove={handleRemove}
               removing={removingId === item?.product?._id}
+              navigate={navigate}
             />
           ))}
         </div>
