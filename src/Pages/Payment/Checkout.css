@@ -109,7 +109,7 @@
 }
 
 .btn-solid {
-  color: var(--lite-yellow);
+  color: white;
   background: var(--red);
   border: 1px solid var(--red);
 }
