@@ -469,12 +469,12 @@ export default function AccountDashboard() {
   }, [toast]);
 
   const close = () => setModal(null);
-  const say = (msg) => setToast({ msg });
+  // const say = (msg) => setToast({ msg });
 
   const saveProfile = (p) => {
     setProfile(p);
     close();
-    say("Profile updated");
+    // say("Profile updated");
   };
   const saveAddress = async (a) => {
     const id = a._id ?? Date.now();
@@ -506,7 +506,7 @@ export default function AccountDashboard() {
       toast.error("Failed to save address to database.");
     }
     close();
-    say(a._id ? "Address updated" : "Address added");
+    // say(a._id ? "Address updated" : "Address added");
   };
   const removeAddress = async (id) => {
     setAddresses((l) => normalise(l.filter((x) => x._id !== id)));
@@ -525,7 +525,7 @@ export default function AccountDashboard() {
   };
   const makeDefault = (id) => {
     setAddresses((l) => normalise(l, id));
-    say("Default address changed");
+    // say("Default address changed");
   };
 
   if (loggedOut) {
