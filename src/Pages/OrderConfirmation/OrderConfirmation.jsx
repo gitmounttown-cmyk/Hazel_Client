@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect } from "react";
 import {
   Check,
   Truck,
@@ -7,21 +9,12 @@ import {
   Headset,
   ArrowRight,
 } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getPaymentByOrder } from "../../services/paymentService";
+import toast from "react-hot-toast";
 import "./OrderConfirmation.css";
 
-/* 👉 Put your product image in /public/images/ (or import it) and update this path */
-import img1 from "../../assets/Trending/img2.png";
-// If you don't want to import, use: const productImage = "/images/admire-maxi.png";
-
-const order = {
-  customer: "Priya",
-  id: "#AR-88291",
-  total: "₹4,904",
-  address: ["12 Example Street, Coimbatore,", "Tamil Nadu, 6410XX"],
-  phone: "+91 98765 43210",
-  delivery: "Thursday, 24th October",
-  item: { name: "Admire Maxi", variant: "Green Floral • XL", price: "₹4,999" },
-};
+const formatINR = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
 const perks = [
   {
@@ -42,6 +35,73 @@ const perks = [
 ];
 
 export default function OrderConfirmation() {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        setLoading(true);
+        const targetId = orderId || localStorage.getItem("latestOrderId");
+        
+        if (!targetId) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await getPaymentByOrder(targetId);
+        if (response && response.data) {
+          setOrderData(response.data.order || response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching order confirmation details:", error);
+        toast.error("Failed to load order details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <div className="oc">
+        <main className="oc__wrap" style={{ textAlign: "center", padding: "4rem 0" }}>
+          <h2>Loading your order details...</h2>
+        </main>
+      </div>
+    );
+  }
+
+  // Map backend fields to match your design structure
+  const customer = orderData?.deliveryAddress?.fullName || "Valued Customer";
+  const id = orderData?._id || orderData?.id || orderId || "#AR-88291";
+  const total = formatINR(orderData?.amount || orderData?.total || 0);
+  
+  const address = orderData?.deliveryAddress ? [
+    `${orderData.deliveryAddress.houseNo}, ${orderData.deliveryAddress.city},`,
+    `${orderData.deliveryAddress.state}, ${orderData.deliveryAddress.pincode}`
+  ] : ["12 Example Street, Coimbatore,", "Tamil Nadu, 6410XX"];
+
+  const phone = orderData?.deliveryAddress?.mobileNumber ? `+91 ${orderData.deliveryAddress.mobileNumber}` : "+91 98765 43210";
+  const delivery = orderData?.expectedDelivery || "Thursday, 24th October";
+  
+  const items = orderData?.products || orderData?.items || [];
+  const firstItem = items[0] || {};
+
+  // Construct dynamic product image URL from backend media metadata
+  const itemImage = firstItem.mediaImageUrl 
+    ? `${import.meta.env.VITE_API_URL}${firstItem.mediaImageUrl}` 
+    : (firstItem.image || "");
+
+  const itemName = firstItem.name || "Admire Maxi";
+  const itemVariant = `${firstItem.print || "Green Floral"} • ${firstItem.size || "XL"}${firstItem.qty ? ` • Qty: ${firstItem.qty}` : ""}`;
+  const itemPrice = formatINR(firstItem.price ? firstItem.price * (firstItem.qty || 1) : 4999);
+
   return (
     <div className="oc">
       <main className="oc__wrap">
@@ -58,14 +118,14 @@ export default function OrderConfirmation() {
 
           <h1 className="oc__title">
             Thank you for your <br className="oc__br" />
-            order, {order.customer}.
+            order, {customer}.
           </h1>
 
-          <p className="oc__lead">
-            A confirmation email has been sent to your registered email address.
-            Your luxurious essentials are being prepared for their journey to
-            you.
-          </p>
+          {/* <p className="oc__lead"> */}
+            {/* A confirmation email has been sent to your registered email address. */}
+            {/* Your luxurious essentials are being prepared for their journey to */}
+            {/* you. */}
+          {/* </p> */}
         </header>
 
         {/* Main card */}
@@ -74,11 +134,11 @@ export default function OrderConfirmation() {
             <div className="oc__meta">
               <div>
                 <span className="oc__label">Order ID</span>
-                <p className="oc__value">{order.id}</p>
+                <p className="oc__value">{id}</p>
               </div>
               <div>
                 <span className="oc__label">Order Total</span>
-                <p className="oc__value">{order.total}</p>
+                <p className="oc__value">{total}</p>
               </div>
             </div>
 
@@ -88,12 +148,12 @@ export default function OrderConfirmation() {
               <span className="oc__label oc__label--icon">
                 <Truck size={16} /> Delivery Details
               </span>
-              <p className="oc__name">{order.customer}</p>
+              <p className="oc__name">{customer}</p>
               <address className="oc__address">
-                {order.address.map((line) => (
+                {address.map((line) => (
                   <span key={line}>{line}</span>
                 ))}
-                <span className="oc__phone">{order.phone}</span>
+                <span className="oc__phone">{phone}</span>
               </address>
             </div>
 
@@ -103,7 +163,7 @@ export default function OrderConfirmation() {
               </span>
               <div>
                 <span className="oc__eta-label">Expected Delivery</span>
-                <p className="oc__eta-date">{order.delivery}</p>
+                <p className="oc__eta-date">{delivery}</p>
               </div>
             </div>
           </div>
@@ -112,25 +172,35 @@ export default function OrderConfirmation() {
             <span className="oc__label">Items Summary</span>
 
             <div className="oc__item">
-              <img
-                className="oc__img"
-                src={img1}
-                alt={order.item.name}
-                loading="lazy"
-              />
+              {itemImage && (
+                <img
+                  className="oc__img"
+                  src={itemImage}
+                  alt={itemName}
+                  loading="lazy"
+                />
+              )}
               <div>
-                <h2 className="oc__item-name">{order.item.name}</h2>
-                <p className="oc__item-variant">{order.item.variant}</p>
-                <p className="oc__item-price">{order.item.price}</p>
+                <h2 className="oc__item-name">{itemName}</h2>
+                <p className="oc__item-variant">{itemVariant}</p>
+                <p className="oc__item-price">{itemPrice}</p>
               </div>
             </div>
 
             <div className="oc__actions">
-              <button type="button" className="oc__btn oc__btn--primary">
+              <button 
+                type="button" 
+                className="oc__btn oc__btn--primary"
+                onClick={() => navigate(`/track-order/${id}`)}
+              >
                 Track Order
                 <ArrowRight size={18} className="oc__arrow" />
               </button>
-              <button type="button" className="oc__btn oc__btn--ghost">
+              <button 
+                type="button" 
+                className="oc__btn oc__btn--ghost"
+                onClick={() => navigate("/shop")}
+              >
                 Continue Shopping
               </button>
             </div>

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import "./Contact.css";
 import heroimg from "../../assets/Rectangle 60.png";
+import footerimg from "../../assets/images/footer_img.png";
 
 const ContactPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,7 +73,7 @@ const ContactPage = () => {
               <span className="contact-help-heading">Order Help</span>
             </div>
             <div className="contact-help-details">
-              <span>Tracking, shipping updates, and address changes.</span>
+              <span className="contact-help-details1">Tracking, shipping updates, and address changes.</span>
               <span className="contact-help-arrow">&rarr;</span>
             </div>
           </div>
@@ -83,7 +84,7 @@ const ContactPage = () => {
               <span className="contact-help-heading">Product Help</span>
             </div>
             <div className="contact-help-details">
-              <span>Sizing guides, fabric care, and styling advice.</span>
+              <span className="contact-help-details1">Sizing guides, fabric care, and styling advice.</span>
               <span className="contact-help-arrow">&rarr;</span>
             </div>
           </div>
@@ -96,7 +97,7 @@ const ContactPage = () => {
               </span>
             </div>
             <div className="contact-help-details">
-              <span>Start a return or learn about our policy.</span>
+              <span className="contact-help-details1">Start a return or learn about our policy.</span>
               <span className="contact-help-arrow">&rarr;</span>
             </div>
           </div>
@@ -107,7 +108,7 @@ const ContactPage = () => {
               <span className="contact-help-heading">Just Say Hello</span>
             </div>
             <div className="contact-help-details">
-              <span>Collaboration inquiries or just checking in.</span>
+              <span className="contact-help-details1">Collaboration inquiries or just checking in.</span>
               <span className="contact-help-arrow">&rarr;</span>
             </div>
           </div>
@@ -153,6 +154,11 @@ const ContactPage = () => {
 
       {/* BOTTOM CTA BANNER */}
       <section className="contact-footer-banner">
+        <img
+          src={footerimg}
+          alt="Footer Background"
+          className="footer-bg-image"
+        />
         <h2 className="contact-banner-heading">
           Need nothing? That's
           <br />
