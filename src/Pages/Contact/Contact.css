@@ -35,7 +35,7 @@ html {
   overflow-x: hidden;
   font-family: var(--contact-font-sans);
   color: var(--contact-black);
-  background-color: var(--contact-cream);
+  background-color: #FBF6E9;
 }
 
 .contact-page img {
@@ -49,7 +49,7 @@ html {
 
 /* ---------------- HERO SECTION ---------------- */
 .contact-hero {
-  background-color: var(--contact-cream);
+  background-color: #FBF6E9;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -111,11 +111,6 @@ html {
   background-color: #F1CB62;
   color: #fff;
   border: 1px solid #F1CB62;
-}
-
-.contact-btn-talk:hover {
-  background-color: var(--contact-heading-red);
-  border-color: var(--contact-heading-red);
 }
 
 .contact-btn-faqs {
@@ -194,11 +189,11 @@ html {
 
 /* ---------------- HELP OPTIONS SECTION ---------------- */
 .contact-help-container {
-  background-color: var(--contact-burgundy);
+  background-color: #F1CB62;
   background-image: linear-gradient(
     90deg,
-    var(--contact-burgundy-dark) 0%,
-    var(--contact-burgundy) 100%
+   #F1CB62 0%,
+   #F1CB62 100%
   );
   color: var(--contact-cream);
   padding: clamp(56px, 9vw, 90px) var(--contact-pad-x);
@@ -208,7 +203,7 @@ html {
   font-family: var(--contact-font-serif);
   font-size: clamp(28px, 5vw, 40px);
   font-weight: 400;
-  color: var(--contact-gold);
+  color: #292626;
   margin-bottom: clamp(32px, 6vw, 50px);
 }
 
@@ -218,14 +213,14 @@ html {
   gap: clamp(24px, 4vw, 36px);
 }
 
-.contact-help-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid rgba(251, 245, 233, 0.12);
+.contact-help-row { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  gap: 12px; 
+  padding-bottom: 24px; 
+  border-bottom: 1px solid rgba(41, 38, 38, 0.1); 
 }
 
 .contact-help-info {
@@ -235,6 +230,7 @@ html {
 }
 
 .contact-help-index {
+  color: #292626;
   font-size: 13px;
   opacity: 0.7;
   font-weight: 300;
@@ -244,7 +240,13 @@ html {
   font-family: var(--contact-font-serif);
   font-size: clamp(20px, 3.2vw, 26px);
   font-weight: 400;
-  color: #ffffff;
+  color: #292626;
+}
+
+.contact-help-details1 {
+  font-size: 14px;
+  opacity: 0.85;
+  color: #292626;
 }
 
 .contact-help-details {
@@ -257,6 +259,7 @@ html {
 }
 
 .contact-help-arrow {
+  color: #292626;
   font-size: 18px;
   transition: transform 0.2s ease;
 }
@@ -267,7 +270,7 @@ html {
 
 /* ---------------- DIRECT CONTACT CHANNELS ---------------- */
 .contact-channels-bar {
-  background-color: var(--contact-tan);
+  background-color: #FAF4E2;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -284,42 +287,54 @@ html {
 .contact-channel-item h3 {
   font-size: 13px;
   font-weight: 600;
-  color: var(--contact-burgundy);
+  color: #F1CB62;
   margin-bottom: 12px;
 }
 
 .contact-channel-primary {
   font-family: var(--contact-font-serif);
   font-size: clamp(16px, 2vw, 18px);
-  color: var(--contact-black);
+  color: #292626;
   margin-bottom: 6px;
   word-break: break-word;
 }
 
 .contact-channel-secondary {
   font-size: 12px;
-  color: var(--contact-black);
+  color: #292626;
   opacity: 0.6;
 }
+
 a.contact-channel-item {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
 }
+
 /* ---------------- BOTTOM CTA BANNER ---------------- */
 .contact-footer-banner {
-  background-color: var(--contact-burgundy);
-  background-image: linear-gradient(
-    90deg,
-    var(--contact-burgundy-dark) 0%,
-    var(--contact-burgundy) 100%
-  );
-  color: var(--contact-cream);
+  position: relative;
+  color: #292626;
   text-align: center;
   padding: clamp(64px, 10vw, 100px) var(--contact-pad-x);
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
+}
+
+.footer-bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.contact-footer-banner > *:not(.footer-bg-image) {
+  position: relative;
+  z-index: 1;
 }
 
 .contact-banner-heading {
@@ -327,7 +342,7 @@ a.contact-channel-item {
   font-size: clamp(28px, 5.5vw, 42px);
   font-weight: 400;
   line-height: 1.25;
-  color: var(--contact-gold);
+  color: #292626;
   margin-bottom: 20px;
 }
 
@@ -335,14 +350,14 @@ a.contact-channel-item {
   max-width: 540px;
   font-size: clamp(13px, 1.8vw, 14px);
   line-height: 1.6;
-  color: #ffffff;
+  color: #292626;
   opacity: 0.9;
   margin-bottom: 36px;
 }
 
 .contact-banner-action {
-  background-color: #ffffff;
-  color: var(--contact-heading-red);
+  background-color: #F1CB62;
+  color: #292626;
   border: none;
   padding: 14px 32px;
   border-radius: 6px;
@@ -476,7 +491,7 @@ a.contact-channel-item {
   border-radius: 8px;
   background-color: #ffffff;
   font-family: var(--contact-font-sans);
-  font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
+  font-size: 16px;
   color: var(--contact-black);
   outline: none;
   transition: all 0.2s ease;
@@ -523,7 +538,6 @@ a.contact-channel-item {
    RESPONSIVE BREAKPOINTS
    ===================================================== */
 
-/* ---- Tablets & small laptops (≤1024px) ---- */
 @media (max-width: 1024px) {
   .contact-hero {
     text-align: left;
@@ -544,7 +558,6 @@ a.contact-channel-item {
   }
 }
 
-/* ---- Tablet portrait / large phones (≤768px) ---- */
 @media (max-width: 768px) {
   .contact-hero {
     flex-direction: column;
@@ -592,7 +605,6 @@ a.contact-channel-item {
   }
 }
 
-/* ---- Phones (≤480px) ---- */
 @media (max-width: 480px) {
   .contact-badge {
     font-size: 12px;
@@ -647,7 +659,6 @@ a.contact-channel-item {
   }
 }
 
-/* ---- Respect users who prefer reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   .contact-btn-talk,
   .contact-btn-faqs,

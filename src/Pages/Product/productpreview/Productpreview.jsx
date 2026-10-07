@@ -814,41 +814,33 @@ const DETAILS =
     }
   };
 
-  const handleAddToCart = async () => {
-    console.log("Add to Cart clicked", isLoggedIn());
-    if (!isLoggedIn()) {
-      toast.error("Please log in to add items to your cart.");
-      return;
-    }
-    console.log("productDetails:", productDetails);
-    console.log(
-      "Adding to cart:",
-      productDetails._id,
-      selectedVariant._id,
-      qty,
-    );
-    const cartItem = {
-      productId: productDetails._id,
-      variantId: selectedVariant._id,
-      quantity: qty,
-      price: selectedVariant.discountPrice || selectedVariant.price,
-      selectedSize: activeSize,
-    };
-    console.log("Cart item:", cartItem);
-    const response = await addToCart(cartItem);
-    console.log("Add to Cart response:", response);
-    if (response.success) {
-      // setAddedToCart(true);
-      // fetch cart items again to update the cart state
-      const updatedCartResponse = await getCart();
-      const updatedCart = updatedCartResponse?.data?.cart || updatedCartResponse?.cart;
-      const updatedItems = updatedCart?.items || [];
-      setCartItems(updatedItems);
-      toast.success("Product added");
-    } else {
-      toast.error(response?.message || "Failed to add item to cart.");
-    }
+const handleAddToCart = async () => {
+  if (!isLoggedIn()) {
+    toast.error("Please log in to add items to your cart.");
+    return;
+  }
+
+  // Find the currently selected variant object based on activeColor if needed, 
+  // or use selectedVariant with its color property.
+  const cartItem = {
+    productId: productDetails._id,
+    variantId: selectedVariant._id,
+    color: selectedVariant.color, // ✅ Added color
+    size: activeSize,             // ✅ Changed from selectedSize to size
+    quantity: qty,
   };
+
+  const response = await addToCart(cartItem);
+  
+  if (response.success) {
+    const updatedCartResponse = await getCart();
+    const updatedCart = updatedCartResponse?.data?.cart || updatedCartResponse?.cart;
+    setCartItems(updatedCart?.items || []);
+    toast.success("Product added");
+  } else {
+    toast.error(response?.message || "Failed to add item to cart.");
+  }
+};
 
   const handleBuyNow = (productId, variantId) => {
     console.log("productId:", productId, "variantId:", variantId);

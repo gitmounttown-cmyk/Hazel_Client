@@ -1,7 +1,7 @@
 :root {
   --hazel-light: #f3d9b4;
   --hazel-gold: #edc484;
-  --hazel-burgundy: #780524;
+  --hazel-burgundy: #f1cb62;
   --hazel-dark-burgundy: #52131e;
   --hazel-dark: #231918;
 
@@ -185,7 +185,7 @@
 
   padding: 45px 42px;
 
-  background-color: #780524;
+  background-color: #F1CB62;
 
   border-radius: 12px;
 
@@ -207,7 +207,7 @@
 }
 
 .logo-icon {
-  width: 38px;
+  width: 250px;
   height: 38px;
   display: flex;
   align-items: center;
@@ -217,8 +217,9 @@
 }
 
 .brand-logo {
-  height: 65px;
-  width: 100px;
+  height: 63px;;
+  width: 130px;
+  object-fit: cover;
 }
 /* .hazel-logo h2 {
   margin: 0;
@@ -257,7 +258,7 @@
 
 .auth-heading h1 {
   margin: 0;
-  color: #edc484;
+  color: #292626;
   font-family: Georgia, serif;
   font-size: 30px;
   font-weight: 500;
@@ -265,7 +266,7 @@
 
 .auth-heading p {
   margin-top: 9px;
-  color: #ffffff;
+  color: #292626;
   font-size: 15px;
 }
 
@@ -276,7 +277,7 @@
 }
 
 .login-tab span {
-  color: #edc484;
+  color: #292626;
 }
 
 .login-tab::after {
@@ -287,12 +288,20 @@
   bottom: 0;
   width: 180px; 
   height: 2px; 
-  background-color: #edc484;
+  background-color: #292626 ;
+  opacity:40%;
 }
 
 .form-group {
   margin-bottom: 20px;
 }
+.mobile-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #292626;
+    border-radius: 4px;
+    font-size: 14px;
+  }
 
 .form-group label,
 .otp-label {
@@ -300,41 +309,41 @@
   margin-bottom: 8px;
   font-size: 18px;
   font-weight: 500;
-  color: #ffffff;
+  color: #292626 !important;
 }
 
 .mobile-input-wrapper {
   display: flex;
   align-items: center;
   height: 52px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(41, 38, 38, 0.34);
   border-radius: 7px;
   overflow: hidden;
   transition: 0.2s;
 }
 
 .mobile-input-wrapper:focus-within {
-  border-color: var(--hazel-burgundy);
-  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.08);
+  border-color: #292626;
+  box-shadow: 0 0 0 0  rgba(41, 38, 38, 0.34);;
 }
 
 .country-code {
   padding: 0 15px;
   /* color: var(--hazel-dark); */
-  color: #ffffff;
+  color: #292626;
   font-weight: 600;
-  border-right: 1px solid #F3D9B4;
+  border-right: 1px solid #292626;
 }
 
 .mobile-input-wrapper input {
   flex: 1;
   height: 100%;
-  border: none;
-  outline: none;
+  /* border: 1px solid #292626; */
+  /* outline: none; */
   padding: 0 15px;
   font-size: 14px;
-  background-color: #780524;
-  color: #ffffff;
+  background-color: #F1CB62;
+  color: #292626;
 }
 
 .auth-primary-button {
@@ -342,18 +351,14 @@
   height: 50px;
   border: none;
   border-radius: 6px;
-  background: var(--white);
-  color: var(--hazel-burgundy);
+  background: #292626;
+  color: #FCFBF8;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer; 
  transition: 0.25s; 
 }
 
-/* .auth-primary-button:hover {
-  background: var(--hazel-dark-burgundy);
-  transform: translateY(-1px);
-} */
 
 .auth-primary-button:disabled {
   opacity: 0.6;
@@ -609,7 +614,7 @@
   height: 44px;
   border: 1px solid #d9d9d9;
   border-radius: 5px;
-  background-color: #780524 !important;
+  background-color: #F1CB62 !important;
   color:white !important;
   font-size: 14px;
   font-weight: 500;
@@ -658,7 +663,7 @@
   margin: 0 0 5px;
   font-size: 19px;
   font-weight: 600;
-  color: #780524;
+  color: #292626;
 }
 
 .hazel-dev-otp-popup p {
@@ -675,8 +680,8 @@
 
   border-radius: 7px;
 
-  background: #f3d9b4;
-  color: #780524;
+  background: #FBF6E9;
+  color: #292626;
 
   font-size: 24px;
   font-weight: 700;
@@ -701,8 +706,8 @@
 
   padding: 8px;
 
-  background: #780524;
-  color: #ffffff;
+  background: #F1CB62;
+  color: #292626;
 
   font-size: 13px;
   font-weight: 600;
@@ -827,8 +832,8 @@
   }
 
   .brand-logo {
-    height: 60px;
-    width: 95px;
+    height: 73px;
+    width: 150px;
   }
 
   .auth-heading {

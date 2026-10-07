@@ -3,8 +3,8 @@
 :root {
   --lite-yellow: #f3d9b4;
   --deep-yellow: #edc484;
-  --red: #780524;
-  --deep-red: #52131e;
+  --red: #f1cb62;
+  --deep-red: #f1cb62;
   --black: #231918;
 
   --text-muted: rgba(35, 25, 24, 0.62);
@@ -394,18 +394,19 @@
 }
 
 .btn-pay {
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   width: 100%;
   padding: 16px 16px;
-  font-family: var(--font-display);
+  font-family: Poppins;
   font-size: 15px;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--deep-yellow);
-  background: var(--black);
+  /* text-transform: uppercase; */
+  color: #292626;
+  background: #F1CB62;
   border: none;
   border-radius: 14px;
   cursor: pointer;
@@ -709,7 +710,7 @@
 .qty__btn:focus-visible,
 .summary__remove:focus-visible,
 .summary__add:focus-visible {
-  outline: 3px solid var(--deep-yellow);
+  outline: 3px solid #f1cb62;
   outline-offset: 2px;
 }
 
@@ -755,7 +756,7 @@
   letter-spacing: 0.06em;
   color: var(--red);
   background: transparent;
-  border: 1px dashed rgba(120, 5, 36, 0.45);
+ border: 1px dashed rgba(241, 203, 98, 1.45);
   border-radius: 12px;
   cursor: pointer;
   transition: background 0.2s ease;
