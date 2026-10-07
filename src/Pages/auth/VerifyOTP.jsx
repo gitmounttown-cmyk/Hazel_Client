@@ -154,10 +154,10 @@ const handleCloseOtpPopup = () => {
         enteredOTP
       );
 
-      console.log(
-        "verify_otp_response",
-        response
-      );
+      // console.log(
+      //   "verify_otp_response",
+      //   response
+      // );
 
       if (response.success) {
         const user = response.user;
@@ -229,10 +229,10 @@ const handleCloseOtpPopup = () => {
               "OTP verified successfully."
           );
 
-          console.log(
-            "User data:",
-            user
-          );
+          // console.log(
+          //   "User data:",
+          //   user
+          // );
 
           if (
             user &&

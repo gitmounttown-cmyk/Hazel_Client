@@ -39,4 +39,25 @@ export const formatCountdown = (seconds) => {
     minutes
   ).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
 };
+
+export const formatOrderDate = (date) => {
+  if (!date) return "-";
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+export const formatOrderDateTime = (date) => {
+  if (!date) return "";
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
     
