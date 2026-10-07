@@ -605,36 +605,117 @@ export default function ProductPage() {
 
   console.log("Product details state:", productDetails); // Log the product details state to the console
 
+  // const colors = [
+  //   ...new Map(
+  //     (productDetails?.variants || [])
+  //       .map((variant, index) => {
+  //         const colorName = variant.color?.trim().toUpperCase();
+
+  //         if (!colorName) return null;
+
+  //         const mappedColor = COLOR_MAP[colorName];
+
+  //         if (!mappedColor) {
+  //           console.warn("New color found:", colorName);
+  //         }
+
+  //         return [
+  //           colorName,
+  //           {
+  //             id: mappedColor?.id || createColorId(colorName),
+
+  //             hex:
+  //               mappedColor?.hex ||
+  //               FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+
+  //             selected: index === 0,
+  //           },
+  //         ];
+  //       })
+  //       .filter(Boolean),
+  //   ).values(),
+  // ];
+
+  const COLOR_KEYWORDS = [
+  { keywords: ["NAVY", "BLUE"], hex: "#1F3A5F" },
+  { keywords: ["BLUE"], hex: "#4A90E2" },
+
+  { keywords: ["MAROON"], hex: "#800000" },
+  { keywords: ["RED"], hex: "#D32F2F" },
+
+  { keywords: ["GREEN"], hex: "#6B8E23" },
+  { keywords: ["SAGE"], hex: "#9CAF88" },
+
+  { keywords: ["YELLOW"], hex: "#E6C229" },
+  { keywords: ["MUSTARD"], hex: "#D4A017" },
+
+  { keywords: ["ORANGE"], hex: "#E67E22" },
+
+  { keywords: ["PINK"], hex: "#E8A0B8" },
+
+  { keywords: ["PURPLE"], hex: "#7E57C2" },
+  { keywords: ["VIOLET"], hex: "#7F5AA2" },
+
+  { keywords: ["BROWN"], hex: "#795548" },
+  { keywords: ["COFFEE"], hex: "#6F4E37" },
+
+  { keywords: ["GREY", "GRAY"], hex: "#808080" },
+
+  { keywords: ["BLACK"], hex: "#222222" },
+  { keywords: ["WHITE"], hex: "#F8F8F8" },
+
+  { keywords: ["CREAM"], hex: "#FFFDD0" },
+  { keywords: ["BEIGE"], hex: "#D8C3A5" },
+];
+
+  const getColorHex = (colorName, index = 0) => {
+  const name = colorName?.trim().toUpperCase();
+
+  if (!name) {
+    return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+  }
+
+  // Exact match first
+  if (COLOR_MAP[name]) {
+    return COLOR_MAP[name].hex;
+  }
+
+  // Keyword match
+  const matchedColor = COLOR_KEYWORDS.find((color) =>
+    color.keywords.some((keyword) => name.includes(keyword))
+  );
+
+  if (matchedColor) {
+    return matchedColor.hex;
+  }
+
+  // Final fallback
+  console.warn("New color found:", name);
+
+  return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+};
+
   const colors = [
-    ...new Map(
-      (productDetails?.variants || [])
-        .map((variant, index) => {
-          const colorName = variant.color?.trim().toUpperCase();
+  ...new Map(
+    (productDetails?.variants || [])
+      .map((variant, index) => {
+        const colorName = variant.color?.trim().toUpperCase();
 
-          if (!colorName) return null;
+        if (!colorName) return null;
 
-          const mappedColor = COLOR_MAP[colorName];
-
-          if (!mappedColor) {
-            console.warn("New color found:", colorName);
-          }
-
-          return [
-            colorName,
-            {
-              id: mappedColor?.id || createColorId(colorName),
-
-              hex:
-                mappedColor?.hex ||
-                FALLBACK_COLORS[index % FALLBACK_COLORS.length],
-
-              selected: index === 0,
-            },
-          ];
-        })
-        .filter(Boolean),
-    ).values(),
-  ];
+        return [
+          colorName,
+          {
+            id: createColorId(colorName),
+            hex: getColorHex(colorName, index),
+            name: colorName,
+            selected: index === 0,
+          },
+        ];
+      })
+      .filter(Boolean)
+  ).values(),
+];
 
   console.log("Colors derived from product details:", colors); // Log the colors derived from product details
 
