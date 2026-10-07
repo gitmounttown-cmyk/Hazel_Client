@@ -21,7 +21,7 @@
 
 .sidebar {
   width: 300px;
-  background: #5a1827;
+  background: #FAF4E2;
   flex-shrink: 0;
   height: 100%;
   display: flex;
@@ -60,7 +60,7 @@
 }
 
 .sidebar-title {
-  color: #edc484;
+  color: black;
   font-size: 20px;
   margin: 0;
   font-family: serif;
@@ -70,7 +70,7 @@
 .clear-all-top {
   background: none;
   border: none;
-  color: #edc484;
+  color: black;
   font-size: 11px;
   cursor: pointer;
   text-decoration: underline;
@@ -83,7 +83,7 @@
   display: none;
   background: none;
   border: none;
-  color: #edc484;
+  color: black;
   font-size: 20px;
   cursor: pointer;
   padding: 0;
@@ -103,7 +103,7 @@
   width: 100%;
   background: none;
   border: none;
-  color: #edc484;
+  color: black;
   font-size: 15px;
   display: flex;
   justify-content: space-between;
@@ -117,7 +117,7 @@
 .chevron {
   transition: transform 0.15s;
   display: inline-block;
-  color: #edc484;
+  color: black;
 }
 
 .chevron-open {
@@ -147,7 +147,7 @@
 }
 
 .checkbox-input {
-  accent-color: #edc484;
+  accent-color: black;
   width: 14px;
   height: 14px;
   cursor: pointer;
@@ -158,7 +158,7 @@
 
 .checkbox-label {
   flex: 1;
-  color: #f5f0eb;
+  color: black;
 }
 
 /* ---------------- MAIN / PRODUCT GRID ---------------- */
@@ -180,6 +180,7 @@
 }
 
 .sort-bar {
+  color:#F1CB62;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -189,7 +190,7 @@
 
 .results-count {
   margin-right: auto;
-  color: #5a1827;
+  color: black;
   font-size: 13px;
   font-weight: 600;
 }
@@ -200,7 +201,7 @@
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
-  color: #5a1827;
+  color: black;
   background: #fff;
   outline: none;
   cursor: pointer;
@@ -228,7 +229,7 @@
 /* ---------------- PRODUCT CARD (FULL IMAGE) ---------------- */
 
 .card {
-  background: #5a1827;
+  background: white;
   border-radius: 10px;
   padding: 10px 10px 14px 10px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
@@ -283,13 +284,13 @@
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.85);
-  color: #5a1827;
+  background:#F1CB62;
+  color: black;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .card-body {
@@ -303,7 +304,7 @@
 
 
 .card-name {
-  color: #edc484;
+  color: black;
   font-size: 14px;
   font-weight: 600;
   margin: 0;
@@ -316,7 +317,7 @@
 }
 
 .card-subtitle {
-  color: #d1c5bd;
+  color: black;
   font-size: 10px;
   margin: 0;
   white-space: nowrap;
@@ -332,7 +333,7 @@
 }
 
 .card-rating {
-  color: #e2d6ce;
+  color:#F1CB62;
   font-size: 11px;
   font-weight: 600;
   margin: 0;
@@ -346,6 +347,7 @@
 } */
 
 .card-price {
+  color:black;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -367,7 +369,7 @@
 .regular-price {
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  color: black;
 }
 
 .loading-text {

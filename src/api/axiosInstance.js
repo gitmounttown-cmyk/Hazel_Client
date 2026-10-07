@@ -2,10 +2,10 @@ import axios from "axios";
 import API_URL from "../config/api";
 
 const axiosInstance = axios.create({
-  baseURL: API_URL,
-  // headers: {
-  //   "Content-Type": "application/json",
-  // },
+  baseURL: API_URL.replace(/\/+$/, ""), // Automatically trims any trailing slash
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 axiosInstance.interceptors.request.use(
@@ -20,24 +20,28 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("[API SUCCESS]", response.config.url, response.data);
     return response;
   },
   (error) => {
-    console.error(
-      "[API ERROR]",
-      error.config?.url,
-      error.response?.status,
-      error.response?.data || error.message,
-    );
+    // Check if error was caused by manual cancellation/abortion
+    if (axios.isCancel(error)) {
+      console.warn("[API CANCELLED]", error.message);
+    } else {
+      console.error(
+        "[API ERROR]",
+        error.config?.url,
+        error.response?.status || "NO_RESPONSE",
+        error.response?.data || error.message
+      );
+    }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default axiosInstance;

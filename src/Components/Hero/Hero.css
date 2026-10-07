@@ -24,7 +24,7 @@ html, body {
   display: flex;
   align-items: center;
   overflow: hidden;
-  background-color: #f6f1eb; 
+  background-color :white; 
 }
 .hero-bg-img {
   position: absolute;
@@ -70,7 +70,7 @@ html, body {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 2.5px;
-  color: #642A30;
+  color: black;
   text-transform: uppercase;
   margin-bottom: 24px;
   padding-left: 65px;
@@ -80,7 +80,7 @@ html, body {
   font-family: 'Playfair Display', serif;
   font-size: 63px;
   font-weight: 500;
-  color: #780524;
+  color: #F1CB62;
   line-height: 1.15;
   margin: 0 0 24px 0;
   padding-left: 60px;
@@ -107,9 +107,9 @@ html, body {
 }
 
 .btn-shop {
-  background-color: #5A1827;
-  color: #FFFFFF;
-  border: 1px solid #5A1827;
+  background-color: #F1CB62;
+  color: #6E6139;
+  border: 1px solid #F1CB62;
   padding: 14.4px 32px;
   border-radius: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -121,13 +121,13 @@ html, body {
 }
 
 .btn-shop:hover {
-  background-color: #43121C;
+  background-color: #F1CB62;
 }
 
 .btn-explore {
   background-color: transparent;
-  color: #5A1827;
-  border: 1px solid #5A1827;
+  color: black;
+  border: 1px solid black;
   padding: 14.4px 28.8px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 14px;
@@ -142,8 +142,8 @@ html, body {
 }
 
 .btn-explore:hover {
-  background-color: #5A1827;
-  color: #FFFFFF;
+  background-color: #F1CB62;
+  color: #352926;
 }
 
 .arrow-icon {

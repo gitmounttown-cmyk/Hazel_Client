@@ -17,4 +17,26 @@ export const formatTimeAgo = (dateString) => {
     return `${days} day${days !== 1 ? 's' : ''} ago`;
     }
 }
+
+
+export const getDeliveryDate = (days = 7) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    weekday: "short",
+  });
+};
+
+export const formatCountdown = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  return `${String(hours).padStart(2, "0")}h ${String(
+    minutes
+  ).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
+};
     

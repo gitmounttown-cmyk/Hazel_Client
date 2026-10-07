@@ -2,10 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import "./TrendingProducts.css";
 import axiosInstance from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import {
+  addToWishlist,
+  checkWishlist,
+  removeWishlistItem,
+} from "../../Services/wishlistService";
+import { addToCart } from "../../Services/cartService";
+import { isUserLoggedIn } from "../../utils/auth"; 
+import toast from "react-hot-toast";
 
 const TrendingProducts = () => {
   const [products, setProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [wishlistStatus, setWishlistStatus] = useState({});
+  const [wishlistLoading, setWishlistLoading] = useState({});
   const navigate = useNavigate();
 
   const sliderRef = useRef(null);
@@ -13,12 +23,10 @@ const TrendingProducts = () => {
   useEffect(() => {
     const fetchTrendingAndProducts = async () => {
       try {
-        // 1. Fetch Trending Configurations (Custom image & display order)
         const trendingRes = await axiosInstance.get("/trending-products/all");
         const trendingRaw = trendingRes.data?.data || trendingRes.data || [];
         const trendingList = Array.isArray(trendingRaw) ? trendingRaw : [trendingRaw];
 
-        // 2. Fetch Master Product Catalog (Dynamic name & pricing from backend)
         const productRes = await axiosInstance.get("/products/all");
         const productRaw = productRes.data?.data || productRes.data || [];
         
@@ -41,7 +49,6 @@ const TrendingProducts = () => {
                 ? (item.product._id || item.product.id)
                 : item?.product;
 
-              // Pull dynamically from master product map or populated item object
               const masterProduct = productMap.get(String(rawProductId)) || 
                 (typeof item?.product === "object" && item?.product !== null ? item.product : {});
 
@@ -75,7 +82,8 @@ const TrendingProducts = () => {
                 offerText: variant?.offer?.type && variant.offer.type !== "none" ? `${variant.offer.value}% OFF` : "",
                 image,
                 displayOrder: item?.displayOrder || 1,
-                categoryId: masterProduct?.categoryId || item?.categoryId || null
+                categoryId: masterProduct?.categoryId || item?.categoryId || null,
+                variantId: variant?._id || variant?.id || null
               });
             });
           }
@@ -92,6 +100,91 @@ const TrendingProducts = () => {
 
     fetchTrendingAndProducts();
   }, []);
+
+  useEffect(() => {
+    if (!products.length || !isUserLoggedIn()) return;
+
+    const checkAllWishlists = async () => {
+      const statusMap = {};
+      await Promise.all(
+        products.map(async (prod) => {
+          if (!prod?.id) return;
+          try {
+            const response = await checkWishlist(prod.id);
+            statusMap[prod.id] = response?.data?.isWishlisted || false;
+          } catch (err) {
+            statusMap[prod.id] = false;
+          }
+        })
+      );
+      setWishlistStatus(statusMap);
+    };
+
+    checkAllWishlists();
+  }, [products]);
+
+  const handleWishlistToggle = async (e, productId) => {
+    e.stopPropagation();
+    if (!productId || wishlistLoading[productId]) return;
+
+    if (!isUserLoggedIn()) {
+      toast.error("Please log in to manage your wishlist.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setWishlistLoading((prev) => ({ ...prev, [productId]: true }));
+      const isCurrentlyWishlisted = wishlistStatus[productId];
+
+      if (isCurrentlyWishlisted) {
+        await removeWishlistItem(productId);
+        setWishlistStatus((prev) => ({ ...prev, [productId]: false }));
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlist({ productId });
+        setWishlistStatus((prev) => ({ ...prev, [productId]: true }));
+        toast.success("Added to wishlist");
+      }
+    } catch (err) {
+      if (err?.response?.status === 409) {
+        setWishlistStatus((prev) => ({ ...prev, [productId]: true }));
+      } else {
+        toast.error("Failed to update wishlist");
+      }
+    } finally {
+      setWishlistLoading((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleAddToCart = async (e, product) => {
+    e.stopPropagation();
+    if (!isUserLoggedIn()) {
+      toast.error("Please log in to add items to your cart.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const cartItem = {
+        productId: product.id,
+        variantId: product.variantId || null,
+        quantity: 1,
+        price: product.currentPrice,
+      };
+
+      const response = await addToCart(cartItem);
+      if (response?.success !== false) {
+        toast.success("Product added to cart!");
+        // navigate("/cartpage");
+      } else {
+        toast.error(response?.message || "Failed to add item to cart.");
+      }
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      toast.error("Failed to add item to cart.");
+    }
+  };
 
   const scrollToProduct = (index) => {
     const slider = sliderRef.current;
@@ -154,11 +247,11 @@ const TrendingProducts = () => {
   }
 
   const renderProductCard = (product, index) => {
+    const isWishlisted = !!wishlistStatus[product.id];
+
     return (
       <article key={`${product.id}-${index}`} className="trending-card">
-        {/* send params product id to shop page */}
-         <div className="trending-image-wrapper" onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: "pointer" }}>
-        {/* <div className="trending-image-wrapper" onClick={() => navigate(`/shop?productId=${product.id}`)} style={{ cursor: "pointer" }}> */}
+        <div className="trending-image-wrapper" onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: "pointer" }}>
           {product.image ? (
             <img
               src={product.image}
@@ -198,10 +291,21 @@ const TrendingProducts = () => {
             </div>
 
             <div className="trending-actions">
-              <button type="button" className="trending-wishlist-btn" aria-label="Add to wishlist">
-                ♡
+              <button
+                type="button"
+                className={`trending-wishlist-btn ${isWishlisted ? "wishlisted" : ""}`}
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                onClick={(e) => handleWishlistToggle(e, product.id)}
+                disabled={wishlistLoading[product.id]}
+              >
+                {isWishlisted ? "♥" : "♡"}
               </button>
-              <button type="button" className="trending-cart-btn" aria-label="Add to cart">
+              <button
+                type="button"
+                className="trending-cart-btn"
+                aria-label="Add to cart"
+                onClick={(e) => handleAddToCart(e, product)}
+              >
                 🛍
               </button>
             </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { sendOTP, googleLogin } from "../../Services/authService";
 import "../../styles/auth.css";
 import { GoogleLogin } from "@react-oauth/google";
-import hazelBrandLogo from "../../assets/images/hazel_brand.png";
+import hazelBrandLogo from "../../assets/images/Logo.png";
 import hazelLogo from "../../assets/images/hazel_logo.jpg";
 
 const Login = () => {
