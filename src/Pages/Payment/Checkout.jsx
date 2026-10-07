@@ -126,6 +126,7 @@ function Thumb({ item, onOpen, productId, navigate }) {
 
   if (failed) {
     return (
+<<<<<<<<< Temporary merge branch 1
       //show product image if not show shopping bag icon
       <div className="summary__img summary__img--fallback" aria-hidden="true" onClick={() => navigate(`/product/${productId}`)}>
         {item.mediaImageUrl && (
@@ -137,6 +138,19 @@ function Thumb({ item, onOpen, productId, navigate }) {
           />
         )}
         <ShoppingBag size={22} strokeWidth={1.5} />
+=========
+      <div
+        className="summary__img summary__img--fallback"
+        aria-hidden="true"
+        onClick={() =>
+          navigate(`/product/${productId}`)
+        }
+      >
+        <ShoppingBag
+          size={22}
+          strokeWidth={1.5}
+        />
+>>>>>>>>> Temporary merge branch 2
       </div>
     );
   }
@@ -150,6 +164,7 @@ function Thumb({ item, onOpen, productId, navigate }) {
       
       aria-label={`View ${item.name} image`}
     >
+<<<<<<<<< Temporary merge branch 1
       <img
         className="summary__img"
         src={import.meta.env.VITE_UPLOAD_URL + item.mediaImageUrl}
@@ -158,6 +173,35 @@ function Thumb({ item, onOpen, productId, navigate }) {
       />
       <span className="summary__zoom" aria-hidden="true">
         <ZoomIn size={12} strokeWidth={2} />
+=========
+      {imageUrl ? (
+        <img
+          className="summary__img"
+          src={imageUrl}
+          alt={item.name}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div
+          className="summary__img summary__img--fallback"
+          aria-hidden="true"
+        >
+          <ShoppingBag
+            size={22}
+            strokeWidth={1.5}
+          />
+        </div>
+      )}
+
+      <span
+        className="summary__zoom"
+        aria-hidden="true"
+      >
+        <ZoomIn
+          size={12}
+          strokeWidth={2}
+        />
+>>>>>>>>> Temporary merge branch 2
       </span>
     </button>
   );
