@@ -664,7 +664,7 @@ export default function ProductPage() {
   const existingCartItem = cartItems?.find(
     (item) =>
       String(item.product?._id) === String(productDetails?._id) &&
-      item.selectedSize?.toUpperCase() === activeSize?.toUpperCase()
+      item.size?.toUpperCase() === activeSize?.toUpperCase()
   );
 
   const addedToCart = !!existingCartItem;
