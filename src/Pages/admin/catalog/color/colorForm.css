@@ -1,7 +1,7 @@
 .color-form-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(41, 38, 38, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,13 +9,13 @@
 }
 
 .color-form-card {
-  background: #fff;
+  background: #fcfbf8;
   width: 480px;
   max-width: 92vw;
   max-height: 88vh;
   overflow-y: auto;
   border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px rgba(41, 38, 38, 0.2);
 }
 
 .color-form-header {
@@ -23,14 +23,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 22px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #faf4e2;
 }
 
 .color-form-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #222;
+  color: #292626;
 }
 
 .color-form-close {
@@ -39,12 +39,12 @@
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  color: #888;
+  color: #666155;
   padding: 4px;
 }
 
 .color-form-close:hover {
-  color: #333;
+  color: #292626;
 }
 
 .color-form-body {
@@ -63,26 +63,30 @@
 .color-form-group label {
   font-size: 13px;
   font-weight: 600;
-  color: #444;
+  color: #292626;
 }
 
 .color-form-group input,
 .color-form-group textarea,
 .color-form-group select {
-  border: 1px solid #d8d8d8;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   font-family: inherit;
+  background-color: #fcfbf8;
+  color: #292626;
 }
 
 .color-form-group input:focus,
 .color-form-group textarea:focus,
 .color-form-group select:focus {
-  border-color: #780524;
-  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+  border-color: #f1cb62;
+  box-shadow: 0 0 0 3px rgba(241, 203, 98, 0.25);
 }
 
 .color-form-group textarea {
@@ -99,10 +103,11 @@
   width: 44px;
   height: 40px;
   padding: 2px;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
   cursor: pointer;
   flex-shrink: 0;
+  background-color: #fcfbf8;
 }
 
 .color-code-text {
@@ -134,8 +139,8 @@
 }
 
 .color-btn-primary {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
 }
 
 .color-btn-primary:hover:not(:disabled) {
@@ -143,10 +148,10 @@
 }
 
 .color-btn-secondary {
-  background: #f2f2f2;
-  color: #333;
+  background: #faf4e2;
+  color: #292626;
 }
 
 .color-btn-secondary:hover {
-  background: #e6e6e6;
+  background: #fbf6e9;
 }

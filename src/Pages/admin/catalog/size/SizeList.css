@@ -3,18 +3,18 @@
    ============================================================ */
 
 .hz-sizes {
-  --hz-maroon: #6d1b3a;
-  --hz-maroon-dark: #57152e;
+  --hz-maroon: #f1cb62;
+  --hz-maroon-dark: #e5be53;
 
-  --hz-gold: #c9a227;
+  --hz-gold: #f1cb62;
 
-  --hz-cream: #f4ecd7;
-  --hz-cream-soft: #efe3c4;
+  --hz-cream: #faf4e2;
+  --hz-cream-soft: #fbf6e9;
 
-  --hz-ink: #2c1a20;
-  --hz-muted: #8a7a6a;
+  --hz-ink: #292626;
+  --hz-muted: #666155;
 
-  --hz-border: #e3d5b5;
+  --hz-border: #faf4e2;
 
   --hz-good: #2f8f5b;
   --hz-good-soft: #e1f4e7;
@@ -24,17 +24,10 @@
 
   --hz-radius: 10px;
 
-  --hz-serif:
-    "Playfair Display",
-    "Georgia",
-    serif;
+  --hz-serif: "Playfair Display", "Georgia", serif;
 
   --hz-sans:
-    "Segoe UI",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+    "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
   width: 100%;
 
@@ -43,7 +36,7 @@
   font-family: var(--hz-sans);
 }
 
-.hz-sizes{
+.hz-sizes {
   padding: 24px;
 }
 
@@ -52,7 +45,6 @@
 .hz-sizes *::after {
   box-sizing: border-box;
 }
-
 
 /* ============================================================
    TOP BAR
@@ -79,7 +71,6 @@
 
   color: var(--hz-ink);
 }
-
 
 /* ============================================================
    BUTTONS
@@ -109,7 +100,7 @@
 .hz-btn--primary {
   background: var(--hz-maroon);
 
-  color: #fdf6e8;
+  color: #292626;
 }
 
 .hz-btn--primary:hover {
@@ -127,7 +118,7 @@
 
   border-color: var(--hz-border);
 
-  color:black;
+  color: #292626;
 }
 
 .hz-btn--ghost:hover:not(:disabled) {
@@ -150,7 +141,6 @@
   background: #7f202c;
 }
 
-
 /* ============================================================
    TEXT LINK
    ============================================================ */
@@ -168,7 +158,7 @@
 
   background: transparent;
 
-  color: var(--hz-maroon);
+  color: #292626;
 
   font-family: var(--hz-sans);
 
@@ -190,7 +180,6 @@
 .hz-link--danger {
   color: #c0293d;
 }
-
 
 /* ============================================================
    ICON BUTTON
@@ -226,7 +215,6 @@
   color: var(--hz-ink);
 }
 
-
 /* ============================================================
    CARD
    ============================================================ */
@@ -236,14 +224,12 @@
 
   padding: 20px;
 
-  background: #fffdf7;
+  background: #fcfbf8;
 
   border-radius: var(--hz-radius);
 
-  box-shadow:
-    0 4px 18px rgba(109, 27, 58, 0.08);
+  box-shadow: 0 4px 18px rgba(41, 38, 38, 0.08);
 }
-
 
 /* ============================================================
    FILTERS
@@ -258,7 +244,6 @@
 
   margin-bottom: 16px;
 }
-
 
 /* ============================================================
    SEARCH
@@ -314,7 +299,6 @@
   color: var(--hz-muted);
 }
 
-
 /* ============================================================
    SELECT
    ============================================================ */
@@ -349,7 +333,6 @@
   outline-offset: 1px;
 }
 
-
 /* ============================================================
    TABLE WRAPPER
    ============================================================ */
@@ -361,7 +344,6 @@
 
   border-radius: 8px;
 }
-
 
 /* ============================================================
    TABLE
@@ -388,7 +370,6 @@
   font-size: 14px;
 }
 
-
 /* ============================================================
    EXACT COLUMN WIDTHS
    ============================================================ */
@@ -413,17 +394,16 @@
   width: 140px;
 }
 
-
 /* ============================================================
    TABLE HEADER
    ============================================================ */
 
 .hz-table thead {
-  background: #faf3e4;
+  background: #faf4e2;
 }
 
 .hz-table thead tr {
-  background: #faf3e4;
+  background: #faf4e2;
 }
 
 .hz-table thead th {
@@ -435,11 +415,11 @@
 
   vertical-align: middle;
 
-  background: #faf3e4;
+  background: #faf4e2;
 
   border-bottom: 1px solid var(--hz-border);
 
-  color: var(--hz-maroon);
+  color: #292626;
 
   font-family: var(--hz-sans);
 
@@ -452,13 +432,12 @@
   white-space: nowrap;
 }
 
-
 /* ============================================================
    TABLE BODY
    ============================================================ */
 
 .hz-table tbody tr {
-  background: #fffdf7;
+  background: #fcfbf8;
 }
 
 .hz-table tbody td {
@@ -468,9 +447,9 @@
 
   vertical-align: middle;
 
-  background: #fffdf7;
+  background: #fcfbf8;
 
-  border-bottom: 1px solid #ece0c3;
+  border-bottom: 1px solid #faf4e2;
 }
 
 .hz-table tbody tr:last-child td {
@@ -478,9 +457,8 @@
 }
 
 .hz-table tbody tr:hover td {
-  background: #fbf3e2;
+  background: #fbf6e9;
 }
-
 
 /* ============================================================
    COLUMN ALIGNMENT
@@ -511,7 +489,6 @@
   text-align: left;
 }
 
-
 /* ============================================================
    S.NO
    ============================================================ */
@@ -523,7 +500,6 @@
 
   white-space: nowrap;
 }
-
 
 /* ============================================================
    NAME
@@ -540,7 +516,6 @@
 
   text-overflow: ellipsis;
 }
-
 
 /* ============================================================
    CODE
@@ -571,11 +546,9 @@
 
   border-radius: 5px;
 
-  color: var(--hz-maroon);
+  color: #292626;
 
-  font-family:
-    "Courier New",
-    monospace;
+  font-family: "Courier New", monospace;
 
   font-size: 12px;
 
@@ -587,7 +560,6 @@
 .hz-empty {
   color: var(--hz-muted);
 }
-
 
 /* ============================================================
    STATUS
@@ -633,7 +605,6 @@
   color: var(--hz-muted);
 }
 
-
 /* ============================================================
    ACTIONS CELL
 
@@ -653,7 +624,6 @@
 
   white-space: nowrap;
 }
-
 
 /* ============================================================
    ACTIONS INNER CONTAINER
@@ -679,7 +649,6 @@
   white-space: nowrap;
 }
 
-
 /* ============================================================
    ACTION BUTTONS
    ============================================================ */
@@ -691,7 +660,6 @@
 
   padding: 0;
 }
-
 
 /* ============================================================
    LOADING / EMPTY / ERROR
@@ -706,7 +674,7 @@
 
   vertical-align: middle !important;
 
-  background: #fffdf7 !important;
+  background: #fcfbf8 !important;
 
   color: var(--hz-muted);
 
@@ -726,7 +694,7 @@
 
   background: transparent;
 
-  color: var(--hz-maroon);
+  color: #292626;
 
   font-family: var(--hz-sans);
 
@@ -741,14 +709,14 @@
   text-decoration: underline;
 }
 
-
 /* ============================================================
    FOOTER
    ============================================================ */
 
 .hz-footer {
   display: flex;
-  color : black !important;
+
+  color: #292626 !important;
 
   align-items: center;
 
@@ -760,25 +728,28 @@
 }
 
 .hz-range {
-color: black !important;
+  color: #292626 !important;
+
   font-size: 13px;
 }
 
 .hz-pager {
   display: flex;
-color: black !important;
+
+  color: #292626 !important;
+
   align-items: center;
 
   gap: 12px;
 }
 
 .hz-page-info {
-color: black !important;
+  color: #292626 !important;
+
   font-size: 13px;
 
   white-space: nowrap;
 }
-
 
 /* ============================================================
    MODAL OVERLAY
@@ -799,9 +770,8 @@ color: black !important;
 
   padding: 20px;
 
-  background: rgba(44, 26, 32, 0.45);
+  background: rgba(41, 38, 38, 0.45);
 }
-
 
 /* ============================================================
    MODAL
@@ -818,12 +788,11 @@ color: black !important;
 
   padding: 24px;
 
-  background: #fffdf7;
+  background: #fcfbf8;
 
   border-radius: var(--hz-radius);
 
-  box-shadow:
-    0 12px 32px rgba(44, 26, 32, 0.25);
+  box-shadow: 0 12px 32px rgba(41, 38, 38, 0.25);
 
   animation: hz-pop-in 0.16s ease-out;
 }
@@ -841,7 +810,6 @@ color: black !important;
     opacity: 1;
   }
 }
-
 
 /* ============================================================
    MODAL HEADER
@@ -870,7 +838,6 @@ color: black !important;
 
   font-size: 19px;
 }
-
 
 /* ============================================================
    FORM
@@ -935,19 +902,15 @@ color: black !important;
   color: var(--hz-muted);
 }
 
-
 /* ============================================================
    CODE INPUT
    ============================================================ */
 
 .hz-mono-input {
-  font-family:
-    "Courier New",
-    monospace !important;
+  font-family: "Courier New", monospace !important;
 
   text-transform: uppercase;
 }
-
 
 /* ============================================================
    FIELD ERROR
@@ -960,7 +923,6 @@ color: black !important;
 
   font-weight: 600;
 }
-
 
 /* ============================================================
    TOGGLE
@@ -985,11 +947,10 @@ color: black !important;
 
   margin: 0;
 
-  accent-color: var(--hz-maroon);
+  accent-color: #f1cb62;
 
   cursor: pointer;
 }
-
 
 /* ============================================================
    FORM NOTICE
@@ -1007,7 +968,6 @@ color: black !important;
   font-size: 13.5px;
 }
 
-
 /* ============================================================
    FORM ACTIONS
    ============================================================ */
@@ -1024,7 +984,6 @@ color: black !important;
   margin-top: 4px;
 }
 
-
 /* ============================================================
    CONFIRM DIALOG
    ============================================================ */
@@ -1036,12 +995,11 @@ color: black !important;
 
   padding: 24px;
 
-  background: #fffdf7;
+  background: #fcfbf8;
 
   border-radius: var(--hz-radius);
 
-  box-shadow:
-    0 12px 32px rgba(44, 26, 32, 0.25);
+  box-shadow: 0 12px 32px rgba(41, 38, 38, 0.25);
 }
 
 .hz-confirm h3 {
@@ -1063,7 +1021,6 @@ color: black !important;
 
   line-height: 1.5;
 }
-
 
 /* ============================================================
    TOAST
@@ -1090,8 +1047,7 @@ color: black !important;
 
   font-weight: 600;
 
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 
   animation: hz-toast-in 0.2s ease-out;
 }
@@ -1117,7 +1073,6 @@ color: black !important;
     opacity: 1;
   }
 }
-
 
 /* ============================================================
    RESPONSIVE

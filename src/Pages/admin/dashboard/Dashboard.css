@@ -1,12 +1,12 @@
 /* ==== Hazel Admin - Dashboard page ==== */
 .hz-dashboard {
-  --hz-maroon: #7a1f2b;
-  --hz-maroon-dark: #5c1a29;
-  --hz-gold: #c9752f;
-  --hz-cream: #f6e9d3;
-  --hz-card-bg: #ffffff;
-  --hz-text-dark: #3a2418;
-  --hz-text-muted: #a98a67;
+  --hz-maroon: #292626; /* Primary Accent (Changed from Maroon to Black) */
+  --hz-maroon-dark: #292626; /* Dark Text / Contrast Element */
+  --hz-gold: #292626; /* Secondary Accent / Dark Text */
+  --hz-cream: #faf4e2; /* Soft Cream Background */
+  --hz-card-bg: #fcfbf8; /* Light Card Background */
+  --hz-text-dark: #292626; /* Base Text Color */
+  --hz-text-muted: #666155; /* Muted Text / Labels */
   --hz-green: #16a34a;
 
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
@@ -43,7 +43,7 @@
   height: 44px;
   border-radius: 12px;
   background: var(--hz-maroon);
-  color: #fff;
+  color: #fcfbf8;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@
 
 .hz-dashboard__date {
   background: var(--hz-card-bg);
-  border: 1px solid #ecdcc0;
+  border: 1px solid #faf4e2;
   border-radius: 10px;
   padding: 10px 16px;
   font-size: 14px;
@@ -88,15 +88,15 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 4px 14px rgba(122, 31, 43, 0.06);
+  box-shadow: 0 4px 14px rgba(41, 38, 38, 0.05);
 }
 
 .hz-summary-card__icon {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #f6e2c2;
-  color: var(--hz-gold);
+  background: #fbf6e9;
+  color: #292626;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,7 +122,7 @@
 
 .hz-skeleton {
   display: inline-block;
-  background: linear-gradient(90deg, #f0e2c9 25%, #f7ecd9 37%, #f0e2c9 63%);
+  background: linear-gradient(90deg, #fbf6e9 25%, #faf4e2 37%, #fbf6e9 63%);
   background-size: 400% 100%;
   animation: hz-shimmer 1.4s ease infinite;
   border-radius: 4px;
@@ -162,7 +162,7 @@
   background: var(--hz-card-bg);
   border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 4px 14px rgba(122, 31, 43, 0.06);
+  box-shadow: 0 4px 14px rgba(41, 38, 38, 0.05);
 }
 
 .hz-card__header {
@@ -181,7 +181,7 @@
 
 .hz-card__link {
   font-size: 13px;
-  color: var(--hz-maroon);
+  color: #292626;
   text-decoration: none;
   font-weight: 600;
 }
@@ -193,7 +193,7 @@
 /* --- Range toggle (Today / Week / Month) --- */
 .hz-range-toggle {
   display: flex;
-  background: #f6e9d3;
+  background: #fbf6e9;
   border-radius: 8px;
   padding: 3px;
   gap: 2px;
@@ -212,7 +212,7 @@
 
 .hz-range-toggle__btn--active {
   background: var(--hz-maroon);
-  color: #fff;
+  color: #fcfbf8;
 }
 
 /* --- Sales chart --- */
@@ -230,8 +230,8 @@
 }
 
 .hz-chart-tooltip {
-  background: #fbeedd;
-  border: 1px solid #ecd4ab;
+  background: #faf4e2;
+  border: 1px solid #292626;
   border-radius: 8px;
   padding: 8px 12px;
   text-align: center;
@@ -260,14 +260,14 @@
   color: var(--hz-text-muted);
   font-weight: 600;
   padding: 8px 10px;
-  border-bottom: 1px solid #f0e2c9;
+  border-bottom: 1px solid #faf4e2;
 }
 
 .hz-table tbody td {
   padding: 12px 10px;
   font-size: 13px;
   color: var(--hz-text-dark);
-  border-bottom: 1px solid #f6eee0;
+  border-bottom: 1px solid #fbf6e9;
 }
 
 .hz-table tbody tr:last-child td {
@@ -276,7 +276,7 @@
 
 .hz-table__id {
   font-weight: 600;
-  color: var(--hz-maroon);
+  color: #292626;
 }
 
 .hz-table__empty {
@@ -298,7 +298,7 @@
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-  background: #f0e2c9;
+  background: #fbf6e9;
 }
 
 .hz-table__thumb img {
@@ -311,7 +311,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f0e2c9, #e6cfa4);
+  background: linear-gradient(135deg, #fbf6e9, #faf4e2);
 }
 
 /* --- Status badges --- */
@@ -440,8 +440,8 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #f6e2c2;
-  color: var(--hz-gold);
+  background: #fbf6e9;
+  color: #292626;
   display: flex;
   align-items: center;
   justify-content: center;

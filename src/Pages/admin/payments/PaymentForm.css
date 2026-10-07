@@ -73,13 +73,15 @@
   padding: 10px 12px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   font-family: inherit;
 }
 
 .payment-form-group input:focus,
 .payment-form-group select:focus {
-  border-color: #780524;
+  border-color: #f1cb62;
   box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
 }
 
@@ -131,8 +133,8 @@
 }
 
 .payment-form-save-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #181717;
   border: none;
 }
 

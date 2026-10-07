@@ -3,19 +3,23 @@
   margin: 40px auto;
   padding: 20px;
   font-family: sans-serif;
+  background-color: #fcfbf8;
+  color: #292626;
 }
 
-.admin-hero-manager h2, .admin-hero-manager h3 {
-  color: #333;
+.admin-hero-manager h2,
+.admin-hero-manager h3 {
+  color: #292626;
   margin-bottom: 20px;
 }
 
 .add-slide-form {
-  background: #f9f9f9;
+  background: #fbf6e9;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(41, 38, 38, 0.05);
   margin-bottom: 30px;
+  border: 1px solid #faf4e2;
 }
 
 .form-group {
@@ -27,28 +31,37 @@
   margin-bottom: 5px;
   font-weight: 600;
   font-size: 14px;
+  color: #292626;
 }
 
 .form-group input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #e3d9c3;
+  background-color: #fcfbf8;
+  color: #292626;
   border-radius: 4px;
   font-size: 14px;
 }
 
+.form-group input:focus {
+  outline: none;
+  border-color: #f1cb62;
+}
+
 .btn-add {
-  background-color: #000;
-  color: #fff;
+  background-color: #f1cb62;
+  color: #292626;
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.2s ease;
 }
 
 .btn-add:hover {
-  background-color: #333;
+  background-color: #d8b14a;
 }
 
 .slides-grid {
@@ -58,11 +71,11 @@
 }
 
 .slide-card {
-  background: #fff;
-  border: 1px solid #eee;
+  background: #fbf6e9;
+  border: 1px solid #e3d9c3;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(41, 38, 38, 0.05);
 }
 
 .slide-card img {
@@ -80,22 +93,25 @@
 
 .badge {
   font-size: 11px;
-  background: #eef2f7;
+  background: #faf4e2;
+  color: #292626;
+  border: 1px solid #e3d9c3;
   padding: 4px 8px;
   border-radius: 4px;
   font-weight: bold;
 }
 
 .btn-delete {
-  background-color: #ff4d4d;
-  color: white;
+  background-color: #a83232;
+  color: #fcfbf8;
   border: none;
   padding: 6px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+  transition: background-color 0.2s ease;
 }
 
 .btn-delete:hover {
-  background-color: #e04343;
+  background-color: #8a2525;
 }

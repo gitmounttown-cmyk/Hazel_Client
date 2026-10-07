@@ -1,12 +1,12 @@
 /* ==== Hazel Admin - Sidebar ==== */
 /* Color tokens (kept local to this file so the component is drop-in portable) */
 .hz-sidebar {
-  --hz-maroon: #6d1f31;
-  --hz-maroon-dark: #5c1a29;
-  --hz-gold: #e3c08a;
-  --hz-gold-soft: #cfa876;
-  --hz-orange-active: #c9752f;
-  --hz-text-muted: #d9b98f;
+  --hz-maroon: #292626;
+  --hz-maroon-dark: #f1cb62;
+  --hz-gold: #292626;
+  --hz-gold-soft: #292626;
+  --hz-orange-active: #292626;
+  --hz-text-muted: #524d40;
 
   width: 272px;
   min-width: 272px;
@@ -25,7 +25,7 @@
   width: 6px;
 }
 .hz-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(227, 192, 138, 0.25);
+  background: rgba(41, 38, 38, 0.2);
   border-radius: 4px;
 }
 
@@ -35,11 +35,11 @@
   align-items: center;
   gap: 10px;
   padding: 22px 20px;
-  border-bottom: 1px solid rgba(227, 192, 138, 0.15);
+  border-bottom: 1px solid rgba(41, 38, 38, 0.15);
 }
 
 .hz-sidebar__logo-icon {
-  color: var(--hz-gold);
+  color: #292626;
   width: 32px;
   height: 40px;
   flex-shrink: 0;
@@ -60,7 +60,7 @@
   font-family: Georgia, "Times New Roman", serif;
   font-size: 22px;
   letter-spacing: 2px;
-  color: var(--hz-gold);
+  color: #292626;
   font-weight: 700;
 }
 
@@ -100,26 +100,29 @@
   border-radius: 8px;
   background: transparent;
   border: none;
-color: #fff;
+  color: #292626;
   font-size: 14px;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   text-align: left;
 }
 
 .hz-sidebar__link:hover {
-  background: rgba(227, 192, 138, 0.08);
-  color: var(--hz-gold);
+  background: #faf4e2;
+  color: #292626;
 }
 
 .hz-sidebar__link--active {
   background: var(--hz-orange-active);
-  color: #ffffff;
+  color: #fcfbf8;
+  font-weight: 600;
 }
 
 .hz-sidebar__link--active .hz-sidebar__icon {
-  color: #ffffff;
+  color: #fcfbf8;
 }
 
 .hz-sidebar__link--parent {
@@ -161,21 +164,24 @@ color: #fff;
   display: block;
   padding: 8px 12px 8px 46px;
   font-size: 13px;
-color: #fff;
+  color: #292626;
   text-decoration: none;
   border-radius: 6px;
-  opacity: 0.9;
-  transition: background 0.15s ease, color 0.15s ease;
+  opacity: 0.85;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .hz-sidebar__sublink:hover {
-  background: rgba(227, 192, 138, 0.08);
-  color: var(--hz-gold);
+  background: #faf4e2;
+  color: #292626;
 }
 
 .hz-sidebar__sublink--active {
-color:white;
-  font-weight: 600;
+  color: #292626;
+  font-weight: 700;
+  background: rgba(41, 38, 38, 0.12);
   opacity: 1;
 }
 
