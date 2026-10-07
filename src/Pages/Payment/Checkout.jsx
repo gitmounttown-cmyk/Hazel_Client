@@ -394,31 +394,39 @@ export default function Checkout({
                 }
 
 
-                const userAddress = {
+                const userAddressObj = {
                   id: address._id,
                   fullName:
-                    address.fullName,
+                    address.fullName || address.name,
+                  name: address.fullName || address.name,
                   houseNo:
-                    address.houseNo,
+                    address.houseNo || address.addressLine1 || "",
+                  addressLine1:
+                    address.addressLine1 || address.houseNo || "",
+                  addressLine2:
+                    address.addressLine2 || "",
+                  district:
+                    address.district || "",
                   isDefault:
                     address.isDefault,
                   addressType:
                     address.addressType,
                   mobileNumber:
-                    address.mobileNumber,
+                    address.mobileNumber || address.phone,
+                  phone: address.mobileNumber || address.phone,
                   city:
                     address.city,
                   state:
                     address.state,
                   country:
-                    address.country,
+                    address.country || "India",
                   pincode:
                     address.pincode,
                 };
 
 
                 userAddresses.push(
-                  userAddress
+                  userAddressObj
                 );
               }
             );
@@ -506,52 +514,46 @@ export default function Checkout({
             selectedSize
           );
 
+const productDetails = {
+  id: item?._id,
 
-          const productDetails = {
+  productId: item?.product?._id,
 
-            id:
-              item?._id ||
-              item?.product?._id,
+  variantId: item?.variantId,
 
-            productId:
-              item?.product?._id,
+  name:
+    item?.product?.name ||
+    item?.productName,
 
-            name:
-              item?.product?.name ||
-              item?.productName,
+  print:
+    item?.print ||
+    item?.variant?.print,
 
-            print:
-              item?.print ||
-              item?.variant?.print,
+  price:
+    item?.price ||
+    item?.variant?.price ||
+    0,
 
-            price:
-              item?.price ||
-              item?.variant?.price ||
-              0,
+  size:
+    item?.selectedSize ||
+    item?.variant?.size ||
+    item?.variant?.sizeName,
 
-            size:
-              item?.selectedSize ||
-              item?.variant?.size ||
-              item?.variant?.sizeName,
+  qty:
+    item?.qty ||
+    item?.quantity ||
+    1,
 
-            qty:
-              item?.qty ||
-              item?.quantity ||
-              1,
+  mediaImageUrl: mediaImageUrl,
 
-            mediaImageUrl:
-              mediaImageUrl,
+  discountPrice:
+    variant?.[0]?.discountPrice ||
+    0,
 
-            discountPrice:
-              variant?.[0]
-                ?.discountPrice ||
-              0,
-
-            selectedSizeStockQuantity:
-              selectedSize?.[0]
-                ?.stockQuantity ||
-              0,
-          };
+  selectedSizeStockQuantity:
+    selectedSize?.[0]?.stockQuantity ||
+    0,
+};
 
 
           productDetailsList.push(
@@ -827,38 +829,50 @@ export default function Checkout({
      REMOVE CART ITEM
   ======================================================= */
 
-  const removeItem = async (
-    item,
-    index
-  ) => {
+ const removeItem = async (item, index) => {
+  try {
+    const payload = {
+      productId: item.productId,
+      variantId: item.variantId,
+    };
 
-    try {
+    console.log("REMOVE PAYLOAD:", payload);
 
-      await removeCartItem(
-        item.id
-      );
+    if (!payload.productId || !payload.variantId) {
+      console.error("Missing productId or variantId:", item);
 
-      await getCartItems();
-
-      onRemoveItem(
-        item,
-        index
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Error removing item from cart:",
-        error
-      );
-
-      toast.error(
-        "Failed to remove item."
-      );
-
+      toast.error("Unable to remove item.");
+      return;
     }
 
-  };
+    const response = await removeCartItem(payload);
+
+    console.log("REMOVE RESPONSE:", response);
+
+    if (!response?.success) {
+      toast.error(
+        response?.message || "Failed to remove item."
+      );
+      return;
+    }
+
+    await getCartItems();
+
+    onRemoveItem(item, index);
+
+    toast.success("Item removed from cart");
+  } catch (error) {
+    console.error(
+      "Error removing item from cart:",
+      error.response?.data || error
+    );
+
+    toast.error(
+      error.response?.data?.message ||
+        "Failed to remove item."
+    );
+  }
+};
 
 
   /* =======================================================
@@ -1007,6 +1021,9 @@ export default function Checkout({
     const created = {
       ...cleaned,
       id: `a${Date.now()}`,
+      fullName: cleaned.name,
+      addressLine1: cleaned.line1,
+      mobileNumber: cleaned.phone,
     };
 
 
@@ -1078,12 +1095,27 @@ export default function Checkout({
         return;
       }
 
+      // Format delivery address to meet Mongoose schema field constraints
+      const formattedAddress = {
+        fullName: selectedAddress.fullName || selectedAddress.name || "",
+        addressLine1: selectedAddress.addressLine1 || selectedAddress.houseNo || selectedAddress.line1 || "",
+        addressLine2: selectedAddress.addressLine2 || "",
+        district: selectedAddress.district || "",
+        city: selectedAddress.city || "",
+        state: selectedAddress.state || "",
+        pincode: selectedAddress.pincode || "",
+        mobileNumber: selectedAddress.mobileNumber || selectedAddress.phone || "",
+        addressType: selectedAddress.addressType || selectedAddress.type || "Home",
+      };
 
       const orderDetails = {
 
         userId:
 
           userId,
+
+        addressId:
+          selectedAddress.id || selectedAddress._id,
 
         products:
 
@@ -1110,7 +1142,7 @@ export default function Checkout({
           ),
 
         deliveryAddress:
-          selectedAddress,
+          formattedAddress,
 
         amount:
           totalAmount,
@@ -1261,7 +1293,7 @@ export default function Checkout({
                   <p className="delivery__address">
 
                     <span>
-                      {address.houseNo},
+                      {address.houseNo || address.addressLine1},
                     </span>
 
                     <span>
@@ -1373,7 +1405,7 @@ export default function Checkout({
 
                             <span className="addr-option__addr">
 
-                              {a.houseNo},{" "}
+                              {a.houseNo || a.addressLine1},{" "}
                               {a.city},{" "}
                               {a.state} -{" "}
 
