@@ -11,7 +11,7 @@ import ManifestoImg3 from "../../assets/About/Manifesto3.png";
 import CustomerImg1 from "../../assets/About/Customer1.png";
 import CustomerImg2 from "../../assets/About/Customer2.png";
 import CustomerImg3 from "../../assets/About/Customer3.png";
-import CustomerImg4 from "../../assets/About/Customer4.png";
+// import CustomerImg4 from "../../assets/About/Customer4.png";
 import CustomerGroup from "../../assets/About/CustomerGroup.png";
 import FinalCtaBg from "../../assets/About/FinalCtaBg.png";
 
@@ -240,6 +240,7 @@ export default function AboutPage() {
             <div
               className="collage-tall1"
               style={{
+                backgroundColor: "#FAF4E2",
                 backgroundImage: `url(${CustomerImg1})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -279,12 +280,15 @@ export default function AboutPage() {
             <div
               className="collage-tall4"
               style={{
-                backgroundImage: `url(${CustomerImg4})`,
+                backgroundColor: "#FAF4E2",
+                // backgroundImage: `url(${CustomerImg4})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 borderRadius: "8px",
               }}
-            ></div>
+            >
+              <p className="about-card">"Style is an extension of how you care for yourself."</p>
+            </div>
           </div>
         </div>
       </section>

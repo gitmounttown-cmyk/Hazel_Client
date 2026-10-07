@@ -80,13 +80,13 @@
 .btn-text-link {
   background: none;
   border: none;
-  color: #F1CB62;
+  color: #292626;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 4px;
-  background-color: #fcf6ef;
+  border-radius: 10px;
+  background-color: #F1CB62;
   transition: background 0.2s;
 }
 
@@ -195,13 +195,13 @@
   border: none;
   font-size: 13px;
   font-weight: 600;
-  color: #F1CB62;
+  color: #292626;
   cursor: pointer;
   padding: 0;
 }
 
 .action-link.danger {
-  color: #F1CB62;
+  color: #292626;
 }
 
 .action-link:hover {

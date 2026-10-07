@@ -1,4 +1,4 @@
-import { AlertCircle, HelpCircle, MessageSquare, PhoneCall, ArrowRight, RefreshCw, CreditCard } from "lucide-react";
+import { X, AlertCircle, ArrowRight } from "lucide-react";
 import "./OrderFailure.css";
 
 /* Put your product image import or path here */
@@ -18,7 +18,7 @@ export default function PaymentFailure() {
         <header className="pf__hero">
           <div className="pf__badge" aria-hidden="true">
             <span className="pf__ring" />
-            <HelpCircle className="pf__icon-main" strokeWidth={2.2} />
+            <X className="pf__icon-main" strokeWidth={2.5} />
             <div className="pf__badge-dot">
               <AlertCircle size={12} />
             </div>

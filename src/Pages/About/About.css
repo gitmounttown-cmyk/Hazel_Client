@@ -30,7 +30,7 @@
 
 .section-title {
   font-family: DM Serif Display;
-  color: #F1CB62 !important;
+  color: #292626 !important;
   font-size: 46px;
   line-height: 1.3;
   margin: 0 0 20px;
@@ -46,7 +46,16 @@
   line-height: 1.7;
   margin: 0 0 14px;
 }
-
+.about-card{
+  color: #292626;
+    font-family: 'DM Serif Display';
+    font-size: 21px;
+    text-align: center;
+    margin-top: 155px;
+   
+   
+    /* align-items: center; */
+}
 .btn-filled {
   background: #F1CB62 !important;
   color: black !important;
@@ -240,13 +249,13 @@
 }
 
 .manifesto {
-  background: #52131e;
+  background: #F1CB62;
   padding: 30px 60px 100px 60px;
 }
 
 .manifesto .section-title1 {
   font-family: serif;
-  color: #fff;
+  color: #292626 !important;
   font-size: 15px;
   margin-bottom: 10px;
   letter-spacing: 2px;
@@ -254,7 +263,7 @@
 
 .manifesto .section-title {
   font-family: serif;
-  color: #edc484;
+  color: #FCFBF8 !important;
   font-size: 46px;
   margin-bottom: 60px;
 }
@@ -294,7 +303,8 @@
 .manifesto-watermark {
   position: absolute;
   top: -10px;
-  color: rgba(255, 255, 255, 0.06);
+  opacity:5%;
+  color: black;
   font-size: 80px;
   font-weight: 700;
   line-height: 1;
@@ -305,14 +315,14 @@
 .manifesto-title {
   padding-top: 17px;
   position: relative;
-  color: #f3d9b4;
+  color: #292626;
   font-size: 23px;
   margin: 0;
   z-index: 2;
 }
 
 .manifesto-copy {
-  color: #a2757f;
+  color: #292626;
   font-size: 14px;
   line-height: 1.6;
   margin: 0 auto 24px auto;
@@ -336,7 +346,7 @@
 
 .customers {
   padding: 80px 60px;
-  background: #fff;
+  background: #FCFBF8;
 }
 
 .collage {
@@ -435,7 +445,7 @@
 .final-cta-title {
   font-family: serif;
   color: #fff;
-  font-size: 32px;
+  font-size: 50px;
   text-align: center;
   line-height: 1.4;
   margin: 0;
@@ -443,7 +453,8 @@
 
 .btn-filled1 {
   background:#F1CB62;
-  color: #fff;
+  color: #292626;
+  font-family:"poppins";
   border: none;
   padding: 12px 25px;
   border-radius: 8px;
@@ -454,9 +465,7 @@
   transition: background 0.3s ease;
 }
 
-.btn-filled1:hover {
-  background: #431319;
-}
+
 
 /* =========================================================
    DESKTOP / TABLET RESPONSIVE BREAKPOINTS
@@ -704,6 +713,13 @@
   .final-cta-title {
     font-size: 17px;
     padding: 0 20px;
+  }
+  .about-card{
+    color: #292626;
+    font-family: 'DM Serif Display';
+    font-size: 18px;
+    text-align: center;
+    margin-top: 70px;
   }
   .btn-filled {
     width: 137px;
