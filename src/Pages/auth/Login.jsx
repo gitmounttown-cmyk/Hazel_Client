@@ -153,7 +153,7 @@ const Login = () => {
               <div className="mobile-input-wrapper">
                 <span className="country-code">+91</span>
 
-                <input
+                <input className="mobile-input"
                   type="tel"
                   placeholder="Enter your mobile number"
                   value={mobileNumber}
