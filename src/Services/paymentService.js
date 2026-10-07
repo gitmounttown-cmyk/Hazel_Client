@@ -8,6 +8,12 @@ export const createOrder = async (data) => {
   return response.data;
 };
 
+// Verify Razorpay payment signature
+export const verifyPayment = async (data) => {
+  const response = await axiosInstance.post(`${BASE}/verify-payment`, data);
+  return response.data;
+};
+
 // Existing payment APIs
 export const createCashfreePayment = (data) =>
   axiosInstance.post("/payments/create", data);
