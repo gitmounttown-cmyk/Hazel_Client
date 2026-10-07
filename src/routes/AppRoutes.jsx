@@ -41,13 +41,8 @@ import AccountOverview from "../Components/AccountOverview/AccountOverview"; // 
 import Video from "../Pages/admin/videos/Video";
 
 import Checkout from "../Pages/Payment/Checkout";
-<<<<<<< HEAD
 import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
 
-=======
-import OrderConfiramation from "../Pages/OrderConfiramation/OrderConfiramation";
-import OrderFailure from "../Pages/OrderFailure/OrderFailure";
->>>>>>> 33f102177f9223df2b523711ab593dde7e4e01b8
 
 const AppRoutes = () => {
   return (
@@ -70,12 +65,7 @@ const AppRoutes = () => {
           <Route path="/Wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />
           <Route path="/checkout" element={<Checkout />} />
-<<<<<<< HEAD
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
-=======
-          <Route path="/order-confiramation" element={<OrderConfiramation />} />
-          <Route path="/order-failure" element={<OrderFailure />} />
->>>>>>> 33f102177f9223df2b523711ab593dde7e4e01b8
 
         </Route>
 
