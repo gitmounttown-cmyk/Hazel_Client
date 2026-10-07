@@ -17,24 +17,25 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .admin-trending-header p {
   margin: 6px 0 0;
   font-size: 13px;
-  color: #777;
+  color: #666155;
 }
 
 .admin-trending-add-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.15s ease;
 }
 
 .admin-trending-add-btn:hover {
@@ -42,9 +43,9 @@
 }
 
 .admin-trending-list-section {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.06);
   padding: 20px;
 }
 
@@ -59,12 +60,12 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .admin-trending-list-header span {
   font-size: 13px;
-  color: #777;
+  color: #666155;
 }
 
 .admin-trending-list {
@@ -78,13 +79,13 @@
   justify-content: space-between;
   gap: 20px;
   padding: 18px;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
   border-radius: 10px;
-  background: #fff;
+  background: #fcfbf8;
 }
 
 .admin-trending-card:hover {
-  background: #fbfaf8;
+  background: #fbf6e9;
 }
 
 .admin-trending-card-content {
@@ -102,7 +103,7 @@
   margin: 0;
   font-size: 17px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .admin-trending-active-badge,
@@ -127,22 +128,20 @@
 }
 
 .admin-trending-featured-badge {
-  background: #f7e7ec;
-  color: #780524;
+  background: #fbf6e9;
+  color: #292626;
+  border: 1px solid #faf4e2;
 }
 
 .admin-trending-subtitle {
   margin: 7px 0 16px;
-  color: #777;
+  color: #666155;
   font-size: 13px;
 }
 
 .admin-trending-products {
   display: grid;
-  grid-template-columns: repeat(
-    3,
-    minmax(0, 1fr)
-  );
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -150,9 +149,9 @@
   display: flex;
   gap: 10px;
   padding: 10px;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
-  background: #fff;
+  background: #fcfbf8;
 }
 
 .admin-trending-product-image-wrapper {
@@ -164,7 +163,7 @@
   height: 70px;
   object-fit: cover;
   border-radius: 7px;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
 }
 
 .admin-trending-no-image {
@@ -174,8 +173,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  background: #f5f5f5;
-  color: #999;
+  background: #faf4e2;
+  color: #666155;
   font-size: 11px;
   text-align: center;
 }
@@ -188,12 +187,12 @@
   margin: 0 0 5px;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: #292626;
 }
 
 .admin-trending-product-info p {
   margin: 0 0 7px;
-  color: #888;
+  color: #666155;
   font-size: 11px;
 }
 
@@ -205,7 +204,7 @@
 }
 
 .admin-trending-product-meta span:first-child {
-  color: #777;
+  color: #666155;
   font-size: 11px;
 }
 
@@ -224,14 +223,15 @@
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 6px;
+  transition: background 0.15s ease;
 }
 
 .admin-trending-edit-btn {
-  color: #780524;
+  color: #292626;
 }
 
 .admin-trending-edit-btn:hover {
-  background: #f7e7ec;
+  background: #f1cb62;
 }
 
 .admin-trending-delete-btn {
@@ -251,15 +251,12 @@
 .admin-trending-empty {
   text-align: center;
   padding: 30px;
-  color: #999;
+  color: #666155;
 }
 
 @media (max-width: 1100px) {
   .admin-trending-products {
-    grid-template-columns: repeat(
-      2,
-      minmax(0, 1fr)
-    );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

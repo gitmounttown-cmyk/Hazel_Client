@@ -1,9 +1,9 @@
 /* ==== Hazel Admin - Header ==== */
 .hz-header {
-  --hz-maroon: #6d1f31;
-  --hz-maroon-light: #7c2438;
-  --hz-gold: #e3c08a;
-  --hz-text-muted: #d9b98f;
+  --hz-maroon: #f1cb62; /* Primary Header Background */
+  --hz-maroon-light: #fbf6e9; /* Component Container Backgrounds */
+  --hz-gold: #faf4e2; /* Accent / Secondary Backgrounds */
+  --hz-text-muted: #292626; /* Dark Text / Icon / Muted Color */
 
   display: flex;
   align-items: center;
@@ -26,7 +26,7 @@
   flex: 1;
   max-width: 420px;
   background: var(--hz-maroon-light);
-  border: 1px solid rgba(227, 192, 138, 0.25);
+  border: 1px solid rgba(41, 38, 38, 0.15);
   border-radius: 10px;
   padding: 10px 16px;
 }
@@ -40,7 +40,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #fff;
+  color: #292626;
   font-size: 14px;
   width: 100%;
 }
@@ -66,13 +66,13 @@
   border-radius: 50%;
   border: none;
   background: var(--hz-maroon-light);
-  color: #fff;
+  color: var(--hz-text-muted);
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .hz-header__icon-btn:hover {
-  background: rgba(227, 192, 138, 0.25);
+  background: var(--hz-gold);
 }
 
 .hz-header__badge {
@@ -84,7 +84,7 @@
   padding: 0 4px;
   border-radius: 50%;
   background: #e0522f;
-  color: #fff;
+  color: #fcfbf8;
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -114,7 +114,7 @@
   border-radius: 50%;
   overflow: hidden;
   background: var(--hz-gold);
-  color: var(--hz-maroon);
+  color: var(--hz-text-muted);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -136,7 +136,7 @@
 }
 
 .hz-header__profile-name {
-  color: #fff;
+  color: #292626;
   font-size: 14px;
   font-weight: 600;
 }
@@ -160,7 +160,7 @@
   top: calc(100% + 10px);
   right: 0;
   min-width: 180px;
-  background: #ffffff;
+  background: #fcfbf8;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   overflow: hidden;
@@ -174,12 +174,12 @@
   background: transparent;
   border: none;
   font-size: 13px;
-  color: #4a2233;
+  color: #292626;
   cursor: pointer;
 }
 
 .hz-header__dropdown-item:hover {
-  background: #f7ede1;
+  background: #faf4e2;
 }
 
 .hz-header__dropdown-item--danger {

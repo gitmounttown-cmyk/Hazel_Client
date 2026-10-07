@@ -12,22 +12,29 @@
 .video-page-header h2 {
   margin: 0;
   font-family: serif;
+  color: #292626;
 }
 
 .video-add-btn {
-  background: #a5002d;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+
+.video-add-btn:hover {
+  opacity: 0.9;
 }
 
 .video-table-card {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 14px;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.06);
 }
 
 .video-table {
@@ -39,7 +46,13 @@
 .video-table td {
   padding: 16px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #faf4e2;
+  color: #292626;
+}
+
+.video-table th {
+  background: #fbf6e9;
+  font-weight: 600;
 }
 
 .video-preview {
@@ -47,7 +60,7 @@
   height: 100px;
   object-fit: cover;
   border-radius: 8px;
-  background: #000;
+  background: #292626;
 }
 
 .video-actions {
@@ -60,20 +73,30 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.15s ease;
 }
 
 .video-edit-btn {
-  color: #a5002d;
+  color: #292626;
+}
+
+.video-edit-btn:hover {
+  color: #f1cb62;
 }
 
 .video-delete-btn {
-  color: #e00000;
+  color: #b3261e;
+}
+
+.video-delete-btn:hover {
+  opacity: 0.8;
 }
 
 .video-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(41, 38, 38, 0.5);
 
   display: flex;
   align-items: center;
@@ -88,9 +111,10 @@
   max-height: 90vh;
   overflow-y: auto;
 
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
   padding: 25px;
+  box-shadow: 0 12px 40px rgba(41, 38, 38, 0.2);
 }
 
 .video-form-group {
@@ -101,20 +125,29 @@
   display: block;
   margin-bottom: 7px;
   font-weight: 600;
+  color: #292626;
 }
 
 .video-form-group input {
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #faf4e2;
   border-radius: 6px;
+  background: #fcfbf8;
+  color: #292626;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.video-form-group input:focus {
+  border-color: #f1cb62;
 }
 
 .video-form-group small {
   display: block;
   margin-top: 5px;
-  color: #777;
+  color: #666155;
 }
 
 .video-form-preview {
@@ -125,12 +158,13 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
+  color: #292626;
 }
 
 .video-form-preview video {
   width: 100%;
   max-height: 250px;
-  background: #000;
+  background: #292626;
   border-radius: 8px;
 }
 
@@ -146,32 +180,46 @@
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  background: #faf4e2;
+  color: #292626;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.video-form-actions button:hover {
+  background: #fbf6e9;
 }
 
 .video-form-actions button[type="submit"] {
-  background: #a5002d;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
+}
+
+.video-form-actions button[type="submit"]:hover {
+  opacity: 0.9;
 }
 
 .video-form-error {
-  background: #ffe8e8;
-  color: #c00000;
+  background: #fdecec;
+  color: #b3261e;
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 15px;
 }
 
 .video-success {
-  background: #e8f7ed;
-  color: #168344;
+  background: #edf7ee;
+  color: #2e7d32;
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 15px;
 }
 
 .video-error {
-  background: #ffe8e8;
-  color: #c00000;
+  background: #fdecec;
+  color: #b3261e;
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 15px;
@@ -181,4 +229,5 @@
 .video-empty {
   padding: 40px;
   text-align: center;
+  color: #666155;
 }
