@@ -538,6 +538,10 @@ export default function Checkout({
      HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
   ========================================================= */
 
+ /* =======================================================
+     HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
+  ========================================================= */
+
   const handlePay = async (selectedAddress) => {
     try {
       if (!selectedAddress) {
@@ -552,7 +556,7 @@ export default function Checkout({
         return;
       }
 
-      // Re-calculate live totals right inside the handler to ensure zero stale data
+      // Compute live totals based on current cart state (including updated quantities)
       const liveSubtotal = cartItems.reduce(
         (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
         0
@@ -587,7 +591,7 @@ export default function Checkout({
           price: item.price,
         })),
         deliveryAddress: formattedAddress,
-        amount: liveTotal, // Pass the live calculated total
+        amount: liveTotal, // Explicitly sending the live UI total
       };
 
       const response = await createOrder(orderDetails);
@@ -599,7 +603,7 @@ export default function Checkout({
 
       const options = {
         key: response.keyId,
-        amount: response.razorpayAmount, // Backend now matches this exact total
+        amount: response.razorpayAmount, // Reflects the exact liveTotal * 100
         currency: response.currency,
         name: "Hazel",
         description: `Order #${response.orderNumber}`,
@@ -915,7 +919,7 @@ export default function Checkout({
             <p className="summary__total-amount">{formatINR(total)}</p>
           </div>
 
-        <button
+       <button
             type="button"
             className="btn-pay"
             onClick={() => handlePay(address)}
