@@ -1,8 +1,15 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState } from "react";
 import * as Lucide from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosInstance";
 import "./AccountOverview.css";
-
+import "./AccountOverview.css";
+import toast from "react-hot-toast";
+import { getMyOrders } from "../../Services/orderService";
+import {formatOrderDate} from "../../utils/dateFormat";
+import {formatINR} from "../../utils/currencyFormat";
+import { formatOrderDateTime } from "../../utils/dateFormat";
 /* Safe icon lookup: works across lucide-react versions (old/new names). */
 const pick = (...names) => {
   for (const n of names) if (Lucide[n]) return Lucide[n];
@@ -107,8 +114,8 @@ const ORDERS = [
   },
 ];
 
-const mask = (p) => `+91 XXXXX ${p.slice(-5)}`;
-const fmt = (p) => `+91 ${p.slice(0, 5)} ${p.slice(5)}`;
+const mask = (p) => `+91 XXXXX ${p?.slice(-5)}`;
+const fmt = (p) => `+91 ${p?.slice(0, 5)} ${p?.slice(5)}`;
 const digits = (v, n) => v.replace(/\D/g, "").slice(0, n);
 const normalise = (list, defId) => {
   const id = list.some((x) => x.id === defId)
@@ -191,27 +198,27 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-function Toast({ toast }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    try {
-      ref.current?.showPopover?.();
-    } catch (e) {
-      /* already open */
-    }
-  }, []);
-  return (
-    <div
-      ref={ref}
-      popover="manual"
-      className="toast"
-      role="status"
-      aria-live="polite"
-    >
-      <span>{toast.msg}</span>
-    </div>
-  );
-}
+// function Toast({ toast }) {
+//   const ref = useRef(null);
+//   useEffect(() => {
+//     try {
+//       ref.current?.showPopover?.();
+//     } catch (e) {
+//       /* already open */
+//     }
+//   }, []);
+//   return (
+//     <div
+//       ref={ref}
+//       popover="manual"
+//       className="toast"
+//       role="status"
+//       aria-live="polite"
+//     >
+//       <span>{toast.msg}</span>
+//     </div>
+//   );
+// }
 
 function Field({ label, error, ...rest }) {
   return (
@@ -277,12 +284,12 @@ function ProfileForm({ profile, onSave, onCancel }) {
 function AddressForm({ address, onSave, onCancel }) {
   const [f, setF] = useState(
     address || {
-      name: "",
-      line1: "",
-      line2: "",
+      fullName: "",
+      houseNo: "",
+      street: "",
       city: "",
       pincode: "",
-      phone: "",
+      mobileNumber: "",
       isDefault: false,
     },
   );
@@ -291,11 +298,11 @@ function AddressForm({ address, onSave, onCancel }) {
   const submit = (e) => {
     e.preventDefault();
     const er = {};
-    if (!f.name.trim()) er.name = "Enter the recipient's name";
-    if (!f.line1.trim()) er.line1 = "Enter house / flat number and building";
+    if (!f.fullName.trim()) er.fullName = "Enter the recipient's name";
+    if (!f.houseNo.trim()) er.houseNo = "Enter house / flat number and building";
     if (!f.city.trim()) er.city = "Enter city and state";
     if (!/^\d{6}$/.test(f.pincode)) er.pincode = "Enter a 6-digit pincode";
-    if (!/^\d{10}$/.test(f.phone)) er.phone = "Enter a 10-digit mobile number";
+    if (!/^\d{10}$/.test(f.mobileNumber)) er.mobileNumber = "Enter a 10-digit mobile number";
     setErr(er);
     if (!Object.keys(er).length) onSave(f);
   };
@@ -304,26 +311,27 @@ function AddressForm({ address, onSave, onCancel }) {
       <div className="span2">
         <Field
           label="Full name"
-          value={f.name}
-          onChange={(e) => set("name", e.target.value)}
-          error={err.name}
+          value={f.fullName}
+          onChange={(e) => set("fullName", e.target.value)}
+          error={err.fullName}
           autoComplete="name"
         />
       </div>
       <div className="span2">
         <Field
           label="Flat, house no., building"
-          value={f.line1}
-          onChange={(e) => set("line1", e.target.value)}
-          error={err.line1}
+          value={f.houseNo}
+          onChange={(e) => set("houseNo", e.target.value)}
+          error={err.houseNo}
           autoComplete="address-line1"
         />
       </div>
       <div className="span2">
         <Field
           label="Area, locality (optional)"
-          value={f.line2}
-          onChange={(e) => set("line2", e.target.value)}
+          value={f.street}
+          onChange={(e) => set("street", e.target.value)}
+          error={err.street}
           autoComplete="address-line2"
         />
       </div>
@@ -345,9 +353,9 @@ function AddressForm({ address, onSave, onCancel }) {
       <div className="span2">
         <Field
           label="Mobile number"
-          value={f.phone}
-          onChange={(e) => set("phone", digits(e.target.value, 10))}
-          error={err.phone}
+          value={f.mobileNumber}
+          onChange={(e) => set("mobileNumber", digits(e.target.value, 10))}
+          error={err.mobileNumber}
           inputMode="numeric"
           autoComplete="tel-national"
         />
@@ -372,34 +380,92 @@ function AddressForm({ address, onSave, onCancel }) {
   );
 }
 
+
+
 /* ---------- page ---------- */
 export default function AccountDashboard() {
+  const navigate = useNavigate();
   const [view, setView] = useState("overview");
   const [modal, setModal] = useState(null);
-  const [toast, setToast] = useState(null);
+  // const [toast, setToast] = useState(null);
   const [loggedOut, setLoggedOut] = useState(false);
-  const [profile, setProfile] = useState({
-    name: "Priya Sharma",
-    phone: "9876012345",
-    email: "priya.s@example.com",
-  });
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: "Priya Sharma",
-      line1: "402, Elegance Residency,",
-      line2: "Pali Hill, Bandra West,",
-      city: "Mumbai, Maharashtra",
-      pincode: "400050",
-      phone: "9876543210",
-      isDefault: true,
-    },
-  ]);
+  const [profile, setProfile] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+   const fetchAddresses = async () => {
+      try {
+        const response = await axiosInstance.get("/addresses/all");
+        const result = response.data;
+        if (result.success) {
+          setAddresses(result.addresses || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch addresses:", err);
+      }
+    };
+
+    //get my orders
+
+  const fetchOrders = async () => {
+    try {
+      setLoadingOrders(true);
+
+      const response = await getMyOrders();
+
+      // console.log("Response from getMyOrders:", response);
+
+      const result = response.data;
+
+      if (result.success) {
+        const fetchedOrders = result.data || result.orders || [];
+
+        // console.log("Fetched orders:", fetchedOrders);
+
+        setOrders(fetchedOrders);
+      } else {
+        console.error("Failed to fetch orders:", result.message);
+      }
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
 
   useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4500);
-    return () => clearTimeout(t);
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+      const storedUser = localStorage.getItem("hazelUser");
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          const userData = {
+            name: parsedUser.name || parsedUser.fullName || "Customer",
+            email: parsedUser.email || "",
+            phone: parsedUser.phone || parsedUser.mobileNumber || "",
+          };
+          // console.log("Parsed user data:", userData);
+          setProfile(userData);
+        } catch (error) {
+          console.error("Failed to parse stored user:", error);
+        }
+      } else {
+        navigate("/login");
+        return;
+      }
+  
+      fetchAddresses();
+      // setLoading(false);
+    }, [navigate]);
+
+  useEffect(() => {
+    // if (!toast) return;
+    // const t = setTimeout(() => setToast(null), 4500);
+    // return () => clearTimeout(t);
   }, [toast]);
 
   const close = () => setModal(null);
@@ -410,19 +476,52 @@ export default function AccountDashboard() {
     close();
     say("Profile updated");
   };
-  const saveAddress = (a) => {
-    const id = a.id ?? Date.now();
+  const saveAddress = async (a) => {
+    const id = a._id ?? Date.now();
     const rec = { ...a, id };
-    const list = a.id
-      ? addresses.map((x) => (x.id === id ? rec : x))
+    const list = a._id
+      ? addresses.map((x) => (x._id === id ? rec : x))
       : [...addresses, rec];
+      console.log("Saving address:", rec);
+      console.log("Updated address list:", list);
     setAddresses(normalise(list, rec.isDefault ? id : undefined));
+    console.log("Addresses after save:", addresses);
+    try {
+      let response;
+      if (modal?.id) {
+        response = await axiosInstance.put(`/addresses/update/${modal.id}`, rec);
+      } else {
+        response = await axiosInstance.post("/addresses/create", rec);
+      }
+
+      const result = response.data;
+      if (result.success) {
+        fetchAddresses();
+        // setIsAddressModalOpen(false);
+      } else {
+        toast.error(result.message || "Failed to save address");
+      }
+    } catch (err) {
+      console.error("Error saving address:", err);
+      toast.error("Failed to save address to database.");
+    }
     close();
-    say(a.id ? "Address updated" : "Address added");
+    say(a._id ? "Address updated" : "Address added");
   };
-  const removeAddress = (id) => {
-    setAddresses((l) => normalise(l.filter((x) => x.id !== id)));
-    say("Address deleted");
+  const removeAddress = async (id) => {
+    setAddresses((l) => normalise(l.filter((x) => x._id !== id)));
+    try {
+      const response = await axiosInstance.delete(`/addresses/delete/${id}`);
+      const result = response.data;
+      if (result.success) {
+        toast.success("Address deleted successfully");
+        fetchAddresses();
+      }
+    } catch (err) {
+      console.error("Error deleting address:", err);
+      toast.error("Failed to delete address from database.");
+    }
+    // say("Address deleted");
   };
   const makeDefault = (id) => {
     setAddresses((l) => normalise(l, id));
@@ -434,7 +533,7 @@ export default function AccountDashboard() {
       <div className="acct acct--out">
         <div className="card out">
           <h1 className="card__title">You've been logged out</h1>
-          <p className="muted">See you soon, {profile.name.split(" ")[0]}.</p>
+          <p className="muted">See you soon, {profile?.name.split(" ")[0]}.</p>
           <button className="btn" onClick={() => setLoggedOut(false)}>
             Log back in
           </button>
@@ -454,33 +553,33 @@ export default function AccountDashboard() {
         <button
           className="icon-btn"
           aria-label="Edit address"
-          onClick={() => setModal({ type: "address", id: a.id })}
+          onClick={() => setModal({ type: "address", id: a._id })}
         >
           <SquarePen size={16} />
         </button>
       </div>
-      <p className="addr__name">{a.name}</p>
+      <p className="addr__name">{a.fullName}</p>
       <p className="addr__lines muted">
-        {a.line1}
-        {a.line2 && (
+        {a.houseNo}
+        {a.street && (
           <>
             <br />
-            {a.line2}
+            {a.street}
           </>
         )}
         <br />
         {a.city} - {a.pincode}
       </p>
-      <p className="addr__phone">Phone: {fmt(a.phone)}</p>
+      <p className="addr__phone">Phone: {fmt(a.mobileNumber)}</p>
       {actions && (
         <div className="addr__actions">
           {!a.isDefault && (
-            <button className="link" onClick={() => makeDefault(a.id)}>
+            <button className="link" onClick={() => makeDefault(a._id)}>
               Set as default
             </button>
           )}
           {addresses.length > 1 && (
-            <button className="link" onClick={() => removeAddress(a.id)}>
+            <button className="link" onClick={() => removeAddress(a._id)}>
               Delete
             </button>
           )}
@@ -489,13 +588,150 @@ export default function AccountDashboard() {
     </div>
   );
 
+  // console.log("Addresses_user:", addresses);
+  const defaultAddress = addresses.find((addr) => addr.isDefault) || addresses[0];
+
+  // console.log("Profile:", profile);
+
+  const getImageUrl = (image) => {
+  if (!image) return "/images/no-image.png";
+
+  if (image.startsWith("http")) {
+    return image;
+  }
+
+  return `${import.meta.env.VITE_UPLOAD_URL}${image}`;
+};
+
+const getOrderDisplay = (order) => {
+  const firstItem = order?.items?.[0];
+
+  if (!firstItem) {
+    return {
+      name: "Order",
+      image: "",
+    };
+  }
+
+  const extraItems = order.items.length - 1;
+
+  return {
+    name:
+      extraItems > 0
+        ? `${firstItem.productName} + ${extraItems} more`
+        : firstItem.productName,
+
+    image: firstItem.image,
+  };
+};
+
+const ACTIVE_STATUSES = [
+  "PENDING",
+  "CONFIRMED",
+  "PACKED",
+  "SHIPPED",
+];
+
+const isActiveOrder = (order) =>
+  ACTIVE_STATUSES.includes(order.orderStatus);
+
+const activeOrder = orders.find(isActiveOrder);
+
+const pastOrders = orders.filter(
+  (order) => !isActiveOrder(order)
+);
+
+// const getCurrentStep = (status) => {
+//   switch (status) {
+//     case "CONFIRMED":
+//       return 0;
+
+//     case "PACKED":
+//       return 1;
+
+//     case "SHIPPED":
+//       return 2;
+
+//     case "DELIVERED":
+//       return 3;
+
+//     case "PENDING":
+//     default:
+//       return -1;
+//   }
+// };
+
+const getCurrentStep = (status) => {
+  switch (status) {
+    case "PENDING":
+      return -1;
+
+    case "CONFIRMED":
+      return 0;
+
+    case "PACKED":
+      return 1;
+
+    case "SHIPPED":
+      return 2;
+
+    case "DELIVERED":
+      return 3;
+
+    default:
+      return -1;
+  }
+};
+
+
+const getOrderSteps = (order) => {
+  return [
+    {
+      label: "Confirmed",
+      icon: Check,
+      when: order.confirmedAt
+        ? formatOrderDateTime(order.confirmedAt)
+        : "",
+    },
+    {
+      label: "Packed",
+      icon: Check,
+      when: order.packedAt
+        ? formatOrderDateTime(order.packedAt)
+        : "",
+    },
+    {
+      label: "Shipped",
+      icon: Truck,
+      when: order.shippedAt
+        ? formatOrderDateTime(order.shippedAt)
+        : "",
+    },
+    {
+      label: "Delivered",
+      icon: House,
+      when: order.deliveredAt
+        ? formatOrderDateTime(order.deliveredAt)
+        : order.expectedDeliveryDate
+          ? `Expected ${formatOrderDate(order.expectedDeliveryDate)}`
+          : "",
+    },
+  ];
+};
+
+//logout function
+const handleLogout = () => {
+  localStorage.clear();
+  navigate("/login");
+};
+
   return (
     <div className="acct">
       <header className="acct__head">
         <p className="eyebrow">My account</p>
         <h1 className="acct__title">Your Space.</h1>
         <p className="acct__welcome">
-          Welcome back, {profile.name.split(" ")[0]}.
+          Welcome back, {profile?.name.split(" ")[0]}.
         </p>
       </header>
 
@@ -531,7 +767,7 @@ export default function AccountDashboard() {
         </aside>
 
         <main className="main">
-          {show("orders") && (
+          {/* {show("orders") && (
             <section className="card">
               <div className="card__head">
                 <h2 className="card__title">Active Order</h2>
@@ -601,6 +837,165 @@ export default function AccountDashboard() {
                 ))}
               </ul>
             </section>
+          )} */}
+
+          {show("orders") && (
+            <section className="card">
+              <div className="card__head">
+                <h2 className="card__title">Active Order</h2>
+
+                {view === "overview" && (
+                  <button
+                    className="link"
+                    onClick={() => setView("orders")}
+                  >
+                    View All Orders
+                  </button>
+                )}
+              </div>
+
+              {activeOrder ? (
+                (() => {
+                  const display = getOrderDisplay(activeOrder);
+                  const currentStep = getCurrentStep(
+  activeOrder.orderStatus
+);
+
+const steps = getOrderSteps(activeOrder);
+console.log('currentStep:', currentStep, 'activeOrder.orderStatus:', activeOrder.orderStatus);
+                  return (
+                    <div className="order">
+                      <Img
+                        className="order__img"
+                        src={getImageUrl(display.image)}
+                        alt={display.name}
+                      />
+
+                      <div className="order__body">
+                        <div className="order__top">
+                          <div className="order__info">
+                            <p className="order__id">
+                              ORDER #{activeOrder.orderNumber}
+                            </p>
+
+                            <h3 className="order__name">
+                              {display.name}
+                            </h3>
+
+                            <p className="muted">
+                              Placed on{" "}
+                              {formatOrderDate(activeOrder.createdAt)}
+                            </p>
+                          </div>
+
+                          <div className="order__buy">
+                            <p className="order__price">
+                              {formatINR(activeOrder.totalAmount)}
+                            </p>
+
+                            <button
+                              className="btn"
+                              onClick={() =>
+                                setModal({
+                                  type: "track",
+                                  order: activeOrder,
+                                })
+                              }
+                            >
+                              Track Order
+                            </button>
+                          </div>
+                        </div>
+
+                        <ol className="track">
+                          {steps.map(({ label, icon: Icon }, i) => (
+                            <li
+                              key={label}
+                              className={`track__step ${i < currentStep
+                                  ? "is-done"
+                                  : ""
+                                } ${i === currentStep
+                                  ? "is-current"
+                                  : ""
+                                }`}
+                            >
+                              <span className="track__dot">
+                                <Icon size={14} />
+                              </span>
+
+                              <span className="track__label">
+                                {label}
+                              </span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                <p className="muted">No active orders.</p>
+              )}
+            </section>
+          )}
+
+          {view === "orders" && (
+            <section className="card">
+              <div className="card__head">
+                <h2 className="card__title">Past Orders</h2>
+              </div>
+
+              {pastOrders.length > 0 ? (
+                <ul className="rows">
+                  {pastOrders.map((order) => {
+                    const display = getOrderDisplay(order);
+
+                    return (
+                      <li
+                        key={order._id}
+                        className="row"
+                      >
+                        <Img
+                          className="row__img"
+                          src={getImageUrl(display.image)}
+                          alt={display.name}
+                        />
+
+                        <div className="row__main">
+                          <p className="row__name">
+                            {display.name}
+                          </p>
+
+                          <p className="muted row__meta">
+                            #{order.orderNumber} · Placed{" "}
+                            {formatOrderDate(order.createdAt)}
+                          </p>
+                        </div>
+
+                        <div className="row__end">
+                          <p className="order__price">
+                            {formatINR(order.totalAmount)}
+                          </p>
+
+                          <span className="badge">
+                            {order.orderStatus === "DELIVERED"
+                              ? `DELIVERED ${order.deliveredAt
+                                ? formatOrderDate(
+                                  order.deliveredAt
+                                )
+                                : ""
+                              }`
+                              : order.orderStatus}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="muted">No past orders.</p>
+              )}
+            </section>
           )}
 
           {(show("profile") || show("addresses")) && (
@@ -620,19 +1015,19 @@ export default function AccountDashboard() {
                     <Img className="who__avatar" src={IMG.avatar} alt="" />
                     <div>
                       <p className="field__label">Name</p>
-                      <p className="who__name">{profile.name}</p>
+                      <p className="who__name">{profile?.name}</p>
                     </div>
                   </div>
                   <div className="field">
                     <p className="field__label">Mobile Number</p>
                     <p className="field__value">
-                      {mask(profile.phone)}{" "}
+                      {profile?.phone && mask(profile.phone)}{" "}
                       <span className="badge">Verified</span>
                     </p>
                   </div>
                   <div className="field">
                     <p className="field__label">Email Address</p>
-                    <p className="field__value">{profile.email}</p>
+                    <p className="field__value">{profile?.email}</p>
                   </div>
                 </section>
               )}
@@ -655,7 +1050,7 @@ export default function AccountDashboard() {
                   )}
                   <div className={single ? "addr-list" : ""}>
                     {(single ? addresses : addresses.slice(0, 1)).map((a) => (
-                      <AddressCard key={a.id} a={a} actions={single} />
+                      <AddressCard key={a?._id} a={a} actions={single} />
                     ))}
                   </div>
                   {!single && addresses.length > 1 && (
@@ -738,7 +1133,7 @@ export default function AccountDashboard() {
           onClose={close}
         >
           <AddressForm
-            address={addresses.find((a) => a.id === modal.id)}
+            address={addresses.find((a) => a?._id === modal.id)}
             onSave={saveAddress}
             onCancel={close}
           />
@@ -806,6 +1201,7 @@ export default function AccountDashboard() {
               onClick={() => {
                 close();
                 setLoggedOut(true);
+                handleLogout();
               }}
             >
               Log out
@@ -814,7 +1210,7 @@ export default function AccountDashboard() {
         </Modal>
       )}
 
-      {toast && <Toast toast={toast} />}
+      {/* {toast && <Toast toast={toast} />} */}
     </div>
   );
 }

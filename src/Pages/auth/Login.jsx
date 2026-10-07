@@ -76,9 +76,9 @@ if (response.success) {
       response.otp
     );
 
-    console.log("DEV OTP SAVED:", response.otp);
+    // console.log("DEV OTP SAVED:", response.otp);
   } else {
-    console.log("OTP NOT FOUND IN RESPONSE");
+    // console.log("OTP NOT FOUND IN RESPONSE");
   }
 
   navigate("/verify-otp");
