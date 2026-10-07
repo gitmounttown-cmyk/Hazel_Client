@@ -13,12 +13,12 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .subcat-add-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -44,13 +44,13 @@
 .subcat-loading {
   padding: 30px;
   text-align: center;
-  color: #888;
+  color: #666155;
 }
 
 .subcat-table-card {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.06);
   overflow: hidden;
 }
 
@@ -63,19 +63,19 @@
 .subcat-table thead th {
   text-align: left;
   padding: 14px 18px;
-  background: #faf7f2;
-  color: #666;
+  background: #faf4e2;
+  color: #292626;
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #fbf6e9;
 }
 
 .subcat-table tbody td {
   padding: 12px 18px;
-  border-bottom: 1px solid #f2f2f2;
-  color: #333;
+  border-bottom: 1px solid #faf4e2;
+  color: #292626;
   vertical-align: middle;
 }
 
@@ -84,11 +84,11 @@
 }
 
 .subcat-table tbody tr:hover {
-  background: #fbfaf8;
+  background: #fbf6e9;
 }
 
 .subcat-sno {
-  color: #999;
+  color: #666155;
   width: 50px;
 }
 
@@ -103,7 +103,7 @@
   height: 40px;
   border-radius: 8px;
   object-fit: cover;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
   flex-shrink: 0;
 }
 
@@ -111,19 +111,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f2ece7;
-  color: #780524;
+  background: #faf4e2;
+  color: #292626;
   font-weight: 700;
   font-size: 15px;
 }
 
 .subcat-name-text {
   font-weight: 600;
-  color: #222;
+  color: #292626;
 }
 
 .subcat-meta {
-  color: #888;
+  color: #666155;
   font-size: 13px;
 }
 
@@ -144,11 +144,11 @@
 }
 
 .subcat-icon-btn.edit {
-  color: #780524;
+  color: #292626;
 }
 
 .subcat-icon-btn.edit:hover {
-  background: #f7e7ec;
+  background: #f1cb62;
 }
 
 .subcat-icon-btn.delete {
@@ -162,5 +162,5 @@
 .subcat-empty {
   text-align: center;
   padding: 30px;
-  color: #999;
+  color: #666155;
 }

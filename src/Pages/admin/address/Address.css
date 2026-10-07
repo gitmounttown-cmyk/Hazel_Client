@@ -17,18 +17,18 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .address-header p {
   margin: 5px 0 0;
-  color: #888;
+  color: #666155;
   font-size: 13px;
 }
 
 .address-add-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -48,9 +48,9 @@
 }
 
 .address-form {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.06);
   padding: 24px;
   margin-bottom: 20px;
 }
@@ -70,7 +70,7 @@
 .address-field label {
   font-size: 13px;
   font-weight: 600;
-  color: #444;
+  color: #292626;
 }
 
 .address-field input,
@@ -78,12 +78,15 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
-  background: #fff;
-  color: #333;
+  background: #fcfbf8;
+  color: #292626;
   font-size: 13px;
   outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .address-field input,
@@ -93,7 +96,8 @@
 
 .address-field input:focus,
 .address-field select:focus {
-  border-color: #780524;
+  border-color: #f1cb62;
+  box-shadow: 0 0 0 3px rgba(241, 203, 98, 0.25);
 }
 
 .address-default {
@@ -108,13 +112,14 @@
   gap: 8px;
   height: 40px;
   font-size: 13px;
-  color: #444;
+  color: #292626;
   cursor: pointer;
 }
 
 .address-default input {
   width: 16px;
   height: 16px;
+  accent-color: #f1cb62;
 }
 
 .address-actions {
@@ -123,7 +128,7 @@
   gap: 8px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #faf4e2;
 }
 
 .address-save-btn,
@@ -134,11 +139,14 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
 }
 
 .address-save-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
 }
 
 .address-save-btn:hover {
@@ -151,12 +159,12 @@
 }
 
 .address-cancel-btn {
-  background: #f1f1f1;
-  color: #555;
+  background: #faf4e2;
+  color: #292626;
 }
 
 .address-cancel-btn:hover {
-  background: #e8e8e8;
+  background: #fbf6e9;
 }
 
 .address-list-section {
@@ -174,12 +182,12 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .address-list-header span {
   font-size: 13px;
-  color: #666;
+  color: #666155;
 }
 
 .address-list {
@@ -189,13 +197,14 @@
 }
 
 .address-list-card {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.06);
   padding: 18px;
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  border: 1px solid #faf4e2;
 }
 
 .address-list-content {
@@ -214,7 +223,7 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #780524;
+  color: #292626;
 }
 
 .address-type-badge,
@@ -230,32 +239,32 @@
 }
 
 .address-type-badge {
-  background: #f4f4f4;
-  color: #666;
+  background: #faf4e2;
+  color: #292626;
 }
 
 .address-default-badge {
-  background: #edf8ef;
-  color: #2e7d32;
+  background: #f1cb62;
+  color: #292626;
 }
 
 .address-mobile {
   margin: 6px 0 0;
-  color: #555;
+  color: #292626;
   font-size: 13px;
   font-weight: 600;
 }
 
 .address-text {
   margin: 7px 0 0;
-  color: #666;
+  color: #292626;
   font-size: 13px;
   line-height: 1.5;
 }
 
 .address-location {
   margin: 4px 0 0;
-  color: #888;
+  color: #666155;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -265,7 +274,7 @@
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 10px;
-  color: #666;
+  color: #666155;
   font-size: 10px;
 }
 
@@ -289,19 +298,19 @@
 }
 
 .address-default-btn {
-  color: #2e7d32;
+  color: #292626;
 }
 
 .address-default-btn:hover {
-  background: #edf8ef;
+  background: #fbf6e9;
 }
 
 .address-edit-btn {
-  color: #2468b3;
+  color: #292626;
 }
 
 .address-edit-btn:hover {
-  background: #eaf3ff;
+  background: #faf4e2;
 }
 
 .address-delete-btn {
@@ -320,12 +329,13 @@
 }
 
 .address-empty {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.06);
+  border: 1px dashed #faf4e2;
   text-align: center;
   padding: 30px;
-  color: #999;
+  color: #666155;
   font-size: 13px;
 }
 
