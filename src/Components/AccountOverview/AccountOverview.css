@@ -189,7 +189,6 @@ ol {
 }
 .link {
   background: none;
-<<<<<<<<< Temporary merge branch 1
   border: 0;
   padding: 0;
   font-family: inherit;
@@ -230,7 +229,7 @@ ol {
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
-=========
+
   border: none;
   color: #292626;
   font-size: 13px;
@@ -239,7 +238,6 @@ ol {
   padding: 4px 8px;
   border-radius: 10px;
   background-color: #F1CB62;
->>>>>>>>> Temporary merge branch 2
   transition: background 0.2s;
   white-space: nowrap;
 }
@@ -768,8 +766,6 @@ ol {
 .vt__when {
   font-size: 13px;
 }
-
-<<<<<<<<< Temporary merge branch 1
 .toast {
   inset: auto;
   margin: 0;
@@ -777,7 +773,7 @@ ol {
   width: auto;
   height: auto;
   overflow: visible;
-=========
+}
 .address-phone {
   font-size: 13px;
   color: #2c2c2a;
@@ -875,7 +871,6 @@ ol {
 }
 
 .modal-overlay {
->>>>>>>>> Temporary merge branch 2
   position: fixed;
   left: 50%;
   bottom: max(20px, env(safe-area-inset-bottom));
