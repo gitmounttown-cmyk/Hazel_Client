@@ -127,6 +127,17 @@ function useShopData() {
           params.append("categoryId", appliedFilters.category[0]);
         }
 
+        // Added parameters for size, fabric, and sleeve filters
+        if (appliedFilters.size && appliedFilters.size.length > 0) {
+          params.append("size", appliedFilters.size.join(","));
+        }
+        if (appliedFilters.fabric && appliedFilters.fabric.length > 0) {
+          params.append("fabric", appliedFilters.fabric.join(","));
+        }
+        if (appliedFilters.sleeve && appliedFilters.sleeve.length > 0) {
+          params.append("sleeve", appliedFilters.sleeve.join(","));
+        }
+
         let effectiveSort = currentSort;
         if (appliedFilters.price_sort?.[0]) {
           effectiveSort = appliedFilters.price_sort[0];

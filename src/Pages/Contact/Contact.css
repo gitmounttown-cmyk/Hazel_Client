@@ -421,8 +421,8 @@ a.contact-channel-item {
 }
 
 .contact-modal-close:hover {
-  background-color: var(--contact-burgundy);
-  color: #ffffff;
+  background-color: #F1CB62;
+  color: #292626;
 }
 
 .contact-modal-header {
@@ -434,7 +434,7 @@ a.contact-channel-item {
   font-size: 11px;
   letter-spacing: 1.5px;
   font-weight: 600;
-  color: var(--contact-burgundy);
+  color: #292626;
   text-transform: uppercase;
   display: block;
   margin-bottom: 6px;
@@ -443,7 +443,7 @@ a.contact-channel-item {
 .contact-modal-title {
   font-family: var(--contact-font-serif);
   font-size: clamp(26px, 5vw, 34px);
-  color: var(--contact-heading-red);
+  color: #292626;
   line-height: 1.1;
   margin-bottom: 8px;
 }
@@ -504,8 +504,8 @@ a.contact-channel-item {
 }
 
 .contact-form-submit {
-  background-color: var(--contact-burgundy);
-  color: #ffffff;
+  background-color: #F1CB62;
+  color: #292626;
   border: none;
   padding: 15px;
   border-radius: 8px;
@@ -521,9 +521,9 @@ a.contact-channel-item {
   gap: 10px;
 }
 
-.contact-form-submit:hover {
-  background-color: var(--contact-heading-red);
-}
+/* .contact-form-submit:hover {
+  background-color: #FAF4E2;
+} */
 
 .contact-form-submit .btn-arrow {
   font-size: 16px;

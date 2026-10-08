@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "./Contact.css";
 import heroimg from "../../assets/Rectangle 60.png";
 import footerimg from "../../assets/images/footer_img.png";
-
+import { useNavigate } from "react-router-dom";
 const ContactPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -12,7 +12,7 @@ const ContactPage = () => {
     email: "",
     message: "",
   });
-
+const navigate = useNavigate();
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -168,7 +168,7 @@ const ContactPage = () => {
           Browse our latest collection of premium loungewear and find something
           that makes your evenings a little more special.
         </p>
-        <button className="contact-banner-action">
+        <button className="contact-banner-action"  onClick={() => navigate("/shop")}>
           EXPLORE THE COLLECTION
         </button>
       </section>

@@ -14,8 +14,11 @@ import CustomerImg3 from "../../assets/About/Customer3.png";
 // import CustomerImg4 from "../../assets/About/Customer4.png";
 import CustomerGroup from "../../assets/About/CustomerGroup.png";
 import FinalCtaBg from "../../assets/About/FinalCtaBg.png";
+import { useNavigate } from "react-router-dom";
 
 export default function AboutPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="about-page">
       <section
@@ -35,13 +38,13 @@ export default function AboutPage() {
             and effortless grace.
           </p>
           <div className="hero-actions">
-            <button className="btn-filled">
+            <button className="btn-filled" onClick={() => navigate("/shop")}>
               <span className="desktop-text">EXPLORE COLLECTION</span>
               <span className="mobile-text">EXPLORE</span>
             </button>
-            <button className="btn-link btn-link-light">
+            {/* <button className="btn-link btn-link-light">
               DISCOVER OUR STORY
-            </button>
+            </button> */}
           </div>
         </div>
       </section>
@@ -307,7 +310,9 @@ export default function AboutPage() {
             <br />
             something you settle for.
           </h2>
-          <button className="btn-filled1">Find Your Style</button>
+          <button className="btn-filled1" onClick={() => navigate("/shop")}>
+            Find Your Style
+          </button>
         </div>
       </section>
     </div>
