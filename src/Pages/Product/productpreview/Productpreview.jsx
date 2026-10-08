@@ -238,6 +238,7 @@ export default function ProductPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [mainImgError, setMainImgError] = useState(false);
 
   const { id } = useParams();
   const [countdown, setCountdown] = useState("");
@@ -693,7 +694,7 @@ export default function ProductPage() {
 
         <div className="pp-grid">
           {/* ---- gallery ---- */}
-          <div className="pp-gallery-panel">
+          {/* <div className="pp-gallery-panel">
             <div className="pp-main-image">
               <img
                 className="pp-main-image-ph"
@@ -720,6 +721,52 @@ export default function ProductPage() {
                       e.target.src = mainPhoto;
                     }}
                   />
+                </button>
+              ))}
+            </div>
+          </div> */}
+          <div className="pp-gallery-panel">
+            <div className="pp-main-image">
+              {variantMedia?.[activeThumb] && !mainImgError ? (
+                <img
+                  className="pp-main-image-ph"
+                  src={`${import.meta.env.VITE_UPLOAD_URL}${variantMedia[activeThumb]}`}
+                  alt={productDetails?.name || "Admire Maxi"}
+                  onError={() => setMainImgError(true)}
+                />
+              ) : (
+                <div className="pp-no-image">
+                  No Image Available
+                </div>
+              )}
+            </div>
+
+            <div className="pp-thumbs">
+              {variantMedia?.map((src, i) => (
+                <button
+                  key={i}
+                  className={`pp-thumb ${activeThumb === i ? "is-active" : ""
+                    }`}
+                  onClick={() => {
+                    setActiveThumb(i);
+                    setMainImgError(false);
+                  }}
+                  aria-label={`View image ${i + 1}`}
+                >
+                  {src ? (
+                    <img
+                      className="pp-thumb-img"
+                      src={`${import.meta.env.VITE_UPLOAD_URL}${src}`}
+                      alt={`View ${i + 1}`}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="pp-thumb-no-image">
+                      No Image
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
