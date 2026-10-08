@@ -9,7 +9,6 @@ import {
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
-
 const STATIC_FILTER_GROUPS = [
   {
     key: "size",
