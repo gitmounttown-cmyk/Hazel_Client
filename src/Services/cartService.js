@@ -1,4 +1,24 @@
 import axiosInstance from "../api/axiosInstance";
+import { getGuestId } from "../helpers/guestId";
+
+
+const getWishlistOwner = () => {
+  const token = localStorage.getItem("hazelToken");
+
+  // Logged-in user
+  if (token) {
+    return {
+      isGuest: false,
+      guestId: null,
+    };
+  }
+
+  // Guest user
+  return {
+    isGuest: true,
+    guestId: getGuestId(),
+  };
+};
 
 // ============================================================
 // ADD TO CART
@@ -6,9 +26,15 @@ import axiosInstance from "../api/axiosInstance";
 
 export const addToCart = async (cartItem) => {
   try {
-    const response = await axiosInstance.post("/cart/add", {
+    const { isGuest, guestId } = getWishlistOwner();
+
+    const requestData = {
       ...cartItem,
-    });
+
+      // Send guestId only for guest
+      ...(isGuest && { guestId }),
+    };
+    const response = await axiosInstance.post("/cart/add", requestData);
     // Ensure response.data is returned so controllers/components can read response.data.success
     return response.data;
   } catch (error) {
@@ -23,7 +49,13 @@ export const addToCart = async (cartItem) => {
 
 export const getCart = async () => {
   try {
-    const response = await axiosInstance.get("/cart/all");
+    const { isGuest, guestId } = getWishlistOwner();
+
+    const response = await axiosInstance.get("/cart/all", {
+      params: {
+        ...(isGuest && { guestId }),
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching cart:", error);
@@ -44,8 +76,13 @@ export const updateCartItem = async (data) => {
 
 export const removeCartItem = async (data) => {
   try {
+    const { isGuest, guestId } = getWishlistOwner();
+    const requestData = {
+      ...data,
+      ...(isGuest && { guestId }),
+    };
     // Aligned with backend router.delete("/remove") using body payload
-    const response = await axiosInstance.delete("/cart/remove", { data });
+    const response = await axiosInstance.delete("/cart/remove", { data: requestData });
     return response.data;
   } catch (error) {
     console.error("Error removing cart item:", error);

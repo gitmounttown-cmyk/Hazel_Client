@@ -71,6 +71,7 @@ function QuantityStepper({
 }
 
 function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem, getCartItemStock, navigate }) {
+  const [imageError, setImageError] = useState(false);
   const {
   stockQuantity,
   isStockAvailable,
@@ -99,11 +100,24 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem, getC
 
   return (
     <div className="cart-item" onClick={() => navigate(`/product/${product._id}`)}>
-      <div className="cart-item-image">
+      {/* <div className="cart-item-image">
         {productImage ? (
           <img src={getImageUrl(productImage)} alt={productName} />
         ) : (
           <div className="cart-item-image-placeholder" aria-hidden="true" />
+        )}
+      </div> */}
+      <div className="cart-item-image">
+        {productImage && !imageError ? (
+          <img
+            src={getImageUrl(productImage)}
+            alt={productName}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="cart-item-image-placeholder">
+            No Image Available
+          </div>
         )}
       </div>
 
@@ -343,10 +357,10 @@ export default function CartPage() {
       }
       setError("");
 
-      if (!token) {
-        navigate("/login");
-        return;
-      }
+      // if (!token) {
+      //   navigate("/login");
+      //   return;
+      // }
 
       const response = await getCart();
       if (response?.success) {

@@ -161,6 +161,8 @@ ol {
   flex-direction: column;
   gap: var(--gap);
   min-width: 0;
+  padding: 10px;
+  border-radius: 10px;
 }
 .main > * {
   flex: 0 0 auto;

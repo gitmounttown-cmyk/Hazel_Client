@@ -286,7 +286,8 @@ export default function ProductPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!id || !isLoggedIn()) return;
+    // if (!id || !isLoggedIn()) return;
+    if (!id) return;
     const checkProductWishlist = async () => {
       try {
         const response = await checkWishlist(id);
@@ -470,21 +471,34 @@ export default function ProductPage() {
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
-    if (!isLoggedIn()) {
-      toast.error("Please log in to use wishlist.");
-      return;
-    }
+    // if (!isLoggedIn()) {
+    //   toast.error("Please log in to use wishlist.");
+    //   return;
+    // }
     if (!id) return;
     try {
       setWishlistLoading(true);
       if (wishlisted) {
-        await removeWishlistItem(id);
+        const response = await removeWishlistItem(id);
         setWishlisted(false);
-        toast.success("Removed from wishlist");
+
+        if (response?.data) {
+          toast.success(response?.data?.message || "Removed from wishlist");
+        }
       } else {
-        await addToWishlist({ productId: id });
+        const response = await addToWishlist({ productId: id });
         setWishlisted(true);
-        toast.success("Added to wishlist");
+        if (response?.data) {
+          toast.success(response?.data?.message || "Added to wishlist");
+          //checkwishlist api
+          const checkResponse = await checkWishlist(id);
+          setWishlisted(
+            checkResponse?.data?.isWishlisted ??
+              checkResponse?.data?.wishlisted ??
+              checkResponse?.data?.data?.isWishlisted ??
+              true
+          );
+        }
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to update wishlist");
@@ -494,10 +508,10 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = async () => {
-    if (!isLoggedIn()) {
-      toast.error("Please log in to add items to your cart.");
-      return;
-    }
+    // if (!isLoggedIn()) {
+    //   toast.error("Please log in to add items to your cart.");
+    //   return;
+    // }
     const cartItem = {
       productId: productDetails._id,
       variantId: selectedVariant._id,
@@ -517,10 +531,10 @@ export default function ProductPage() {
   };
 
   const handleBuyNow = (productId, variantId) => {
-    if (!isLoggedIn()) {
-      toast.error("Please log in to proceed with the purchase.");
-      return;
-    }
+    // if (!isLoggedIn()) {
+    //   toast.error("Please log in to proceed with the purchase.");
+    //   return;
+    // }
     const itemExistsInCart = cartItems.some(
       (item) => String(item?.product?._id || item?.productId) === String(productId)
     );

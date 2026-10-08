@@ -22,6 +22,7 @@ import {
   removeCartItem,
 } from "../../services/cartService";
 
+
 import { useNavigate } from "react-router-dom";
 
 import { getAddresses } from "../../Services/addressService";
@@ -29,6 +30,8 @@ import { getAddresses } from "../../Services/addressService";
 import { createOrder, verifyPayment } from "../../Services/paymentService";
 
 import toast from "react-hot-toast";
+import { getGuestAddress, saveGuestAddress } from "../../helpers/guestAddress";
+import { getGuestId } from "../../helpers/guestId";
 
 const formatINR = (n) =>
   `₹${Number(n || 0).toLocaleString("en-IN")}`;
@@ -280,6 +283,25 @@ export default function Checkout({
 
   const [userAddress, setUserAddress] =
     useState([]);
+    const [guestAddress, setGuestAddress] = useState(null);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+
+    const token = localStorage.getItem("hazelToken");
+const isGuest = !token;
+
+useEffect(() => {
+  if (isGuest) {
+    const savedAddress = getGuestAddress();
+
+    if (savedAddress) {
+      setGuestAddress(savedAddress);
+      setSelectedAddress(savedAddress);
+      setMode("view");
+    } else {
+      setMode("add");
+    }
+  }
+}, [isGuest]);
 
   // Fetch User Addresses
   useEffect(() => {
@@ -378,8 +400,7 @@ export default function Checkout({
     getCartItems();
   }, []);
 
-  const address =
-    userAddress.find((a) => a.id === selectedId) || null;
+  const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
 
   const itemCount =
     cartItems.reduce((n, i) => n + Number(i.qty || 0), 0);
@@ -502,33 +523,86 @@ export default function Checkout({
     }
   };
 
+  // const saveNew = (e) => {
+  //   e.preventDefault();
+  //   const found = validate(draft);
+
+  //   if (Object.keys(found).length) {
+  //     setErrors(found);
+  //     return;
+  //   }
+
+  //   const cleaned = Object.fromEntries(
+  //     Object.entries(draft).map(([k, v]) => [k, v.trim()])
+  //   );
+
+  //   const created = {
+  //     ...cleaned,
+  //     id: `a${Date.now()}`,
+  //     fullName: cleaned.name,
+  //     addressLine1: cleaned.line1,
+  //     mobileNumber: cleaned.phone,
+  //   };
+
+  //   setUserAddress((list) => [...list, created]);
+  //   setSelectedId(created.id);
+  //   setPendingId(created.id);
+  //   onAddAddress(created);
+  //   setMode("view");
+  // };
+
   const saveNew = (e) => {
-    e.preventDefault();
-    const found = validate(draft);
+  e.preventDefault();
 
-    if (Object.keys(found).length) {
-      setErrors(found);
-      return;
-    }
+  const found = validate(draft);
 
-    const cleaned = Object.fromEntries(
-      Object.entries(draft).map(([k, v]) => [k, v.trim()])
-    );
+  if (Object.keys(found).length) {
+    setErrors(found);
+    return;
+  }
 
-    const created = {
-      ...cleaned,
-      id: `a${Date.now()}`,
-      fullName: cleaned.name,
-      addressLine1: cleaned.line1,
-      mobileNumber: cleaned.phone,
-    };
+  const cleaned = Object.fromEntries(
+    Object.entries(draft).map(([k, v]) => [k, v.trim()])
+  );
 
-    setUserAddress((list) => [...list, created]);
+  const created = {
+    ...cleaned,
+    id: `a${Date.now()}`,
+    fullName: cleaned.name,
+    addressLine1: cleaned.line1,
+    mobileNumber: cleaned.phone,
+  };
+
+  // ==========================================
+  // GUEST USER
+  // ==========================================
+  if (isGuest) {
+    // Save address in browser
+    saveGuestAddress(created);
+
+    // Show it immediately in checkout
+    setSelectedAddress(created);
+
+    // Keep your existing state updated
     setSelectedId(created.id);
     setPendingId(created.id);
-    onAddAddress(created);
+
     setMode("view");
-  };
+
+    return;
+  }
+
+  // ==========================================
+  // LOGGED-IN USER
+  // ==========================================
+  setUserAddress((list) => [...list, created]);
+  setSelectedId(created.id);
+  setPendingId(created.id);
+
+  onAddAddress(created);
+
+  setMode("view");
+};
 
   /* =======================================================
      HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
@@ -542,109 +616,345 @@ export default function Checkout({
      HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
   ========================================================= */
 
+  // const handlePay = async (selectedAddress) => {
+  //   try {
+  //     if (!selectedAddress) {
+  //       toast.error("Please select a delivery address before proceeding to payment.");
+  //       return;
+  //     }
+
+  //     const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id;
+
+  //     if (!userId) {
+  //       toast.error("Please login before placing your order.");
+  //       return;
+  //     }
+
+  //     // Compute live totals based on current cart state (including updated quantities)
+  //     const liveSubtotal = cartItems.reduce(
+  //       (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
+  //       0
+  //     );
+  //     const liveDiscount = 0;
+  //     const liveAmountAfterDiscount = Math.max(0, liveSubtotal - liveDiscount);
+  //     const liveShipping = 0;
+  //     const liveTax = Math.round(liveAmountAfterDiscount * 0.09);
+  //     const liveTotal = liveAmountAfterDiscount + liveShipping + liveTax;
+
+  //     const formattedAddress = {
+  //       fullName: selectedAddress.fullName || selectedAddress.name || "",
+  //       addressLine1: selectedAddress.addressLine1 || selectedAddress.houseNo || selectedAddress.line1 || "",
+  //       addressLine2: selectedAddress.addressLine2 || "",
+  //       district: selectedAddress.district || "",
+  //       city: selectedAddress.city || "",
+  //       state: selectedAddress.state || "",
+  //       pincode: selectedAddress.pincode || "",
+  //       mobileNumber: selectedAddress.mobileNumber || selectedAddress.phone || "",
+  //       addressType: selectedAddress.addressType || selectedAddress.type || "Home",
+  //     };
+
+  //     const orderDetails = {
+  //       userId,
+  //       addressId: selectedAddress.id || selectedAddress._id,
+  //       products: cartItems.map((item) => ({
+  //         productId: item.productId,
+  //         name: item.name,
+  //         print: item.print,
+  //         size: item.size,
+  //         qty: item.qty,
+  //         price: item.price,
+  //       })),
+  //       deliveryAddress: formattedAddress,
+  //       amount: liveTotal, // Explicitly sending the live UI total
+  //     };
+
+  //     const response = await createOrder(orderDetails);
+
+  //     if (!response || !response.success) {
+  //       toast.error(response?.message || "Failed to create order.");
+  //       return;
+  //     }
+
+  //     const options = {
+  //       key: response.keyId,
+  //       amount: response.razorpayAmount, // Reflects the exact liveTotal * 100
+  //       currency: response.currency,
+  //       name: "Hazel",
+  //       description: `Order #${response.orderNumber}`,
+  //       order_id: response.razorpayOrderId,
+  //       handler: async function (paymentResponse) {
+  //         try {
+  //           const verifyRes = await verifyPayment({
+  //             razorpay_order_id: paymentResponse.razorpay_order_id,
+  //             razorpay_payment_id: paymentResponse.razorpay_payment_id,
+  //             razorpay_signature: paymentResponse.razorpay_signature,
+  //           });
+
+  //           if (verifyRes?.success) {
+  //             toast.success("Payment verified successfully!");
+  //             navigate(`/order-success/${response.orderId}`);
+  //           } else {
+  //             toast.error("Payment verification failed.");
+  //           }
+  //         } catch (verifyError) {
+  //           console.error("Verification error:", verifyError);
+  //           toast.error("Payment verification failed.");
+  //         }
+  //       },
+  //       prefill: {
+  //         name: selectedAddress.fullName || selectedAddress.name,
+  //         email: JSON.parse(localStorage.getItem("hazelUser"))?.email || "",
+  //         contact: selectedAddress.mobileNumber || selectedAddress.phone,
+  //       },
+  //       theme: {
+  //         color: "#3399cc",
+  //       },
+  //     };
+
+  //     const paymentObject = new window.Razorpay(options);
+  //     paymentObject.open();
+
+  //   } catch (error) {
+  //     console.error("Error preparing order details for payment:", error);
+  //     toast.error(error.response?.data?.message || "Failed to create order. Please try again.");
+  //   }
+  // };
+
   const handlePay = async (selectedAddress) => {
-    try {
-      if (!selectedAddress) {
-        toast.error("Please select a delivery address before proceeding to payment.");
-        return;
-      }
+  try {
+    // ==========================================
+    // 1. VALIDATE ADDRESS
+    // ==========================================
 
-      const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id;
-
-      if (!userId) {
-        toast.error("Please login before placing your order.");
-        return;
-      }
-
-      // Compute live totals based on current cart state (including updated quantities)
-      const liveSubtotal = cartItems.reduce(
-        (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
-        0
+    if (!selectedAddress) {
+      toast.error(
+        "Please select a delivery address before proceeding to payment."
       );
-      const liveDiscount = 0;
-      const liveAmountAfterDiscount = Math.max(0, liveSubtotal - liveDiscount);
-      const liveShipping = 0;
-      const liveTax = Math.round(liveAmountAfterDiscount * 0.09);
-      const liveTotal = liveAmountAfterDiscount + liveShipping + liveTax;
-
-      const formattedAddress = {
-        fullName: selectedAddress.fullName || selectedAddress.name || "",
-        addressLine1: selectedAddress.addressLine1 || selectedAddress.houseNo || selectedAddress.line1 || "",
-        addressLine2: selectedAddress.addressLine2 || "",
-        district: selectedAddress.district || "",
-        city: selectedAddress.city || "",
-        state: selectedAddress.state || "",
-        pincode: selectedAddress.pincode || "",
-        mobileNumber: selectedAddress.mobileNumber || selectedAddress.phone || "",
-        addressType: selectedAddress.addressType || selectedAddress.type || "Home",
-      };
-
-      const orderDetails = {
-        userId,
-        addressId: selectedAddress.id || selectedAddress._id,
-        products: cartItems.map((item) => ({
-          productId: item.productId,
-          name: item.name,
-          print: item.print,
-          size: item.size,
-          qty: item.qty,
-          price: item.price,
-        })),
-        deliveryAddress: formattedAddress,
-        amount: liveTotal, // Explicitly sending the live UI total
-      };
-
-      const response = await createOrder(orderDetails);
-
-      if (!response || !response.success) {
-        toast.error(response?.message || "Failed to create order.");
-        return;
-      }
-
-      const options = {
-        key: response.keyId,
-        amount: response.razorpayAmount, // Reflects the exact liveTotal * 100
-        currency: response.currency,
-        name: "Hazel",
-        description: `Order #${response.orderNumber}`,
-        order_id: response.razorpayOrderId,
-        handler: async function (paymentResponse) {
-          try {
-            const verifyRes = await verifyPayment({
-              razorpay_order_id: paymentResponse.razorpay_order_id,
-              razorpay_payment_id: paymentResponse.razorpay_payment_id,
-              razorpay_signature: paymentResponse.razorpay_signature,
-            });
-
-            if (verifyRes?.success) {
-              toast.success("Payment verified successfully!");
-              navigate(`/order-success/${response.orderId}`);
-            } else {
-              toast.error("Payment verification failed.");
-            }
-          } catch (verifyError) {
-            console.error("Verification error:", verifyError);
-            toast.error("Payment verification failed.");
-          }
-        },
-        prefill: {
-          name: selectedAddress.fullName || selectedAddress.name,
-          email: JSON.parse(localStorage.getItem("hazelUser"))?.email || "",
-          contact: selectedAddress.mobileNumber || selectedAddress.phone,
-        },
-        theme: {
-          color: "#3399cc",
-        },
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
-
-    } catch (error) {
-      console.error("Error preparing order details for payment:", error);
-      toast.error(error.response?.data?.message || "Failed to create order. Please try again.");
+      return;
     }
-  };
+
+    // ==========================================
+    // 2. CHECK LOGIN / GUEST
+    // ==========================================
+
+    const hazelUser = JSON.parse(
+      localStorage.getItem("hazelUser") || "null"
+    );
+
+    const userId = hazelUser?.id || hazelUser?._id || null;
+
+    // Guest gets persistent guestId
+    const guestId = userId ? null : getGuestId();
+
+    // ==========================================
+    // 3. COMPUTE LIVE TOTALS
+    // ==========================================
+
+    const liveSubtotal = cartItems.reduce(
+      (sum, i) =>
+        sum + Number(i.price || 0) * Number(i.qty || 0),
+      0
+    );
+
+    const liveDiscount = 0;
+
+    const liveAmountAfterDiscount = Math.max(
+      0,
+      liveSubtotal - liveDiscount
+    );
+
+    const liveShipping = 0;
+
+    const liveTax = Math.round(
+      liveAmountAfterDiscount * 0.09
+    );
+
+    const liveTotal =
+      liveAmountAfterDiscount +
+      liveShipping +
+      liveTax;
+
+    // ==========================================
+    // 4. FORMAT DELIVERY ADDRESS
+    // ==========================================
+
+    const formattedAddress = {
+      fullName:
+        selectedAddress.fullName ||
+        selectedAddress.name ||
+        "",
+
+      addressLine1:
+        selectedAddress.addressLine1 ||
+        selectedAddress.houseNo ||
+        selectedAddress.line1 ||
+        "",
+
+      addressLine2:
+        selectedAddress.addressLine2 || "",
+
+      district:
+        selectedAddress.district || "",
+
+      city:
+        selectedAddress.city || "",
+
+      state:
+        selectedAddress.state || "",
+
+      pincode:
+        selectedAddress.pincode || "",
+
+      mobileNumber:
+        selectedAddress.mobileNumber ||
+        selectedAddress.phone ||
+        "",
+
+      addressType:
+        selectedAddress.addressType ||
+        selectedAddress.type ||
+        "Home",
+    };
+
+    // ==========================================
+    // 5. CREATE ORDER DATA
+    // ==========================================
+
+    const orderDetails = {
+      // Logged-in user gets userId
+      // Guest gets null
+      userId: userId || null,
+
+      // Guest gets guestId
+      // Logged-in user gets null
+      guestId: guestId || null,
+
+      // Only logged-in users have backend address ID
+      addressId: userId
+        ? selectedAddress.id || selectedAddress._id || null
+        : null,
+
+      products: cartItems.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        print: item.print,
+        size: item.size,
+        qty: item.qty,
+        price: item.price,
+      })),
+
+      deliveryAddress: formattedAddress,
+
+      amount: liveTotal,
+    };
+
+    console.log("ORDER DETAILS:", orderDetails);
+
+    // ==========================================
+    // 6. CREATE ORDER
+    // ==========================================
+
+    const response = await createOrder(orderDetails);
+
+    if (!response || !response.success) {
+      toast.error(
+        response?.message || "Failed to create order."
+      );
+      return;
+    }
+
+    // ==========================================
+    // 7. RAZORPAY
+    // ==========================================
+
+    const options = {
+      key: response.keyId,
+
+      amount: response.razorpayAmount,
+
+      currency: response.currency,
+
+      name: "Hazel",
+
+      description: `Order #${response.orderNumber}`,
+
+      order_id: response.razorpayOrderId,
+
+      handler: async function (paymentResponse) {
+        try {
+          const verifyRes = await verifyPayment({
+            razorpay_order_id:
+              paymentResponse.razorpay_order_id,
+
+            razorpay_payment_id:
+              paymentResponse.razorpay_payment_id,
+
+            razorpay_signature:
+              paymentResponse.razorpay_signature,
+          });
+
+          if (verifyRes?.success) {
+            toast.success(
+              "Payment verified successfully!"
+            );
+
+            navigate(
+              `/order-success/${response.orderId}`
+            );
+          } else {
+            toast.error(
+              "Payment verification failed."
+            );
+          }
+        } catch (verifyError) {
+          console.error(
+            "Verification error:",
+            verifyError
+          );
+
+          toast.error(
+            "Payment verification failed."
+          );
+        }
+      },
+
+      prefill: {
+        name:
+          selectedAddress.fullName ||
+          selectedAddress.name ||
+          "",
+
+        email: hazelUser?.email || "",
+
+        contact:
+          selectedAddress.mobileNumber ||
+          selectedAddress.phone ||
+          "",
+      },
+
+      theme: {
+        color: "#3399cc",
+      },
+    };
+
+    const paymentObject =
+      new window.Razorpay(options);
+
+    paymentObject.open();
+
+  } catch (error) {
+    console.error(
+      "Error preparing order details for payment:",
+      error
+    );
+
+    toast.error(
+      error?.response?.data?.message ||
+        "Failed to create order. Please try again."
+    );
+  }
+};
+
 
   return (
     <div className="checkout">
@@ -662,11 +972,38 @@ export default function Checkout({
                 Delivering to
               </p>
 
-              {mode === "view" && address && (
+              {/* {mode === "view" && address && (
                 <button
                   type="button"
                   className="btn-outline"
                   onClick={openSelect}
+                >
+                  Change
+                </button>
+              )} */}
+              {mode === "view" && address && (
+                <button
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => {
+                    if (isGuest) {
+                      // Open the same form with existing address
+                      setDraft({
+                        type: address.addressType || "Home",
+                        fullName: address.fullName || "",
+                        houseNo: address.houseNo || "",
+                        addressLine1: address.addressLine1 || "",
+                        city: address.city || "",
+                        state: address.state || "",
+                        pincode: address.pincode || "",
+                        mobileNumber: address.mobileNumber || "",
+                      });
+
+                      setMode("add");
+                    } else {
+                      openSelect();
+                    }
+                  }}
                 >
                   Change
                 </button>
@@ -919,7 +1256,16 @@ export default function Checkout({
             <p className="summary__total-amount">{formatINR(total)}</p>
           </div>
 
-       <button
+       {/* <button
+            type="button"
+            className="btn-pay"
+            onClick={() => handlePay(address)}
+            disabled={!canPay}
+          >
+            <span>Pay {formatINR(total)}</span>
+            <ArrowRight size={16} strokeWidth={2} />
+          </button> */}
+          <button
             type="button"
             className="btn-pay"
             onClick={() => handlePay(address)}
