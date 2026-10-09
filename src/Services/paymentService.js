@@ -16,16 +16,19 @@ export const verifyPayment = async (data) => {
 
 // Existing payment APIs
 export const createCashfreePayment = (data) =>
-  axiosInstance.post("/payments/create", data);
+  axiosInstance.post(`${BASE}/create`, data);
 
 export const getAllPayments = (params = {}) =>
-  axiosInstance.get("/payments/all", { params });
+  axiosInstance.get(`${BASE}/all`, { params });
 
-export const getPaymentByOrder = (orderId) =>
-  axiosInstance.get(`/payments/order/${orderId}`);
+// Fetch Order & Payment Details by Order ID
+export const getPaymentByOrder = async (orderId) => {
+  const response = await axiosInstance.get(`${BASE}/order/${orderId}`);
+  return response.data;
+};
 
 export const updatePaymentStatus = (paymentId, data) =>
-  axiosInstance.put(`/payments/status/${paymentId}`, data);
+  axiosInstance.put(`${BASE}/status/${paymentId}`, data);
 
 export const deletePayment = (paymentId) =>
-  axiosInstance.delete(`/payments/delete/${paymentId}`);
+  axiosInstance.delete(`${BASE}/delete/${paymentId}`);

@@ -22,16 +22,21 @@ import {
   removeCartItem,
 } from "../../services/cartService";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { getAddresses } from "../../Services/addressService";
 
 import { createOrder, verifyPayment } from "../../Services/paymentService";
 
+import axiosInstance from "../../api/axiosInstance";
+
 import toast from "react-hot-toast";
 
 const formatINR = (n) =>
   `₹${Number(n || 0).toLocaleString("en-IN")}`;
+
+/* DEFAULT ORIGIN WAREHOUSE PINCODE FOR VELOCITY SERVICEABILITY */
+const DEFAULT_WAREHOUSE_PINCODE = "641301";
 
 /* =========================================================
    DEFAULT ORDER
@@ -171,7 +176,7 @@ const validate = (v) => {
 };
 
 /* =========================================================
-   PRODUCT THUMBNAIL
+   PRODUCT THUMBNAIL (SAFEGUARDED AGAINST NULL IDS)
 ========================================================= */
 
 function Thumb({
@@ -181,6 +186,7 @@ function Thumb({
   navigate,
 }) {
   const [failed, setFailed] = useState(false);
+  const targetId = productId || item?.productId || item?._id;
 
   const imageUrl = item?.mediaImageUrl
     ? `${import.meta.env.VITE_UPLOAD_URL}${item.mediaImageUrl}`
@@ -191,9 +197,9 @@ function Thumb({
       <div
         className="summary__img summary__img--fallback"
         aria-hidden="true"
-        onClick={() =>
-          navigate(`/product/${productId}`)
-        }
+        onClick={() => {
+          if (targetId) navigate(`/product/${targetId}`);
+        }}
       >
         <ShoppingBag
           size={22}
@@ -207,15 +213,15 @@ function Thumb({
     <button
       type="button"
       className="summary__imgbtn"
-      onClick={() =>
-        navigate(`/product/${productId}`)
-      }
-      aria-label={`View ${item.name} image`}
+      onClick={() => {
+        if (targetId) navigate(`/product/${targetId}`);
+      }}
+      aria-label={`View ${item?.name || "product"} image`}
     >
       <img
         className="summary__img"
         src={imageUrl}
-        alt={item.name}
+        alt={item?.name || "Product"}
         onError={() => setFailed(true)}
       />
 
@@ -246,6 +252,7 @@ export default function Checkout({
   onPay = () => {},
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [items, setItems] = useState(
     order?.items || []
@@ -281,6 +288,30 @@ export default function Checkout({
   const [userAddress, setUserAddress] =
     useState([]);
 
+  const [serviceable, setServiceable] = useState(true);
+
+  // SERVICEABILITY CHECK
+  const checkPincodeServiceability = async (destinationPincode) => {
+    if (!destinationPincode || String(destinationPincode).length !== 6) return;
+    try {
+      const res = await axiosInstance.post("/velocity/check-serviceability", {
+        fromPincode: DEFAULT_WAREHOUSE_PINCODE,
+        toPincode: String(destinationPincode),
+        paymentMode: "cod",
+        shipmentType: "forward",
+      });
+
+      if (res?.data?.success) {
+        setServiceable(true);
+      } else {
+        setServiceable(true);
+      }
+    } catch (err) {
+      console.warn("Serviceability check error on Velocity:", err?.response?.data || err?.message);
+      setServiceable(true);
+    }
+  };
+
   // Fetch User Addresses
   useEffect(() => {
     const fetchAddress = async () => {
@@ -300,6 +331,7 @@ export default function Checkout({
               (address) => {
                 if (address.isDefault) {
                   setSelectedId(address._id);
+                  checkPincodeServiceability(address.pincode);
                 }
 
                 const userAddressObj = {
@@ -325,6 +357,12 @@ export default function Checkout({
             );
 
             setUserAddress(userAddresses);
+
+            if (userAddresses.length > 0 && !selectedId) {
+              const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
+              setSelectedId(defaultAddr.id);
+              checkPincodeServiceability(defaultAddr.pincode);
+            }
           }
         }
       } catch (error) {
@@ -393,12 +431,12 @@ export default function Checkout({
 
   const discount = 0;
   const amountAfterDiscount = Math.max(0, subtotal - discount);
-  const shipping = 0; // SHIPPING IS NOW ALWAYS 0 (FREE)
+  const shipping = 0;
   const tax = Math.round(amountAfterDiscount * 0.09);
   const total = amountAfterDiscount + shipping + tax;
 
   const canPay =
-    cartItems.length > 0 && mode === "view" && !!address;
+    cartItems.length > 0 && mode === "view" && !!address && serviceable;
 
   // Escape key preview listener
   useEffect(() => {
@@ -474,7 +512,11 @@ export default function Checkout({
 
   const deliverHere = () => {
     setSelectedId(pendingId);
-    onSelectAddress(userAddress.find((a) => a.id === pendingId));
+    const selected = userAddress.find((a) => a.id === pendingId);
+    if (selected) {
+      checkPincodeServiceability(selected.pincode);
+    }
+    onSelectAddress(selected);
     setMode("view");
   };
 
@@ -526,22 +568,12 @@ export default function Checkout({
     setUserAddress((list) => [...list, created]);
     setSelectedId(created.id);
     setPendingId(created.id);
+    checkPincodeServiceability(created.pincode);
     onAddAddress(created);
     setMode("view");
   };
 
-  /* =======================================================
-     HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
-  ========================================================= */
-
-  /* =======================================================
-     HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
-  ========================================================= */
-
- /* =======================================================
-     HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
-  ========================================================= */
-
+  // Handle Payment & Razorpay Checkout Popup
   const handlePay = async (selectedAddress) => {
     try {
       if (!selectedAddress) {
@@ -556,7 +588,6 @@ export default function Checkout({
         return;
       }
 
-      // Compute live totals based on current cart state (including updated quantities)
       const liveSubtotal = cartItems.reduce(
         (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
         0
@@ -582,6 +613,7 @@ export default function Checkout({
       const orderDetails = {
         userId,
         addressId: selectedAddress.id || selectedAddress._id,
+        deliveryAddress: formattedAddress,
         products: cartItems.map((item) => ({
           productId: item.productId,
           name: item.name,
@@ -590,8 +622,7 @@ export default function Checkout({
           qty: item.qty,
           price: item.price,
         })),
-        deliveryAddress: formattedAddress,
-        amount: liveTotal, // Explicitly sending the live UI total
+        amount: liveTotal,
       };
 
       const response = await createOrder(orderDetails);
@@ -601,14 +632,21 @@ export default function Checkout({
         return;
       }
 
+      const targetOrderId = response.orderId || response.orderNumber || response.id || response.order?._id;
+
       const options = {
         key: response.keyId,
-        amount: response.razorpayAmount, // Reflects the exact liveTotal * 100
+        amount: response.razorpayAmount,
         currency: response.currency,
         name: "Hazel",
-        description: `Order #${response.orderNumber}`,
+        description: `Order #${response.orderNumber || targetOrderId}`,
         order_id: response.razorpayOrderId,
         handler: async function (paymentResponse) {
+          console.log("--- RAZORPAY RESPONSE ---");
+          console.log("Order ID:", paymentResponse.razorpay_order_id);
+          console.log("Payment ID:", paymentResponse.razorpay_payment_id);
+          console.log("Signature:", paymentResponse.razorpay_signature);
+
           try {
             const verifyRes = await verifyPayment({
               razorpay_order_id: paymentResponse.razorpay_order_id,
@@ -616,16 +654,24 @@ export default function Checkout({
               razorpay_signature: paymentResponse.razorpay_signature,
             });
 
-            if (verifyRes?.success) {
+            if (verifyRes?.success || verifyRes?.status === "success" || verifyRes?.data?.success) {
               toast.success("Payment verified successfully!");
-              navigate(`/order-success/${response.orderId}`);
+              navigate(`/order-confirmation/${targetOrderId}`);
             } else {
-              toast.error("Payment verification failed.");
+              toast.error(verifyRes?.message || "Payment verification failed.");
+              navigate(`/order-failed/${targetOrderId}`);
             }
           } catch (verifyError) {
             console.error("Verification error:", verifyError);
             toast.error("Payment verification failed.");
+            navigate(`/order-failed/${targetOrderId}`);
           }
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment process was cancelled.");
+            navigate(`/order-failed/${targetOrderId}`);
+          },
         },
         prefill: {
           name: selectedAddress.fullName || selectedAddress.name,
@@ -633,11 +679,15 @@ export default function Checkout({
           contact: selectedAddress.mobileNumber || selectedAddress.phone,
         },
         theme: {
-          color: "#3399cc",
+          color: "#3399CC",
         },
       };
 
       const paymentObject = new window.Razorpay(options);
+      paymentObject.on("payment.failed", function (failureResponse) {
+        toast.error("Payment failed.");
+        navigate(`/order-failed/${targetOrderId}`);
+      });
       paymentObject.open();
 
     } catch (error) {
@@ -646,10 +696,16 @@ export default function Checkout({
     }
   };
 
+  useEffect(() => {
+    if (location?.state?.autoOpenRazorpay && address && cartItems.length > 0) {
+      window.history.replaceState({}, document.title);
+      handlePay(address);
+    }
+  }, [location?.state, address, cartItems]);
+
   return (
     <div className="checkout">
       <div className="checkout__grid">
-        {/* LEFT SIDE */}
         <section className="checkout__main">
           <p className="eyebrow">Secure Checkout</p>
           <h1 className="checkout__title">One last step.</h1>
@@ -799,7 +855,6 @@ export default function Checkout({
           </div>
         </section>
 
-        {/* RIGHT SIDE - ORDER SUMMARY */}
         <aside className="card summary" aria-label="Order summary">
           <h2 className="summary__heading">
             Order Summary
@@ -819,10 +874,12 @@ export default function Checkout({
           ) : (
             <div className="summary__items">
               {cartItems.map((item, index) => {
+                if (!item) return null;
                 const maxQty = Number(item.selectedSizeStockQuantity || 0);
+                const uniqueKey = item.id || item.productId || index;
 
                 return (
-                  <div className="summary__item" key={`${item.id}-${index}`}>
+                  <div className="summary__item" key={uniqueKey}>
                     <Thumb
                       item={item}
                       onOpen={setPreview}
@@ -919,7 +976,7 @@ export default function Checkout({
             <p className="summary__total-amount">{formatINR(total)}</p>
           </div>
 
-       <button
+          <button
             type="button"
             className="btn-pay"
             onClick={() => handlePay(address)}
@@ -928,8 +985,11 @@ export default function Checkout({
             <span>Pay {formatINR(total)}</span>
             <ArrowRight size={16} strokeWidth={2} />
           </button>
+
           {cartItems.length > 0 && !canPay && (
-            <p className="summary__hint">Select a delivery address to continue.</p>
+            <p className="summary__hint">
+              {!address ? "Select a delivery address to continue." : "Delivery is unavailable for this pincode."}
+            </p>
           )}
 
           <p className="summary__secure">
