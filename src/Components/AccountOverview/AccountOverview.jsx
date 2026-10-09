@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { getMyOrders } from "../../Services/orderService";
 import { formatOrderDate, formatOrderDateTime } from "../../utils/dateFormat";
 import { formatINR } from "../../utils/currencyFormat";
+import { updateUserData } from "../../Services/authService";
 
 /* Safe icon lookup: works across lucide-react versions (old/new names). */
 const pick = (...names) => {
@@ -174,16 +175,88 @@ function ProfileForm({ profile, onSave, onCancel }) {
   const [f, setF] = useState(profile);
   const [err, setErr] = useState({});
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
-  const submit = (e) => {
-    e.preventDefault();
-    const er = {};
-    if (!f.name?.trim()) er.name = "Enter your name";
-    if (!/^\d{10}$/.test(f.phone)) er.phone = "Enter a 10-digit mobile number";
-    if (!/^\S+@\S+\.\S+$/.test(f.email))
-      er.email = "Enter a valid email address";
-    setErr(er);
-    if (!Object.keys(er).length) onSave({ ...f, name: f.name.trim() });
-  };
+
+
+const submit = async (e) => {
+  e.preventDefault();
+
+  const er = {};
+
+  if (!f.name?.trim()) {
+    er.name = "Enter your name";
+  }
+
+  if (!/^\d{10}$/.test(f.phone || "")) {
+    er.phone = "Enter a 10-digit mobile number";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(f.email || "")) {
+    er.email = "Enter a valid email address";
+  }
+
+  setErr(er);
+
+  if (Object.keys(er).length > 0) return;
+
+  try {
+    // await axiosInstance.put("/users/update/profile", {
+    //   name: f.name.trim(),
+    //   email: f.email.trim(),
+    //   phone: f.phone.trim(),
+    // });
+    const response = await updateUserData({
+      name: f.name.trim(),
+      email: f.email.trim(),
+      phone: f.phone.trim(),
+    });
+    console.log("Profile update response:", response);
+
+    if(response.success) {
+      toast.success(response?.message || "Profile updated successfully!");
+
+    // Update localStorage without requiring a `user` variable
+    const storedUser = localStorage.getItem("hazelUser");
+
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+
+      const newStoredUser = {
+        ...parsedUser,
+        name: f.name.trim(),
+        fullName: f.name.trim(),
+        email: f.email.trim(),
+        phone: f.phone.trim(),
+      };
+
+      localStorage.setItem("hazelUser", JSON.stringify(newStoredUser));
+      window.dispatchEvent(new Event("storage"));
+    }
+
+    // Notify parent component if required
+    if (typeof onSave === "function") {
+      onSave({
+        ...f,
+        name: f.name.trim(),
+      });
+    }
+  }else {
+    toast.error(response?.message || "Failed to update profile.");
+  }
+
+  } catch (err) {
+    console.error(
+      "Error updating profile:",
+      err.response?.data || err.message
+    );
+
+    alert(
+      err.response?.data?.message ||
+        "Failed to save changes to database."
+    );
+  }
+};
+
+
   return (
     <form className="form" onSubmit={submit} noValidate>
       <Field
