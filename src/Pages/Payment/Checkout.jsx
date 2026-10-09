@@ -31,6 +31,8 @@ import { createOrder, verifyPayment } from "../../Services/paymentService";
 import axiosInstance from "../../api/axiosInstance";
 
 import toast from "react-hot-toast";
+import { getGuestAddress, saveGuestAddress } from "../../helpers/guestAddress";
+import { getGuestId } from "../../helpers/guestId";
 
 const formatINR = (n) =>
   `₹${Number(n || 0).toLocaleString("en-IN")}`;
@@ -164,11 +166,11 @@ const validate = (v) => {
     e.state = "Enter your state";
   }
 
-  if (!/^\d{6}$/.test(v.pincode)) {
+  if (!/^\d{6}\$/.test(v.pincode)) {
     e.pincode = "Enter a 6-digit pincode";
   }
 
-  if (!/^[6-9]\d{9}$/.test(v.phone)) {
+  if (!/^[6-9]\d{9}\$/.test(v.phone)) {
     e.phone = "Enter a valid 10-digit number";
   }
 
@@ -287,8 +289,14 @@ export default function Checkout({
 
   const [userAddress, setUserAddress] =
     useState([]);
+    
+  const [guestAddress, setGuestAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   const [serviceable, setServiceable] = useState(true);
+
+  const token = localStorage.getItem("hazelToken");
+  const isGuest = !token;
 
   // SERVICEABILITY CHECK
   const checkPincodeServiceability = async (destinationPincode) => {
@@ -312,8 +320,27 @@ export default function Checkout({
     }
   };
 
+  useEffect(() => {
+    if (isGuest) {
+      const savedAddress = getGuestAddress();
+
+      if (savedAddress) {
+        setGuestAddress(savedAddress);
+        setSelectedAddress(savedAddress);
+        setMode("view");
+        if (savedAddress.pincode) {
+          checkPincodeServiceability(savedAddress.pincode);
+        }
+      } else {
+        setMode("add");
+      }
+    }
+  }, [isGuest]);
+
   // Fetch User Addresses
   useEffect(() => {
+    if (isGuest) return;
+
     const fetchAddress = async () => {
       try {
         const userId =
@@ -371,7 +398,7 @@ export default function Checkout({
     };
 
     fetchAddress();
-  }, []);
+  }, [isGuest]);
 
   // Fetch Cart Items
   const getCartItems = async () => {
@@ -396,7 +423,7 @@ export default function Checkout({
           name: item?.product?.name || item?.productName,
           print: item?.print || item?.variant?.print,
           price: item?.price || item?.variant?.price || 0,
-          size: item?.selectedSize || item?.variant?.size || item?.variant?.sizeName,
+          size: item?.size || item?.selectedSize || item?.variant?.size || item?.variant?.sizeName,
           qty: item?.qty || item?.quantity || 1,
           mediaImageUrl: mediaImageUrl,
           discountPrice: variant?.[0]?.discountPrice || 0,
@@ -416,8 +443,7 @@ export default function Checkout({
     getCartItems();
   }, []);
 
-  const address =
-    userAddress.find((a) => a.id === selectedId) || null;
+  const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
 
   const itemCount =
     cartItems.reduce((n, i) => n + Number(i.qty || 0), 0);
@@ -563,12 +589,28 @@ export default function Checkout({
       fullName: cleaned.name,
       addressLine1: cleaned.line1,
       mobileNumber: cleaned.phone,
+      addressType: cleaned.addressType || cleaned.type || "Home",
     };
+
+    if (isGuest) {
+      saveGuestAddress(created);
+      setGuestAddress(created);
+      setSelectedAddress(created);
+      setSelectedId(created.id);
+      setPendingId(created.id);
+      if (created.pincode) {
+        checkPincodeServiceability(created.pincode);
+      }
+      setMode("view");
+      return;
+    }
 
     setUserAddress((list) => [...list, created]);
     setSelectedId(created.id);
     setPendingId(created.id);
-    checkPincodeServiceability(created.pincode);
+    if (created.pincode) {
+      checkPincodeServiceability(created.pincode);
+    }
     onAddAddress(created);
     setMode("view");
   };
@@ -581,12 +623,11 @@ export default function Checkout({
         return;
       }
 
-      const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id;
-
-      if (!userId) {
-        toast.error("Please login before placing your order.");
-        return;
-      }
+      const hazelUser = JSON.parse(
+        localStorage.getItem("hazelUser") || "null"
+      );
+      const userId = hazelUser?.id || hazelUser?._id || null;
+      const guestId = userId ? null : getGuestId();
 
       const liveSubtotal = cartItems.reduce(
         (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
@@ -611,8 +652,9 @@ export default function Checkout({
       };
 
       const orderDetails = {
-        userId,
-        addressId: selectedAddress.id || selectedAddress._id,
+        userId: userId || null,
+        guestId: guestId || null,
+        addressId: userId ? selectedAddress.id || selectedAddress._id || null : null,
         deliveryAddress: formattedAddress,
         products: cartItems.map((item) => ({
           productId: item.productId,
@@ -642,11 +684,6 @@ export default function Checkout({
         description: `Order #${response.orderNumber || targetOrderId}`,
         order_id: response.razorpayOrderId,
         handler: async function (paymentResponse) {
-          console.log("--- RAZORPAY RESPONSE ---");
-          console.log("Order ID:", paymentResponse.razorpay_order_id);
-          console.log("Payment ID:", paymentResponse.razorpay_payment_id);
-          console.log("Signature:", paymentResponse.razorpay_signature);
-
           try {
             const verifyRes = await verifyPayment({
               razorpay_order_id: paymentResponse.razorpay_order_id,
@@ -663,7 +700,11 @@ export default function Checkout({
             }
           } catch (verifyError) {
             console.error("Verification error:", verifyError);
-            toast.error("Payment verification failed.");
+            if (verifyError?.response?.data?.message) {
+              toast.error(verifyError.response.data.message);
+            } else {
+              toast.error("Payment verification failed.");
+            }
             navigate(`/order-failed/${targetOrderId}`);
           }
         },
@@ -674,9 +715,9 @@ export default function Checkout({
           },
         },
         prefill: {
-          name: selectedAddress.fullName || selectedAddress.name,
-          email: JSON.parse(localStorage.getItem("hazelUser"))?.email || "",
-          contact: selectedAddress.mobileNumber || selectedAddress.phone,
+          name: selectedAddress.fullName || selectedAddress.name || "",
+          email: hazelUser?.email || "",
+          contact: selectedAddress.mobileNumber || selectedAddress.phone || "",
         },
         theme: {
           color: "#3399CC",
@@ -692,7 +733,7 @@ export default function Checkout({
 
     } catch (error) {
       console.error("Error preparing order details for payment:", error);
-      toast.error(error.response?.data?.message || "Failed to create order. Please try again.");
+      toast.error(error?.response?.data?.message || "Failed to create order. Please try again.");
     }
   };
 
@@ -722,7 +763,22 @@ export default function Checkout({
                 <button
                   type="button"
                   className="btn-outline"
-                  onClick={openSelect}
+                  onClick={() => {
+                    if (isGuest) {
+                      setDraft({
+                        type: address.addressType || "Home",
+                        name: address.fullName || address.name || "",
+                        line1: address.houseNo || address.addressLine1 || "",
+                        city: address.city || "",
+                        state: address.state || "",
+                        pincode: address.pincode || "",
+                        phone: address.mobileNumber || address.phone || "",
+                      });
+                      setMode("add");
+                    } else {
+                      openSelect();
+                    }
+                  }}
                 >
                   Change
                 </button>
@@ -808,9 +864,9 @@ export default function Checkout({
                         key={t}
                         type="button"
                         role="radio"
-                        aria-checked={draft.type === t}
-                        className={`type-toggle__btn ${draft.type === t ? "is-active" : ""}`}
-                        onClick={() => setDraft((d) => ({ ...d, type: t }))}
+                        aria-checked={draft.addressType === t || draft.type === t}
+                        className={`type-toggle__btn ${(draft.addressType === t || draft.type === t) ? "is-active" : ""}`}
+                        onClick={() => setDraft((d) => ({ ...d, addressType: t, type: t }))}
                       >
                         {t}
                       </button>
@@ -844,11 +900,11 @@ export default function Checkout({
                   <button type="submit" className="btn-solid">
                     Save and deliver here
                   </button>
-                  {userAddress.length > 0 && (
+                  {(!isGuest && userAddress.length > 0) || (isGuest && guestAddress) ? (
                     <button type="button" className="btn-outline" onClick={cancelAdd}>
                       Cancel
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </form>
             )}

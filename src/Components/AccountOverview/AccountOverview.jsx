@@ -178,8 +178,8 @@ function ProfileForm({ profile, onSave, onCancel }) {
     e.preventDefault();
     const er = {};
     if (!f.name?.trim()) er.name = "Enter your name";
-    if (!/^\d{10}$/.test(f.phone)) er.phone = "Enter a 10-digit mobile number";
-    if (!/^\S+@\S+\.\S+$/.test(f.email))
+    if (!/^\d{10}\$/.test(f.phone)) er.phone = "Enter a 10-digit mobile number";
+    if (!/^\S+@\S+\.\S+\$/.test(f.email))
       er.email = "Enter a valid email address";
     setErr(er);
     if (!Object.keys(er).length) onSave({ ...f, name: f.name.trim() });
@@ -244,8 +244,8 @@ function AddressForm({ address, onSave, onCancel }) {
     if (!f.houseNo?.trim()) er.houseNo = "Enter house / flat number";
     if (!f.city?.trim()) er.city = "Enter city";
     if (!f.state?.trim()) er.state = "Enter state";
-    if (!/^\d{6}$/.test(f.pincode)) er.pincode = "Enter a 6-digit pincode";
-    if (!/^\d{10}$/.test(f.mobileNumber)) er.mobileNumber = "Enter a 10-digit mobile number";
+    if (!/^\d{6}\$/.test(f.pincode)) er.pincode = "Enter a 6-digit pincode";
+    if (!/^\d{10}\$/.test(f.mobileNumber)) er.mobileNumber = "Enter a 10-digit mobile number";
 
     setErr(er);
     if (!Object.keys(er).length) onSave(f);
