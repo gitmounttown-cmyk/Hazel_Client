@@ -1,4 +1,4 @@
-import { Toaster } from 'react-hot-toast';
+import { Toaster} from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -28,13 +28,14 @@ function App() {
         position="top-right"
         reverseOrder={false}
         toastOptions={{
-          duration: 4000,
+          duration: 2000,
           style: {
             fontSize: "14px",
           },
         }}
-      />
-    </GoogleOAuthProvider>
+      />     
+
+ </GoogleOAuthProvider>
   );
 }
 

@@ -380,7 +380,7 @@ useEffect(() => {
           name: item?.product?.name || item?.productName,
           print: item?.print || item?.variant?.print,
           price: item?.price || item?.variant?.price || 0,
-          size: item?.selectedSize || item?.variant?.size || item?.variant?.sizeName,
+          size: item?.size || item?.variant?.size || item?.variant?.sizeName,
           qty: item?.qty || item?.quantity || 1,
           mediaImageUrl: mediaImageUrl,
           discountPrice: variant?.[0]?.discountPrice || 0,
@@ -417,6 +417,10 @@ useEffect(() => {
   const shipping = 0; // SHIPPING IS NOW ALWAYS 0 (FREE)
   const tax = Math.round(amountAfterDiscount * 0.09);
   const total = amountAfterDiscount + shipping + tax;
+
+  // console.log("Selected Address:", address);
+  // console.log("Selected Address ID:", selectedId,mode);
+  // console.log("cartItems:", cartItems);
 
   const canPay =
     cartItems.length > 0 && mode === "view" && !!address;
@@ -581,6 +585,7 @@ useEffect(() => {
     saveGuestAddress(created);
 
     // Show it immediately in checkout
+    setGuestAddress(created);
     setSelectedAddress(created);
 
     // Keep your existing state updated
@@ -892,14 +897,15 @@ useEffect(() => {
             razorpay_signature:
               paymentResponse.razorpay_signature,
           });
-
+          // console.log("VERIFY RESPONSE:", verifyRes);
+          // console.log("response.orderId:", response);
           if (verifyRes?.success) {
             toast.success(
               "Payment verified successfully!"
             );
 
             navigate(
-              `/order-success/${response.orderId}`
+              `/order-confirmation/${response.orderId}`
             );
           } else {
             toast.error(
@@ -907,14 +913,20 @@ useEffect(() => {
             );
           }
         } catch (verifyError) {
+          // console.log("VERIFY ERROR:", verifyError, verifyError?.response, verifyError?.response?.data);
           console.error(
             "Verification error:",
             verifyError
           );
-
-          toast.error(
-            "Payment verification failed."
-          );
+          if(verifyError?.response?.data?.message) {
+            toast.error(
+              verifyError.response.data.message
+            );
+          } else {
+            toast.error(
+              "Payment verification failed."
+            );
+          }
         }
       },
 
@@ -955,7 +967,7 @@ useEffect(() => {
   }
 };
 
-
+// console.log('cartItems:', cartItems);
   return (
     <div className="checkout">
       <div className="checkout__grid">
@@ -1089,9 +1101,9 @@ useEffect(() => {
                         key={t}
                         type="button"
                         role="radio"
-                        aria-checked={draft.type === t}
-                        className={`type-toggle__btn ${draft.type === t ? "is-active" : ""}`}
-                        onClick={() => setDraft((d) => ({ ...d, type: t }))}
+                        aria-checked={draft.addressType === t}
+                        className={`type-toggle__btn ${draft.addressType === t ? "is-active" : ""}`}
+                        onClick={() => setDraft((d) => ({ ...d, addressType: t }))}
                       >
                         {t}
                       </button>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { getCart, removeCartItem, updateCartItem } from "../../Services/cartService";
+import { getCart, removeCartItem, updateCartItem, clearCart } from "../../Services/cartService";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5004/api";
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -88,7 +88,7 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem, getC
     product.images?.[0] ||
     productMedia?.[0]?.media?.[0]?.imageURL ||
     "";
-  const size = item.selectedSize || item.variant?.size || item.variant?.sizeName || "";
+  const size = item.size || item.variant?.size || item.variant?.sizeName || "";
   const color = item.color || item.variant?.color || item.variant?.colorName || "";
 
   const originalPrice = Number(item.price || 0);
@@ -457,9 +457,11 @@ export default function CartPage() {
       setClearing(true);
       setError("");
 
-      const response = await api.delete("/cart/clear");
+      // const response = await api.delete("/cart/clear");
+      const response = await clearCart();
+console.log("Clear cart response:", response);
 
-      if (response.data.success) {
+      if (response?.success) {
         setItems([]);
         setCartTotal(0);
       }

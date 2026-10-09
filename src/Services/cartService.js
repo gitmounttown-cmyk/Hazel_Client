@@ -90,13 +90,39 @@ export const removeCartItem = async (data) => {
   }
 };
 
+// export const clearCart = async () => {
+//   try {
+//     const { isGuest, guestId } = getWishlistOwner();
+//     const requestData = {
+//       ...(isGuest && { guestId }),
+//     };
+//     // Added missing "/cart" prefix
+//     const response = await axiosInstance.delete("/cart/clear", { data: requestData });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error clearing cart:", error);
+//     throw error;
+//   }
+// };
+
 export const clearCart = async () => {
   try {
-    // Added missing "/cart" prefix
-    const response = await axiosInstance.delete("/cart/clear");
+    const { isGuest, guestId } = getWishlistOwner();
+
+    const requestData = isGuest ? { guestId } : {};
+
+    console.log("Request payload:", requestData);
+
+    const response = await axiosInstance.delete("/cart/clear", {
+      data: requestData,
+    });
+
     return response.data;
   } catch (error) {
-    console.error("Error clearing cart:", error);
+    console.error(
+      "Clear cart error:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
