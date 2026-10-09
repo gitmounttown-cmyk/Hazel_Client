@@ -497,7 +497,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--deep-red);
+  color: var(--black);
   background: var(--lite-yellow);
   border-radius: 6px;
 }

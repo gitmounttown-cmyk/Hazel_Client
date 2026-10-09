@@ -6,6 +6,7 @@ import {
   addToWishlist,
   checkWishlist,
   removeWishlistItem,
+  getWishlist,
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
@@ -382,48 +383,141 @@ function Sidebar({
   );
 }
 
-function ProductCard({ product, navigate }) {
+// function ProductCard({ product, navigate, wishlistStatus }) {
+//   console.log("ProductCard rwishlistStatus:", wishlistStatus);
+//   console.log("Rendering ProductCard for product:", product);
+//   const [imgError, setImgError] = useState(false);
+//   const [isWishlisted, setIsWishlisted] = useState(false);
+//   const [wishlistLoading, setWishlistLoading] = useState(false);
+
+
+//   const handleWishlist = async () => {
+//     if (!product?.id || wishlistLoading) return;
+//     // if (!isUserLoggedIn()) {
+//     //   toast.error("Please log in to manage your wishlist.");
+//     //   navigate("/login");
+//     //   return;
+//     // }
+
+//     try {
+//       setWishlistLoading(true);
+//       if (isWishlisted) {
+//         await removeWishlistItem(product.id);
+//         setIsWishlisted(false);
+//       } else {
+//         await addToWishlist({ productId: product.id });
+//         setIsWishlisted(true);
+//       }
+//     } catch (err) {
+//       if (err?.response?.status === 409) {
+//         setIsWishlisted(true);
+//       }
+//     } finally {
+//       setWishlistLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="card" onClick={() => navigate(`/product/${product.id}`)}>
+//       <div className="card-image">
+//         {product.image && !imgError ? (
+//           <img
+//             src={product.image}
+//             alt={product.name}
+//             className="card-img-content"
+//             onError={() => setImgError(true)}
+//           />
+//         ) : (
+//           <div className="card-no-image">No Image Available</div>
+//         )}
+
+//         <button
+//           type="button"
+//           className={`wishlist-btn ${isWishlisted ? "wishlisted" : ""}`}
+//           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+//           onClick={(e) => {
+//             e.stopPropagation();
+//             handleWishlist();
+//           }}
+//           disabled={wishlistLoading}
+//         >
+//           {isWishlisted ? "♥" : "♡"}
+//         </button>
+//       </div>
+
+//       <div className="card-body">
+//         <p className="card-name" title={product?.name}>
+//           {product.name}
+//         </p>
+//         <p className="card-subtitle" title={product?.subtitle}>
+//           {product.subtitle}
+//         </p>
+//         <p className="card-rating" title={`Rating: ${product.rating}`}>
+//           {product.rating} ★
+//         </p>
+//         <div className="card-price">
+//           {product.discountPrice > 0 ? (
+//             <>
+//               <span className="discount-price">
+//                 ₹{product.discountPrice.toLocaleString("en-IN")}
+//               </span>
+//               <span className="original-price">
+//                 ₹{product.price?.toLocaleString("en-IN")}
+//               </span>
+//             </>
+//           ) : (
+//             <span className="regular-price">
+//               ₹{product.price?.toLocaleString("en-IN")}
+//             </span>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+function ProductCard({ product, navigate, wishlistStatus }) {
+  console.log("ProductCard wishlistStatus:", wishlistStatus);
+  console.log("Rendering ProductCard for product:", product);
+
   const [imgError, setImgError] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
+  // ------------------------------------------------------
+  // SET WISHLIST STATUS FROM PARENT
+  // ------------------------------------------------------
+
   useEffect(() => {
-    const checkProductWishlist = async () => {
-      if (!product?.id) return;
-      if (!isUserLoggedIn()) {
-        setIsWishlisted(false);
-        return;
-      }
+    const productId = String(product?.id);
 
-      try {
-        const response = await checkWishlist(product.id);
-        setIsWishlisted(response?.data?.isWishlisted || false);
-      } catch (err) {
-        setIsWishlisted(false);
-      }
-    };
+    setIsWishlisted(!!wishlistStatus?.[productId]);
+  }, [product?.id, wishlistStatus]);
 
-    checkProductWishlist();
-  }, [product?.id]);
+  // ------------------------------------------------------
+  // WISHLIST
+  // ------------------------------------------------------
 
   const handleWishlist = async () => {
     if (!product?.id || wishlistLoading) return;
-    if (!isUserLoggedIn()) {
-      toast.error("Please log in to manage your wishlist.");
-      navigate("/login");
-      return;
-    }
 
     try {
       setWishlistLoading(true);
+
       if (isWishlisted) {
         await removeWishlistItem(product.id);
+
         setIsWishlisted(false);
       } else {
-        await addToWishlist({ productId: product.id });
+        await addToWishlist({
+          productId: product.id,
+        });
+
         setIsWishlisted(true);
       }
     } catch (err) {
+      console.error("Wishlist error:", err);
+
       if (err?.response?.status === 409) {
         setIsWishlisted(true);
       }
@@ -433,7 +527,10 @@ function ProductCard({ product, navigate }) {
   };
 
   return (
-    <div className="card" onClick={() => navigate(`/product/${product.id}`)}>
+    <div
+      className="card"
+      onClick={() => navigate(`/product/${product.id}`)}
+    >
       <div className="card-image">
         {product.image && !imgError ? (
           <img
@@ -443,13 +540,21 @@ function ProductCard({ product, navigate }) {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="card-no-image">No Image Available</div>
+          <div className="card-no-image">
+            No Image Available
+          </div>
         )}
 
         <button
           type="button"
-          className={`wishlist-btn ${isWishlisted ? "wishlisted" : ""}`}
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          className={`wishlist-btn ${
+            isWishlisted ? "wishlisted" : ""
+          }`}
+          aria-label={
+            isWishlisted
+              ? "Remove from wishlist"
+              : "Add to wishlist"
+          }
           onClick={(e) => {
             e.stopPropagation();
             handleWishlist();
@@ -464,18 +569,25 @@ function ProductCard({ product, navigate }) {
         <p className="card-name" title={product?.name}>
           {product.name}
         </p>
+
         <p className="card-subtitle" title={product?.subtitle}>
           {product.subtitle}
         </p>
-        <p className="card-rating" title={`Rating: ${product.rating}`}>
+
+        <p
+          className="card-rating"
+          title={`Rating: ${product.rating}`}
+        >
           {product.rating} ★
         </p>
+
         <div className="card-price">
           {product.discountPrice > 0 ? (
             <>
               <span className="discount-price">
                 ₹{product.discountPrice.toLocaleString("en-IN")}
               </span>
+
               <span className="original-price">
                 ₹{product.price?.toLocaleString("en-IN")}
               </span>
@@ -502,6 +614,7 @@ function ProductGrid({
   setPage,
   onOpenMobileFilters,
   navigate,
+  wishlistStatus,
 }) {
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
 
@@ -537,7 +650,7 @@ function ProductGrid({
             </p>
           )}
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} navigate={navigate} />
+            <ProductCard key={p.id} product={p} navigate={navigate} wishlistStatus={wishlistStatus} />
           ))}
         </div>
 
@@ -626,8 +739,52 @@ export default function ShopPage() {
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [wishlistStatus, setWishlistStatus] = useState({}); // { productId: true/false }
   const navigate = useNavigate();
   const shopRef = useRef(null);
+
+  //fetch all wishlist items
+  // Fetch all wishlist
+    const fetchAllWishlist = async () => {
+    try {
+      const response = await getWishlist();
+  
+      console.log("Fetched wishlist:", response);
+  
+      const wishlistItems = response.data?.wishlist?.items || [];
+  
+      console.log("Wishlist items:", wishlistItems);
+  
+      const wishlistSet = new Set(
+        wishlistItems.map((item) =>
+          String(
+            item?.product?._id ||
+            item?.product?.id ||
+            item?.product
+          )
+        )
+      );
+  
+      console.log("Wishlist product IDs:", wishlistSet);
+  
+      // Set does not have map()
+      const wishlistStatus = Object.fromEntries(
+        [...wishlistSet].map((id) => [id, true])
+      );
+  
+      setWishlistStatus((prev) => ({
+        ...prev,
+        ...wishlistStatus,
+      }));
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchAllWishlist();
+  }, []);
+
 
   return (
     <div className="shop-page">
@@ -652,6 +809,7 @@ export default function ShopPage() {
           setPage={setPage}
           onOpenMobileFilters={() => setMobileFiltersOpen(true)}
           navigate={navigate}
+          wishlistStatus={wishlistStatus}
         />
       </div>
     </div>
