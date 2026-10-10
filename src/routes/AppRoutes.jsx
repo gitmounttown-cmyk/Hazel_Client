@@ -44,6 +44,8 @@ import Checkout from "../Pages/Payment/Checkout";
 import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
 import OrderFailure from "../Pages/OrderFailure/OrderFailure";
 
+import Loader from "../../src/Components/Loader/Loader"
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -67,6 +69,7 @@ const AppRoutes = () => {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+          <Route path="/loader" element={<Loader />} />
 
           {/* ORDER FAILURE ROUTES */}
           <Route path="/order-failed" element={<OrderFailure />} />

@@ -144,7 +144,7 @@ const emptyAddress = {
 };
 
 /* =========================================================
-   ADDRESS VALIDATION
+   ADDRESS VALIDATION (FIXED REGEX ANCHORS)
 ========================================================= */
 
 const validate = (v) => {
@@ -178,7 +178,7 @@ const validate = (v) => {
 };
 
 /* =========================================================
-   PRODUCT THUMBNAIL (SAFEGUARDED AGAINST NULL IDS)
+   PRODUCT THUMBNAIL
 ========================================================= */
 
 function Thumb({
@@ -248,10 +248,7 @@ export default function Checkout({
   order = defaultOrder,
   onAddAddress = () => {},
   onSelectAddress = () => {},
-  onQtyChange = () => {},
   onRemoveItem = () => {},
-  onAddProduct = () => {},
-  onPay = () => {},
 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -259,9 +256,6 @@ export default function Checkout({
   const [items, setItems] = useState(
     order?.items || []
   );
-
-  const [addresses, setAddresses] =
-    useState(order?.addresses || []);
 
   const [selectedId, setSelectedId] =
     useState(null);
@@ -398,7 +392,7 @@ export default function Checkout({
     };
 
     fetchAddress();
-  }, [isGuest]);
+  }, [isGuest, selectedId]);
 
   // Fetch Cart Items
   const getCartItems = async () => {
@@ -444,6 +438,13 @@ export default function Checkout({
   }, []);
 
   const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
+
+  // Keep selectedAddress synchronized
+  useEffect(() => {
+    if (address) {
+      setSelectedAddress(address);
+    }
+  }, [address]);
 
   const itemCount =
     cartItems.reduce((n, i) => n + Number(i.qty || 0), 0);
@@ -541,6 +542,7 @@ export default function Checkout({
     const selected = userAddress.find((a) => a.id === pendingId);
     if (selected) {
       checkPincodeServiceability(selected.pincode);
+      setSelectedAddress(selected);
     }
     onSelectAddress(selected);
     setMode("view");
@@ -572,6 +574,7 @@ export default function Checkout({
 
   const saveNew = (e) => {
     e.preventDefault();
+
     const found = validate(draft);
 
     if (Object.keys(found).length) {
@@ -580,7 +583,7 @@ export default function Checkout({
     }
 
     const cleaned = Object.fromEntries(
-      Object.entries(draft).map(([k, v]) => [k, v.trim()])
+      Object.entries(draft).map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
     );
 
     const created = {
@@ -608,6 +611,7 @@ export default function Checkout({
     setUserAddress((list) => [...list, created]);
     setSelectedId(created.id);
     setPendingId(created.id);
+    setSelectedAddress(created);
     if (created.pincode) {
       checkPincodeServiceability(created.pincode);
     }
@@ -615,10 +619,14 @@ export default function Checkout({
     setMode("view");
   };
 
-  // Handle Payment & Razorpay Checkout Popup
-  const handlePay = async (selectedAddress) => {
+  /* =======================================================
+     HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
+  ========================================================= */
+
+  const handlePay = async (targetAddress) => {
+    const deliveryAddr = targetAddress || address;
     try {
-      if (!selectedAddress) {
+      if (!deliveryAddr) {
         toast.error("Please select a delivery address before proceeding to payment.");
         return;
       }
@@ -640,21 +648,21 @@ export default function Checkout({
       const liveTotal = liveAmountAfterDiscount + liveShipping + liveTax;
 
       const formattedAddress = {
-        fullName: selectedAddress.fullName || selectedAddress.name || "",
-        addressLine1: selectedAddress.addressLine1 || selectedAddress.houseNo || selectedAddress.line1 || "",
-        addressLine2: selectedAddress.addressLine2 || "",
-        district: selectedAddress.district || "",
-        city: selectedAddress.city || "",
-        state: selectedAddress.state || "",
-        pincode: selectedAddress.pincode || "",
-        mobileNumber: selectedAddress.mobileNumber || selectedAddress.phone || "",
-        addressType: selectedAddress.addressType || selectedAddress.type || "Home",
+        fullName: deliveryAddr.fullName || deliveryAddr.name || "",
+        addressLine1: deliveryAddr.addressLine1 || deliveryAddr.houseNo || deliveryAddr.line1 || "",
+        addressLine2: deliveryAddr.addressLine2 || "",
+        district: deliveryAddr.district || "",
+        city: deliveryAddr.city || "",
+        state: deliveryAddr.state || "",
+        pincode: deliveryAddr.pincode || "",
+        mobileNumber: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
+        addressType: deliveryAddr.addressType || deliveryAddr.type || "Home",
       };
 
       const orderDetails = {
         userId: userId || null,
         guestId: guestId || null,
-        addressId: userId ? selectedAddress.id || selectedAddress._id || null : null,
+        addressId: userId ? deliveryAddr.id || deliveryAddr._id || null : null,
         deliveryAddress: formattedAddress,
         products: cartItems.map((item) => ({
           productId: item.productId,
@@ -689,6 +697,7 @@ export default function Checkout({
               razorpay_order_id: paymentResponse.razorpay_order_id,
               razorpay_payment_id: paymentResponse.razorpay_payment_id,
               razorpay_signature: paymentResponse.razorpay_signature,
+              guestId: guestId,
             });
 
             if (verifyRes?.success || verifyRes?.status === "success" || verifyRes?.data?.success) {
@@ -715,9 +724,9 @@ export default function Checkout({
           },
         },
         prefill: {
-          name: selectedAddress.fullName || selectedAddress.name || "",
+          name: deliveryAddr.fullName || deliveryAddr.name || "",
           email: hazelUser?.email || "",
-          contact: selectedAddress.mobileNumber || selectedAddress.phone || "",
+          contact: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
         },
         theme: {
           color: "#3399CC",
@@ -767,13 +776,15 @@ export default function Checkout({
                     if (isGuest) {
                       setDraft({
                         type: address.addressType || "Home",
-                        name: address.fullName || address.name || "",
-                        line1: address.houseNo || address.addressLine1 || "",
+                        fullName: address.fullName || "",
+                        houseNo: address.houseNo || "",
+                        addressLine1: address.addressLine1 || "",
                         city: address.city || "",
                         state: address.state || "",
                         pincode: address.pincode || "",
-                        phone: address.mobileNumber || address.phone || "",
+                        mobileNumber: address.mobileNumber || "",
                       });
+
                       setMode("add");
                     } else {
                       openSelect();
@@ -1086,4 +1097,4 @@ export default function Checkout({
       )}
     </div>
   );
-}
+};

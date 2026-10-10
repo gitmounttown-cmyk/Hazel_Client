@@ -136,3 +136,20 @@ export const logout = () => {
   localStorage.clear();
   sessionStorage.clear();
 }
+
+//update user data use api
+export const updateUserData = async (userData) => {
+  try {
+    // Make API call to update user data
+    const response = await axiosInstance.put(
+      `/users/update/profile`,
+      {
+        ...userData,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Update User Data Error:", error);
+    throw error;
+  }
+}
