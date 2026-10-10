@@ -1,62 +1,16 @@
-import React, { useState, useEffect } from "react";
 import { X, AlertCircle, ArrowRight } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getPaymentByOrder } from "../../Services/paymentService";
-import toast from "react-hot-toast";
 import "./OrderFailure.css";
 
 /* Put your product image import or path here */
 import img1 from "../../assets/Trending/img2.png";
 
-const formatINR = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+const failedOrder = {
+  id: "#LR-92841",
+  total: "₹4,904",
+  item: { name: "Admire Maxi", variant: "Print: Green Floral • Size: XL", qty: "1", price: "₹4,999" },
+};
 
 export default function PaymentFailure() {
-  const { orderId } = useParams();
-  const navigate = useNavigate();
-
-  const [orderData, setOrderData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        setLoading(true);
-        const targetId = orderId || localStorage.getItem("latestOrderId");
-
-        if (!targetId) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await getPaymentByOrder(targetId);
-        if (response && response.data) {
-          setOrderData(response.data.order || response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching failed order details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrderDetails();
-  }, [orderId]);
-
-  const id = orderData?.orderNumber || orderData?._id || orderData?.id || orderId || "#LR-92841";
-  const total = formatINR(orderData?.amount || orderData?.total || 0);
-
-  const items = orderData?.products || orderData?.items || [];
-  const firstItem = items[0] || {};
-
-  const itemImage = firstItem.mediaImageUrl
-    ? `${import.meta.env.VITE_UPLOAD_URL || import.meta.env.VITE_API_URL}${firstItem.mediaImageUrl}`
-    : (firstItem.image || img1);
-
-  const itemName = firstItem.name || "Admire Maxi";
-  const itemVariant = `Print: ${firstItem.print || "Green Floral"} • Size: ${firstItem.size || "XL"}`;
-  const itemQty = firstItem.qty || 1;
-  const itemPrice = formatINR(firstItem.price || 4999);
-
   return (
     <div className="pf">
       <main className="pf__wrap">
@@ -84,19 +38,11 @@ export default function PaymentFailure() {
           </p>
 
           <div className="pf__actions-hero">
-            <button
-              type="button"
-              className="pf__btn pf__btn--primary"
-              onClick={() => navigate("/checkout", { state: { autoOpenRazorpay: true, orderId: id } })}
-            >
+            <button type="button" className="pf__btn pf__btn--primary">
               Try Again
               <ArrowRight size={18} className="pf__arrow" />
             </button>
-            <button
-              type="button"
-              className="pf__btn pf__btn--ghost"
-              onClick={() => navigate("/checkout", { state: { selectPaymentMethod: true } })}
-            >
+            <button type="button" className="pf__btn pf__btn--ghost">
               Change Payment Method
             </button>
           </div>
@@ -109,17 +55,17 @@ export default function PaymentFailure() {
           <div className="pf__item">
             <img
               className="pf__img"
-              src={itemImage}
-              alt={itemName}
+              src={img1}
+              alt={failedOrder.item.name}
               loading="lazy"
             />
             <div className="pf__item-info">
               <div className="pf__item-row">
-                <h2 className="pf__item-name">{itemName}</h2>
-                <span className="pf__item-qty">Qty: {itemQty}</span>
+                <h2 className="pf__item-name">{failedOrder.item.name}</h2>
+                <span className="pf__item-qty">Qty: {failedOrder.item.qty}</span>
               </div>
-              <p className="pf__item-variant">{itemVariant}</p>
-              <p className="pf__item-price">{itemPrice}</p>
+              <p className="pf__item-variant">{failedOrder.item.variant}</p>
+              <p className="pf__item-price">{failedOrder.item.price}</p>
             </div>
           </div>
 
@@ -128,11 +74,11 @@ export default function PaymentFailure() {
           <div className="pf__total-row">
             <div>
               <span className="pf__label">Total Amount</span>
-              <p className="pf__value">{total}</p>
+              <p className="pf__value">{failedOrder.total}</p>
             </div>
             <div className="pf__order-id-box">
               <span className="pf__label">Order ID</span>
-              <p className="pf__id-val">{id}</p>
+              <p className="pf__id-val">{failedOrder.id}</p>
             </div>
           </div>
         </section>
