@@ -42,7 +42,10 @@ import Video from "../Pages/admin/videos/Video";
 
 import Checkout from "../Pages/Payment/Checkout";
 import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
+<<<<<<< HEAD
+=======
 import OrderFailure from "../Pages/OrderFailure/OrderFailure";
+>>>>>>> dev
 
 import Loader from "../../src/Components/Loader/Loader"
 
@@ -68,12 +71,12 @@ const AppRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
+<<<<<<< HEAD
+=======
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+>>>>>>> dev
           <Route path="/loader" element={<Loader />} />
 
-          {/* ORDER FAILURE ROUTES */}
-          <Route path="/order-failed" element={<OrderFailure />} />
-          <Route path="/order-failed/:orderId" element={<OrderFailure />} />
         </Route>
 
         {/* =================================
@@ -84,6 +87,7 @@ const AppRoutes = () => {
         <Route path="/verify-otp" element={<VerifyOTP />} />
 
         <Route path="/admin/login" element={<Login />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
 
         {/* =================================
           ADMIN ROUTES
@@ -100,6 +104,7 @@ const AppRoutes = () => {
             path="/admin/catalog/product-length"
             element={<LengthList />}
           />
+          {/* <Route path="/admin/catalog/neck-patterns" element={<NeckPatternList />} /> */}
           <Route path="/admin/catalog/products" element={<ProductList />} />
           <Route
             path="/admin/catalog/product-variants"
@@ -125,7 +130,16 @@ const AppRoutes = () => {
           />
           <Route path="/admin/videos" element={<Video />} />
           <Route path="/admin/inventory" element={<Inventory />} />
+
+          {/* add more admin routes here, all under this same AdminLayout wrapper */}
         </Route>
+
+        {/* =================================
+          DEFAULT ROUTE
+      ================================= */}
+        {/* 
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    */}
       </Routes>
     </BrowserRouter>
   );
