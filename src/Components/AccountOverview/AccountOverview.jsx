@@ -424,6 +424,10 @@ export default function AccountDashboard() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
+  // Velocity live tracking state
+  const [trackingData, setTrackingData] = useState(null);
+  const [loadingTracking, setLoadingTracking] = useState(false);
+
   const fetchAddresses = async () => {
     try {
       const response = await axiosInstance.get("/addresses/all");
@@ -481,7 +485,10 @@ export default function AccountDashboard() {
     fetchAddresses();
   }, [navigate]);
 
-  const close = () => setModal(null);
+  const close = () => {
+    setModal(null);
+    setTrackingData(null);
+  };
 
   const saveProfile = (p) => {
     setProfile(p);
@@ -545,6 +552,24 @@ export default function AccountDashboard() {
       }
     } catch (err) {
       console.error("Error setting default address:", err);
+    }
+  };
+
+  // Fetch Velocity Live Tracking Details
+  const handleTrackClick = async (order) => {
+    setModal({ type: "track", order });
+    setLoadingTracking(true);
+    setTrackingData(null);
+
+    try {
+      const res = await axiosInstance.get(`/velocity/track-by-order/${order.orderNumber}`);
+      if (res.data.success) {
+        setTrackingData(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch live Velocity tracking details:", err);
+    } finally {
+      setLoadingTracking(false);
     }
   };
 
@@ -626,10 +651,14 @@ export default function AccountDashboard() {
     };
   };
 
-  const ACTIVE_STATUSES = ["PENDING", "CONFIRMED", "PACKED", "SHIPPED"];
-  const isActiveOrder = (order) => ACTIVE_STATUSES.includes(order.orderStatus);
-  const activeOrder = orders.find(isActiveOrder);
-  const pastOrders = orders.filter((order) => !isActiveOrder(order));
+  // Safe array resolution sorted newest first
+  const ordersList = Array.isArray(orders) ? orders : [];
+
+  // Active Order is the newest order (index 0)
+  const activeOrder = ordersList.length > 0 ? ordersList[0] : null;
+
+  // Past Orders includes ALL previous orders (sliced from index 1)
+  const pastOrders = ordersList.length > 1 ? ordersList.slice(1) : [];
 
   const getCurrentStep = (status) => {
     switch (status) {
@@ -762,12 +791,7 @@ export default function AccountDashboard() {
                             </p>
                             <button
                               className="btn"
-                              onClick={() =>
-                                setModal({
-                                  type: "track",
-                                  order: activeOrder,
-                                })
-                              }
+                              onClick={() => handleTrackClick(activeOrder)}
                             >
                               Track Order
                             </button>
@@ -799,7 +823,7 @@ export default function AccountDashboard() {
             </section>
           )}
 
-          {view === "orders" && (
+          {(show("orders") || view === "orders") && (
             <section className="card">
               <div className="card__head">
                 <h2 className="card__title">Past Orders</h2>
@@ -993,28 +1017,61 @@ export default function AccountDashboard() {
           <p className="muted vt__sub">
             {getOrderDisplay(modal.order).name}
           </p>
-          <ol className="vt">
-            {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => (
-              <li
-                key={label}
-                className={`vt__item ${
-                  i < getCurrentStep(modal.order.orderStatus) ? "is-done" : ""
-                } ${
-                  i === getCurrentStep(modal.order.orderStatus)
-                    ? "is-current"
-                    : ""
-                }`}
-              >
-                <span className="track__dot">
-                  <Icon size={14} />
-                </span>
-                <div>
-                  <p className="vt__label">{label}</p>
-                  <p className="muted vt__when">{when}</p>
+
+          {loadingTracking ? (
+            <p className="muted" style={{ padding: "16px 0" }}>
+              Fetching live tracking details from Velocity...
+            </p>
+          ) : trackingData ? (
+            <div style={{ marginBottom: "16px" }}>
+              <p><strong>Courier:</strong> {trackingData.courierName || "Velocity Partner"}</p>
+              <p><strong>AWB Code:</strong> {trackingData.awbCode}</p>
+              <p><strong>Status:</strong> <span className="badge">{trackingData.status}</span></p>
+
+              {trackingData.activities?.length > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  <p style={{ fontWeight: 600, marginBottom: "8px" }}>Live Tracking History:</p>
+                  <ol className="vt">
+                    {trackingData.activities.map((act, index) => (
+                      <li key={index} className="vt__item is-done">
+                        <span className="track__dot">
+                          <Check size={14} />
+                        </span>
+                        <div>
+                          <p className="vt__label">{act.activity || act.status}</p>
+                          <p className="muted vt__when">{act.location} · {act.date}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-              </li>
-            ))}
-          </ol>
+              )}
+            </div>
+          ) : (
+            <ol className="vt">
+              {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => (
+                <li
+                  key={label}
+                  className={`vt__item ${
+                    i < getCurrentStep(modal.order.orderStatus) ? "is-done" : ""
+                  } ${
+                    i === getCurrentStep(modal.order.orderStatus)
+                      ? "is-current"
+                      : ""
+                  }`}
+                >
+                  <span className="track__dot">
+                    <Icon size={14} />
+                  </span>
+                  <div>
+                    <p className="vt__label">{label}</p>
+                    <p className="muted vt__when">{when}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+
           <div className="form__actions">
             <button className="btn" onClick={close}>
               Done
