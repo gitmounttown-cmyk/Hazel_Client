@@ -1,9 +1,42 @@
 import axiosInstance from "../api/axiosInstance";
+import { getGuestId } from "../helpers/guestId";
+
+
+const getWishlistOwner = () => {
+  const token = localStorage.getItem("hazelToken");
+
+  // Logged-in user
+  if (token) {
+    return {
+      isGuest: false,
+      guestId: null,
+    };
+  }
+
+  // Guest user
+  return {
+    isGuest: true,
+    guestId: getGuestId(),
+  };
+};
 
 const BASE = "/addresses";
 
-export const createAddress = (data) =>
-  axiosInstance.post(`${BASE}/create`, data);
+export const createAddress = (data) => {
+  try {
+    const { isGuest, guestId } = getWishlistOwner();
+
+    const requestData = {
+      ...data,
+      guestId: isGuest ? guestId : undefined,
+    };
+
+    return axiosInstance.post(`${BASE}/create`, requestData);
+  } catch (error) {
+    console.error("Error creating address:", error);
+    throw error;
+  }
+};
 
 export const getAddresses = (params = {}) =>
   axiosInstance.get(`${BASE}/all`, { params });

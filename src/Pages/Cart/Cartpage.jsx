@@ -229,10 +229,12 @@ function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
         </span>
       </div>
 
+    {tax > 0 && (
       <div className="summary-row">
         <span>Estimated Tax</span>
         <span>{formatINR(tax)}</span>
       </div>
+    )}
 
       <div className="summary-divider" />
 
@@ -494,7 +496,9 @@ console.log("Clear cart response:", response);
   }, 0);
 
   const shipping = 0;
-  const tax = Math.round(Math.max(0, subtotal - discount) * 0.018);
+  // const tax = Math.round(Math.max(0, subtotal - discount) * 0.018);
+  const tax = Math.round(Math.max(0, 0) * 0.018);
+
   const total =
     cartTotal > 0 ? cartTotal + tax : subtotal - discount + shipping + tax;
 
