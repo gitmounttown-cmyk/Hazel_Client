@@ -23,7 +23,7 @@ import {
 
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { getAddresses } from "../../Services/addressService";
+import { createAddress, getAddresses } from "../../Services/addressService";
 
 import { createOrder, verifyPayment } from "../../Services/paymentService";
 
@@ -84,15 +84,54 @@ const defaultOrder = {
   ],
 };
 
+// const fields = [
+//   {
+//     key: "name",
+//     label: "Full name",
+//     autoComplete: "name",
+//     full: true,
+//   },
+//   {
+//     key: "line1",
+//     label: "Address",
+//     autoComplete: "street-address",
+//     full: true,
+//   },
+//   {
+//     key: "city",
+//     label: "City",
+//     autoComplete: "address-level2",
+//   },
+//   {
+//     key: "state",
+//     label: "State",
+//     autoComplete: "address-level1",
+//   },
+//   {
+//     key: "pincode",
+//     label: "Pincode",
+//     autoComplete: "postal-code",
+//     inputMode: "numeric",
+//     maxLength: 6,
+//   },
+//   {
+//     key: "phone",
+//     label: "Phone",
+//     autoComplete: "tel-national",
+//     inputMode: "numeric",
+//     maxLength: 10,
+//   },
+// ];
+
 const fields = [
   {
-    key: "name",
+    key: "fullName",
     label: "Full name",
     autoComplete: "name",
     full: true,
   },
   {
-    key: "line1",
+    key: ["houseNo", "address"],
     label: "Address",
     autoComplete: "street-address",
     full: true,
@@ -115,7 +154,7 @@ const fields = [
     maxLength: 6,
   },
   {
-    key: "phone",
+    key: ["phone", "mobileNumber"],
     label: "Phone",
     autoComplete: "tel-national",
     inputMode: "numeric",
@@ -125,24 +164,58 @@ const fields = [
 
 const emptyAddress = {
   type: "Home",
-  name: "",
-  line1: "",
+  fullName: "",
+  address: "",
   city: "",
   state: "",
   pincode: "",
   phone: "",
+  mobileNumber: "",
 };
 
+// const validate = (v) => {
+//   console.log("Validating address:", v);
+//   const e = {};
+
+//   if (!v.name.trim()) {
+//     e.name = "Enter your name";
+//   }
+
+//   if (!v.line1.trim()) {
+//     e.line1 = "Enter your address";
+//   }
+
+//   if (!v.city.trim()) {
+//     e.city = "Enter your city";
+//   }
+
+//   if (!v.state.trim()) {
+//     e.state = "Enter your state";
+//   }
+
+//   if (!/^\d{6}\$/.test(v.pincode)) {
+//     e.pincode = "Enter a 6-digit pincode";
+//   }
+
+//   if (!/^[6-9]\d{9}\$/.test(v.phone)) {
+//     e.phone = "Enter a valid 10-digit number";
+//   }
+
+//   return e;
+// };
+
 const validate = (v) => {
+  console.log("Validating address:", v);
   const e = {};
+  const addressValue =  v?.houseNo || v?.address || v?.addressLine1 || "";
 
-  if (!v.name.trim()) {
-    e.name = "Enter your name";
+  if (!v.fullName.trim()) {
+    e.fullName = "Enter your name";
   }
 
-  if (!v.line1.trim()) {
-    e.line1 = "Enter your address";
-  }
+  if (!addressValue.trim()) {
+  e.address = "Enter your address";
+}
 
   if (!v.city.trim()) {
     e.city = "Enter your city";
@@ -152,11 +225,11 @@ const validate = (v) => {
     e.state = "Enter your state";
   }
 
-  if (!/^\d{6}\$/.test(v.pincode)) {
+  if (!/^\d{6}$/.test(v.pincode)) {
     e.pincode = "Enter a 6-digit pincode";
   }
 
-  if (!/^[6-9]\d{9}\$/.test(v.phone)) {
+  if (!/^[6-9]\d{9}$/.test(v.phone) && !/^[6-9]\d{9}$/.test(v.mobileNumber)) {
     e.phone = "Enter a valid 10-digit number";
   }
 
@@ -433,7 +506,8 @@ export default function Checkout({
   const discount = 0;
   const amountAfterDiscount = Math.max(0, subtotal - discount);
   const shipping = 0;
-  const tax = Math.round(amountAfterDiscount * 0.09);
+  // const tax = Math.round(amountAfterDiscount * 0.09);
+  const tax = Math.round(0 * 0.09);
   const total = amountAfterDiscount + shipping + tax;
 
   const canPay =
@@ -521,11 +595,29 @@ export default function Checkout({
     setMode("view");
   };
 
-  const openAdd = () => {
-    setDraft(emptyAddress);
-    setErrors({});
-    setMode("add");
-  };
+  // const openAdd = () => {
+  //   setDraft(emptyAddress);
+  //   setErrors({});
+  //   setMode("add");
+  // };
+
+    const openAdd = () => {
+  setDraft({
+    addressType: "Home",
+    fullName: "",
+    mobileNumber: "",
+    houseNo: "",
+    street: "",
+    area: "",
+    landmark: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+
+  setErrors({});
+  setMode("add");
+};
 
   const cancelAdd = () => {
     setErrors({});
@@ -545,52 +637,171 @@ export default function Checkout({
     }
   };
 
-  const saveNew = (e) => {
-    e.preventDefault();
+  // const saveNew = (e) => {
+  //   e.preventDefault();
 
-    const found = validate(draft);
+  //   const found = validate(draft);
 
-    if (Object.keys(found).length) {
-      setErrors(found);
+  //   if (Object.keys(found).length) {
+  //     setErrors(found);
+  //     return;
+  //   }
+
+  //   const cleaned = Object.fromEntries(
+  //     Object.entries(draft).map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
+  //   );
+
+  //   const created = {
+  //     ...cleaned,
+  //     id: `a${Date.now()}`,
+  //     fullName: cleaned.name,
+  //     addressLine1: cleaned.line1,
+  //     mobileNumber: cleaned.phone,
+  //     addressType: cleaned.addressType || cleaned.type || "Home",
+  //   };
+
+  //   if (isGuest) {
+  //     saveGuestAddress(created);
+  //     setGuestAddress(created);
+  //     setSelectedAddress(created);
+  //     setSelectedId(created.id);
+  //     setPendingId(created.id);
+  //     if (created.pincode) {
+  //       checkPincodeServiceability(created.pincode);
+  //     }
+  //     setMode("view");
+  //     return;
+  //   }
+
+  //   setUserAddress((list) => [...list, created]);
+  //   setSelectedId(created.id);
+  //   setPendingId(created.id);
+  //   setSelectedAddress(created);
+  //   if (created.pincode) {
+  //     checkPincodeServiceability(created.pincode);
+  //   }
+  //   onAddAddress(created);
+  //   setMode("view");
+  // };
+
+  const saveNew = async (e) => {
+  e.preventDefault();
+
+  const found = validate(draft);
+console.log("Validation errors:", found);
+  if (Object.keys(found).length) {
+    setErrors(found);
+    return;
+  }
+
+  const cleaned = Object.fromEntries(
+    Object.entries(draft).map(([k, v]) => [
+      k,
+      typeof v === "string" ? v.trim() : v,
+    ])
+  );
+console.log("Cleaned address data:", cleaned);
+  // ==========================================
+  // MAP FRONTEND FIELDS TO BACKEND FIELDS
+  // ==========================================
+  const addressPayload = {
+    addressType:
+      cleaned.addressType || cleaned.type || "Home",
+    fullName: cleaned.fullName || cleaned.name,
+    mobileNumber:
+      cleaned.mobileNumber || cleaned.phone,
+    houseNo:
+      cleaned.houseNo || cleaned?.address || cleaned.line1 ||
+      cleaned.addressLine1,
+    street:
+      cleaned.street || cleaned.line2 || "",
+    area: cleaned.area || "",
+    landmark: cleaned.landmark || "",
+    city: cleaned.city,
+    state: cleaned.state,
+    pincode: cleaned.pincode,
+    country: cleaned.country || "India",
+  };
+
+  console.log("Address payload for backend:", addressPayload);
+
+  try {
+    // ==========================================
+    // CREATE ADDRESS IN MONGODB
+    // BOTH GUEST AND LOGGED-IN USERS
+    // ==========================================
+    const response = await createAddress(addressPayload);
+
+    console.log("Create address response:", response);
+
+    // Support the normal Axios response format
+    const result = response?.data ?? response;
+
+    if (!result?.success || !result?.address) {
+      toast.error(
+        result?.message || "Failed to save delivery address."
+      );
       return;
     }
 
-    const cleaned = Object.fromEntries(
-      Object.entries(draft).map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
-    );
+    // ==========================================
+    // USE THE SAVED MONGODB ADDRESS
+    // ==========================================
+    const savedAddress = result.address;
 
     const created = {
-      ...cleaned,
-      id: `a${Date.now()}`,
-      fullName: cleaned.name,
-      addressLine1: cleaned.line1,
-      mobileNumber: cleaned.phone,
-      addressType: cleaned.addressType || cleaned.type || "Home",
+      ...savedAddress,
+      id: savedAddress._id,
     };
 
+    // ==========================================
+    // UPDATE GUEST OR LOGGED-IN USER STATE
+    // ==========================================
     if (isGuest) {
+      // Keep your existing guest browser storage
       saveGuestAddress(created);
       setGuestAddress(created);
-      setSelectedAddress(created);
-      setSelectedId(created.id);
-      setPendingId(created.id);
-      if (created.pincode) {
-        checkPincodeServiceability(created.pincode);
-      }
-      setMode("view");
-      return;
+    } else {
+      setUserAddress((list) => [
+        ...list.filter(
+          (item) =>
+            String(item._id || item.id) !==
+            String(created.id)
+        ),
+        created,
+      ]);
+
+      // Keep your existing address callback
+      onAddAddress(created);
     }
 
-    setUserAddress((list) => [...list, created]);
+    // ==========================================
+    // SELECT ADDRESS FOR CHECKOUT
+    // ==========================================
+    setSelectedAddress(created);
     setSelectedId(created.id);
     setPendingId(created.id);
-    setSelectedAddress(created);
-    if (created.pincode) {
-      checkPincodeServiceability(created.pincode);
-    }
-    onAddAddress(created);
+
+    // Update the address displayed under
+    // "Delivering to", if this is its state
+    // setAddress(created);
+
+    setErrors({});
     setMode("view");
-  };
+
+    toast.success("Delivery address saved successfully.");
+  } catch (error) {
+    console.error(
+      "Create address error:",
+      error.response?.data || error
+    );
+
+    toast.error(
+      error.response?.data?.message ||
+        "Failed to save delivery address."
+    );
+  }
+};
 
   const handlePay = async (targetAddress) => {
     const deliveryAddr = targetAddress || address;
@@ -784,6 +995,29 @@ export default function Checkout({
               </div>
             )}
 
+
+            {/* LOGGED-IN USER: NO DELIVERY ADDRESS */}
+            {mode === "view" && !address && (
+              <div className="delivery__empty">
+                <p className="delivery__empty-title">
+                  No delivery address added
+                </p>
+
+                <p className="delivery__empty-text">
+                  Add your delivery address to continue with checkout.
+                </p>
+
+                <button
+                  type="button"
+                  className="btn-solid"
+                  onClick={openAdd}
+                >
+                  <Plus size={16} />
+                  Add Delivery Address
+                </button>
+              </div>
+            )}
+
             {mode === "select" && (
               <div className="addr-list" role="radiogroup" aria-label="Select delivery address">
                 {userAddress.map((a) => {
@@ -859,7 +1093,7 @@ export default function Checkout({
                   </div>
                 </div>
 
-                {fields.map((f) => (
+                {/* {fields.map((f) => (
                   <div key={f.key} className={`field ${f.full ? "field--full" : ""}`}>
                     <label htmlFor={`addr-${f.key}`}>{f.label}</label>
                     <input
@@ -879,7 +1113,40 @@ export default function Checkout({
                       </span>
                     )}
                   </div>
-                ))}
+                ))} */}
+
+                {fields.map((f) => {
+                  const fieldKey = Array.isArray(f.key)
+                    ? f.key.find((key) => draft[key] !== undefined) || f.key[0]
+                    : f.key;
+
+                  return (
+                    <div
+                      key={fieldKey}
+                      className={`field ${f.full ? "field--full" : ""}`}
+                    >
+                      <label htmlFor={`addr-${fieldKey}`}>{f.label}</label>
+
+                      <input
+                        id={`addr-${fieldKey}`}
+                        type="text"
+                        value={draft[fieldKey] ?? ""}
+                        onChange={(e) => handleChange(fieldKey, e.target.value)}
+                        autoComplete={f.autoComplete}
+                        inputMode={f.inputMode}
+                        maxLength={f.maxLength}
+                        aria-invalid={!!errors[fieldKey]}
+                        className={errors[fieldKey] ? "is-invalid" : ""}
+                      />
+
+                      {errors[fieldKey] && (
+                        <span className="field__error" role="alert">
+                          {errors[fieldKey]}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
 
                 <div className="edit-form__actions">
                   <button type="submit" className="btn-solid">
@@ -1006,10 +1273,12 @@ export default function Checkout({
               <dd className="row__free">FREE</dd>
             </div>
 
+          {tax > 0 && (
             <div className="row">
               <dt>Tax (GST)</dt>
               <dd>{formatINR(tax)}</dd>
             </div>
+          )}
           </dl>
 
           <div className="summary__total">
