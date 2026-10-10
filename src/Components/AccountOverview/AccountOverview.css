@@ -161,6 +161,8 @@ ol {
   flex-direction: column;
   gap: var(--gap);
   min-width: 0;
+  padding: 10px;
+  border-radius: 10px;
 }
 .main > * {
   flex: 0 0 auto;
@@ -229,6 +231,15 @@ ol {
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
+
+  border: none;
+  color: #292626;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background-color: #F1CB62;
   transition: background 0.2s;
   white-space: nowrap;
 }
@@ -757,7 +768,6 @@ ol {
 .vt__when {
   font-size: 13px;
 }
-
 .toast {
   inset: auto;
   margin: 0;
@@ -765,6 +775,104 @@ ol {
   width: auto;
   height: auto;
   overflow: visible;
+}
+.address-phone {
+  font-size: 13px;
+  color: #2c2c2a;
+  margin: 0 0 20px 0;
+}
+
+.address-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #f4eee3;
+  padding-top: 15px;
+}
+
+.action-link {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #292626;
+  cursor: pointer;
+  padding: 0;
+}
+
+.action-link.danger {
+  color: #292626;
+}
+
+.action-link:hover {
+  text-decoration: underline;
+}
+
+.dot-separator {
+  color: #b5aaa0;
+  font-size: 10px;
+}
+
+.addresses-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+}
+
+.addresses-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-add-address {
+  background: #ffffff;
+  border: 1px solid #eadecc;
+  color: #3b2219;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.btn-add-address:hover {
+  background: #f4eee3;
+}
+
+.addresses-list-card {
+  background: #ffffff;
+  border: 1px solid #eadecc;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.address-item-block {
+  padding: 10px 0;
+}
+
+.address-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.default-link {
+  color: #52131E;
+}
+
+.address-divider {
+  border: none;
+  border-top: 1px solid #f4eee3;
+  margin: 20px 0;
+}
+
+.modal-overlay {
   position: fixed;
   left: 50%;
   bottom: max(20px, env(safe-area-inset-bottom));

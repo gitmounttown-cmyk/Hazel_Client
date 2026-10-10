@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { getCart, removeCartItem } from "../../Services/cartService";
+import { getCart, removeCartItem, updateCartItem, clearCart } from "../../Services/cartService";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5004/api";
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -26,34 +26,6 @@ const getImageUrl = (image) => {
   return `${UPLOAD_URL}${image?.startsWith("/") ? image : `/${image}`}`;
 };
 
-// function QuantityStepper({ value, onDecrease, onIncrease, disabled }) {
-//   return (
-//     <div className="quantity-stepper">
-//       <button
-//         type="button"
-//         className="quantity-btn"
-//         onClick={onDecrease}
-//         disabled={disabled || value <= 1}
-//         aria-label="Decrease quantity"
-//       >
-//         −
-//       </button>
-
-//       <span className="quantity-value">{value}</span>
-
-//       <button
-//         type="button"
-//         className="quantity-btn"
-//         onClick={onIncrease}
-//         disabled={disabled}
-//         aria-label="Increase quantity"
-//       >
-//         +
-//       </button>
-//     </div>
-//   );
-// }
-
 function QuantityStepper({
   value,
   onDecrease,
@@ -61,16 +33,19 @@ function QuantityStepper({
   disabled,
   maxQuantity,
 }) {
-  const isMaxReached =
-    maxQuantity != null && value >= maxQuantity;
+  const isMaxReached = maxQuantity != null && value >= maxQuantity;
 
   return (
-    <div className="quantity-stepper">
+    <div className="quantity-stepper" style={{ position: 'relative', zIndex: 10 }}>
       <button
         type="button"
         className="quantity-btn"
-        onClick={onDecrease}
-        disabled={disabled || value <= 1}
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log("MINUS BUTTON DIRECT CLICK");
+          onDecrease();
+        }}
+        disabled={false} // Temporarily forced to false to test if it's a disable issue
         aria-label="Decrease quantity"
       >
         −
@@ -81,8 +56,12 @@ function QuantityStepper({
       <button
         type="button"
         className="quantity-btn"
-        onClick={onIncrease}
-        disabled={disabled || isMaxReached}
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log("PLUS BUTTON DIRECT CLICK");
+          onIncrease();
+        }}
+        disabled={false} // Temporarily forced to false to test if it's a disable issue
         aria-label="Increase quantity"
       >
         +
@@ -92,19 +71,16 @@ function QuantityStepper({
 }
 
 function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem, getCartItemStock, navigate }) {
+  const [imageError, setImageError] = useState(false);
   const {
   stockQuantity,
   isStockAvailable,
-  selectedVariant,
-  selectedSize,
 } = getCartItemStock(item);
   const product = item.product || {};
-console.log("CartItemRow product:", product);
   const productName =
     item.productName || product.name || product.productName || "Product";
 
-    const productMedia = product?.variants?.filter((variant) => variant.media && variant.media.length > 0);
-console.log("productMedia:", productMedia);
+  const productMedia = product?.variants?.filter((variant) => variant.media && variant.media.length > 0);
   const productImage =
     item.image ||
     product.image ||
@@ -112,16 +88,11 @@ console.log("productMedia:", productMedia);
     product.images?.[0] ||
     productMedia?.[0]?.media?.[0]?.imageURL ||
     "";
-console.log("productImage:", productImage);
-  const size = item.selectedSize || item.variant?.size || item.variant?.sizeName || "";
-
-  const color =
-    item.color || item.variant?.color || item.variant?.colorName || "";
+  const size = item.size || item.variant?.size || item.variant?.sizeName || "";
+  const color = item.color || item.variant?.color || item.variant?.colorName || "";
 
   const originalPrice = Number(item.price || 0);
-
   const discountPrice = Number(item.discountPrice || 0);
-
   const sellingPrice =
     discountPrice > 0 && discountPrice < originalPrice
       ? discountPrice
@@ -129,11 +100,24 @@ console.log("productImage:", productImage);
 
   return (
     <div className="cart-item" onClick={() => navigate(`/product/${product._id}`)}>
-      <div className="cart-item-image">
+      {/* <div className="cart-item-image">
         {productImage ? (
           <img src={getImageUrl(productImage)} alt={productName} />
         ) : (
           <div className="cart-item-image-placeholder" aria-hidden="true" />
+        )}
+      </div> */}
+      <div className="cart-item-image">
+        {productImage && !imageError ? (
+          <img
+            src={getImageUrl(productImage)}
+            alt={productName}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="cart-item-image-placeholder">
+            No Image Available
+          </div>
         )}
       </div>
 
@@ -157,11 +141,11 @@ console.log("productImage:", productImage);
           <div className="cart-item-price">{formatINR(sellingPrice)}</div>
         </div>
 
-        <div className="cart-item-options">
+        {/* Added e.stopPropagation() here so clicking buttons doesn't trigger card navigation */}
+        <div className="cart-item-options" onClick={(e) => e.stopPropagation()}>
           {color && (
             <div className="cart-item-option">
               <span className="option-label">COLOR</span>
-
               <span className="option-value">{color}</span>
             </div>
           )}
@@ -169,7 +153,6 @@ console.log("productImage:", productImage);
           {size && (
             <div className="cart-item-option">
               <span className="option-label">SIZE</span>
-
               <span className="option-value">{size}</span>
             </div>
           )}
@@ -179,8 +162,14 @@ console.log("productImage:", productImage);
 
             <QuantityStepper
               value={item.quantity}
-              onDecrease={() => onDecrease(item._id)}
-              onIncrease={() => onIncrease(item._id)}
+              onDecrease={() => {
+                console.log("Decrease clicked for:", item);
+                onDecrease(item);
+              }}
+              onIncrease={() => {
+                console.log("Increase clicked for:", item);
+                onIncrease(item);
+              }}
               disabled={loadingItem === item._id || !isStockAvailable}
               maxQuantity={stockQuantity}
             />
@@ -192,11 +181,11 @@ console.log("productImage:", productImage);
           IN STOCK
         </div>
 
-        <div className="cart-item-actions">
+        <div className="cart-item-actions" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             className="text-action"
-            onClick={() => onRemove(item._id)}
+            onClick={() => onRemove(item)}
             disabled={loadingItem === item._id}
           >
             {loadingItem === item._id ? "REMOVING..." : "REMOVE"}
@@ -217,7 +206,6 @@ console.log("productImage:", productImage);
 
 function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
   const [promoOpen, setPromoOpen] = useState(false);
-
   const [promoCode, setPromoCode] = useState("");
 
   return (
@@ -231,13 +219,11 @@ function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
 
       <div className="summary-row">
         <span>Discount</span>
-
         <span className="summary-discount">− {formatINR(discount)}</span>
       </div>
 
       <div className="summary-row">
         <span>Shipping</span>
-
         <span className="summary-free">
           {shipping === 0 ? "Free" : formatINR(shipping)}
         </span>
@@ -245,7 +231,6 @@ function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
 
       <div className="summary-row">
         <span>Estimated Tax</span>
-
         <span>{formatINR(tax)}</span>
       </div>
 
@@ -253,7 +238,6 @@ function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
 
       <div className="summary-row summary-total">
         <span>Total</span>
-
         <span>{formatINR(total)}</span>
       </div>
 
@@ -302,126 +286,6 @@ function OrderSummary({ subtotal, discount, shipping, tax, total, navigate }) {
   );
 }
 
-// function DeliveryAvailability() {
-//   const [pin, setPin] = useState("");
-
-//   const perks = [
-//     {
-//       icon: (
-//         <svg
-//           width="22"
-//           height="22"
-//           viewBox="0 0 24 24"
-//           fill="none"
-//           stroke="currentColor"
-//           strokeWidth="1.2"
-//         >
-//           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-//         </svg>
-//       ),
-//       label: "SECURE CHECKOUT",
-//     },
-//     {
-//       icon: (
-//         <svg
-//           width="22"
-//           height="22"
-//           viewBox="0 0 24 24"
-//           fill="none"
-//           stroke="currentColor"
-//           strokeWidth="1.2"
-//         >
-//           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-//           <path d="M3 3v5h5" />
-//         </svg>
-//       ),
-//       label: "EASY RETURNS",
-//     },
-//     {
-//       icon: (
-//         <svg
-//           width="22"
-//           height="22"
-//           viewBox="0 0 24 24"
-//           fill="none"
-//           stroke="currentColor"
-//           strokeWidth="1.2"
-//         >
-//           <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
-//           <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-//         </svg>
-//       ),
-//       label: "ECO-FRIENDLY PACKAGING",
-//     },
-//     {
-//       icon: (
-//         <svg
-//           width="22"
-//           height="22"
-//           viewBox="0 0 24 24"
-//           fill="none"
-//           stroke="currentColor"
-//           strokeWidth="1.2"
-//         >
-//           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-//           <circle cx="12" cy="7" r="4" />
-//         </svg>
-//       ),
-//       label: "PREMIUM QUALITY",
-//     },
-//   ];
-
-//   return (
-//     <section className="delivery-box">
-//       <div className="delivery-row">
-//         <div className="delivery-label">
-//           <svg
-//             className="delivery-truck-icon"
-//             width="20"
-//             height="20"
-//             viewBox="0 0 24 24"
-//             fill="none"
-//             stroke="currentColor"
-//             strokeWidth="1.5"
-//           >
-//             <rect x="1" y="3" width="15" height="13" />
-//             <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-//             <circle cx="5.5" cy="18.5" r="2.5" />
-//             <circle cx="18.5" cy="18.5" r="2.5" />
-//           </svg>
-//           DELIVERY &amp; AVAILABILITY
-//         </div>
-
-//         <div className="delivery-check">
-//           <input
-//             type="text"
-//             className="pin-input"
-//             placeholder="Enter PIN code"
-//             value={pin}
-//             onChange={(e) => setPin(e.target.value)}
-//           />
-
-//           <button type="button" className="check-btn">
-//             CHECK
-//           </button>
-//         </div>
-//       </div>
-
-//       <div className="delivery-divider" />
-
-//       <div className="perks-row">
-//         {perks.map((perk) => (
-//           <div className="perk" key={perk.label}>
-//             <div className="perk-icon">{perk.icon}</div>
-
-//             <span className="perk-label">{perk.label}</span>
-//           </div>
-//         ))}
-//       </div>
-//     </section>
-//   );
-// }
-
 function RecommendedCard({ product }) {
   const image = product.image || product.images?.[0] || "";
 
@@ -455,7 +319,6 @@ function RecommendedCard({ product }) {
         {product.rating && (
           <div className="rec-card-rating">
             {product.rating}
-
             <span className="rec-star">★</span>
           </div>
         )}
@@ -473,13 +336,9 @@ export default function CartPage() {
 
   const [items, setItems] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
-
   const [loadingItem, setLoadingItem] = useState(null);
-
   const [clearing, setClearing] = useState(false);
 
   const token = localStorage.getItem("hazelToken");
@@ -491,23 +350,22 @@ export default function CartPage() {
     },
   });
 
-  const fetchCart = async () => {
+ const fetchCart = async (isInitialLoad = false) => {
     try {
-      setLoading(true);
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       setError("");
 
-      if (!token) {
-        navigate("/login");
-        return;
-      }
+      // if (!token) {
+      //   navigate("/login");
+      //   return;
+      // }
 
       const response = await getCart();
-console.log("GET CART RESPONSE:", response);
       if (response?.success) {
         const cart = response?.cart;
-
         setItems(cart?.items || []);
-
         setCartTotal(Number(cart?.totalAmount || 0));
       }
     } catch (err) {
@@ -516,85 +374,76 @@ console.log("GET CART RESPONSE:", response);
       if (err.response?.status === 401) {
         localStorage.removeItem("hazelToken");
         localStorage.removeItem("hazelUser");
-
         navigate("/login");
         return;
       }
 
       setError(err.response?.data?.message || "Failed to load cart");
     } finally {
-      setLoading(false);
+      if (isInitialLoad) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchCart();
+    fetchCart(true); // Pass true only for the initial page load
   }, []);
+ 
 
-  const updateQuantity = async (itemId, quantity) => {
+ const handleUpdateQuantity = async (item, quantity) => {
     try {
-      setLoadingItem(itemId);
+      setLoadingItem(item._id); // This already handles disabling the specific stepper buttons cleanly!
       setError("");
 
-      const response = await api.put(`/cart/item/${itemId}`, {
+      const productId = item.product?._id || item.product;
+      const variantId = item.variantId;
+
+      const response = await updateCartItem({
+        productId,
+        variantId,
         quantity,
       });
 
-      if (response.data.success) {
-        const cart = response.data.cart;
-
-        setItems(cart?.items || []);
-
-        setCartTotal(Number(cart?.totalAmount || 0));
+      if (response?.success) {
+        await fetchCart(false); // Fetches silently without full page flicker
+      } else {
+        setError(response?.message || "Failed to update quantity");
       }
     } catch (err) {
       console.error("UPDATE CART ERROR:", err.response?.data || err);
-
       setError(err.response?.data?.message || "Failed to update quantity");
     } finally {
       setLoadingItem(null);
     }
   };
-
-  const handleIncrease = async (itemId) => {
-    const item = items.find((cartItem) => cartItem._id === itemId);
-
-    if (!item) return;
-
-    await updateQuantity(itemId, Number(item.quantity) + 1);
+  const handleIncrease = async (item) => {
+    await handleUpdateQuantity(item, Number(item.quantity) + 1);
   };
 
-  const handleDecrease = async (itemId) => {
-    const item = items.find((cartItem) => cartItem._id === itemId);
-
-    if (!item) return;
-
+  const handleDecrease = async (item) => {
     const newQuantity = Number(item.quantity) - 1;
-
     if (newQuantity < 1) return;
-
-    await updateQuantity(itemId, newQuantity);
+    await handleUpdateQuantity(item, newQuantity);
   };
 
-  const handleRemove = async (itemId) => {
+  const handleRemove = async (item) => {
     try {
-      setLoadingItem(itemId);
+      setLoadingItem(item._id);
       setError("");
 
-      const response = await removeCartItem(itemId);
+      const productId = item.product?._id || item.product;
+      const variantId = item.variantId;
 
-      if (response.data.success) {
-        // const cart = response.data.cart;
+      const response = await removeCartItem({ productId, variantId });
 
-        // setItems(cart?.items || []);
-        // fetch the cart again to get the updated items and total
+      if (response?.success) {
         await fetchCart();
-
-        // setCartTotal(Number(cart?.totalAmount || 0));
+      } else {
+        setError(response?.message || "Failed to remove item");
       }
     } catch (err) {
       console.error("REMOVE CART ERROR:", err.response?.data || err);
-
       setError(err.response?.data?.message || "Failed to remove item");
     } finally {
       setLoadingItem(null);
@@ -608,15 +457,16 @@ console.log("GET CART RESPONSE:", response);
       setClearing(true);
       setError("");
 
-      const response = await api.delete("/cart/clear");
+      // const response = await api.delete("/cart/clear");
+      const response = await clearCart();
+console.log("Clear cart response:", response);
 
-      if (response.data.success) {
+      if (response?.success) {
         setItems([]);
         setCartTotal(0);
       }
     } catch (err) {
       console.error("CLEAR CART ERROR:", err.response?.data || err);
-
       setError(err.response?.data?.message || "Failed to clear cart");
     } finally {
       setClearing(false);
@@ -625,9 +475,7 @@ console.log("GET CART RESPONSE:", response);
 
   const subtotal = items.reduce((sum, item) => {
     const price = Number(item.price || 0);
-
     const discountPrice = Number(item.discountPrice || 0);
-
     const sellingPrice =
       discountPrice > 0 && discountPrice < price ? discountPrice : price;
 
@@ -636,7 +484,6 @@ console.log("GET CART RESPONSE:", response);
 
   const discount = items.reduce((sum, item) => {
     const price = Number(item.price || 0);
-
     const discountPrice = Number(item.discountPrice || 0);
 
     if (discountPrice > 0 && discountPrice < price) {
@@ -647,9 +494,7 @@ console.log("GET CART RESPONSE:", response);
   }, 0);
 
   const shipping = 0;
-
   const tax = Math.round(Math.max(0, subtotal - discount) * 0.018);
-
   const total =
     cartTotal > 0 ? cartTotal + tax : subtotal - discount + shipping + tax;
 
@@ -708,23 +553,6 @@ console.log("GET CART RESPONSE:", response);
       selectedSize,
     };
   };
-  
-
-//   const selectedVariant = product?.variants?.find(
-//   (variant) =>
-//     variant.color?.toLowerCase() === color?.toLowerCase()
-// );
-
-// const selectedSize = selectedVariant?.sizes?.find(
-//   (sizeItem) =>
-//     sizeItem.size?.toUpperCase() === size?.toUpperCase()
-// );
-
-// const stockQuantity = selectedSize?.stockQuantity ?? 0;
-
-// const isStockAvailable =
-//   selectedSize?.isActive === true &&
-//   stockQuantity > 0;
 
   return (
     <div className="cart-page">
@@ -732,9 +560,7 @@ console.log("GET CART RESPONSE:", response);
         <header className="cart-header">
           <div>
             <p className="cart-eyebrow">YOUR BAG</p>
-
             <h1 className="cart-title">Ready When You Are.</h1>
-
             <p className="cart-subtitle">
               Review your pieces before you make them yours.
             </p>
@@ -750,9 +576,7 @@ console.log("GET CART RESPONSE:", response);
         {items.length === 0 ? (
           <div className="cart-empty">
             <h2>Your cart is empty</h2>
-
             <p>Add some products to your cart to see them here.</p>
-
             <button
               type="button"
               className="continue-shopping-btn"
@@ -786,8 +610,6 @@ console.log("GET CART RESPONSE:", response);
                 >
                   {clearing ? "CLEARING..." : "CLEAR CART"}
                 </button>
-
-                {/* <DeliveryAvailability /> */}
               </div>
 
               <OrderSummary

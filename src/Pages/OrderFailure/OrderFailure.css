@@ -81,6 +81,7 @@
 }
 
 .pf__eyebrow {
+  padding-top:35px;
   margin-top: clamp(20px, 3vw, 28px);
   display: inline-flex;
   align-items: center;
@@ -95,6 +96,8 @@
 }
 
 .pf__title {
+  padding-bottom: 20px;
+  padding-top: 30px;
   margin-top: 14px;
   font-family: var(--serif);
   font-weight: 400;

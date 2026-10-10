@@ -4,12 +4,12 @@ import * as Lucide from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import "./AccountOverview.css";
-import "./AccountOverview.css";
 import toast from "react-hot-toast";
 import { getMyOrders } from "../../Services/orderService";
-import {formatOrderDate} from "../../utils/dateFormat";
-import {formatINR} from "../../utils/currencyFormat";
-import { formatOrderDateTime } from "../../utils/dateFormat";
+import { formatOrderDate, formatOrderDateTime } from "../../utils/dateFormat";
+import { formatINR } from "../../utils/currencyFormat";
+import { updateUserData } from "../../Services/authService";
+
 /* Safe icon lookup: works across lucide-react versions (old/new names). */
 const pick = (...names) => {
   for (const n of names) if (Lucide[n]) return Lucide[n];
@@ -28,9 +28,8 @@ const SquarePen = pick("SquarePen", "Edit", "Pencil");
 const Mail = pick("Mail");
 const Package = pick("Package");
 const X = pick("X");
-const Plus = pick("Plus");
 
-/* Brand icons are inline SVGs (removed from newer lucide-react versions) */
+/* Brand icons are inline SVGs */
 const Svg = ({ size = 16, children }) => (
   <svg
     width={size}
@@ -65,7 +64,6 @@ const Pinterest = (p) => (
   </Svg>
 );
 
-/* Replace with your own image URLs / imports. Missing images show a styled placeholder. */
 const IMG = {
   robe: "/images/mulberry-silk-robe.jpg",
   avatar: "/images/priya.jpg",
@@ -80,49 +78,16 @@ const NAV = [
   { key: "profile", label: "Profile", icon: User },
 ];
 
-const STEPS = [
-  { label: "Confirmed", icon: Check, when: "12 Oct, 10:42 AM" },
-  { label: "Packed", icon: Check, when: "13 Oct, 4:15 PM" },
-  { label: "Shipped", icon: Truck, when: "14 Oct, 9:05 AM" },
-  { label: "Delivered", icon: House, when: "Expected 18 Oct" },
-];
-const CURRENT_STEP = 2;
-
-const ORDERS = [
-  {
-    id: "LA-902183",
-    name: "Mulberry Silk Robe - Champagne",
-    date: "12th Oct, 2023",
-    price: "₹14,500",
-    img: IMG.robe,
-  },
-  {
-    id: "LA-871204",
-    name: "Satin PJ Set - Ivory",
-    date: "3rd Aug, 2023",
-    price: "₹5,900",
-    img: IMG.pj,
-    delivered: "Delivered 8 Aug",
-  },
-  {
-    id: "LA-840917",
-    name: "Velvet Slippers - Rust",
-    date: "21st May, 2023",
-    price: "₹2,800",
-    img: IMG.slippers,
-    delivered: "Delivered 26 May",
-  },
-];
-
 const mask = (p) => `+91 XXXXX ${p?.slice(-5)}`;
 const fmt = (p) => `+91 ${p?.slice(0, 5)} ${p?.slice(5)}`;
-const digits = (v, n) => v.replace(/\D/g, "").slice(0, n);
+const digits = (v, n) => v?.replace(/\D/g, "").slice(0, n) || "";
+
 const normalise = (list, defId) => {
-  const id = list.some((x) => x.id === defId)
+  const id = list.some((x) => x._id === defId)
     ? defId
-    : (list.find((x) => x.isDefault) || list[0])?.id;
+    : (list.find((x) => x.isDefault) || list[0])?._id;
   return list
-    .map((x) => ({ ...x, isDefault: x.id === id }))
+    .map((x) => ({ ...x, isDefault: x._id === id }))
     .sort((a, b) => b.isDefault - a.isDefault);
 };
 
@@ -155,8 +120,6 @@ function Modal({ title, onClose, children }) {
     const el = dlg.current;
     if (!el) return undefined;
     const native = typeof el.showModal === "function";
-    // A native <dialog> lives in the browser's "top layer": it is always centred on the real
-    // screen, whatever transforms / overflow / z-index / layout the surrounding page has.
     if (native) {
       if (!el.open) el.showModal();
     } else el.setAttribute("open", "");
@@ -167,8 +130,8 @@ function Modal({ title, onClose, children }) {
     const onCancel = (e) => {
       e.preventDefault();
       closeRef.current();
-    }; // Esc key
-    const onKey = (e) => e.key === "Escape" && closeRef.current(); // fallback browsers
+    };
+    const onKey = (e) => e.key === "Escape" && closeRef.current();
     el.addEventListener("cancel", onCancel);
     if (!native) document.addEventListener("keydown", onKey);
     return () => {
@@ -198,28 +161,6 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-// function Toast({ toast }) {
-//   const ref = useRef(null);
-//   useEffect(() => {
-//     try {
-//       ref.current?.showPopover?.();
-//     } catch (e) {
-//       /* already open */
-//     }
-//   }, []);
-//   return (
-//     <div
-//       ref={ref}
-//       popover="manual"
-//       className="toast"
-//       role="status"
-//       aria-live="polite"
-//     >
-//       <span>{toast.msg}</span>
-//     </div>
-//   );
-// }
-
 function Field({ label, error, ...rest }) {
   return (
     <label className="form__field">
@@ -234,28 +175,86 @@ function ProfileForm({ profile, onSave, onCancel }) {
   const [f, setF] = useState(profile);
   const [err, setErr] = useState({});
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
-  const submit = (e) => {
+
+  const submit = async (e) => {
     e.preventDefault();
+
     const er = {};
-    if (!f.name.trim()) er.name = "Enter your name";
-    if (!/^\d{10}$/.test(f.phone)) er.phone = "Enter a 10-digit mobile number";
-    if (!/^\S+@\S+\.\S+$/.test(f.email))
+
+    if (!f.name?.trim()) {
+      er.name = "Enter your name";
+    }
+
+    if (!/^\d{10}$/.test(f.phone || "")) {
+      er.phone = "Enter a 10-digit mobile number";
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(f.email || "")) {
       er.email = "Enter a valid email address";
+    }
+
     setErr(er);
-    if (!Object.keys(er).length) onSave({ ...f, name: f.name.trim() });
+
+    if (Object.keys(er).length > 0) return;
+
+    try {
+      const response = await updateUserData({
+        name: f.name.trim(),
+        email: f.email.trim(),
+        phone: f.phone.trim(),
+      });
+      console.log("Profile update response:", response);
+
+      if (response.success) {
+        toast.success(response?.message || "Profile updated successfully!");
+
+        const storedUser = localStorage.getItem("hazelUser");
+
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+
+          const newStoredUser = {
+            ...parsedUser,
+            name: f.name.trim(),
+            fullName: f.name.trim(),
+            email: f.email.trim(),
+            phone: f.phone.trim(),
+          };
+
+          localStorage.setItem("hazelUser", JSON.stringify(newStoredUser));
+          window.dispatchEvent(new Event("storage"));
+        }
+
+        if (typeof onSave === "function") {
+          onSave({
+            ...f,
+            name: f.name.trim(),
+          });
+        }
+      } else {
+        toast.error(response?.message || "Failed to update profile.");
+      }
+    } catch (err) {
+      console.error("Error updating profile:", err.response?.data || err.message);
+
+      alert(
+        err.response?.data?.message || "Failed to save changes to database."
+      );
+    }
   };
+
   return (
     <form className="form" onSubmit={submit} noValidate>
       <Field
         label="Full name"
-        value={f.name}
+        value={f.name || ""}
         onChange={(e) => set("name", e.target.value)}
         error={err.name}
         autoComplete="name"
       />
       <Field
         label="Mobile number"
-        value={f.phone}
+        value={f.phone || ""}
         onChange={(e) => set("phone", digits(e.target.value, 10))}
         error={err.phone}
         inputMode="numeric"
@@ -264,7 +263,7 @@ function ProfileForm({ profile, onSave, onCancel }) {
       <Field
         label="Email address"
         type="email"
-        value={f.email}
+        value={f.email || ""}
         onChange={(e) => set("email", e.target.value)}
         error={err.email}
         autoComplete="email"
@@ -288,30 +287,45 @@ function AddressForm({ address, onSave, onCancel }) {
       houseNo: "",
       street: "",
       city: "",
+      state: "",
       pincode: "",
       mobileNumber: "",
       isDefault: false,
-    },
+    }
   );
   const [err, setErr] = useState({});
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
+
   const submit = (e) => {
     e.preventDefault();
     const er = {};
-    if (!f.fullName.trim()) er.fullName = "Enter the recipient's name";
-    if (!f.houseNo.trim()) er.houseNo = "Enter house / flat number and building";
-    if (!f.city.trim()) er.city = "Enter city and state";
-    if (!/^\d{6}$/.test(f.pincode)) er.pincode = "Enter a 6-digit pincode";
-    if (!/^\d{10}$/.test(f.mobileNumber)) er.mobileNumber = "Enter a 10-digit mobile number";
+
+    const cleanPincode = digits(String(f.pincode || ""), 6);
+    const cleanMobile = digits(String(f.mobileNumber || ""), 10);
+
+    if (!f.fullName?.trim()) er.fullName = "Enter the recipient's name";
+    if (!f.houseNo?.trim()) er.houseNo = "Enter house / flat number";
+    if (!f.city?.trim()) er.city = "Enter city";
+    if (!f.state?.trim()) er.state = "Enter state";
+    if (!/^\d{6}$/.test(cleanPincode)) er.pincode = "Enter a 6-digit pincode";
+    if (!/^\d{10}$/.test(cleanMobile)) er.mobileNumber = "Enter a 10-digit mobile number";
+
     setErr(er);
-    if (!Object.keys(er).length) onSave(f);
+    if (!Object.keys(er).length) {
+      onSave({
+        ...f,
+        pincode: cleanPincode,
+        mobileNumber: cleanMobile,
+      });
+    }
   };
+
   return (
     <form className="form form--grid" onSubmit={submit} noValidate>
       <div className="span2">
         <Field
           label="Full name"
-          value={f.fullName}
+          value={f.fullName || ""}
           onChange={(e) => set("fullName", e.target.value)}
           error={err.fullName}
           autoComplete="name"
@@ -320,7 +334,7 @@ function AddressForm({ address, onSave, onCancel }) {
       <div className="span2">
         <Field
           label="Flat, house no., building"
-          value={f.houseNo}
+          value={f.houseNo || ""}
           onChange={(e) => set("houseNo", e.target.value)}
           error={err.houseNo}
           autoComplete="address-line1"
@@ -328,42 +342,61 @@ function AddressForm({ address, onSave, onCancel }) {
       </div>
       <div className="span2">
         <Field
-          label="Area, locality (optional)"
-          value={f.street}
+          label="Area, street (optional)"
+          value={f.street || ""}
           onChange={(e) => set("street", e.target.value)}
           error={err.street}
           autoComplete="address-line2"
         />
       </div>
       <Field
-        label="City, state"
-        value={f.city}
+        label="City"
+        value={f.city || ""}
         onChange={(e) => set("city", e.target.value)}
         error={err.city}
         autoComplete="address-level2"
       />
       <Field
+        label="State"
+        value={f.state || ""}
+        onChange={(e) => set("state", e.target.value)}
+        error={err.state}
+        autoComplete="address-level1"
+      />
+      <Field
         label="Pincode"
-        value={f.pincode}
-        onChange={(e) => set("pincode", digits(e.target.value, 6))}
+        value={f.pincode || ""}
+        onChange={(e) => {
+          const val = digits(e.target.value, 6);
+          set("pincode", val);
+          if (err.pincode && /^\d{6}$/.test(val)) {
+            setErr((prev) => ({ ...prev, pincode: undefined }));
+          }
+        }}
         error={err.pincode}
         inputMode="numeric"
+        maxLength={6}
         autoComplete="postal-code"
       />
-      <div className="span2">
-        <Field
-          label="Mobile number"
-          value={f.mobileNumber}
-          onChange={(e) => set("mobileNumber", digits(e.target.value, 10))}
-          error={err.mobileNumber}
-          inputMode="numeric"
-          autoComplete="tel-national"
-        />
-      </div>
+      <Field
+        label="Mobile number"
+        value={f.mobileNumber || ""}
+        onChange={(e) => {
+          const val = digits(e.target.value, 10);
+          set("mobileNumber", val);
+          if (err.mobileNumber && /^\d{10}$/.test(val)) {
+            setErr((prev) => ({ ...prev, mobileNumber: undefined }));
+          }
+        }}
+        error={err.mobileNumber}
+        inputMode="numeric"
+        maxLength={10}
+        autoComplete="tel-national"
+      />
       <label className="check span2">
         <input
           type="checkbox"
-          checked={f.isDefault}
+          checked={f.isDefault || false}
           onChange={(e) => set("isDefault", e.target.checked)}
         />
         <span>Make this my default shipping address</span>
@@ -387,42 +420,36 @@ export default function AccountDashboard() {
   const navigate = useNavigate();
   const [view, setView] = useState("overview");
   const [modal, setModal] = useState(null);
-  // const [toast, setToast] = useState(null);
   const [loggedOut, setLoggedOut] = useState(false);
   const [profile, setProfile] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
-   const fetchAddresses = async () => {
-      try {
-        const response = await axiosInstance.get("/addresses/all");
-        const result = response.data;
-        if (result.success) {
-          setAddresses(result.addresses || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch addresses:", err);
-      }
-    };
+  // Velocity live tracking state
+  const [trackingData, setTrackingData] = useState(null);
+  const [loadingTracking, setLoadingTracking] = useState(false);
 
-    //get my orders
+  const fetchAddresses = async () => {
+    try {
+      const response = await axiosInstance.get("/addresses/all");
+      const result = response.data;
+      if (result.success) {
+        setAddresses(result.addresses || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch addresses:", err);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
       setLoadingOrders(true);
-
       const response = await getMyOrders();
-
-      // console.log("Response from getMyOrders:", response);
-
       const result = response.data;
 
       if (result.success) {
         const fetchedOrders = result.data || result.orders || [];
-
-        // console.log("Fetched orders:", fetchedOrders);
-
         setOrders(fetchedOrders);
       } else {
         console.error("Failed to fetch orders:", result.message);
@@ -439,77 +466,72 @@ export default function AccountDashboard() {
   }, []);
 
   useEffect(() => {
-      const storedUser = localStorage.getItem("hazelUser");
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          const userData = {
-            name: parsedUser.name || parsedUser.fullName || "Customer",
-            email: parsedUser.email || "",
-            phone: parsedUser.phone || parsedUser.mobileNumber || "",
-          };
-          // console.log("Parsed user data:", userData);
-          setProfile(userData);
-        } catch (error) {
-          console.error("Failed to parse stored user:", error);
-        }
-      } else {
-        navigate("/login");
-        return;
+    const storedUser = localStorage.getItem("hazelUser");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        const userData = {
+          name: parsedUser.name || parsedUser.fullName || "Customer",
+          email: parsedUser.email || "",
+          phone: parsedUser.phone || parsedUser.mobileNumber || "",
+        };
+        setProfile(userData);
+      } catch (error) {
+        console.error("Failed to parse stored user:", error);
       }
-  
-      fetchAddresses();
-      // setLoading(false);
-    }, [navigate]);
+    } else {
+      navigate("/login");
+      return;
+    }
 
-  useEffect(() => {
-    // if (!toast) return;
-    // const t = setTimeout(() => setToast(null), 4500);
-    // return () => clearTimeout(t);
-  }, [toast]);
+    fetchAddresses();
+  }, [navigate]);
 
-  const close = () => setModal(null);
-  const say = (msg) => setToast({ msg });
+  const close = () => {
+    setModal(null);
+    setTrackingData(null);
+  };
 
   const saveProfile = (p) => {
     setProfile(p);
     close();
-    say("Profile updated");
   };
+
   const saveAddress = async (a) => {
-    const id = a._id ?? Date.now();
-    const rec = { ...a, id };
-    const list = a._id
-      ? addresses.map((x) => (x._id === id ? rec : x))
-      : [...addresses, rec];
-      console.log("Saving address:", rec);
-      console.log("Updated address list:", list);
-    setAddresses(normalise(list, rec.isDefault ? id : undefined));
-    console.log("Addresses after save:", addresses);
+    const payload = {
+      fullName: a.fullName,
+      mobileNumber: a.mobileNumber,
+      houseNo: a.houseNo,
+      street: a.street || "",
+      city: a.city,
+      state: a.state,
+      pincode: a.pincode,
+      isDefault: Boolean(a.isDefault),
+    };
+
     try {
       let response;
       if (modal?.id) {
-        response = await axiosInstance.put(`/addresses/update/${modal.id}`, rec);
+        response = await axiosInstance.put(`/addresses/update/${modal.id}`, payload);
       } else {
-        response = await axiosInstance.post("/addresses/create", rec);
+        response = await axiosInstance.post("/addresses/create", payload);
       }
 
       const result = response.data;
       if (result.success) {
+        toast.success(modal?.id ? "Address updated successfully" : "Address added successfully");
         fetchAddresses();
-        // setIsAddressModalOpen(false);
       } else {
         toast.error(result.message || "Failed to save address");
       }
     } catch (err) {
       console.error("Error saving address:", err);
-      toast.error("Failed to save address to database.");
+      toast.error(err.response?.data?.message || "Failed to save address to database.");
     }
     close();
-    say(a._id ? "Address updated" : "Address added");
   };
+
   const removeAddress = async (id) => {
-    setAddresses((l) => normalise(l.filter((x) => x._id !== id)));
     try {
       const response = await axiosInstance.delete(`/addresses/delete/${id}`);
       const result = response.data;
@@ -523,9 +545,35 @@ export default function AccountDashboard() {
     }
     // say("Address deleted");
   };
-  const makeDefault = (id) => {
-    setAddresses((l) => normalise(l, id));
-    say("Default address changed");
+
+  const makeDefault = async (id) => {
+    try {
+      const response = await axiosInstance.put(`/addresses/default/${id}`);
+      if (response.data.success) {
+        toast.success("Default address updated");
+        fetchAddresses();
+      }
+    } catch (err) {
+      console.error("Error setting default address:", err);
+    }
+  };
+
+  // Fetch Velocity Live Tracking Details
+  const handleTrackClick = async (order) => {
+    setModal({ type: "track", order });
+    setLoadingTracking(true);
+    setTrackingData(null);
+
+    try {
+      const res = await axiosInstance.get(`/velocity/track-by-order/${order.orderNumber}`);
+      if (res.data.success) {
+        setTrackingData(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch live Velocity tracking details:", err);
+    } finally {
+      setLoadingTracking(false);
+    }
   };
 
   if (loggedOut) {
@@ -533,7 +581,7 @@ export default function AccountDashboard() {
       <div className="acct acct--out">
         <div className="card out">
           <h1 className="card__title">You've been logged out</h1>
-          <p className="muted">See you soon, {profile?.name.split(" ")[0]}.</p>
+          <p className="muted">See you soon, {profile?.name?.split(" ")[0]}.</p>
           <button className="btn" onClick={() => setLoggedOut(false)}>
             Log back in
           </button>
@@ -544,7 +592,6 @@ export default function AccountDashboard() {
 
   const show = (k) => view === "overview" || view === k;
   const single = view !== "overview";
-  const order = ORDERS[0];
 
   const AddressCard = ({ a, actions }) => (
     <div className="addr">
@@ -568,7 +615,7 @@ export default function AccountDashboard() {
           </>
         )}
         <br />
-        {a.city} - {a.pincode}
+        {a.city}, {a.state} - {a.pincode}
       </p>
       <p className="addr__phone">Phone: {fmt(a.mobileNumber)}</p>
       {actions && (
@@ -588,124 +635,66 @@ export default function AccountDashboard() {
     </div>
   );
 
-  // console.log("Addresses_user:", addresses);
-  const defaultAddress = addresses.find((addr) => addr.isDefault) || addresses[0];
-
-  // console.log("Profile:", profile);
-
   const getImageUrl = (image) => {
-  if (!image) return "/images/no-image.png";
-
-  if (image.startsWith("http")) {
-    return image;
-  }
-
-  return `${import.meta.env.VITE_UPLOAD_URL}${image}`;
-};
-
-const getOrderDisplay = (order) => {
-  const firstItem = order?.items?.[0];
-
-  if (!firstItem) {
-    return {
-      name: "Order",
-      image: "",
-    };
-  }
-
-  const extraItems = order.items.length - 1;
-
-  return {
-    name:
-      extraItems > 0
-        ? `${firstItem.productName} + ${extraItems} more`
-        : firstItem.productName,
-
-    image: firstItem.image,
+    if (!image) return "/images/no-image.png";
+    if (image.startsWith("http")) return image;
+    return `${import.meta.env.VITE_UPLOAD_URL}${image}`;
   };
-};
 
-const ACTIVE_STATUSES = [
-  "PENDING",
-  "CONFIRMED",
-  "PACKED",
-  "SHIPPED",
-];
+  const getOrderDisplay = (order) => {
+    const firstItem = order?.items?.[0];
+    if (!firstItem) return { name: "Order", image: "" };
+    const extraItems = order.items.length - 1;
+    return {
+      name:
+        extraItems > 0
+          ? `${firstItem.productName} + ${extraItems} more`
+          : firstItem.productName,
+      image: firstItem.image,
+    };
+  };
 
-const isActiveOrder = (order) =>
-  ACTIVE_STATUSES.includes(order.orderStatus);
+  // Safe array resolution sorted newest first
+  const ordersList = Array.isArray(orders) ? orders : [];
 
-const activeOrder = orders.find(isActiveOrder);
+  // Active Order is the newest order (index 0)
+  const activeOrder = ordersList.length > 0 ? ordersList[0] : null;
 
-const pastOrders = orders.filter(
-  (order) => !isActiveOrder(order)
-);
+  // Past Orders includes ALL previous orders (sliced from index 1)
+  const pastOrders = ordersList.length > 1 ? ordersList.slice(1) : [];
 
-// const getCurrentStep = (status) => {
-//   switch (status) {
-//     case "CONFIRMED":
-//       return 0;
+  const getCurrentStep = (status) => {
+    switch (status) {
+      case "PENDING":
+        return -1;
+      case "CONFIRMED":
+        return 0;
+      case "PACKED":
+        return 1;
+      case "SHIPPED":
+        return 2;
+      case "DELIVERED":
+        return 3;
+      default:
+        return -1;
+    }
+  };
 
-//     case "PACKED":
-//       return 1;
-
-//     case "SHIPPED":
-//       return 2;
-
-//     case "DELIVERED":
-//       return 3;
-
-//     case "PENDING":
-//     default:
-//       return -1;
-//   }
-// };
-
-const getCurrentStep = (status) => {
-  switch (status) {
-    case "PENDING":
-      return -1;
-
-    case "CONFIRMED":
-      return 0;
-
-    case "PACKED":
-      return 1;
-
-    case "SHIPPED":
-      return 2;
-
-    case "DELIVERED":
-      return 3;
-
-    default:
-      return -1;
-  }
-};
-
-
-const getOrderSteps = (order) => {
-  return [
+  const getOrderSteps = (order) => [
     {
       label: "Confirmed",
       icon: Check,
-      when: order.confirmedAt
-        ? formatOrderDateTime(order.confirmedAt)
-        : "",
+      when: order.confirmedAt ? formatOrderDateTime(order.confirmedAt) : "",
     },
     {
       label: "Packed",
       icon: Check,
-      when: order.packedAt
-        ? formatOrderDateTime(order.packedAt)
-        : "",
+      when: order.packedAt ? formatOrderDateTime(order.packedAt) : "",
     },
     {
       label: "Shipped",
       icon: Truck,
-      when: order.shippedAt
-        ? formatOrderDateTime(order.shippedAt)
-        : "",
+      when: order.shippedAt ? formatOrderDateTime(order.shippedAt) : "",
     },
     {
       label: "Delivered",
@@ -713,17 +702,15 @@ const getOrderSteps = (order) => {
       when: order.deliveredAt
         ? formatOrderDateTime(order.deliveredAt)
         : order.expectedDeliveryDate
-          ? `Expected ${formatOrderDate(order.expectedDeliveryDate)}`
-          : "",
+        ? `Expected ${formatOrderDate(order.expectedDeliveryDate)}`
+        : "",
     },
   ];
-};
 
-//logout function
-const handleLogout = () => {
-  localStorage.clear();
-  navigate("/login");
-};
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
   return (
     <div className="acct">
@@ -731,7 +718,7 @@ const handleLogout = () => {
         <p className="eyebrow">My account</p>
         <h1 className="acct__title">Your Space.</h1>
         <p className="acct__welcome">
-          Welcome back, {profile?.name.split(" ")[0]}.
+          Welcome back, {profile?.name?.split(" ")[0]}.
         </p>
       </header>
 
@@ -777,65 +764,113 @@ const handleLogout = () => {
                   </button>
                 )}
               </div>
-              <div className="order">
-                <Img className="order__img" src={order.img} alt={order.name} />
-                <div className="order__body">
-                  <div className="order__top">
-                    <div className="order__info">
-                      <p className="order__id">ORDER #{order.id}</p>
-                      <h3 className="order__name">{order.name}</h3>
-                      <p className="muted">Placed on {order.date}</p>
+
+              {activeOrder ? (
+                (() => {
+                  const display = getOrderDisplay(activeOrder);
+                  const currentStep = getCurrentStep(activeOrder.orderStatus);
+                  const steps = getOrderSteps(activeOrder);
+                  return (
+                    <div className="order">
+                      <Img
+                        className="order__img"
+                        src={getImageUrl(display.image)}
+                        alt={display.name}
+                      />
+                      <div className="order__body">
+                        <div className="order__top">
+                          <div className="order__info">
+                            <p className="order__id">
+                              ORDER #{activeOrder.orderNumber}
+                            </p>
+                            <h3 className="order__name">{display.name}</h3>
+                            <p className="muted">
+                              Placed on {formatOrderDate(activeOrder.createdAt)}
+                            </p>
+                          </div>
+                          <div className="order__buy">
+                            <p className="order__price">
+                              {formatINR(activeOrder.totalAmount)}
+                            </p>
+                            <button
+                              className="btn"
+                              onClick={() => handleTrackClick(activeOrder)}
+                            >
+                              Track Order
+                            </button>
+                          </div>
+                        </div>
+
+                        <ol className="track">
+                          {steps.map(({ label, icon: Icon }, i) => (
+                            <li
+                              key={label}
+                              className={`track__step ${
+                                i < currentStep ? "is-done" : ""
+                              } ${i === currentStep ? "is-current" : ""}`}
+                            >
+                              <span className="track__dot">
+                                <Icon size={14} />
+                              </span>
+                              <span className="track__label">{label}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
                     </div>
-                    <div className="order__buy">
-                      <p className="order__price">{order.price}</p>
-                      <button
-                        className="btn"
-                        onClick={() => setModal({ type: "track" })}
-                      >
-                        Track Order
-                      </button>
-                    </div>
-                  </div>
-                  <ol className="track">
-                    {STEPS.map(({ label, icon: Icon }, i) => (
-                      <li
-                        key={label}
-                        className={`track__step ${i < CURRENT_STEP ? "is-done" : ""} ${i === CURRENT_STEP ? "is-current" : ""}`}
-                      >
-                        <span className="track__dot">
-                          <Icon size={14} />
-                        </span>
-                        <span className="track__label">{label}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
+                  );
+                })()
+              ) : (
+                <p className="muted">No active orders.</p>
+              )}
             </section>
           )}
 
-          {view === "orders" && (
+          {(show("orders") || view === "orders") && (
             <section className="card">
               <div className="card__head">
                 <h2 className="card__title">Past Orders</h2>
               </div>
-              <ul className="rows">
-                {ORDERS.slice(1).map((o) => (
-                  <li key={o.id} className="row">
-                    <Img className="row__img" src={o.img} alt={o.name} />
-                    <div className="row__main">
-                      <p className="row__name">{o.name}</p>
-                      <p className="muted row__meta">
-                        #{o.id} · Placed {o.date}
-                      </p>
-                    </div>
-                    <div className="row__end">
-                      <p className="order__price">{o.price}</p>
-                      <span className="badge">{o.delivered}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+
+              {pastOrders.length > 0 ? (
+                <ul className="rows">
+                  {pastOrders.map((order) => {
+                    const display = getOrderDisplay(order);
+                    return (
+                      <li key={order._id} className="row">
+                        <Img
+                          className="row__img"
+                          src={getImageUrl(display.image)}
+                          alt={display.name}
+                        />
+                        <div className="row__main">
+                          <p className="row__name">{display.name}</p>
+                          <p className="muted row__meta">
+                            #{order.orderNumber} · Placed{" "}
+                            {formatOrderDate(order.createdAt)}
+                          </p>
+                        </div>
+                        <div className="row__end">
+                          <p className="order__price">
+                            {formatINR(order.totalAmount)}
+                          </p>
+                          <span className="badge">
+                            {order.orderStatus === "DELIVERED"
+                              ? `DELIVERED ${
+                                  order.deliveredAt
+                                    ? formatOrderDate(order.deliveredAt)
+                                    : ""
+                                }`
+                              : order.orderStatus}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="muted">No past orders.</p>
+              )}
             </section>
           )} */}
 
@@ -1139,25 +1174,66 @@ console.log('currentStep:', currentStep, 'activeOrder.orderStatus:', activeOrder
           />
         </Modal>
       )}
-      {modal?.type === "track" && (
-        <Modal title={`Order #${order.id}`} onClose={close}>
-          <p className="muted vt__sub">{order.name}</p>
-          <ol className="vt">
-            {STEPS.map(({ label, icon: Icon, when }, i) => (
-              <li
-                key={label}
-                className={`vt__item ${i < CURRENT_STEP ? "is-done" : ""} ${i === CURRENT_STEP ? "is-current" : ""}`}
-              >
-                <span className="track__dot">
-                  <Icon size={14} />
-                </span>
-                <div>
-                  <p className="vt__label">{label}</p>
-                  <p className="muted vt__when">{when}</p>
+      {modal?.type === "track" && modal?.order && (
+        <Modal title={`Order #${modal.order.orderNumber}`} onClose={close}>
+          <p className="muted vt__sub">
+            {getOrderDisplay(modal.order).name}
+          </p>
+
+          {loadingTracking ? (
+            <p className="muted" style={{ padding: "16px 0" }}>
+              Fetching live tracking details from Velocity...
+            </p>
+          ) : trackingData ? (
+            <div style={{ marginBottom: "16px" }}>
+              <p><strong>Courier:</strong> {trackingData.courierName || "Velocity Partner"}</p>
+              <p><strong>AWB Code:</strong> {trackingData.awbCode}</p>
+              <p><strong>Status:</strong> <span className="badge">{trackingData.status}</span></p>
+
+              {trackingData.activities?.length > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  <p style={{ fontWeight: 600, marginBottom: "8px" }}>Live Tracking History:</p>
+                  <ol className="vt">
+                    {trackingData.activities.map((act, index) => (
+                      <li key={index} className="vt__item is-done">
+                        <span className="track__dot">
+                          <Check size={14} />
+                        </span>
+                        <div>
+                          <p className="vt__label">{act.activity || act.status}</p>
+                          <p className="muted vt__when">{act.location} · {act.date}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-              </li>
-            ))}
-          </ol>
+              )}
+            </div>
+          ) : (
+            <ol className="vt">
+              {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => (
+                <li
+                  key={label}
+                  className={`vt__item ${
+                    i < getCurrentStep(modal.order.orderStatus) ? "is-done" : ""
+                  } ${
+                    i === getCurrentStep(modal.order.orderStatus)
+                      ? "is-current"
+                      : ""
+                  }`}
+                >
+                  <span className="track__dot">
+                    <Icon size={14} />
+                  </span>
+                  <div>
+                    <p className="vt__label">{label}</p>
+                    <p className="muted vt__when">{when}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+
           <div className="form__actions">
             <button className="btn" onClick={close}>
               Done
@@ -1209,8 +1285,6 @@ console.log('currentStep:', currentStep, 'activeOrder.orderStatus:', activeOrder
           </div>
         </Modal>
       )}
-
-      {/* {toast && <Toast toast={toast} />} */}
     </div>
   );
 }

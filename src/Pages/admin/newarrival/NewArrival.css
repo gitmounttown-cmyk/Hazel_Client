@@ -17,18 +17,19 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .new-arrival-header p {
   margin: 5px 0 0;
-  color: #888;
+  color: #292626;
+  opacity: 0.7;
   font-size: 13px;
 }
 
 .new-arrival-add-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -48,9 +49,9 @@
 }
 
 .new-arrival-form {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.08);
   padding: 24px;
   margin-bottom: 20px;
 }
@@ -70,7 +71,7 @@
 .new-arrival-field label {
   font-size: 13px;
   font-weight: 600;
-  color: #444;
+  color: #292626;
 }
 
 .new-arrival-field input,
@@ -79,10 +80,10 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
-  background: #fff;
-  color: #333;
+  background: #fcfbf8;
+  color: #292626;
   font-size: 13px;
   outline: none;
 }
@@ -100,7 +101,7 @@
 .new-arrival-field input:focus,
 .new-arrival-field select:focus,
 .new-arrival-field textarea:focus {
-  border-color: #780524;
+  border-color: #f1cb62;
 }
 
 .new-arrival-full {
@@ -119,13 +120,14 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .new-arrival-products-header span {
   display: block;
   margin-top: 4px;
-  color: #888;
+  color: #292626;
+  opacity: 0.7;
   font-size: 12px;
 }
 
@@ -136,8 +138,8 @@
 }
 
 .new-arrival-product-card {
-  background: #fafafa;
-  border: 1px solid #eee;
+  background: #fbf6e9;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
   padding: 16px;
 }
@@ -153,13 +155,14 @@
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #333;
+  color: #292626;
 }
 
 .new-arrival-remove-btn {
   border: none;
   background: none;
-  color: #b3261e;
+  color: #292626;
+  opacity: 0.8;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -168,7 +171,8 @@
 }
 
 .new-arrival-remove-btn:hover {
-  background: #fdecec;
+  background: #faf4e2;
+  opacity: 1;
 }
 
 .new-arrival-product-grid {
@@ -189,17 +193,19 @@
   align-items: center;
   gap: 7px;
   font-size: 13px;
-  color: #444;
+  color: #292626;
   cursor: pointer;
 }
 
 .new-arrival-featured input {
   width: 16px;
   height: 16px;
+  accent-color: #f1cb62;
 }
 
 .new-arrival-image-help {
-  color: #888;
+  color: #292626;
+  opacity: 0.6;
   font-size: 11px;
   margin-top: 2px;
 }
@@ -214,7 +220,7 @@
   height: 70px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
 }
 
 .new-arrival-actions {
@@ -223,7 +229,7 @@
   gap: 8px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #faf4e2;
 }
 
 .new-arrival-save-btn,
@@ -237,8 +243,8 @@
 }
 
 .new-arrival-save-btn {
-  background: #780524;
-  color: #fff;
+  background: #f1cb62;
+  color: #292626;
 }
 
 .new-arrival-save-btn:hover {
@@ -251,12 +257,12 @@
 }
 
 .new-arrival-cancel-btn {
-  background: #f1f1f1;
-  color: #555;
+  background: #faf4e2;
+  color: #292626;
 }
 
 .new-arrival-cancel-btn:hover {
-  background: #e8e8e8;
+  background: #fbf6e9;
 }
 
 .new-arrival-list-section {
@@ -274,12 +280,13 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #292626;
 }
 
 .new-arrival-list-header span {
   font-size: 13px;
-  color: #666;
+  color: #292626;
+  opacity: 0.7;
 }
 
 .new-arrival-list {
@@ -289,9 +296,9 @@
 }
 
 .new-arrival-list-card {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.08);
   padding: 18px;
   display: flex;
   justify-content: space-between;
@@ -307,18 +314,20 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #780524;
+  color: #292626;
 }
 
 .new-arrival-subtitle {
   margin: 5px 0 0;
-  color: #666;
+  color: #292626;
+  opacity: 0.7;
   font-size: 13px;
 }
 
 .new-arrival-description {
   margin: 7px 0 14px;
-  color: #888;
+  color: #292626;
+  opacity: 0.6;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -335,9 +344,9 @@
   gap: 10px;
   min-width: 230px;
   padding: 8px;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
   border-radius: 8px;
-  background: #fff;
+  background: #fcfbf8;
 }
 
 .new-arrival-product-item img,
@@ -346,7 +355,7 @@
   height: 50px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #eee;
+  border: 1px solid #faf4e2;
   flex-shrink: 0;
 }
 
@@ -354,15 +363,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
-  color: #999;
+  background: #fbf6e9;
+  color: #292626;
+  opacity: 0.5;
   font-size: 10px;
   border: none;
 }
 
 .new-arrival-product-item strong {
   display: block;
-  color: #222;
+  color: #292626;
   font-size: 13px;
   font-weight: 600;
 }
@@ -374,7 +384,8 @@
 .new-arrival-product-item span {
   display: block;
   margin-top: 3px;
-  color: #888;
+  color: #292626;
+  opacity: 0.6;
   font-size: 11px;
 }
 
@@ -385,8 +396,8 @@
   padding: 4px 7px;
   margin-top: 4px;
   border-radius: 6px;
-  background: #edf8ef;
-  color: #2e7d32 !important;
+  background: #faf4e2;
+  color: #292626 !important;
   font-size: 10px !important;
   font-weight: 600;
 }
@@ -410,28 +421,32 @@
 }
 
 .new-arrival-edit-btn {
-  color: #2468b3;
+  color: #292626;
 }
 
 .new-arrival-edit-btn:hover {
-  background: #eaf3ff;
+  background: #fbf6e9;
+  color: #292626;
 }
 
 .new-arrival-delete-btn {
-  color: #b3261e;
+  color: #292626;
+  opacity: 0.7;
 }
 
 .new-arrival-delete-btn:hover {
-  background: #fdecec;
+  background: #faf4e2;
+  opacity: 1;
 }
 
 .new-arrival-empty {
-  background: #fff;
+  background: #fcfbf8;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(41, 38, 38, 0.08);
   text-align: center;
   padding: 30px;
-  color: #999;
+  color: #292626;
+  opacity: 0.5;
   font-size: 13px;
 }
 

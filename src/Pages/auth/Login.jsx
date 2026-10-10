@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { sendOTP, googleLogin } from "../../Services/authService";
+import { sendOTP } from "../../Services/authService";
 import "../../styles/auth.css";
-import { GoogleLogin } from "@react-oauth/google";
 import hazelBrandLogo from "../../assets/images/Logo.png";
 import hazelLogo from "../../assets/images/hazel_logo.jpg";
 
@@ -10,11 +9,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [mobileNumber, setMobileNumber] = useState("");
-
   const [loading, setLoading] = useState(false);
-
-  const [googleLoading, setGoogleLoading] = useState(false);
-
   const [error, setError] = useState("");
 
   // ============================================================
@@ -62,13 +57,10 @@ const Login = () => {
       setLoading(true);
 
       const response = await sendOTP(mobileNumber);
-if (response.success) {
-  console.log("SEND OTP RESPONSE:", response);
+      if (response.success) {
+        console.log("SEND OTP RESPONSE:", response);
 
-  sessionStorage.setItem(
-    "hazelMobileNumber",
-    mobileNumber
-  );
+        sessionStorage.setItem("hazelMobileNumber", mobileNumber);
 
   if (response.otp) {
     sessionStorage.setItem(
@@ -81,8 +73,8 @@ if (response.success) {
     // console.log("OTP NOT FOUND IN RESPONSE");
   }
 
-  navigate("/verify-otp");
-}else {
+        navigate("/verify-otp");
+      } else {
         setError(response.message || "Unable to send OTP.");
       }
     } catch (error) {
@@ -90,78 +82,6 @@ if (response.success) {
     } finally {
       setLoading(false);
     }
-  };
-
-  // ============================================================
-  // GOOGLE LOGIN SUCCESS
-  // ============================================================
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      setGoogleLoading(true);
-      setError("");
-
-      console.log("Google Response:", credentialResponse);
-
-      // Google returns the ID token here
-      const credential = credentialResponse?.credential;
-
-      if (!credential) {
-        setError("Google authentication failed.");
-        return;
-      }
-
-      // Send Google credential to backend
-      const response = await googleLogin(credential);
-
-      console.log("Google Backend Response:", response);
-
-      if (response.success) {
-        // ======================================================
-        // SAVE JWT TOKEN
-        // ======================================================
-
-        if (response.token) {
-          localStorage.setItem("hazelToken", response.token);
-        }
-
-        // ======================================================
-        // SAVE USER
-        // ======================================================
-
-        if (response.user) {
-          localStorage.setItem("hazelUser", JSON.stringify(response.user));
-        }
-
-        // ======================================================
-        // REMOVE OLD OTP SESSION
-        // ======================================================
-
-        sessionStorage.removeItem("hazelMobileNumber");
-
-        // ======================================================
-        // GO HOME
-        // ======================================================
-
-        navigate("/admin/dashboard");
-      } else {
-        setError(response.message || "Google login failed.");
-      }
-    } catch (error) {
-      console.error("Google Login Error:", error);
-
-      setError(error.message || "Unable to login with Google.");
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  // ============================================================
-  // GOOGLE LOGIN ERROR
-  // ============================================================
-
-  const handleGoogleError = () => {
-    setError("Google login was cancelled or failed. Please try again.");
   };
 
   return (
@@ -192,9 +112,7 @@ if (response.success) {
 
           <div className="auth-feature-list">
             <span>✓ Premium Quality</span>
-
             <span>✓ Comfortable Styles</span>
-
             <span>✓ Made for Every Mom</span>
           </div>
         </div>
@@ -216,18 +134,12 @@ if (response.success) {
                 className="brand-logo"
               />
             </div>
-
-            {/* <div>
-              <h2>HAZEL</h2>
-              <span>E-COMMERCE</span>
-            </div> */}
           </div>
 
           {/* Welcome */}
 
           <div className="auth-heading">
             <h1>Welcome Back!</h1>
-
             <p>Login to continue your shopping journey</p>
             <div className="login-tab">
               <span>Login </span>
@@ -245,7 +157,7 @@ if (response.success) {
               <div className="mobile-input-wrapper">
                 <span className="country-code">+91</span>
 
-                <input
+                <input className="mobile-input"
                   type="tel"
                   placeholder="Enter your mobile number"
                   value={mobileNumber}
@@ -264,61 +176,11 @@ if (response.success) {
             <button
               type="submit"
               className="auth-primary-button"
-              disabled={loading || googleLoading}
+              disabled={loading}
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </form>
-
-          {/* =================================================
-              DIVIDER
-          ================================================== */}
-
-          <div className="auth-divider">
-            <span>Or</span>
-          </div>
-
-          {/* =================================================
-              GOOGLE LOGIN
-          ================================================== */}
-
-          <div className="google-login-container">
-            {googleLoading ? (
-              <button type="button" className="google-button" disabled>
-                Signing in with Google...
-              </button>
-            ) : (
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                theme="#780524"
-                size="large"
-                text="continue_with"
-                shape="rectangular"
-                width="305"
-              />
-            )}
-          </div>
-          {/* =================================================
-              BOTTOM FEATURES
-          ================================================== */}
-
-          {/* <div className="auth-benefits">
-            <div>
-              <span>♧</span>
-              <small>Secure Login</small>
-            </div>
-
-            <div>
-              <span>♡</span>
-              <small>Easy Checkout</small>
-            </div>
-
-            <div>
-              <span>✓</span>
-              <small>Trusted Service</small>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>

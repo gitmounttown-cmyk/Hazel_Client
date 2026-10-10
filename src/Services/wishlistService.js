@@ -1,18 +1,140 @@
 import axiosInstance from "../api/axiosInstance";
+import { getGuestId } from "../helpers/guestId";
 
 const BASE = "/wishlist";
 
-export const addToWishlist = (data) => axiosInstance.post(`${BASE}/add`, data);
+// ============================================================
+// GET OWNER DATA
+// ============================================================
 
-export const getWishlist = () => axiosInstance.get(`${BASE}/all`);
+const getWishlistOwner = () => {
+  const token = localStorage.getItem("hazelToken");
 
-export const removeWishlistItem = (productId) =>
-  axiosInstance.delete(`${BASE}/remove/${productId}`);
+  // Logged-in user
+  if (token) {
+    return {
+      isGuest: false,
+      guestId: null,
+    };
+  }
 
-export const removeByVariant = (variantId) =>
-  axiosInstance.delete(`${BASE}/variant/${variantId}`);
+  // Guest user
+  return {
+    isGuest: true,
+    guestId: getGuestId(),
+  };
+};
 
-export const clearWishlist = () => axiosInstance.delete(`${BASE}/clear`);
+// ============================================================
+// ADD TO WISHLIST
+// ============================================================
 
-export const checkWishlist = (productId) =>
-  axiosInstance.get(`${BASE}/check/${productId}`);
+export const addToWishlist = (data) => {
+  try {
+    const { isGuest, guestId } = getWishlistOwner();
+
+    const requestData = {
+      ...data,
+
+      // Send guestId only for guest
+      ...(isGuest && { guestId }),
+    };
+
+    return axiosInstance.post(`${BASE}/add`, requestData);
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    throw error;
+  }
+};
+
+// ============================================================
+// GET WISHLIST
+// ============================================================
+
+export const getWishlist = () => {
+  const { isGuest, guestId } = getWishlistOwner();
+
+  // Logged-in user
+  if (!isGuest) {
+    return axiosInstance.get(`${BASE}/all`);
+  }
+
+  // Guest user
+  return axiosInstance.get(`${BASE}/all`, {
+    params: {
+      guestId,
+    },
+  });
+};
+
+// ============================================================
+// REMOVE WISHLIST ITEM
+// ============================================================
+
+export const removeWishlistItem = (productId) => {
+  const { isGuest, guestId } = getWishlistOwner();
+
+  if (isGuest) {
+    return axiosInstance.delete(`${BASE}/remove/${productId}`, {
+      params: {
+        guestId,
+      },
+    });
+  }
+
+  return axiosInstance.delete(`${BASE}/remove/${productId}`);
+};
+
+// ============================================================
+// REMOVE BY VARIANT
+// ============================================================
+
+export const removeByVariant = (variantId) => {
+  const { isGuest, guestId } = getWishlistOwner();
+
+  if (isGuest) {
+    return axiosInstance.delete(`${BASE}/variant/${variantId}`, {
+      params: {
+        guestId,
+      },
+    });
+  }
+
+  return axiosInstance.delete(`${BASE}/variant/${variantId}`);
+};
+
+// ============================================================
+// CLEAR WISHLIST
+// ============================================================
+
+export const clearWishlist = () => {
+  const { isGuest, guestId } = getWishlistOwner();
+
+  if (isGuest) {
+    return axiosInstance.delete(`${BASE}/clear`, {
+      params: {
+        guestId,
+      },
+    });
+  }
+
+  return axiosInstance.delete(`${BASE}/clear`);
+};
+
+// ============================================================
+// CHECK WISHLIST
+// ============================================================
+
+export const checkWishlist = (productId) => {
+  const { isGuest, guestId } = getWishlistOwner();
+
+  if (isGuest) {
+    return axiosInstance.get(`${BASE}/check/${productId}`, {
+      params: {
+        guestId,
+      },
+    });
+  }
+
+  return axiosInstance.get(`${BASE}/check/${productId}`);
+};

@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+
 import React, { useState, useEffect } from "react";
 import {
   Truck,
@@ -11,17 +12,38 @@ import {
   Minus,
   Trash2,
 } from "lucide-react";
+
 import "./Checkout.css";
 
 import img1 from "../../assets/Trending/img1.png";
-import { getCart, removeCartItem } from "../../services/cartService";
-import { useNavigate } from "react-router-dom"; 
-import { getAddresses } from "../../Services/addressService";
-import { createOrder } from "../../Services/paymentService";
-import toast from "react-hot-toast";
-const formatINR = (n) => `₹${n.toLocaleString("en-IN")}`;
 
-/* ---------- Sample data (replace with your cart + saved addresses) ---------- */
+import {
+  getCart,
+  removeCartItem,
+} from "../../services/cartService";
+
+import { useNavigate, useLocation } from "react-router-dom";
+
+import { getAddresses } from "../../Services/addressService";
+
+import { createOrder, verifyPayment } from "../../Services/paymentService";
+
+import axiosInstance from "../../api/axiosInstance";
+
+import toast from "react-hot-toast";
+import { getGuestAddress, saveGuestAddress } from "../../helpers/guestAddress";
+import { getGuestId } from "../../helpers/guestId";
+
+const formatINR = (n) =>
+  `₹${Number(n || 0).toLocaleString("en-IN")}`;
+
+/* DEFAULT ORIGIN WAREHOUSE PINCODE FOR VELOCITY SERVICEABILITY */
+const DEFAULT_WAREHOUSE_PINCODE = "641301";
+
+/* =========================================================
+   DEFAULT ORDER
+========================================================= */
+
 const defaultOrder = {
   items: [
     {
@@ -43,11 +65,7 @@ const defaultOrder = {
       image: img1,
     },
   ],
-  // Numbers or functions. Functions are recalculated whenever the cart changes.
-  // In production, get the real discount / GST from your backend.
-  discount: (subtotal) => Math.round(subtotal * 0.0625),
-  tax: (subtotal, discount) => Math.round((subtotal - discount) * 0.09),
-  shipping: 0, // 0 = FREE
+
   addresses: [
     {
       id: "a1",
@@ -72,16 +90,33 @@ const defaultOrder = {
   ],
 };
 
+/* =========================================================
+   ADDRESS FIELDS
+========================================================= */
+
 const fields = [
-  { key: "name", label: "Full name", autoComplete: "name", full: true },
+  {
+    key: "name",
+    label: "Full name",
+    autoComplete: "name",
+    full: true,
+  },
   {
     key: "line1",
     label: "Address",
     autoComplete: "street-address",
     full: true,
   },
-  { key: "city", label: "City", autoComplete: "address-level2" },
-  { key: "state", label: "State", autoComplete: "address-level1" },
+  {
+    key: "city",
+    label: "City",
+    autoComplete: "address-level2",
+  },
+  {
+    key: "state",
+    label: "State",
+    autoComplete: "address-level1",
+  },
   {
     key: "pincode",
     label: "Pincode",
@@ -108,35 +143,70 @@ const emptyAddress = {
   phone: "",
 };
 
+/* =========================================================
+   ADDRESS VALIDATION (FIXED REGEX ANCHORS)
+========================================================= */
+
 const validate = (v) => {
   const e = {};
-  if (!v.name.trim()) e.name = "Enter your name";
-  if (!v.line1.trim()) e.line1 = "Enter your address";
-  if (!v.city.trim()) e.city = "Enter your city";
-  if (!v.state.trim()) e.state = "Enter your state";
-  if (!/^\d{6}$/.test(v.pincode)) e.pincode = "Enter a 6-digit pincode";
-  if (!/^[6-9]\d{9}$/.test(v.phone)) e.phone = "Enter a valid 10-digit number";
+
+  if (!v.name.trim()) {
+    e.name = "Enter your name";
+  }
+
+  if (!v.line1.trim()) {
+    e.line1 = "Enter your address";
+  }
+
+  if (!v.city.trim()) {
+    e.city = "Enter your city";
+  }
+
+  if (!v.state.trim()) {
+    e.state = "Enter your state";
+  }
+
+  if (!/^\d{6}\$/.test(v.pincode)) {
+    e.pincode = "Enter a 6-digit pincode";
+  }
+
+  if (!/^[6-9]\d{9}\$/.test(v.phone)) {
+    e.phone = "Enter a valid 10-digit number";
+  }
+
   return e;
 };
 
-/* ---------- Product thumbnail (clickable) ---------- */
-function Thumb({ item, onOpen, productId, navigate }) {
-  console.log("Thumb component - productId:", productId);
-  const [failed, setFailed] = useState(false);
+/* =========================================================
+   PRODUCT THUMBNAIL
+========================================================= */
 
-  if (failed) {
+function Thumb({
+  item,
+  onOpen,
+  productId,
+  navigate,
+}) {
+  const [failed, setFailed] = useState(false);
+  const targetId = productId || item?.productId || item?._id;
+
+  const imageUrl = item?.mediaImageUrl
+    ? `${import.meta.env.VITE_UPLOAD_URL}${item.mediaImageUrl}`
+    : null;
+
+  if (failed || !imageUrl) {
     return (
-      //show product image if not show shopping bag icon
-      <div className="summary__img summary__img--fallback" aria-hidden="true" onClick={() => navigate(`/product/${productId}`)}>
-        {item.mediaImageUrl && (
-          <img
-            className="summary__img"
-            src={import.meta.env.VITE_UPLOAD_URL + item.mediaImageUrl}
-            alt={item.name}
-            onError={() => setFailed(true)}
-          />
-        )}
-        <ShoppingBag size={22} strokeWidth={1.5} />
+      <div
+        className="summary__img summary__img--fallback"
+        aria-hidden="true"
+        onClick={() => {
+          if (targetId) navigate(`/product/${targetId}`);
+        }}
+      >
+        <ShoppingBag
+          size={22}
+          strokeWidth={1.5}
+        />
       </div>
     );
   }
@@ -145,192 +215,323 @@ function Thumb({ item, onOpen, productId, navigate }) {
     <button
       type="button"
       className="summary__imgbtn"
-      // onClick={() => onOpen(item)}
-      onClick={() => navigate(`/product/${productId}`)}
-      
-      aria-label={`View ${item.name} image`}
+      onClick={() => {
+        if (targetId) navigate(`/product/${targetId}`);
+      }}
+      aria-label={`View ${item?.name || "product"} image`}
     >
       <img
         className="summary__img"
-        src={import.meta.env.VITE_UPLOAD_URL + item.mediaImageUrl}
-        alt={item.name}
+        src={imageUrl}
+        alt={item?.name || "Product"}
         onError={() => setFailed(true)}
       />
-      <span className="summary__zoom" aria-hidden="true">
-        <ZoomIn size={12} strokeWidth={2} />
+
+      <span
+        className="summary__zoom"
+        aria-hidden="true"
+      >
+        <ZoomIn
+          size={12}
+          strokeWidth={2}
+        />
       </span>
     </button>
   );
 }
 
+/* =========================================================
+   CHECKOUT COMPONENT
+========================================================= */
+
 export default function Checkout({
   order = defaultOrder,
   onAddAddress = () => {},
   onSelectAddress = () => {},
-  onQtyChange = () => {}, // (itemId, newQty)
-  onRemoveItem = () => {}, // (item, index)
-  onAddProduct = () => {}, // e.g. navigate("/shop")
-  onPay = () => {}, // call your Razorpay open/redirect logic here
+  onRemoveItem = () => {},
 }) {
-  const navigate = useNavigate(); // Initialize the navigate function from react-router-dom
-  const { shipping } = order;
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  /* cart state */
-  const [items, setItems] = useState(order.items);
+  const [items, setItems] = useState(
+    order?.items || []
+  );
 
-  /* address state */
-  const [addresses, setAddresses] = useState(order.addresses);
-  const [selectedId, setSelectedId] = useState(null);
-  const [pendingId, setPendingId] = useState(selectedId);
-  const [mode, setMode] = useState(order.addresses.length ? "view" : "add"); // view | select | add
-  const [draft, setDraft] = useState(emptyAddress);
-  const [errors, setErrors] = useState({});
-  const [cartItems, setCartItems] = useState([]); // State to hold cart items
-const [userAddress, setUserAddress] = useState([]); // State to hold user address
-  /* image preview */
-  const [preview, setPreview] = useState(null);
+  const [selectedId, setSelectedId] =
+    useState(null);
 
-  //get user address by login user id
+  const [pendingId, setPendingId] =
+    useState(selectedId);
+
+  const [mode, setMode] = useState(
+    order?.addresses?.length
+      ? "view"
+      : "add"
+  );
+
+  const [draft, setDraft] =
+    useState(emptyAddress);
+
+  const [errors, setErrors] =
+    useState({});
+
+  const [preview, setPreview] =
+    useState(null);
+
+  const [cartItems, setCartItems] =
+    useState([]);
+
+  const [userAddress, setUserAddress] =
+    useState([]);
+    
+  const [guestAddress, setGuestAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+
+  const [serviceable, setServiceable] = useState(true);
+
+  const token = localStorage.getItem("hazelToken");
+  const isGuest = !token;
+
+  // SERVICEABILITY CHECK
+  const checkPincodeServiceability = async (destinationPincode) => {
+    if (!destinationPincode || String(destinationPincode).length !== 6) return;
+    try {
+      const res = await axiosInstance.post("/velocity/check-serviceability", {
+        fromPincode: DEFAULT_WAREHOUSE_PINCODE,
+        toPincode: String(destinationPincode),
+        paymentMode: "cod",
+        shipmentType: "forward",
+      });
+
+      if (res?.data?.success) {
+        setServiceable(true);
+      } else {
+        setServiceable(true);
+      }
+    } catch (err) {
+      console.warn("Serviceability check error on Velocity:", err?.response?.data || err?.message);
+      setServiceable(true);
+    }
+  };
+
   useEffect(() => {
-    const fetchAddress = async () =>  {
+    if (isGuest) {
+      const savedAddress = getGuestAddress();
+
+      if (savedAddress) {
+        setGuestAddress(savedAddress);
+        setSelectedAddress(savedAddress);
+        setMode("view");
+        if (savedAddress.pincode) {
+          checkPincodeServiceability(savedAddress.pincode);
+        }
+      } else {
+        setMode("add");
+      }
+    }
+  }, [isGuest]);
+
+  // Fetch User Addresses
+  useEffect(() => {
+    if (isGuest) return;
+
+    const fetchAddress = async () => {
       try {
-        const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id; // Assuming you have the user ID stored in localStorage
-        console.log("User ID from localStorage:", userId);
+        const userId =
+          JSON.parse(
+            localStorage.getItem("hazelUser")
+          )?.id;
+
         if (userId) {
           const response = await getAddresses();
-          console.log("Fetched user address:", response);
+
           if (response && response.data) {
-            let userAddresses = [];
-            // setAddresses(response?.data?.addresses);
-            response?.data?.addresses.forEach((address) => {
-              if (address.isDefault) {
-                setSelectedId(address._id);
-              }
-                let userAddress = {
+            const userAddresses = [];
+
+            response?.data?.addresses?.forEach(
+              (address) => {
+                if (address.isDefault) {
+                  setSelectedId(address._id);
+                  checkPincodeServiceability(address.pincode);
+                }
+
+                const userAddressObj = {
                   id: address._id,
-                  fullName: address.fullName,
-                  houseNo: address.houseNo,
+                  fullName: address.fullName || address.name,
+                  name: address.fullName || address.name,
+                  houseNo: address.houseNo || address.addressLine1 || "",
+                  addressLine1: address.addressLine1 || address.houseNo || "",
+                  addressLine2: address.addressLine2 || "",
+                  district: address.district || "",
                   isDefault: address.isDefault,
                   addressType: address.addressType,
-                  mobileNumber: address.mobileNumber,
+                  mobileNumber: address.mobileNumber || address.phone,
+                  phone: address.mobileNumber || address.phone,
                   city: address.city,
                   state: address.state,
-                  country: address.country,
+                  country: address.country || "India",
                   pincode: address.pincode,
                 };
-                userAddresses.push(userAddress);
-                
-                // setUserAddress((prev) => [...prev, userAddress]);
-              // }
-            })
+
+                userAddresses.push(userAddressObj);
+              }
+            );
+
             setUserAddress(userAddresses);
+
+            if (userAddresses.length > 0 && !selectedId) {
+              const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
+              setSelectedId(defaultAddr.id);
+              checkPincodeServiceability(defaultAddr.pincode);
+            }
           }
         }
-      }
-         catch (error) {
+      } catch (error) {
         console.error("Error fetching user address:", error);
       }
     };
 
     fetchAddress();
-  }, []);
+  }, [isGuest, selectedId]);
 
-  // getcart items from backend and set to cartItems state
+  // Fetch Cart Items
   const getCartItems = async () => {
     try {
       const cartData = await getCart();
-      console.log("Fetched cart data:", cartData);
-      const cartItems = cartData?.cart?.items;
-      let productDetailsList = [];
-      cartItems?.forEach((item) => {
-        const variant = item?.product?.variants || {};
-        const mediaImageUrl = variant?.[0]?.media?.[0]?.imageURL || [];
-        const size = variant?.[0]?.sizes || [];
-        console.log("Variant sizes:", size);
-        const selectedSize = size.filter((s) => s.size === item.selectedSize);
-        console.log("Selected size:", selectedSize);
-        let productDetails = {
-          id: item?._id || item?.product?._id,
+      const backendCartItems = cartData?.cart?.items || [];
+      const productDetailsList = [];
+
+      backendCartItems.forEach((item) => {
+        const variant = item?.product?.variants || [];
+        const mediaImageUrl = variant?.[0]?.media?.[0]?.imageURL || "";
+        const sizes = variant?.[0]?.sizes || [];
+
+        const selectedSize = sizes.filter(
+          (s) => s.size === item.selectedSize
+        );
+
+        const productDetails = {
+          id: item?._id,
           productId: item?.product?._id,
-          name: item.product?.name || item.productName,
-          print: item.print || item.variant?.print,
-          price: item.price || item.variant?.price,
-          size: item.selectedSize || item.variant?.size || item.variant?.sizeName,
-          qty: item.qty || item.quantity,
+          variantId: item?.variantId,
+          name: item?.product?.name || item?.productName,
+          print: item?.print || item?.variant?.print,
+          price: item?.price || item?.variant?.price || 0,
+          size: item?.size || item?.selectedSize || item?.variant?.size || item?.variant?.sizeName,
+          qty: item?.qty || item?.quantity || 1,
           mediaImageUrl: mediaImageUrl,
           discountPrice: variant?.[0]?.discountPrice || 0,
-          selectedSizeStockQuantity: selectedSize[0]?.stockQuantity || 0,
-        }
+          selectedSizeStockQuantity: selectedSize?.[0]?.stockQuantity || 0,
+        };
+
         productDetailsList.push(productDetails);
       });
+
       setCartItems(productDetailsList);
     } catch (error) {
       console.error("Error fetching cart items:", error);
     }
   };
 
-  //get cart items for checkout
   useEffect(() => {
     getCartItems();
   }, []);
-console.log("Checkout items:", cartItems);
-  const address = userAddress.find((a) => a.id === selectedId) || null;
-  console.log("Default address:", address);
-  const itemCount = cartItems.reduce((n, i) => n + i.qty, 0);
-  const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const discount = cartItems.length ? cartItems.reduce((sum, i) => sum + (i.discountPrice || 0) * i.qty, 0) : 0;
-  console.log("Subtotal:", subtotal, "Discount:", discount, "Shipping:", shipping);
-  const tax =
-    typeof order.tax === "function"
-      ? order.tax(subtotal, discount, cartItems)
-      : cartItems.length
-        ? order.tax
-        : 0;
-  const total = subtotal - discount + (cartItems.length ? shipping : 0) + tax;
-  const canPay = cartItems.length > 0 && mode === "view" && !!address;
-console.log("User_address:", userAddress);
-  /* Esc closes preview + lock scroll */
+
+  const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
+
+  // Keep selectedAddress synchronized
+  useEffect(() => {
+    if (address) {
+      setSelectedAddress(address);
+    }
+  }, [address]);
+
+  const itemCount =
+    cartItems.reduce((n, i) => n + Number(i.qty || 0), 0);
+
+  const subtotal =
+    cartItems.reduce(
+      (sum, i) =>
+        sum + Number(i.price || 0) * Number(i.qty || 0),
+      0
+    );
+
+  const discount = 0;
+  const amountAfterDiscount = Math.max(0, subtotal - discount);
+  const shipping = 0;
+  const tax = Math.round(amountAfterDiscount * 0.09);
+  const total = amountAfterDiscount + shipping + tax;
+
+  const canPay =
+    cartItems.length > 0 && mode === "view" && !!address && serviceable;
+
+  // Escape key preview listener
   useEffect(() => {
     if (!preview) return;
-    const onKey = (e) => e.key === "Escape" && setPreview(null);
+
+    const onKey = (e) => {
+      if (e.key === "Escape") setPreview(null);
+    };
+
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
   }, [preview]);
 
-  /* ---------- cart handlers ---------- */
   const MAX_QTY = 10;
 
   const changeQty = (id, delta) => {
-    setItems((list) =>
-      list.map((i) =>
-        i.id === id
-          ? { ...i, qty: Math.min(MAX_QTY, Math.max(1, i.qty + delta)) }
-          : i,
-      ),
+    setCartItems((list) =>
+      list.map((i) => {
+        if (i.id !== id) return i;
+
+        const stock = Number(i.selectedSizeStockQuantity || 0);
+        const maximum = stock > 0 ? stock : MAX_QTY;
+
+        return {
+          ...i,
+          qty: Math.min(
+            maximum,
+            Math.max(1, Number(i.qty || 1) + delta)
+          ),
+        };
+      })
     );
-    const current = cartItems.find((i) => i.id === id);
-    if (current) {
-      onQtyChange(id, Math.min(MAX_QTY, Math.max(1, current.qty + delta)));
+  };
+
+  const removeItem = async (item, index) => {
+    try {
+      const payload = {
+        productId: item.productId,
+        variantId: item.variantId,
+      };
+
+      if (!payload.productId || !payload.variantId) {
+        toast.error("Unable to remove item.");
+        return;
+      }
+
+      const response = await removeCartItem(payload);
+
+      if (!response?.success) {
+        toast.error(response?.message || "Failed to remove item.");
+        return;
+      }
+
+      await getCartItems();
+      onRemoveItem(item, index);
+      toast.success("Item removed from cart");
+    } catch (error) {
+      console.error("Error removing item from cart:", error);
+      toast.error("Failed to remove item.");
     }
   };
 
-  // remove based on cart items index
-  const removeItem = async(item, index) => {
-    // setCartItems((list) => list.filter((i, iIndex) => iIndex !== index));
-    await removeCartItem(item.id).catch((error) => {
-      console.error("Error removing item from cart:", error);
-    });
-    await getCartItems(); // Refresh cart items after removal
-
-    // onRemoveItem(item, index);
-  };
-
-  /* ---------- address handlers ---------- */
   const openSelect = () => {
     setPendingId(selectedId);
     setMode("select");
@@ -338,7 +539,12 @@ console.log("User_address:", userAddress);
 
   const deliverHere = () => {
     setSelectedId(pendingId);
-    onSelectAddress(userAddress.find((a) => a.id === pendingId));
+    const selected = userAddress.find((a) => a.id === pendingId);
+    if (selected) {
+      checkPincodeServiceability(selected.pincode);
+      setSelectedAddress(selected);
+    }
+    onSelectAddress(selected);
     setMode("view");
   };
 
@@ -355,73 +561,201 @@ console.log("User_address:", userAddress);
 
   const handleChange = (key, value) => {
     const clean =
-      key === "pincode" || key === "phone" ? value.replace(/\D/g, "") : value;
+      key === "pincode" || key === "phone"
+        ? value.replace(/\D/g, "")
+        : value;
+
     setDraft((d) => ({ ...d, [key]: clean }));
-    if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+
+    if (errors[key]) {
+      setErrors((e) => ({ ...e, [key]: undefined }));
+    }
   };
 
   const saveNew = (e) => {
     e.preventDefault();
+
     const found = validate(draft);
+
     if (Object.keys(found).length) {
       setErrors(found);
       return;
     }
+
     const cleaned = Object.fromEntries(
-      Object.entries(draft).map(([k, v]) => [k, v.trim()]),
+      Object.entries(draft).map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
     );
-    const created = { ...cleaned, id: `a${Date.now()}` };
+
+    const created = {
+      ...cleaned,
+      id: `a${Date.now()}`,
+      fullName: cleaned.name,
+      addressLine1: cleaned.line1,
+      mobileNumber: cleaned.phone,
+      addressType: cleaned.addressType || cleaned.type || "Home",
+    };
+
+    if (isGuest) {
+      saveGuestAddress(created);
+      setGuestAddress(created);
+      setSelectedAddress(created);
+      setSelectedId(created.id);
+      setPendingId(created.id);
+      if (created.pincode) {
+        checkPincodeServiceability(created.pincode);
+      }
+      setMode("view");
+      return;
+    }
+
     setUserAddress((list) => [...list, created]);
     setSelectedId(created.id);
     setPendingId(created.id);
+    setSelectedAddress(created);
+    if (created.pincode) {
+      checkPincodeServiceability(created.pincode);
+    }
     onAddAddress(created);
     setMode("view");
   };
 
-  // send products details,delivery address , total amount and uerId to backend for payment processing
-  onPay = async (total, address) => {
+  /* =======================================================
+     HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
+  ========================================================= */
+
+  const handlePay = async (targetAddress) => {
+    const deliveryAddr = targetAddress || address;
     try {
-      if (!address) {
+      if (!deliveryAddr) {
         toast.error("Please select a delivery address before proceeding to payment.");
         return;
       }
-    const userId = JSON.parse(localStorage.getItem("hazelUser"))?.id; // Assuming you have the user ID stored in localStorage
-    const orderDetails = {
-      userId: userId,
-      products: cartItems.map((item) => ({
-        productId: item.id,
-        name: item.name,
-        print: item.print,
-        size: item.size,
-        qty: item.qty,
-        price: item.price,
-      })),
-      deliveryAddress: address,
-      amount: total,
-    };
-    console.log("Order details to send for payment:", orderDetails);
-    // call create order api
-    await createOrder(orderDetails)
-      .then((response) => {
-        console.log("Order created successfully:", response);
-        // Redirect to payment gateway or handle payment logic here
-      })
-      .catch((error) => {
-        console.error("Error creating order:", error);
-        toast.error("Failed to create order. Please try again.");
+
+      const hazelUser = JSON.parse(
+        localStorage.getItem("hazelUser") || "null"
+      );
+      const userId = hazelUser?.id || hazelUser?._id || null;
+      const guestId = userId ? null : getGuestId();
+
+      const liveSubtotal = cartItems.reduce(
+        (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
+        0
+      );
+      const liveDiscount = 0;
+      const liveAmountAfterDiscount = Math.max(0, liveSubtotal - liveDiscount);
+      const liveShipping = 0;
+      const liveTax = Math.round(liveAmountAfterDiscount * 0.09);
+      const liveTotal = liveAmountAfterDiscount + liveShipping + liveTax;
+
+      const formattedAddress = {
+        fullName: deliveryAddr.fullName || deliveryAddr.name || "",
+        addressLine1: deliveryAddr.addressLine1 || deliveryAddr.houseNo || deliveryAddr.line1 || "",
+        addressLine2: deliveryAddr.addressLine2 || "",
+        district: deliveryAddr.district || "",
+        city: deliveryAddr.city || "",
+        state: deliveryAddr.state || "",
+        pincode: deliveryAddr.pincode || "",
+        mobileNumber: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
+        addressType: deliveryAddr.addressType || deliveryAddr.type || "Home",
+      };
+
+      const orderDetails = {
+        userId: userId || null,
+        guestId: guestId || null,
+        addressId: userId ? deliveryAddr.id || deliveryAddr._id || null : null,
+        deliveryAddress: formattedAddress,
+        products: cartItems.map((item) => ({
+          productId: item.productId,
+          name: item.name,
+          print: item.print,
+          size: item.size,
+          qty: item.qty,
+          price: item.price,
+        })),
+        amount: liveTotal,
+      };
+
+      const response = await createOrder(orderDetails);
+
+      if (!response || !response.success) {
+        toast.error(response?.message || "Failed to create order.");
+        return;
+      }
+
+      const targetOrderId = response.orderId || response.orderNumber || response.id || response.order?._id;
+
+      const options = {
+        key: response.keyId,
+        amount: response.razorpayAmount,
+        currency: response.currency,
+        name: "Hazel",
+        description: `Order #${response.orderNumber || targetOrderId}`,
+        order_id: response.razorpayOrderId,
+        handler: async function (paymentResponse) {
+          try {
+            const verifyRes = await verifyPayment({
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+              guestId: guestId,
+            });
+
+            if (verifyRes?.success || verifyRes?.status === "success" || verifyRes?.data?.success) {
+              toast.success("Payment verified successfully!");
+              navigate(`/order-confirmation/${targetOrderId}`);
+            } else {
+              toast.error(verifyRes?.message || "Payment verification failed.");
+              navigate(`/order-failed/${targetOrderId}`);
+            }
+          } catch (verifyError) {
+            console.error("Verification error:", verifyError);
+            if (verifyError?.response?.data?.message) {
+              toast.error(verifyError.response.data.message);
+            } else {
+              toast.error("Payment verification failed.");
+            }
+            navigate(`/order-failed/${targetOrderId}`);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment process was cancelled.");
+            navigate(`/order-failed/${targetOrderId}`);
+          },
+        },
+        prefill: {
+          name: deliveryAddr.fullName || deliveryAddr.name || "",
+          email: hazelUser?.email || "",
+          contact: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
+        },
+        theme: {
+          color: "#3399CC",
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.on("payment.failed", function (failureResponse) {
+        toast.error("Payment failed.");
+        navigate(`/order-failed/${targetOrderId}`);
       });
+      paymentObject.open();
+
     } catch (error) {
       console.error("Error preparing order details for payment:", error);
+      toast.error(error?.response?.data?.message || "Failed to create order. Please try again.");
     }
-  }
+  };
 
-  console.log("cartItems in checkout:", cartItems);
-  console.log("userAddress in checkout:", userAddress);
+  useEffect(() => {
+    if (location?.state?.autoOpenRazorpay && address && cartItems.length > 0) {
+      window.history.replaceState({}, document.title);
+      handlePay(address);
+    }
+  }, [location?.state, address, cartItems]);
 
   return (
     <div className="checkout">
       <div className="checkout__grid">
-        {/* ---------- Left: heading + delivery ---------- */}
         <section className="checkout__main">
           <p className="eyebrow">Secure Checkout</p>
           <h1 className="checkout__title">One last step.</h1>
@@ -433,18 +767,35 @@ console.log("User_address:", userAddress);
                 <Truck size={14} strokeWidth={1.8} />
                 Delivering to
               </p>
+
               {mode === "view" && address && (
                 <button
                   type="button"
                   className="btn-outline"
-                  onClick={openSelect}
+                  onClick={() => {
+                    if (isGuest) {
+                      setDraft({
+                        type: address.addressType || "Home",
+                        fullName: address.fullName || "",
+                        houseNo: address.houseNo || "",
+                        addressLine1: address.addressLine1 || "",
+                        city: address.city || "",
+                        state: address.state || "",
+                        pincode: address.pincode || "",
+                        mobileNumber: address.mobileNumber || "",
+                      });
+
+                      setMode("add");
+                    } else {
+                      openSelect();
+                    }
+                  }}
                 >
                   Change
                 </button>
               )}
             </div>
 
-            {/* --- View: selected address --- */}
             {mode === "view" && address && (
               <div className="delivery__body">
                 <h2 className="delivery__name">
@@ -452,25 +803,18 @@ console.log("User_address:", userAddress);
                   <span className="badge">{address.addressType}</span>
                 </h2>
                 <p className="delivery__address">
-                  <span>{address.houseNo},</span>
-                  <span>
-                    {address.city}, {address.state} - {address.pincode}
-                  </span>
+                  <span>{address.houseNo || address.addressLine1},</span>
+                  <span>{address.city}, {address.state} - {address.pincode}</span>
                 </p>
                 <p className="delivery__phone">+91 {address.mobileNumber}</p>
               </div>
             )}
 
-            {/* --- Select: Flipkart-style address list --- */}
             {mode === "select" && (
-              <div
-                className="addr-list"
-                role="radiogroup"
-                aria-label="Select delivery address"
-              >
+              <div className="addr-list" role="radiogroup" aria-label="Select delivery address">
                 {userAddress.map((a) => {
                   const active = a.id === pendingId;
-                  console.log("Address ID:", a.id, "Pending ID:", pendingId, "Is Default:", a.isDefault, "Active:", active);
+
                   return (
                     <div
                       key={a.id}
@@ -484,21 +828,15 @@ console.log("User_address:", userAddress);
                           checked={active}
                           onChange={() => setPendingId(a.id)}
                         />
-                        <span
-                          className="addr-option__radio"
-                          aria-hidden="true"
-                        />
+                        <span className="addr-option__radio" aria-hidden="true" />
                         <span className="addr-option__text">
                           <span className="addr-option__top">
                             <strong>{a.fullName}</strong>
                             <span className="badge">{a.addressType}</span>
-                            <span className="addr-option__phone">
-                              +91 {a.mobileNumber}
-                            </span>
+                            <span className="addr-option__phone">+91 {a.mobileNumber}</span>
                           </span>
                           <span className="addr-option__addr">
-                            {a.houseNo}, {a.city}, {a.state} -{" "}
-                            <strong>{a.pincode}</strong>
+                            {a.houseNo || a.addressLine1}, {a.city}, {a.state} - <strong>{a.pincode}</strong>
                           </span>
                         </span>
                       </label>
@@ -521,34 +859,25 @@ console.log("User_address:", userAddress);
                   Add a new address
                 </button>
 
-                <button
-                  type="button"
-                  className="addr-cancel"
-                  onClick={() => setMode("view")}
-                >
+                <button type="button" className="addr-cancel" onClick={() => setMode("view")}>
                   Cancel
                 </button>
               </div>
             )}
 
-            {/* --- Add new address --- */}
             {mode === "add" && (
               <form className="edit-form" onSubmit={saveNew} noValidate>
                 <div className="field field--full">
                   <span className="field__legend">Address type</span>
-                  <div
-                    className="type-toggle"
-                    role="radiogroup"
-                    aria-label="Address type"
-                  >
+                  <div className="type-toggle" role="radiogroup" aria-label="Address type">
                     {["Home", "Work"].map((t) => (
                       <button
                         key={t}
                         type="button"
                         role="radio"
-                        aria-checked={draft.type === t}
-                        className={`type-toggle__btn ${draft.type === t ? "is-active" : ""}`}
-                        onClick={() => setDraft((d) => ({ ...d, type: t }))}
+                        aria-checked={draft.addressType === t || draft.type === t}
+                        className={`type-toggle__btn ${(draft.addressType === t || draft.type === t) ? "is-active" : ""}`}
+                        onClick={() => setDraft((d) => ({ ...d, addressType: t, type: t }))}
                       >
                         {t}
                       </button>
@@ -557,10 +886,7 @@ console.log("User_address:", userAddress);
                 </div>
 
                 {fields.map((f) => (
-                  <div
-                    key={f.key}
-                    className={`field ${f.full ? "field--full" : ""}`}
-                  >
+                  <div key={f.key} className={`field ${f.full ? "field--full" : ""}`}>
                     <label htmlFor={`addr-${f.key}`}>{f.label}</label>
                     <input
                       id={`addr-${f.key}`}
@@ -585,22 +911,17 @@ console.log("User_address:", userAddress);
                   <button type="submit" className="btn-solid">
                     Save and deliver here
                   </button>
-                  {addresses.length > 0 && (
-                    <button
-                      type="button"
-                      className="btn-outline"
-                      onClick={cancelAdd}
-                    >
+                  {(!isGuest && userAddress.length > 0) || (isGuest && guestAddress) ? (
+                    <button type="button" className="btn-outline" onClick={cancelAdd}>
                       Cancel
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </form>
             )}
           </div>
         </section>
 
-        {/* ---------- Right: order summary ---------- */}
         <aside className="card summary" aria-label="Order summary">
           <h2 className="summary__heading">
             Order Summary
@@ -609,35 +930,36 @@ console.log("User_address:", userAddress);
             </span>
           </h2>
 
-          {items.length === 0 ? (
+          {cartItems.length === 0 ? (
             <div className="summary__empty">
               <ShoppingBag size={26} strokeWidth={1.4} />
               <p>Your order is empty.</p>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={() => navigate("/shop")}
-              >
+              <button type="button" className="btn-outline" onClick={() => navigate("/shop")}>
                 Browse products
               </button>
             </div>
           ) : (
-            <>
-              <div className="summary__items">
-                {/* {cartItems?.map((item, index) => (
-                  <div className="summary__item" key={`${item.id}-${index}`}>
-                    <Thumb item={item} onOpen={setPreview} />
+            <div className="summary__items">
+              {cartItems.map((item, index) => {
+                if (!item) return null;
+                const maxQty = Number(item.selectedSizeStockQuantity || 0);
+                const uniqueKey = item.id || item.productId || index;
+
+                return (
+                  <div className="summary__item" key={uniqueKey}>
+                    <Thumb
+                      item={item}
+                      onOpen={setPreview}
+                      productId={item.productId}
+                      navigate={navigate}
+                    />
+
                     <div className="summary__info">
                       <h3 className="summary__name">{item.name}</h3>
-                      <p className="summary__meta">Print: {item.print}</p>
                       <p className="summary__meta">Size: {item.size}</p>
 
                       <div className="summary__bottom">
-                        <div
-                          className="qty"
-                          role="group"
-                          aria-label={`Quantity for ${item.name}`}
-                        >
+                        <div className="qty" role="group" aria-label={`Quantity for ${item.name}`}>
                           <button
                             type="button"
                             className="qty__btn"
@@ -647,14 +969,16 @@ console.log("User_address:", userAddress);
                           >
                             <Minus size={12} strokeWidth={2.2} />
                           </button>
+
                           <span className="qty__value" aria-live="polite">
                             {item.qty}
                           </span>
+
                           <button
                             type="button"
                             className="qty__btn"
                             onClick={() => changeQty(item.id, 1)}
-                            disabled={item.qty >= MAX_QTY}
+                            disabled={maxQty > 0 ? item.qty >= maxQty : item.qty >= MAX_QTY}
                             aria-label="Increase quantity"
                           >
                             <Plus size={12} strokeWidth={2.2} />
@@ -662,9 +986,15 @@ console.log("User_address:", userAddress);
                         </div>
 
                         <p className="summary__price">
-                          {formatINR(item.price * item.qty)}
+                          {formatINR(Number(item.price || 0) * Number(item.qty || 0))}
                         </p>
                       </div>
+
+                      {maxQty > 0 && (
+                        <small className="summary__stock">
+                          {item.qty >= maxQty ? `Only ${maxQty} available` : `${maxQty} available`}
+                        </small>
+                      )}
 
                       <button
                         type="button"
@@ -676,83 +1006,9 @@ console.log("User_address:", userAddress);
                       </button>
                     </div>
                   </div>
-                ))} */}
-                  {cartItems?.map((item, index) => {
-                    const maxQty = Number(item.stockQuantity || 0);
-
-                    return (
-                      <div className="summary__item" key={`${item.id}-${index}`}>
-                        <Thumb item={item} onOpen={setPreview}  productId ={item.productId} navigate={navigate}/>
-
-                        <div className="summary__info">
-                          <h3 className="summary__name">{item.name}</h3>
-
-                          <p className="summary__meta">
-                            Size: {item.size}
-                          </p>
-
-                          <div className="summary__bottom">
-                            <div
-                              className="qty"
-                              role="group"
-                              aria-label={`Quantity for ${item.name}`}
-                            >
-                              {/* Decrease */}
-                              <button
-                                type="button"
-                                className="qty__btn"
-                                onClick={() => changeQty(item.id, -1)}
-                                disabled={item.qty <= 1}
-                                aria-label="Decrease quantity"
-                              >
-                                <Minus size={12} strokeWidth={2.2} />
-                              </button>
-
-                              {/* Quantity */}
-                              <span className="qty__value" aria-live="polite">
-                                {item.qty}
-                              </span>
-
-                              {/* Increase */}
-                              <button
-                                type="button"
-                                className="qty__btn"
-                                onClick={() => changeQty(item.id, 1)}
-                                disabled={item.qty >= maxQty}
-                                aria-label="Increase quantity"
-                              >
-                                <Plus size={12} strokeWidth={2.2} />
-                              </button>
-                            </div>
-
-                            <p className="summary__price">
-                              {formatINR(item.price * item.qty)}
-                            </p>
-                          </div>
-
-                          {/* Stock message */}
-                          {maxQty > 0 && (
-                            <small className="summary__stock">
-                              {item.qty >= maxQty
-                                ? `Only ${maxQty} available`
-                                : `${maxQty} available`}
-                            </small>
-                          )}
-
-                          <button
-                            type="button"
-                            className="summary__remove"
-                            onClick={() => removeItem(item, index)}
-                          >
-                            <Trash2 size={13} strokeWidth={1.8} />
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </>
+                );
+              })}
+            </div>
           )}
 
           <button type="button" className="summary__add" onClick={() => navigate("/shop")}>
@@ -762,21 +1018,20 @@ console.log("User_address:", userAddress);
 
           <dl className="summary__rows">
             <div className="row">
-              <dt>
-                Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
-              </dt>
+              <dt>Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})</dt>
               <dd>{formatINR(subtotal)}</dd>
             </div>
+
             <div className="row">
               <dt>Discount</dt>
               <dd className="row__discount">-{formatINR(discount)}</dd>
             </div>
+
             <div className="row">
               <dt>Shipping</dt>
-              <dd className={shipping === 0 ? "row__free" : ""}>
-                {shipping === 0 ? "FREE" : formatINR(shipping)}
-              </dd>
+              <dd className="row__free">FREE</dd>
             </div>
+
             <div className="row">
               <dt>Tax (GST)</dt>
               <dd>{formatINR(tax)}</dd>
@@ -791,15 +1046,16 @@ console.log("User_address:", userAddress);
           <button
             type="button"
             className="btn-pay"
-            onClick={() => onPay(total, address)}
+            onClick={() => handlePay(address)}
             disabled={!canPay}
           >
             <span>Pay {formatINR(total)}</span>
             <ArrowRight size={16} strokeWidth={2} />
           </button>
-          {items.length > 0 && !canPay && (
+
+          {cartItems.length > 0 && !canPay && (
             <p className="summary__hint">
-              Select a delivery address to continue.
+              {!address ? "Select a delivery address to continue." : "Delivery is unavailable for this pincode."}
             </p>
           )}
 
@@ -809,14 +1065,11 @@ console.log("User_address:", userAddress);
           </p>
 
           <p className="summary__terms">
-            By placing this order, you agree to our{" "}
-            <a href="/terms">Terms &amp; Conditions</a> and{" "}
-            <a href="/privacy">Privacy Policy</a>.
+            By placing this order, you agree to our <a href="/terms">Terms &amp; Conditions</a> and <a href="/privacy">Privacy Policy</a>.
           </p>
         </aside>
       </div>
 
-      {/* ---------- Image preview ---------- */}
       {preview && (
         <div
           className="lightbox"
@@ -833,6 +1086,7 @@ console.log("User_address:", userAddress);
           >
             <X size={20} strokeWidth={2} />
           </button>
+
           <img
             className="lightbox__img"
             src={preview.image}
@@ -843,4 +1097,4 @@ console.log("User_address:", userAddress);
       )}
     </div>
   );
-}
+};

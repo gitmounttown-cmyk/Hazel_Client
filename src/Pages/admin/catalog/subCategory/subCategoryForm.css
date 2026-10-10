@@ -1,7 +1,7 @@
 .subcat-form-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(41, 38, 38, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,13 +10,13 @@
 }
 
 .subcat-form-card {
-  background: #fff;
+  background: #FCFBF8;
   width: 480px;
   max-width: 92vw;
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px rgba(41, 38, 38, 0.2);
 }
 
 .subcat-form-header {
@@ -24,10 +24,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 22px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #FAF4E2;
   position: sticky;
   top: 0;
-  background: #fff;
+  background: #FCFBF8;
   z-index: 1;
 }
 
@@ -35,7 +35,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #222;
+  color: #292626;
 }
 
 .subcat-form-close {
@@ -44,18 +44,20 @@
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  color: #888;
+  color: #292626;
   padding: 4px;
+  opacity: 0.7;
 }
 
 .subcat-form-close:hover {
-  color: #333;
+  color: #292626;
+  opacity: 1;
 }
 
 .subcat-form-loading {
   padding: 40px;
   text-align: center;
-  color: #888;
+  color: #666155;
 }
 
 .subcat-form-body {
@@ -75,12 +77,14 @@
 .subcat-form-group label {
   font-size: 13px;
   font-weight: 600;
-  color: #444;
+  color: #292626;
 }
 
 .subcat-form-group input,
 .subcat-form-group select {
-  border: 1px solid #d8d8d8;
+  border: 1px solid #FAF4E2;
+  background-color: #FCFBF8;
+  color: #292626;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
@@ -91,8 +95,8 @@
 
 .subcat-form-group input:focus,
 .subcat-form-group select:focus {
-  border-color: #780524;
-  box-shadow: 0 0 0 3px rgba(120, 5, 36, 0.12);
+  border-color: #F1CB62;
+  box-shadow: 0 0 0 3px rgba(241, 203, 98, 0.3);
 }
 
 .subcat-form-image-upload {
@@ -106,26 +110,26 @@
   height: 84px;
   object-fit: cover;
   border-radius: 8px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid #FAF4E2;
 }
 
 .subcat-form-file-label {
   display: inline-flex;
   align-items: center;
   padding: 9px 16px;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #FAF4E2;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  color: #444;
-  background: #fafafa;
+  color: #292626;
+  background: #FBF6E9;
   transition: background 0.15s ease;
   width: fit-content;
 }
 
 .subcat-form-file-label:hover {
-  background: #f0f0f0;
+  background: #FAF4E2;
 }
 
 .subcat-form-actions {
@@ -135,7 +139,7 @@
   margin-top: 6px;
   position: sticky;
   bottom: 0;
-  background: #fff;
+  background: #FCFBF8;
   padding-top: 6px;
 }
 
@@ -155,8 +159,8 @@
 }
 
 .subcat-btn-primary {
-  background: #780524;
-  color: #fff;
+  background: #F1CB62;
+  color: #292626;
 }
 
 .subcat-btn-primary:hover:not(:disabled) {
@@ -164,10 +168,10 @@
 }
 
 .subcat-btn-secondary {
-  background: #f2f2f2;
-  color: #333;
+  background: #FBF6E9;
+  color: #292626;
 }
 
 .subcat-btn-secondary:hover {
-  background: #e6e6e6;
+  background: #FAF4E2;
 }

@@ -10,9 +10,7 @@ import {
   removeWishlistItem,
 } from "../../../Services/wishlistService";
 
-/* ---------- real image assets ----------
-   Swap these import paths for your real product photography — everything
-   else (layout, sizing, hover states) stays the same. */
+/* ---------- real image assets ---------- */
 import mainPhoto from "../../../assets/Trending/img2.png";
 import thumb1 from "../../../assets/Trending/img1.png";
 import thumb2 from "../../../assets/Trending/img2.png";
@@ -28,7 +26,7 @@ import reviewPhoto3 from "../../../assets/Trending/img3.png";
 import relatedPhoto from "../../../assets/Trending/img4.png";
 import { getProductById, getProducts } from "../../../services/productService";
 import toast from "react-hot-toast";
-import { getAllReviews } from "../../../Services/reviewService";
+import { getProductReviews, createReview } from "../../../Services/reviewService"; // ✅ Fixed: Imported public getProductReviews instead of admin getAllReviews
 import { formatCurrency } from "../../../utils/currencyFormat";
 import { formatTimeAgo, getDeliveryDate, formatCountdown } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
@@ -129,7 +127,6 @@ const QualityIcon = () => (
   </svg>
 );
 
-/* camera / plus icon used in the review popup photo tile */
 const CameraPlusIcon = () => (
   <svg
     width="22"
@@ -146,78 +143,12 @@ const CameraPlusIcon = () => (
   </svg>
 );
 
-/* ---------- content ---------- */
-const THUMBS = [thumb1, thumb2, thumb3, thumb4, thumb5, thumb6, thumb7, thumb8];
-
-const COLORS = [
-  { id: "rose", hex: "#E7CDD3", selected: true },
-  { id: "beige", hex: "#F1E9DE" },
-  { id: "mint", hex: "#E4F1DC" },
-  { id: "aqua", hex: "#DCF1EE" },
-  { id: "lilac", hex: "#DEDCF2" },
-  { id: "blush", hex: "#F1DDDC" },
-];
-
-const SIZES = [
-  { id: "L", label: "In Stock", disabled: false },
-  { id: "XL", label: "In Stock", disabled: false },
-  { id: "XXL", label: "Out of Stock", disabled: true },
-];
-
-// const DETAILS = [
-//   ["Fabric", "Cotton Flex"],
-//   ["Designed For", "Feeding Moms"],
-//   ["Feeding Access", "Invisible Vertical Zipper"],
-//   ["Zip Detail", "Matching zipper colour as per fabric"],
-//   ["Finishing", "Fully Overlocked"],
-//   ["Pocket", "Convenient Side Pocket"],
-//   ["Available Sizes", "L | XL | XXL | 3XL"],
-// ];
-
 const FILTERS = [
   { id: "all", label: "All Reviews" },
-  { id: "photos", label: "With Photos (42)" },
+  { id: "photos", label: "With Photos" },
   { id: "helpful", label: "Most Helpful" },
-  { id: "five", label: "5 Stars (98)" },
+  { id: "five", label: "5 Stars" },
 ];
-
-const REVIEWS = [
-  {
-    id: 1,
-    stars: 5,
-    time: "2 days ago",
-    title: "The softest cotton I've ever felt!",
-    body: "I bought this for my post-pregnancy days and the feeding zippers are a life saver. The fabric doesn't shrink even after multiple washes. Truly premium.",
-    author: "Ananya S.",
-    photos: null,
-  },
-  {
-    id: 2,
-    stars: 5,
-    time: "1 week ago",
-    title: "Beautiful Print & Great Fit",
-    body: "The print looks even better in person. I love the puff sleeves, they give it such a sophisticated look for home wear. Highly recommended.",
-    author: "Megha R.",
-    photos: [reviewPhoto1, reviewPhoto2, reviewPhoto3],
-  },
-  {
-    id: 3,
-    stars: 5,
-    time: "3 days ago",
-    title: "The softest cotton I've ever felt!",
-    body: "I bought this for my post-pregnancy days and the feeding zippers are a life saver. The fabric doesn't shrink even after multiple washes. Truly premium.",
-    author: "Ananya S.",
-    photos: null,
-  },
-];
-
-const RELATED = [1, 2, 3, 4].map((n) => ({
-  id: n,
-  name: "Admire Maxi Ditsy",
-  subtitle: "Cambric Cotton · Hand Block Print",
-  rating: 4.2,
-  price: "1,299",
-}));
 
 function Stars({ count }) {
   return (
@@ -230,45 +161,17 @@ function Stars({ count }) {
 }
 
 const COLOR_MAP = {
-  "LIGHT ORCHID": {
-    id: "light-orchid",
-    hex: "#E6B7D1",
-  },
-  ROSE: {
-    id: "rose",
-    hex: "#E7CDD3",
-  },
-  BEIGE: {
-    id: "beige",
-    hex: "#F1E9DE",
-  },
-  MINT: {
-    id: "mint",
-    hex: "#E4F1DC",
-  },
-  AQUA: {
-    id: "aqua",
-    hex: "#DCF1EE",
-  },
-  LILAC: {
-    id: "lilac",
-    hex: "#DEDCF2",
-  },
-  BLUSH: {
-    id: "blush",
-    hex: "#F1DDDC",
-  },
+  "LIGHT ORCHID": { id: "light-orchid", hex: "#E6B7D1" },
+  ROSE: { id: "rose", hex: "#E7CDD3" },
+  BEIGE: { id: "beige", hex: "#F1E9DE" },
+  MINT: { id: "mint", hex: "#E4F1DC" },
+  AQUA: { id: "aqua", hex: "#DCF1EE" },
+  LILAC: { id: "lilac", hex: "#DEDCF2" },
+  BLUSH: { id: "blush", hex: "#F1DDDC" },
 };
 
 const FALLBACK_COLORS = [
-  "#E8D5C4",
-  "#D8E2DC",
-  "#E2D4F0",
-  "#F3D5B5",
-  "#D6EAF8",
-  "#F5CAC3",
-  "#CDEAC0",
-  "#E8C7C8",
+  "#E8D5C4", "#D8E2DC", "#E2D4F0", "#F3D5B5", "#D6EAF8", "#F5CAC3", "#CDEAC0", "#E8C7C8",
 ];
 
 const createColorId = (color) => {
@@ -279,18 +182,6 @@ const createColorId = (color) => {
     .replace(/^-|-$/g, "");
 };
 
-const DELIVERY_ADDRESSES = [
-  {
-    id: 1,
-    name: "Name",
-    address: "12, Gandhi Road",
-    city: "Coimbatore",
-    state: "Tamil Nadu",
-    pincode: "641001",
-  },
-];
-
-/* ---------- write-a-review popup settings ---------- */
 const REVIEW_MAX_IMAGES = 5;
 const REVIEW_MAX_IMAGE_MB = 5;
 const REVIEW_MAX_CHARS = 500;
@@ -300,8 +191,6 @@ export default function ProductPage() {
   const storedUser = localStorage.getItem("hazelUser");
   const userId = storedUser ? JSON.parse(storedUser)?.id : null;
   const navigate = useNavigate();
-  // const [addedToCart, setAddedToCart] = useState(false);
-  const [products, setProducts] = useState([]);
   const [activeThumb, setActiveThumb] = useState(0);
   const [activeColor, setActiveColor] = useState("rose");
   const [activeSize, setActiveSize] = useState("L");
@@ -312,14 +201,13 @@ export default function ProductPage() {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [relatedWishlisted, setRelatedWishlisted] = useState({});
 
-  const [productDetails, setProductDetails] = useState(null); // State to hold product details
-  const [reviews, setReviews] = useState([]); // State to hold product reviews
-  const [variantMedia, setVariantMedia] = useState([]); // State to hold variant media images
-  const [userAddresses, setUserAddresses] = useState([]); // State to hold user addresses
+  const [productDetails, setProductDetails] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [variantMedia, setVariantMedia] = useState([]);
+  const [userDeliveryAddress, setUserDeliveryAddress] = useState(null);
   const [showLocations, setShowLocations] = useState(false);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [userDeliveryAddress, setUserDeliveryAddress] = useState(null);
   const [newAddress, setNewAddress] = useState({
     name: "",
     phone: "",
@@ -341,58 +229,39 @@ export default function ProductPage() {
     },
   ]);
 
-  /* ---------- write-a-review popup state ---------- */
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewHover, setReviewHover] = useState(0);
   const [reviewName, setReviewName] = useState("");
   const [reviewComment, setReviewComment] = useState("");
-  const [reviewImages, setReviewImages] = useState([]); // [{ file, preview }]
+  const [reviewImages, setReviewImages] = useState([]);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [relatedProducts, setRelatedProducts] = useState([]); // State to hold related products
-  const [cartItems, setCartItems] = useState([]); // State to hold cart items
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
   const { id } = useParams();
-  console.log("Product ID:", id); // Log the product ID to the console
-
-
   const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
     const updateCountdown = () => {
       const now = new Date();
-
       const cutoff = new Date();
-      cutoff.setHours(18, 0, 0, 0); // 6 PM
-
-      // If today's cutoff has passed,
-      // count down to tomorrow's cutoff
+      cutoff.setHours(18, 0, 0, 0);
       if (now >= cutoff) {
         cutoff.setDate(cutoff.getDate() + 1);
       }
-
-      const difference = Math.max(
-        0,
-        Math.floor((cutoff - now) / 1000)
-      );
-
+      const difference = Math.max(0, Math.floor((cutoff - now) / 1000));
       setCountdown(formatCountdown(difference));
     };
-
     updateCountdown();
-
     const timer = setInterval(updateCountdown, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
-
   useEffect(() => {
-    // Fetch cart items from the backend API when the component mounts
     const fetchCartItems = async () => {
       try {
         const response = await getCart();
-        console.log("Fetched cart items:", response); // Log the response to the console
         const cart = response?.data?.cart || response?.cart;
         const items = cart?.items || [];
         setCartItems(items);
@@ -400,117 +269,61 @@ export default function ProductPage() {
         console.error("Error fetching cart items:", error);
       }
     };
-
     fetchCartItems();
   }, []);
 
-  // get product details using the id from the backend API and display them on the page. You can use useEffect to fetch the product details when the component mounts or when the id changes.
   useEffect(() => {
-    // Fetch product details from the backend API using the id
     getProductById(id)
       .then((response) => {
-        // Handle the response and update the state with product details
-        console.log("Product details:", response.data);
-        // Update state with product details here
         setProductDetails(response?.data?.data);
-        if(response?.data?.data?.relatedProducts?.length > 0) {
+        if (response?.data?.data?.relatedProducts?.length > 0) {
           setRelatedProducts(response?.data?.data?.relatedProducts);
         }
       })
       .catch((error) => {
-        // Handle error if the API call fails
         console.error("Error fetching product details:", error);
       });
   }, [id]);
 
   useEffect(() => {
-    if (!id || !isLoggedIn()) return;
-
-    const checkCart = async () => {
-      try {
-        const response = await getCart();
-
-        const cart = response?.data?.cart || response?.cart;
-
-        const items = cart?.items || [];
-
-        const exists = items.some(
-          (item) =>
-            String(item?.product?._id || item?.productId) === String(id),
-        );
-
-        // setAddedToCart(exists);
-      } catch (error) {
-        console.error("CHECK CART ERROR:", error);
-      }
-    };
-
-    checkCart();
-  }, [id]);
-
-  useEffect(() => {
-    if (!id || !isLoggedIn()) return;
-
+    if (!id) return;
     const checkProductWishlist = async () => {
       try {
         const response = await checkWishlist(id);
-
         setWishlisted(
           response?.data?.isWishlisted ??
             response?.data?.wishlisted ??
             response?.data?.data?.isWishlisted ??
-            false,
+            false
         );
       } catch (error) {
         console.error("CHECK WISHLIST ERROR:", error);
       }
     };
-
     checkProductWishlist();
   }, [id]);
 
   const handleRelatedWishlist = async (e, productId) => {
     e.stopPropagation();
-
     if (!isLoggedIn()) {
       toast.error("Please log in to use wishlist.");
       return;
     }
-
     if (!productId) return;
-
     try {
       setWishlistLoading(true);
-
       const isCurrentlyWishlisted = relatedWishlisted[productId];
-
       if (isCurrentlyWishlisted) {
         await removeWishlistItem(productId);
-
-        setRelatedWishlisted((prev) => ({
-          ...prev,
-          [productId]: false,
-        }));
-
+        setRelatedWishlisted((prev) => ({ ...prev, [productId]: false }));
         toast.success("Removed from wishlist");
       } else {
-        await addToWishlist({
-          productId,
-        });
-
-        setRelatedWishlisted((prev) => ({
-          ...prev,
-          [productId]: true,
-        }));
-
+        await addToWishlist({ productId });
+        setRelatedWishlisted((prev) => ({ ...prev, [productId]: true }));
         toast.success("Added to wishlist");
       }
     } catch (error) {
-      console.error("RELATED WISHLIST ERROR:", error);
-
-      toast.error(
-        error?.response?.data?.message || "Failed to update wishlist",
-      );
+      toast.error(error?.response?.data?.message || "Failed to update wishlist");
     } finally {
       setWishlistLoading(false);
     }
@@ -521,77 +334,34 @@ export default function ProductPage() {
       setVariantMedia([]);
       return;
     }
-
     const images = productDetails.variants.flatMap((variant) => {
       if (!variant.media?.length) return [];
-
-      console.log(`Media for variant ${variant.id}:`, variant.media);
-
-      return variant.media.map((mediaItem) => {
-        console.log(`Media item for variant ${variant.id}:`, mediaItem);
-
-        return mediaItem.imageURL;
-      });
+      return variant.media.map((mediaItem) => mediaItem.imageURL);
     });
-
-    // Remove duplicate image URLs
     const uniqueImages = [...new Set(images)];
-
-    console.log("All variant images:", images);
-    console.log("Unique variant images:", uniqueImages);
-
     setVariantMedia(uniqueImages);
   }, [productDetails]);
 
-  //get all product reviews using the product id from the backend API and display them on the page. You can use useEffect to fetch the product reviews when the component mounts or when the id changes.
+  // ✅ Fixed: Replaced unauthorized getAllReviews() with public getProductReviews(id)
   useEffect(() => {
-    getAllReviews()
+    if (!id) return;
+    getProductReviews(id)
       .then((response) => {
-        console.log("Product reviews:", response.data?.data);
-        // Update state with product reviews here
-        const productReviews = response?.data?.data?.filter(
-          (review) => review.product === id,
-        );
-        console.log(
-          "Filtered product reviews for product ID",
-          id,
-          ":",
-          productReviews,
-        );
-        setReviews(
-          productReviews?.length ? productReviews : response.data?.data,
-        );
+        const productReviews = response?.data?.data || response?.data || [];
+        setReviews(productReviews);
       })
       .catch((error) => {
         console.error("Error fetching product reviews:", error);
       });
   }, [id]);
 
-  //get products using the backend API and display them on the page. You can use useEffect to fetch the products when the component mounts.
-  // useEffect(() => {
-  //   getProducts()
-  //     .then((response) => {
-  //       console.log("Products:", response.data?.data);
-  //       // Update state with products here
-  //       setProducts(response.data?.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching products:", error);
-  //     });
-  // }, []);
-
-  //get user addresses using the user id from the backend API and display them on the page. You can use useEffect to fetch the user addresses when the component mounts or when the userId changes.
   useEffect(() => {
-    console.log("Fetching user addresses for user ID:", userId);
     if (userId) {
       getAddresses()
         .then((response) => {
-          console.log("User addresses:", response);
           const addresses = response?.data?.addresses || [];
           const userDefaultAddress = addresses.find((addr) => addr.isDefault);
-          // Update state with user addresses here
           setUserDeliveryAddress(userDefaultAddress || null);
-          // setUserAddresses(addresses);
         })
         .catch((error) => {
           console.error("Error fetching user addresses:", error);
@@ -599,130 +369,62 @@ export default function ProductPage() {
     }
   }, [userId]);
 
-  console.log("Variant media state:", variantMedia); // Log the variant media state to the console
-
-  console.log("Reviews state:", reviews); // Log the reviews state to the console
-
-  console.log("Product details state:", productDetails); // Log the product details state to the console
-
-  // const colors = [
-  //   ...new Map(
-  //     (productDetails?.variants || [])
-  //       .map((variant, index) => {
-  //         const colorName = variant.color?.trim().toUpperCase();
-
-  //         if (!colorName) return null;
-
-  //         const mappedColor = COLOR_MAP[colorName];
-
-  //         if (!mappedColor) {
-  //           console.warn("New color found:", colorName);
-  //         }
-
-  //         return [
-  //           colorName,
-  //           {
-  //             id: mappedColor?.id || createColorId(colorName),
-
-  //             hex:
-  //               mappedColor?.hex ||
-  //               FALLBACK_COLORS[index % FALLBACK_COLORS.length],
-
-  //             selected: index === 0,
-  //           },
-  //         ];
-  //       })
-  //       .filter(Boolean),
-  //   ).values(),
-  // ];
-
   const COLOR_KEYWORDS = [
-  { keywords: ["NAVY", "BLUE"], hex: "#1F3A5F" },
-  { keywords: ["BLUE"], hex: "#4A90E2" },
-
-  { keywords: ["MAROON"], hex: "#800000" },
-  { keywords: ["RED"], hex: "#D32F2F" },
-
-  { keywords: ["GREEN"], hex: "#6B8E23" },
-  { keywords: ["SAGE"], hex: "#9CAF88" },
-
-  { keywords: ["YELLOW"], hex: "#E6C229" },
-  { keywords: ["MUSTARD"], hex: "#D4A017" },
-
-  { keywords: ["ORANGE"], hex: "#E67E22" },
-
-  { keywords: ["PINK"], hex: "#E8A0B8" },
-
-  { keywords: ["PURPLE"], hex: "#7E57C2" },
-  { keywords: ["VIOLET"], hex: "#7F5AA2" },
-
-  { keywords: ["BROWN"], hex: "#795548" },
-  { keywords: ["COFFEE"], hex: "#6F4E37" },
-
-  { keywords: ["GREY", "GRAY"], hex: "#808080" },
-
-  { keywords: ["BLACK"], hex: "#222222" },
-  { keywords: ["WHITE"], hex: "#F8F8F8" },
-
-  { keywords: ["CREAM"], hex: "#FFFDD0" },
-  { keywords: ["BEIGE"], hex: "#D8C3A5" },
-];
+    { keywords: ["NAVY", "BLUE"], hex: "#1F3A5F" },
+    { keywords: ["BLUE"], hex: "#4A90E2" },
+    { keywords: ["MAROON"], hex: "#800000" },
+    { keywords: ["RED"], hex: "#D32F2F" },
+    { keywords: ["GREEN"], hex: "#6B8E23" },
+    { keywords: ["SAGE"], hex: "#9CAF88" },
+    { keywords: ["YELLOW"], hex: "#E6C229" },
+    { keywords: ["MUSTARD"], hex: "#D4A017" },
+    { keywords: ["ORANGE"], hex: "#E67E22" },
+    { keywords: ["PINK"], hex: "#E8A0B8" },
+    { keywords: ["PURPLE"], hex: "#7E57C2" },
+    { keywords: ["VIOLET"], hex: "#7F5AA2" },
+    { keywords: ["BROWN"], hex: "#795548" },
+    { keywords: ["COFFEE"], hex: "#6F4E37" },
+    { keywords: ["GREY", "GRAY"], hex: "#808080" },
+    { keywords: ["BLACK"], hex: "#222222" },
+    { keywords: ["WHITE"], hex: "#F8F8F8" },
+    { keywords: ["CREAM"], hex: "#FFFDD0" },
+    { keywords: ["BEIGE"], hex: "#D8C3A5" },
+  ];
 
   const getColorHex = (colorName, index = 0) => {
-  const name = colorName?.trim().toUpperCase();
-
-  if (!name) {
+    const name = colorName?.trim().toUpperCase();
+    if (!name) return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+    if (COLOR_MAP[name]) return COLOR_MAP[name].hex;
+    const matchedColor = COLOR_KEYWORDS.find((color) =>
+      color.keywords.some((keyword) => name.includes(keyword))
+    );
+    if (matchedColor) return matchedColor.hex;
     return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
-  }
-
-  // Exact match first
-  if (COLOR_MAP[name]) {
-    return COLOR_MAP[name].hex;
-  }
-
-  // Keyword match
-  const matchedColor = COLOR_KEYWORDS.find((color) =>
-    color.keywords.some((keyword) => name.includes(keyword))
-  );
-
-  if (matchedColor) {
-    return matchedColor.hex;
-  }
-
-  // Final fallback
-  console.warn("New color found:", name);
-
-  return FALLBACK_COLORS[index % FALLBACK_COLORS.length];
-};
+  };
 
   const colors = [
-  ...new Map(
-    (productDetails?.variants || [])
-      .map((variant, index) => {
-        const colorName = variant.color?.trim().toUpperCase();
-
-        if (!colorName) return null;
-
-        return [
-          colorName,
-          {
-            id: createColorId(colorName),
-            hex: getColorHex(colorName, index),
-            name: colorName,
-            selected: index === 0,
-          },
-        ];
-      })
-      .filter(Boolean)
-  ).values(),
-];
-
-  console.log("Colors derived from product details:", colors); // Log the colors derived from product details
+    ...new Map(
+      (productDetails?.variants || [])
+        .map((variant, index) => {
+          const colorName = variant.color?.trim().toUpperCase();
+          if (!colorName) return null;
+          return [
+            colorName,
+            {
+              id: createColorId(colorName),
+              hex: getColorHex(colorName, index),
+              name: colorName,
+              selected: index === 0,
+            },
+          ];
+        })
+        .filter(Boolean)
+    ).values(),
+  ];
 
   const SIZES =
     productDetails?.variants?.[0]?.sizes?.map((item) => {
       const inStock = item.isActive && item.stockQuantity > 0;
-
       return {
         id: item.size,
         label: inStock ? "In Stock" : "Out of Stock",
@@ -731,131 +433,92 @@ export default function ProductPage() {
       };
     }) || [];
 
-  console.log("Sizes derived from product details:", SIZES); // Log the sizes derived from product details
-
-  const selectedSize = SIZES.find(
-  (size) => size.id === activeSize
-);
-
-const maxQty = selectedSize?.stockQuantity || 0;
+  const selectedSize = SIZES.find((size) => size.id === activeSize);
+  const maxQty = selectedSize?.stockQuantity || 0;
 
   useEffect(() => {
-  const firstAvailableSize = SIZES.find((size) => !size.disabled);
+    const firstAvailableSize = SIZES.find((size) => !size.disabled);
+    if (firstAvailableSize) {
+      setActiveSize(firstAvailableSize.id);
+      setQty(1);
+    } else {
+      setActiveSize(null);
+      setQty(1);
+    }
+  }, [productDetails]);
 
-  if (firstAvailableSize) {
-    setActiveSize(firstAvailableSize.id);
-    setQty(1);
-  } else {
-    setActiveSize(null);
-    setQty(1);
-  }
-}, [productDetails]);
-  
   const selectedVariant =
     productDetails?.variants?.find((variant) => variant.isActive) ||
     productDetails?.variants?.[0];
 
-  // const DETAILS = [
-  //   ["Fabric", selectedVariant?.fabric || "-"],
-  //   ["Feel", selectedVariant?.feel || "-"],
-  //   ["Lining", selectedVariant?.lining || "-"],
-  //   ["Sleeves", selectedVariant?.sleeves || "-"],
-  //   ["Finishing", selectedVariant?.finishing || "-"],
-  //   ["Pocket", selectedVariant?.pocket || "-"],
-  //   // [
-  //   //   "Available Sizes",
-  //   //   selectedVariant?.sizes?.map((item) => item.size).join(" | ") || "-",
-  //   // ],
-  // ];
-
-const DETAILS =
-  selectedVariant?.details
-    ?.filter(
-      (item) =>
-        item?.key &&
-        item?.value &&
-        item.value.trim() !== "" &&
-        item.value !== "N/A" &&
-        item.value !== "-"
-    )
-    .map((item) => [item.key, item.value]) || [];
+  const DETAILS =
+    selectedVariant?.details
+      ?.filter(
+        (item) =>
+          item?.key &&
+          item?.value &&
+          item.value.trim() !== "" &&
+          item.value !== "N/A" &&
+          item.value !== "-"
+      )
+      .map((item) => [item.key, item.value]) || [];
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
-
-    if (!isLoggedIn()) {
-      toast.error("Please log in to use wishlist.");
-      return;
-    }
-
     if (!id) return;
-
     try {
       setWishlistLoading(true);
-
       if (wishlisted) {
-        await removeWishlistItem(id);
+        const response = await removeWishlistItem(id);
         setWishlisted(false);
-        toast.success("Removed from wishlist");
+
+        if (response?.data) {
+          toast.success(response?.data?.message || "Removed from wishlist");
+        }
       } else {
-        await addToWishlist({
-          productId: id,
-        });
+        const response = await addToWishlist({ productId: id });
         setWishlisted(true);
-        toast.success("Added to wishlist");
+        if (response?.data) {
+          toast.success(response?.data?.message || "Added to wishlist");
+          const checkResponse = await checkWishlist(id);
+          setWishlisted(
+            checkResponse?.data?.isWishlisted ??
+              checkResponse?.data?.wishlisted ??
+              checkResponse?.data?.data?.isWishlisted ??
+              true
+          );
+        }
       }
     } catch (error) {
-      console.error("WISHLIST ERROR:", error);
-      toast.error(
-        error?.response?.data?.message || "Failed to update wishlist",
-      );
+      toast.error(error?.response?.data?.message || "Failed to update wishlist");
     } finally {
       setWishlistLoading(false);
     }
   };
 
-const handleAddToCart = async () => {
-  if (!isLoggedIn()) {
-    toast.error("Please log in to add items to your cart.");
-    return;
-  }
-
-  // Find the currently selected variant object based on activeColor if needed, 
-  // or use selectedVariant with its color property.
-  const cartItem = {
-    productId: productDetails._id,
-    variantId: selectedVariant._id,
-    color: selectedVariant.color, // ✅ Added color
-    size: activeSize,             // ✅ Changed from selectedSize to size
-    quantity: qty,
+  const handleAddToCart = async () => {
+    const cartItem = {
+      productId: productDetails._id,
+      variantId: selectedVariant._id,
+      color: selectedVariant.color,
+      size: activeSize,
+      quantity: qty,
+    };
+    const response = await addToCart(cartItem);
+    if (response.success) {
+      const updatedCartResponse = await getCart();
+      const updatedCart = updatedCartResponse?.data?.cart || updatedCartResponse?.cart;
+      setCartItems(updatedCart?.items || []);
+      toast.success("Product added");
+    } else {
+      toast.error(response?.message || "Failed to add item to cart.");
+    }
   };
 
-  const response = await addToCart(cartItem);
-  
-  if (response.success) {
-    const updatedCartResponse = await getCart();
-    const updatedCart = updatedCartResponse?.data?.cart || updatedCartResponse?.cart;
-    setCartItems(updatedCart?.items || []);
-    toast.success("Product added");
-  } else {
-    toast.error(response?.message || "Failed to add item to cart.");
-  }
-};
-
   const handleBuyNow = (productId, variantId) => {
-    console.log("productId:", productId, "variantId:", variantId);
-    if (!isLoggedIn()) {
-      toast.error("Please log in to proceed with the purchase.");
-      return;
-    }
-    // check product id exsit in the cart or not, if not then add to cart and then navigate to the checkout page
-      const itemExistsInCart = cartItems.some(
-        (item) =>
-          String(item?.product?._id || item?.productId) === String(productId) 
-        // &&          String(item?.variantId) === String(variantId)
-      );
-      console.log("itemExistsInCart:", itemExistsInCart);
-    // add to cart and then navigate to the checkout page
+    const itemExistsInCart = cartItems.some(
+      (item) => String(item?.product?._id || item?.productId) === String(productId)
+    );
     if (!itemExistsInCart) {
       handleAddToCart().then(() => {
         navigate("/checkout");
@@ -865,87 +528,23 @@ const handleAddToCart = async () => {
     }
   };
 
-  const handleSaveAddress = () => {
-    if (!newAddress.name.trim()) {
-      toast.error("Please enter your name");
-      return;
-    }
-
-    if (!newAddress.phone.trim()) {
-      toast.error("Please enter your phone number");
-      return;
-    }
-
-    if (!newAddress.address.trim()) {
-      toast.error("Please enter your address");
-      return;
-    }
-
-    if (!newAddress.city.trim()) {
-      toast.error("Please enter your city");
-      return;
-    }
-
-    if (!newAddress.state.trim()) {
-      toast.error("Please enter your state");
-      return;
-    }
-
-    if (newAddress.pincode.length !== 6) {
-      toast.error("Please enter a valid 6 digit pincode");
-      return;
-    }
-
-    const address = {
-      id: Date.now(),
-      ...newAddress,
-    };
-
-    setDeliveryAddresses((prev) => [...prev, address]);
-
-    // Automatically select new address
-    setSelectedAddress(address);
-
-    // Reset form
-    setNewAddress({
-      name: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-    });
-
-    // Close both modals
-    setShowAddAddress(false);
-    setShowLocations(false);
-
-    toast.success("Address added successfully");
-  };
-
-  /* ---------- write-a-review popup handlers ---------- */
   const handleOpenReviewModal = () => {
     if (!isLoggedIn()) {
       toast.error("Please log in to write a review.");
       return;
     }
-
-    // pre-fill the reviewer name from the logged in user (if available)
     let savedName = "";
     try {
       savedName = storedUser ? JSON.parse(storedUser)?.name || "" : "";
     } catch (error) {
       savedName = "";
     }
-
     setReviewName(savedName);
     setShowReviewModal(true);
   };
 
   const closeReviewModal = () => {
-    // free the temporary image previews
     reviewImages.forEach((img) => URL.revokeObjectURL(img.preview));
-
     setReviewImages([]);
     setReviewRating(0);
     setReviewHover(0);
@@ -955,106 +554,55 @@ const handleAddToCart = async () => {
     setShowReviewModal(false);
   };
 
-  const handleReviewImages = (e) => {
-    const files = Array.from(e.target.files || []);
-    e.target.value = ""; // allow picking the same file again
-
-    if (!files.length) return;
-
-    const remaining = REVIEW_MAX_IMAGES - reviewImages.length;
-
-    if (remaining <= 0) {
-      toast.error(`You can add up to ${REVIEW_MAX_IMAGES} photos`);
-      return;
-    }
-
-    const valid = files.filter((file) => {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Only image files are allowed");
-        return false;
-      }
-
-      if (file.size > REVIEW_MAX_IMAGE_MB * 1024 * 1024) {
-        toast.error(`${file.name} is larger than ${REVIEW_MAX_IMAGE_MB}MB`);
-        return false;
-      }
-
-      return true;
-    });
-
-    if (valid.length > remaining) {
-      toast.error(`You can add up to ${REVIEW_MAX_IMAGES} photos`);
-    }
-
-    const accepted = valid.slice(0, remaining).map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-
-    setReviewImages((prev) => [...prev, ...accepted]);
-  };
-
-  const handleRemoveReviewImage = (index) => {
-    const target = reviewImages[index];
-
-    if (target) URL.revokeObjectURL(target.preview);
-
-    setReviewImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-
     if (!reviewRating) {
       toast.error("Please select a star rating");
       return;
     }
-
     if (!reviewName.trim()) {
       toast.error("Please enter your name");
       return;
     }
-
     if (reviewComment.trim().length < 10) {
       toast.error("Please write at least 10 characters in your review");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("product", id);
-    formData.append("rating", reviewRating);
-    formData.append("name", reviewName.trim());
-    formData.append("comment", reviewComment.trim());
-    reviewImages.forEach((img) => formData.append("images", img.file));
-
     try {
       setReviewSubmitting(true);
+      const payload = {
+        productId: id,
+        rating: reviewRating,
+        title: reviewComment.slice(0, 50),
+        comment: reviewComment.trim(),
+      };
 
-      // TODO: send `formData` to your create-review API here, for example:
-      // await createReview(formData);
-      console.log("Review payload:", Object.fromEntries(formData.entries()));
-
-      toast.success("Thank you! Your review has been submitted");
-      closeReviewModal();
+      const response = await createReview(payload);
+      if (response?.data?.success || response?.success) {
+        toast.success("Thank you! Your review has been submitted");
+        const newReview = response?.data?.data || response?.data;
+        setReviews((prev) => [newReview, ...prev]);
+        closeReviewModal();
+      } else {
+        toast.error(response?.message || "Failed to submit review");
+      }
     } catch (error) {
       console.error("SUBMIT REVIEW ERROR:", error);
       toast.error(error?.response?.data?.message || "Failed to submit review");
+    } finally {
       setReviewSubmitting(false);
     }
   };
 
-  // lock page scroll + close on Escape while the review popup is open
   useEffect(() => {
     if (!showReviewModal) return;
-
     const onKeyDown = (e) => {
       if (e.key === "Escape") closeReviewModal();
     };
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", onKeyDown);
-
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
@@ -1063,7 +611,6 @@ const handleAddToCart = async () => {
 
   const RELATED = relatedProducts.map((product) => {
     const variant = product.variants?.[0];
-
     return {
       id: product._id,
       name: product.name,
@@ -1071,112 +618,48 @@ const handleAddToCart = async () => {
       rating: product.rating || 0,
       reviewCount: product.reviewCount || 0,
       price: formatCurrency(variant?.discountPrice || variant?.price || 0),
-      image:
-        import.meta.env.VITE_UPLOAD_URL + (variant?.media?.[0]?.imageURL || ""),
+      image: import.meta.env.VITE_UPLOAD_URL + (variant?.media?.[0]?.imageURL || ""),
     };
   });
 
-  useEffect(() => {
-    if (!RELATED?.length || !isLoggedIn()) return;
-
-    const checkRelatedWishlist = async () => {
-      try {
-        const wishlistStatus = {};
-
-        await Promise.all(
-          RELATED.slice(0, 4).map(async (product) => {
-            if (!product.id) return;
-
-            try {
-              const response = await checkWishlist(product.id);
-
-              wishlistStatus[product.id] =
-                response?.data?.isWishlisted ??
-                response?.data?.wishlisted ??
-                response?.data?.data?.isWishlisted ??
-                false;
-            } catch (error) {
-              wishlistStatus[product.id] = false;
-            }
-          }),
-        );
-
-        setRelatedWishlisted(wishlistStatus);
-      } catch (error) {
-        console.error("CHECK RELATED WISHLIST ERROR:", error);
-      }
-    };
-
-    checkRelatedWishlist();
-  }, [relatedProducts, id]);
-
-  /* ---------- gallery auto-slide ----------
-     Uses the existing activeThumb/variantMedia state — no new data logic,
-     just automatically advances the main image every 6 seconds. */
-  useEffect(() => {
-    if (!variantMedia.length || variantMedia.length <= 1) return;
-
-    const slideInterval = setInterval(() => {
-      setActiveThumb((prev) =>
-        prev === variantMedia.length - 1 ? 0 : prev + 1,
-      );
-    }, 6000); // rotates every 6 seconds (within the 5-7s range)
-
-    return () => clearInterval(slideInterval);
-  }, [variantMedia]);
-
   const existingCartItem = cartItems?.find(
-  (item) =>
-    String(item.product?._id) ===
-      String(productDetails?._id) &&
-    // item.color?.toLowerCase() ===      selectedColor?.toLowerCase() &&
-    item.selectedSize?.toUpperCase() ===
-      activeSize?.toUpperCase()
-);
+    (item) =>
+      String(item.product?._id) === String(productDetails?._id) &&
+      item.size?.toUpperCase() === activeSize?.toUpperCase()
+  );
 
-const addedToCart = !!existingCartItem;
-
-  console.log('cart_items:', cartItems); // Log the cart items to the console
+  const addedToCart = !!existingCartItem;
 
   const selectUserDeliveryAddress = (address) => {
-    if(!isLoggedIn()) {
+    if (!isLoggedIn()) {
       toast.error("Please log in to select a delivery address.");
       return;
     }
-
     navigate("/account", {
       state: {
         selectedAddress: address,
         productId: productDetails?._id,
         variantId: selectedVariant?._id,
-      }
+      },
     });
-
-  }
+  };
 
   return (
     <div className="pp">
-      {/* ============ PRODUCT SECTION ============ */}
       <section className="pp-product">
         <div className="pp-breadcrumb">
-          <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> /{" "}
-          {productDetails?.name || "Product Name"}
+          <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {productDetails?.name || "Product Name"}
         </div>
 
         <div className="pp-grid">
-          {/* ---- gallery ---- */}
           <div className="pp-gallery-panel">
             <div className="pp-main-image">
               <img
                 className="pp-main-image-ph"
-                src={
-                  import.meta.env.VITE_UPLOAD_URL +
-                  (variantMedia[activeThumb] || mainPhoto)
-                }
+                src={import.meta.env.VITE_UPLOAD_URL + (variantMedia[activeThumb] || mainPhoto)}
                 alt={productDetails?.name || "Admire Maxi"}
                 onError={(e) => {
-                  console.error(`Error loading main image:`, e);
-                  e.target.src = mainPhoto; // Fallback to main photo on error
+                  e.target.src = mainPhoto;
                 }}
               />
             </div>
@@ -1191,10 +674,9 @@ const addedToCart = !!existingCartItem;
                   <img
                     className="pp-thumb-img"
                     src={import.meta.env.VITE_UPLOAD_URL + src}
-                    alt={`Admire Maxi view ${i + 1}`}
+                    alt={`View ${i + 1}`}
                     onError={(e) => {
-                      console.error(`Error loading image ${src}:`, e);
-                      e.target.src = mainPhoto; // Fallback to main photo on error
+                      e.target.src = mainPhoto;
                     }}
                   />
                 </button>
@@ -1202,22 +684,18 @@ const addedToCart = !!existingCartItem;
             </div>
           </div>
 
-          {/* ---- info ---- */}
           <div className="pp-info">
             <div className="pp-eyebrow">
               {productDetails?.variants?.[0]?.fabric || null}
             </div>
 
             <div className="pp-title-row">
-              {/* //if no name show nill */}
               <h1 className="pp-title">{productDetails?.name || null}</h1>
               <button
                 className={`pp-wish ${wishlisted ? "is-active" : ""}`}
                 onClick={handleWishlist}
                 disabled={wishlistLoading}
-                aria-label={
-                  wishlisted ? "Remove from wishlist" : "Add to wishlist"
-                }
+                aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
               >
                 <Heart active={wishlisted} />
               </button>
@@ -1231,7 +709,7 @@ const addedToCart = !!existingCartItem;
               <Stars count={productDetails?.rating} />
               <span className="pp-rating-num">{productDetails?.rating}</span>
               <span className="pp-rating-count">
-                ({productDetails?.reviewCount || 0} Reviews)
+                ({productDetails?.reviewCount || reviews.length} Reviews)
               </span>
             </div>
 
@@ -1263,54 +741,26 @@ const addedToCart = !!existingCartItem;
             <div className="pp-block">
               <div className="pp-label-row">
                 <span className="pp-label">Select Size</span>
-                {/* <button className="pp-size-guide">Size Guide</button> */}
               </div>
               <div className="pp-sizes">
                 {SIZES.map((s) => (
                   <button
                     key={s.id}
                     disabled={s.disabled}
-                    className={`pp-size ${activeSize === s.id ? "is-active" : ""
-                      } ${s.disabled ? "is-disabled" : ""}`}
+                    className={`pp-size ${activeSize === s.id ? "is-active" : ""} ${
+                      s.disabled ? "is-disabled" : ""
+                    }`}
                     onClick={() => {
                       if (!s.disabled) {
                         setActiveSize(s.id);
-                        setQty(1); // important
+                        setQty(1);
                       }
                     }}
                   >
                     <span className="pp-size-id">{s.id}</span>
-                    <span className="pp-size-note">
-                      {s.label}
-                    </span>
+                    <span className="pp-size-note">{s.label}</span>
                   </button>
                 ))}
-                {/* {SIZES.map((s) => (
-                  <button
-                    key={s.id}
-                    disabled={s.disabled}
-                    className={`pp-size ${activeSize === s.id ? "is-active" : ""} ${
-                      s.disabled ? "is-disabled" : ""
-                    }`}
-                    onClick={() => !s.disabled && setActiveSize(s.id)}
-                  >
-                    <span className="pp-size-id">{s.id}</span>
-                    <span className="pp-size-note">{s.label}</span>
-                  </button>
-                ))} */}
-                {/* {productDetails?.variants?.[0]?.sizes?.map((s) => (
-                  <button
-                    key={s?._id}
-                    disabled={s.isActive}
-                    className={`pp-size ${activeSize === s?.size ? "is-active" : ""} ${
-                      s?.isActive ? "is-disabled" : ""
-                    }`}
-                    onClick={() => !s.isActive && setActiveSize(s?.size)}
-                  >
-                    <span className="pp-size-id">{s?.size}</span>
-                    <span className="pp-size-note">{s.label}</span>
-                  </button>
-                ))} */}
               </div>
             </div>
 
@@ -1318,58 +768,26 @@ const addedToCart = !!existingCartItem;
               {selectedSize && (
                 <div>
                   <span className="pp-label">Quantity</span>
-
                   <div className="pp-qty">
                     <button
-                      onClick={() =>
-                        setQty((q) => Math.max(1, q - 1))
-                      }
+                      onClick={() => setQty((q) => Math.max(1, q - 1))}
                       disabled={qty <= 1}
                       aria-label="Decrease quantity"
                     >
                       −
                     </button>
-
-                    <span className="pp-qty-num">
-                      {qty}
-                    </span>
-
+                    <span className="pp-qty-num">{qty}</span>
                     <button
-                      onClick={() =>
-                        setQty((q) => Math.min(maxQty, q + 1))
-                      }
+                      onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
                       disabled={qty >= maxQty}
                       aria-label="Increase quantity"
                     >
                       +
                     </button>
                   </div>
-
-                  {maxQty > 1 && (
-                    <small>
-                      {maxQty} available
-                    </small>
-                  )}
+                  {maxQty > 1 && <small>{maxQty} available</small>}
                 </div>
               )}
-              {/* <div>
-                <span className="pp-label">Quantity</span>
-                <div className="pp-qty">
-                  <button
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    aria-label="Decrease quantity"
-                  >
-                    −
-                  </button>
-                  <span className="pp-qty-num">{qty}</span>
-                  <button
-                    onClick={() => setQty((q) => q + 1)}
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
-              </div> */}
               <div className="pp-fitmodel">
                 <div>
                   <span className="pp-fitmodel-k">Sleeves</span>
@@ -1387,7 +805,6 @@ const addedToCart = !!existingCartItem;
             </div>
 
             <div className="pp-actions">
-
               <button
                 className="btn btn--primary"
                 onClick={() => {
@@ -1400,25 +817,16 @@ const addedToCart = !!existingCartItem;
               >
                 {addedToCart ? "Go to Cart" : "Add To Cart"}
               </button>
-
-              {/* <button
-                className="btn btn--primary"
-                onClick={
-                  addedToCart ? () => navigate("/cartpage") : handleAddToCart
-                }
+              <button
+                className="btn--outline"
+                onClick={() => handleBuyNow(productDetails?._id, selectedVariant?._id)}
               >
-                {addedToCart ? "Go to Cart" : "Add To Cart"}
-
-              </button>*/}
-              <button className="btn--outline" onClick={() => handleBuyNow(productDetails?._id, selectedVariant?._id)}>
-
                 Buy Now
               </button>
             </div>
           </div>
         </div>
 
-        {/* ---- details + delivery ---- */}
         <div className="pp-lower">
           <div className="pp-details">
             <h2 className="pp-h2">Product Details</h2>
@@ -1427,7 +835,6 @@ const addedToCart = !!existingCartItem;
                 if (k === "Lining") {
                   return v?.trim() && v !== "N/A" && v !== "-";
                 }
-
                 return true;
               }).map(([k, v]) => (
                 <div className="pp-details-row" key={k}>
@@ -1438,99 +845,13 @@ const addedToCart = !!existingCartItem;
             </dl>
           </div>
 
-          {/* <div className="pp-delivery"> */}
-          {/* <h2 className="pp-h2">Delivery Details</h2>
-
-            <div className="pp-delivery-card">
-              <div className="pp-delivery-row">
-                <span className="pp-delivery-icon">
-                  <PinIcon />
-                </span>
-                <span>
-                  Location not set{" "}
-                  <a href="#location">Select delivery location</a>
-                </span>
-              </div>
-              <div className="pp-delivery-row">
-                <span className="pp-delivery-icon">
-                  <PinIcon />
-                </span>
-
-                <div className="pp-delivery-content">
-                  {selectedAddress ? (
-                    <>
-                      <span className="pp-delivery-text">
-                        Deliver to{" "}
-                        <strong>
-                          {selectedAddress.city} - {selectedAddress.pincode}
-                        </strong>
-                      </span>
-
-                      <button
-                        type="button"
-                        className="pp-change-location"
-                        onClick={() => setShowLocations(true)}
-                      >
-                        Change
-                      </button>
-                    </>
-                  ) : (
-                    <span className="pp-delivery-text">
-                      Location not set{" "}
-                      <button
-                        type="button"
-                        className="pp-location-link"
-                        onClick={() => setShowLocations(true)}
-                      >
-                        Select delivery location
-                      </button>
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="pp-delivery-row">
-                <span className="pp-delivery-icon">
-                  <TruckIcon />
-                </span>
-                <span>
-                  Delivery by 11 Sep, Fri
-                  <br />
-                  <em>Order in 00h 00m 00s</em>
-                </span>
-              </div>
-            </div>
-
-            <div className="pp-perks">
-              <div className="pp-perk">
-                <ShieldIcon />
-                <span>Secure Pay</span>
-              </div>
-              <div className="pp-perk">
-                <RefreshIcon />
-                <span>Easy Exchange</span>
-              </div>
-              <div className="pp-perk">
-                <TruckIcon size={20} />
-                <span>Fast Delivery</span>
-              </div>
-              <div className="pp-perk">
-                <QualityIcon />
-                <span>Quality Check</span>
-              </div>
-            </div> */}
-
-          {/* <div className="pp-delivery-card"> */}
           <div className="pp-delivery">
             <h2 className="pp-h2">Delivery Details</h2>
-
             <div className="pp-delivery-card">
-              {/* Delivery location */}
               <div className="pp-delivery-row">
                 <span className="pp-delivery-icon">
                   <PinIcon />
                 </span>
-
                 <div className="pp-delivery-content">
                   {userDeliveryAddress ? (
                     <>
@@ -1540,12 +861,10 @@ const addedToCart = !!existingCartItem;
                           {userDeliveryAddress.city} - {userDeliveryAddress.pincode}
                         </strong>
                       </span>
-
                       <button
                         type="button"
                         className="pp-change-location"
-                        // onClick={() => setShowLocations(true)}
-                        onClick={()=> selectUserDeliveryAddress()}
+                        onClick={() => selectUserDeliveryAddress()}
                       >
                         Change
                       </button>
@@ -1556,8 +875,7 @@ const addedToCart = !!existingCartItem;
                       <button
                         type="button"
                         className="pp-location-link"
-                        // onClick={() => setShowLocations(true)}
-                        onClick={()=> selectUserDeliveryAddress()}
+                        onClick={() => selectUserDeliveryAddress()}
                       >
                         Select delivery location
                       </button>
@@ -1566,12 +884,10 @@ const addedToCart = !!existingCartItem;
                 </div>
               </div>
 
-              {/* Delivery date */}
               <div className="pp-delivery-row">
                 <span className="pp-delivery-icon">
                   <TruckIcon />
                 </span>
-
                 <span>
                   Delivery by {getDeliveryDate(7)}
                   <br />
@@ -1580,248 +896,28 @@ const addedToCart = !!existingCartItem;
               </div>
             </div>
 
-            {/* ================= LOCATION POPUP ================= */}
-
-            {showLocations && (
-              <div
-                className="pp-location-overlay"
-                onClick={() => setShowLocations(false)}
-              >
-                <div
-                  className="pp-location-modal"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {/* Header */}
-                  <div className="pp-location-header">
-                    <h3>Select delivery location</h3>
-
-                    <button
-                      type="button"
-                      className="pp-location-close"
-                      onClick={() => setShowLocations(false)}
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  {/* Address list */}
-                  <div className="pp-location-list">
-                    {deliveryAddresses.map((address) => (
-                      <button
-                        type="button"
-                        key={address.id}
-                        className={`pp-address-card ${
-                          selectedAddress?.id === address.id
-                            ? "is-selected"
-                            : ""
-                        }`}
-                        onClick={() => {
-                          setSelectedAddress(address);
-                          setShowLocations(false);
-                        }}
-                      >
-                        <span className="pp-address-icon">
-                          <PinIcon />
-                        </span>
-
-                        <span className="pp-address-info">
-                          <strong>{address.name}</strong>
-
-                          <span>{address.address}</span>
-
-                          <span>
-                            {address.city}, {address.state}
-                          </span>
-
-                          <span>{address.pincode}</span>
-                        </span>
-
-                        {/* Radio */}
-                        <span className="pp-address-radio">
-                          {selectedAddress?.id === address.id && <span />}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Add address */}
-                  <button
-                    type="button"
-                    className="pp-add-address"
-                    onClick={() => setShowAddAddress(true)}
-                  >
-                    + Add New Address
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {showAddAddress && (
-              <div
-                className="pp-location-overlay"
-                onClick={() => setShowAddAddress(false)}
-              >
-                <div
-                  className="pp-location-modal pp-add-address-modal"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="pp-location-header">
-                    <h3>Add New Address</h3>
-
-                    <button
-                      type="button"
-                      className="pp-location-close"
-                      onClick={() => setShowAddAddress(false)}
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <div className="pp-address-form">
-                    <div className="pp-form-group">
-                      <label>Full Name</label>
-                      <input
-                        type="text"
-                        placeholder="Enter your name"
-                        value={newAddress.name}
-                        onChange={(e) =>
-                          setNewAddress({
-                            ...newAddress,
-                            name: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className="pp-form-group">
-                      <label>Phone Number</label>
-                      <input
-                        type="tel"
-                        placeholder="Enter phone number"
-                        value={newAddress.phone}
-                        onChange={(e) =>
-                          setNewAddress({
-                            ...newAddress,
-                            phone: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className="pp-form-group">
-                      <label>Address</label>
-                      <textarea
-                        placeholder="House No, Street, Area"
-                        rows="3"
-                        value={newAddress.address}
-                        onChange={(e) =>
-                          setNewAddress({
-                            ...newAddress,
-                            address: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className="pp-form-row">
-                      <div className="pp-form-group">
-                        <label>City</label>
-                        <input
-                          type="text"
-                          placeholder="City"
-                          value={newAddress.city}
-                          onChange={(e) =>
-                            setNewAddress({
-                              ...newAddress,
-                              city: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-
-                      <div className="pp-form-group">
-                        <label>State</label>
-                        <input
-                          type="text"
-                          placeholder="State"
-                          value={newAddress.state}
-                          onChange={(e) =>
-                            setNewAddress({
-                              ...newAddress,
-                              state: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pp-form-group">
-                      <label>Pincode</label>
-                      <input
-                        type="text"
-                        maxLength="6"
-                        placeholder="6 digit pincode"
-                        value={newAddress.pincode}
-                        onChange={(e) =>
-                          setNewAddress({
-                            ...newAddress,
-                            pincode: e.target.value.replace(/\D/g, ""),
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className="pp-form-actions">
-                      <button
-                        type="button"
-                        className="pp-cancel-address"
-                        onClick={() => setShowAddAddress(false)}
-                      >
-                        Cancel
-                      </button>
-
-                      <button
-                        type="button"
-                        className="pp-save-address"
-                        onClick={handleSaveAddress}
-                      >
-                        Save Address
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Perks */}
             <div className="pp-perks">
               <div className="pp-perk">
                 <ShieldIcon />
                 <span>Secure Pay</span>
               </div>
-
               <div className="pp-perk">
                 <RefreshIcon />
                 <span>Easy Exchange</span>
               </div>
-
               <div className="pp-perk">
                 <TruckIcon size={20} />
                 <span>Fast Delivery</span>
               </div>
-
               <div className="pp-perk">
                 <QualityIcon />
                 <span>Quality Check</span>
               </div>
             </div>
           </div>
-          {/* </div> */}
-          {/* </div> */}
         </div>
       </section>
 
-      {/* ============ REVIEWS SECTION ============ */}
       <section className="pp-reviews">
         <div className="pp-reviews-head">
           <div>
@@ -1832,7 +928,7 @@ const addedToCart = !!existingCartItem;
               </span>
               <div className="pp-reviews-score-meta">
                 <Stars count={5} />
-                <span>Based On {productDetails?.reviewCount || 0} Reviews</span>
+                <span>Based On {reviews.length} Reviews</span>
               </div>
             </div>
           </div>
@@ -1857,72 +953,69 @@ const addedToCart = !!existingCartItem;
         </div>
 
         <div className="pp-review-grid">
-          {reviews.map((r) => (
-            <article className="pp-review-card" key={r?._id}>
-              <div className="pp-review-top">
-                <Stars count={r.rating} />
-                <span className="pp-review-time">
-                  {formatTimeAgo(r?.createdAt)}
-                </span>
-              </div>
-
-              {r.images && (
-                <div className="pp-review-photos">
-                  {r.images.map((src, i) => (
-                    <img
-                      className="pp-review-photo"
-                      src={import.meta.env.VITE_API_URL + src}
-                      alt=""
-                      key={i}
-                      onError={(e) => {
-                        e.target.src = mainPhoto;
-                      }}
-                    />
-                  ))}
+          {reviews.length === 0 ? (
+            <p className="pp-no-reviews">No reviews yet for this product. Be the first to review!</p>
+          ) : (
+            reviews.map((r) => (
+              <article className="pp-review-card" key={r?._id}>
+                <div className="pp-review-top">
+                  <Stars count={r.rating} />
+                  <span className="pp-review-time">
+                    {formatTimeAgo(r?.createdAt)}
+                  </span>
                 </div>
-              )}
 
-              <h3 className="pp-review-title">&ldquo;{r.title}&rdquo;</h3>
-              <p className="pp-review-body">{r.comment}</p>
-
-              <div className="pp-review-author">
-                <div className="pp-avatar" />
-                <div>
-                  <div className="pp-author-name">
-                    {r.user?.name || "Anonymous"}
+                {r.images && r.images.length > 0 && (
+                  <div className="pp-review-photos">
+                    {r.images.map((src, i) => (
+                      <img
+                        className="pp-review-photo"
+                        src={import.meta.env.VITE_API_URL + src}
+                        alt=""
+                        key={i}
+                        onError={(e) => {
+                          e.target.src = mainPhoto;
+                        }}
+                      />
+                    ))}
                   </div>
-                  <div className="pp-verified">
-                    <span className="pp-verified-dot" /> Verified Buyer
+                )}
+
+                <h3 className="pp-review-title">&ldquo;{r.title || "Great product"}&rdquo;</h3>
+                <p className="pp-review-body">{r.comment}</p>
+
+                <div className="pp-review-author">
+                  <div className="pp-avatar" />
+                  <div>
+                    <div className="pp-author-name">
+                      {r.user?.name || "Anonymous"}
+                    </div>
+                    <div className="pp-verified">
+                      <span className="pp-verified-dot" /> Verified Buyer
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </div>
 
         <div className="pp-related-head">
           <h2 className="pp-h1-serif pp-h1-serif--black">You May Also Like</h2>
-          <a onClick={(e) => navigate("/shop")} className="pp-explore">
+          <a onClick={() => navigate("/shop")} className="pp-explore">
             Explore All Shop
           </a>
         </div>
 
         <div className="pp-related-grid">
-          {/* show only 4 data */}
           {RELATED?.slice(0, 4).map((p) => (
             <article className="pp-related-card" key={p.id} onClick={() => navigate(`/product/${p.id}`)}>
               <div className="pp-related-image">
                 <button
-                  className={`pp-wish ${
-                    relatedWishlisted[p.id] ? "is-active" : ""
-                  }`}
+                  className={`pp-wish ${relatedWishlisted[p.id] ? "is-active" : ""}`}
                   onClick={(e) => handleRelatedWishlist(e, p.id)}
                   disabled={wishlistLoading}
-                  aria-label={
-                    relatedWishlisted[p.id]
-                      ? "Remove from wishlist"
-                      : "Add to wishlist"
-                  }
+                  aria-label={relatedWishlisted[p.id] ? "Remove from wishlist" : "Add to wishlist"}
                 >
                   <Heart active={!!relatedWishlisted[p.id]} />
                 </button>
@@ -1931,8 +1024,7 @@ const addedToCart = !!existingCartItem;
                   src={p.image}
                   alt={p.name}
                   onError={(e) => {
-                    console.error(`Error loading related product image:`, e);
-                    e.target.src = mainPhoto; // Fallback to main photo on error
+                    e.target.src = mainPhoto;
                   }}
                 />
               </div>
@@ -1948,7 +1040,6 @@ const addedToCart = !!existingCartItem;
         </div>
       </section>
 
-      {/* ================= WRITE A REVIEW POPUP ================= */}
       {showReviewModal && (
         <div className="pp-rvm-overlay" onClick={closeReviewModal}>
           <div
@@ -1958,10 +1049,8 @@ const addedToCart = !!existingCartItem;
             aria-labelledby="pp-rvm-title"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="pp-rvm-header">
               <h3 id="pp-rvm-title">Write A Review</h3>
-
               <button
                 type="button"
                 className="pp-rvm-close"
@@ -1974,19 +1063,16 @@ const addedToCart = !!existingCartItem;
 
             <form className="pp-rvm-form" onSubmit={handleSubmitReview}>
               <div className="pp-rvm-body">
-                {/* Product being reviewed */}
                 {productDetails?.name && (
                   <div className="pp-rvm-product">
                     Reviewing <strong>{productDetails.name}</strong>
                   </div>
                 )}
 
-                {/* Rating */}
                 <div className="pp-rvm-field">
                   <span className="pp-rvm-label">
                     Your Rating <em>*</em>
                   </span>
-
                   <div
                     className="pp-rvm-stars"
                     onMouseLeave={() => setReviewHover(0)}
@@ -2003,71 +1089,20 @@ const addedToCart = !!existingCartItem;
                         <Star filled={n <= (reviewHover || reviewRating)} />
                       </button>
                     ))}
-
                     <span className="pp-rvm-rating-text">
                       {RATING_LABELS[reviewHover || reviewRating]}
                     </span>
                   </div>
                 </div>
 
-                {/* Photos */}
-                <div className="pp-rvm-field">
-                  <span className="pp-rvm-label">
-                    Add Photos{" "}
-                    <small>
-                      ({reviewImages.length}/{REVIEW_MAX_IMAGES})
-                    </small>
-                  </span>
-
-                  <div className="pp-rvm-photos">
-                    {reviewImages.map((img, i) => (
-                      <div className="pp-rvm-photo" key={img.preview}>
-                        <img src={img.preview} alt={`Review upload ${i + 1}`} />
-
-                        <button
-                          type="button"
-                          className="pp-rvm-photo-remove"
-                          onClick={() => handleRemoveReviewImage(i)}
-                          aria-label={`Remove photo ${i + 1}`}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-
-                    {reviewImages.length < REVIEW_MAX_IMAGES && (
-                      <label className="pp-rvm-add" htmlFor="pp-rvm-file">
-                        <CameraPlusIcon />
-                        <span>Add</span>
-
-                        <input
-                          id="pp-rvm-file"
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleReviewImages}
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  <span className="pp-rvm-hint">
-                    Up to {REVIEW_MAX_IMAGES} photos, {REVIEW_MAX_IMAGE_MB}MB
-                    each.
-                  </span>
-                </div>
-
-                {/* Reviewer profile name */}
                 <div className="pp-rvm-field">
                   <label className="pp-rvm-label" htmlFor="pp-rvm-name">
                     Your Name <em>*</em>
                   </label>
-
                   <div className="pp-rvm-profile">
                     <div className="pp-rvm-avatar" aria-hidden="true">
                       {(reviewName.trim().charAt(0) || "?").toUpperCase()}
                     </div>
-
                     <input
                       id="pp-rvm-name"
                       className="pp-rvm-input"
@@ -2080,12 +1115,10 @@ const addedToCart = !!existingCartItem;
                   </div>
                 </div>
 
-                {/* Description */}
                 <div className="pp-rvm-field">
                   <label className="pp-rvm-label" htmlFor="pp-rvm-comment">
                     Your Review <em>*</em>
                   </label>
-
                   <textarea
                     id="pp-rvm-comment"
                     className="pp-rvm-input pp-rvm-textarea"
@@ -2095,14 +1128,12 @@ const addedToCart = !!existingCartItem;
                     onChange={(e) => setReviewComment(e.target.value)}
                     maxLength={REVIEW_MAX_CHARS}
                   />
-
                   <span className="pp-rvm-count">
                     {reviewComment.length}/{REVIEW_MAX_CHARS}
                   </span>
                 </div>
               </div>
 
-              {/* Footer actions */}
               <div className="pp-rvm-footer">
                 <button
                   type="button"
@@ -2112,7 +1143,6 @@ const addedToCart = !!existingCartItem;
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   className="btn btn--primary"

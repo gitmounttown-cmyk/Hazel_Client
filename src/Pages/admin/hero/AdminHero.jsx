@@ -150,10 +150,10 @@ const AdminHero = () => {
                 <div style={{ padding: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
                   <span style={{ fontSize: "11px", background: "#eef2f7", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold" }}>{slide.tag}</span>
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button onClick={() => handleEditClick(slide)} style={{ flex: 1, backgroundColor: "#007bff", color: "white", border: "none", padding: "6px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}>
+                    <button onClick={() => handleEditClick(slide)} style={{ flex: 1, backgroundColor: "#f1cb62", color: "# 292626", border: "none", padding: "6px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}>
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(slide._id)} style={{ flex: 1, backgroundColor: "#ff4d4d", color: "white", border: "none", padding: "6px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}>
+                    <button onClick={() => handleDelete(slide._id)} style={{ flex: 1, backgroundColor: "#e3d9c3", color: "292626", border: "none", padding: "6px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}>
                       Delete
                     </button>
                   </div>

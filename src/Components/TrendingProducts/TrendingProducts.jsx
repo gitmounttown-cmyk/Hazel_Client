@@ -6,10 +6,12 @@ import {
   addToWishlist,
   checkWishlist,
   removeWishlistItem,
+  getWishlist
 } from "../../Services/wishlistService";
 import { addToCart } from "../../Services/cartService";
 import { isUserLoggedIn } from "../../utils/auth"; 
 import toast from "react-hot-toast";
+import { getGuestId } from "../../helpers/guestId";
 
 const TrendingProducts = () => {
   const [products, setProducts] = useState([]);
@@ -19,6 +21,47 @@ const TrendingProducts = () => {
   const navigate = useNavigate();
 
   const sliderRef = useRef(null);
+
+  // Fetch all wishlist
+  const fetchAllWishlist = async () => {
+  try {
+    const response = await getWishlist();
+
+    console.log("Fetched wishlist:", response);
+
+    const wishlistItems = response.data?.wishlist?.items || [];
+
+    console.log("Wishlist items:", wishlistItems);
+
+    const wishlistSet = new Set(
+      wishlistItems.map((item) =>
+        String(
+          item?.product?._id ||
+          item?.product?.id ||
+          item?.product
+        )
+      )
+    );
+
+    console.log("Wishlist product IDs:", wishlistSet);
+
+    // Set does not have map()
+    const wishlistStatus = Object.fromEntries(
+      [...wishlistSet].map((id) => [id, true])
+    );
+
+    setWishlistStatus((prev) => ({
+      ...prev,
+      ...wishlistStatus,
+    }));
+  } catch (error) {
+    console.error("Error fetching wishlist:", error);
+  }
+};
+
+useEffect(() => {
+  fetchAllWishlist();
+}, []);
 
   useEffect(() => {
     const fetchTrendingAndProducts = async () => {
@@ -127,11 +170,11 @@ const TrendingProducts = () => {
     e.stopPropagation();
     if (!productId || wishlistLoading[productId]) return;
 
-    if (!isUserLoggedIn()) {
-      toast.error("Please log in to manage your wishlist.");
-      navigate("/login");
-      return;
-    }
+    // if (!isUserLoggedIn()) {
+    //   toast.error("Please log in to manage your wishlist.");
+    //   navigate("/login");
+    //   return;
+    // }
 
     try {
       setWishlistLoading((prev) => ({ ...prev, [productId]: true }));
@@ -142,13 +185,23 @@ const TrendingProducts = () => {
         setWishlistStatus((prev) => ({ ...prev, [productId]: false }));
         toast.success("Removed from wishlist");
       } else {
-        await addToWishlist({ productId });
+        const guestId = getGuestId();
+        const response = await addToWishlist({ productId, guestId });
+        console.log("Add to wishlist response:", response);
         setWishlistStatus((prev) => ({ ...prev, [productId]: true }));
-        toast.success("Added to wishlist");
+        if (response?.data) {
+          toast.success(response?.data?.message || "Added to wishlist");
+        } else {
+          toast.success(response?.message || "Added to wishlist");
+        }
+        await fetchAllWishlist(); // Refresh the wishlist after adding
       }
     } catch (err) {
-      if (err?.response?.status === 409) {
+      console.log("Wishlist toggle error:", err?.refresh, err?.response, err?.message);
+      const data = err?.response?.data;
+      if (err?.status === 409) {
         setWishlistStatus((prev) => ({ ...prev, [productId]: true }));
+        toast.error(data?.message || "Already in wishlist");
       } else {
         toast.error("Failed to update wishlist");
       }
