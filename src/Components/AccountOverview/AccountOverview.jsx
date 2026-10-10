@@ -413,8 +413,6 @@ function AddressForm({ address, onSave, onCancel }) {
   );
 }
 
-
-
 /* ---------- page ---------- */
 export default function AccountDashboard() {
   const navigate = useNavigate();
@@ -425,6 +423,10 @@ export default function AccountDashboard() {
   const [addresses, setAddresses] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Velocity live tracking state
+  const [trackingData, setTrackingData] = useState(null);
+  const [loadingTracking, setLoadingTracking] = useState(false);
 
   const fetchAddresses = async () => {
     try {
@@ -483,7 +485,10 @@ export default function AccountDashboard() {
     fetchAddresses();
   }, [navigate]);
 
-  const close = () => setModal(null);
+  const close = () => {
+    setModal(null);
+    setTrackingData(null);
+  };
 
   const saveProfile = (p) => {
     setProfile(p);
@@ -536,7 +541,6 @@ export default function AccountDashboard() {
       console.error("Error deleting address:", err);
       toast.error("Failed to delete address from database.");
     }
-    // say("Address deleted");
   };
 
   const makeDefault = async (id) => {
@@ -548,6 +552,24 @@ export default function AccountDashboard() {
       }
     } catch (err) {
       console.error("Error setting default address:", err);
+    }
+  };
+
+  // Fetch Velocity Live Tracking Details
+  const handleTrackClick = async (order) => {
+    setModal({ type: "track", order });
+    setLoadingTracking(true);
+    setTrackingData(null);
+
+    try {
+      const res = await axiosInstance.get(`/velocity/track-by-order/${order.orderNumber}`);
+      if (res.data.success) {
+        setTrackingData(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch live Velocity tracking details:", err);
+    } finally {
+      setLoadingTracking(false);
     }
   };
 
@@ -629,10 +651,14 @@ export default function AccountDashboard() {
     };
   };
 
-  const ACTIVE_STATUSES = ["PENDING", "CONFIRMED", "PACKED", "SHIPPED"];
-  const isActiveOrder = (order) => ACTIVE_STATUSES.includes(order.orderStatus);
-  const activeOrder = orders.find(isActiveOrder);
-  const pastOrders = orders.filter((order) => !isActiveOrder(order));
+  // Safe array resolution sorted newest first
+  const ordersList = Array.isArray(orders) ? orders : [];
+
+  // Active Order is the newest order (index 0)
+  const activeOrder = ordersList.length > 0 ? ordersList[0] : null;
+
+  // Past Orders includes ALL previous orders (sliced from index 1)
+  const pastOrders = ordersList.length > 1 ? ordersList.slice(1) : [];
 
   const getCurrentStep = (status) => {
     switch (status) {
@@ -725,7 +751,7 @@ export default function AccountDashboard() {
         </aside>
 
         <main className="main">
-          {/* {show("orders") && (
+          {show("orders") && (
             <section className="card">
               <div className="card__head">
                 <h2 className="card__title">Active Order</h2>
@@ -765,12 +791,7 @@ export default function AccountDashboard() {
                             </p>
                             <button
                               className="btn"
-                              onClick={() =>
-                                setModal({
-                                  type: "track",
-                                  order: activeOrder,
-                                })
-                              }
+                              onClick={() => handleTrackClick(activeOrder)}
                             >
                               Track Order
                             </button>
@@ -802,7 +823,7 @@ export default function AccountDashboard() {
             </section>
           )}
 
-          {view === "orders" && (
+          {(show("orders") || view === "orders") && (
             <section className="card">
               <div className="card__head">
                 <h2 className="card__title">Past Orders</h2>
@@ -837,165 +858,6 @@ export default function AccountDashboard() {
                                     ? formatOrderDate(order.deliveredAt)
                                     : ""
                                 }`
-                              : order.orderStatus}
-                          </span>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="muted">No past orders.</p>
-              )}
-            </section>
-          )} */}
-
-          {show("orders") && (
-            <section className="card">
-              <div className="card__head">
-                <h2 className="card__title">Active Order</h2>
-
-                {view === "overview" && (
-                  <button
-                    className="link"
-                    onClick={() => setView("orders")}
-                  >
-                    View All Orders
-                  </button>
-                )}
-              </div>
-
-              {activeOrder ? (
-                (() => {
-                  const display = getOrderDisplay(activeOrder);
-                  const currentStep = getCurrentStep(
-  activeOrder.orderStatus
-);
-
-const steps = getOrderSteps(activeOrder);
-console.log('currentStep:', currentStep, 'activeOrder.orderStatus:', activeOrder.orderStatus);
-                  return (
-                    <div className="order">
-                      <Img
-                        className="order__img"
-                        src={getImageUrl(display.image)}
-                        alt={display.name}
-                      />
-
-                      <div className="order__body">
-                        <div className="order__top">
-                          <div className="order__info">
-                            <p className="order__id">
-                              ORDER #{activeOrder.orderNumber}
-                            </p>
-
-                            <h3 className="order__name">
-                              {display.name}
-                            </h3>
-
-                            <p className="muted">
-                              Placed on{" "}
-                              {formatOrderDate(activeOrder.createdAt)}
-                            </p>
-                          </div>
-
-                          <div className="order__buy">
-                            <p className="order__price">
-                              {formatINR(activeOrder.totalAmount)}
-                            </p>
-
-                            <button
-                              className="btn"
-                              onClick={() =>
-                                setModal({
-                                  type: "track",
-                                  order: activeOrder,
-                                })
-                              }
-                            >
-                              Track Order
-                            </button>
-                          </div>
-                        </div>
-
-                        <ol className="track">
-                          {steps.map(({ label, icon: Icon }, i) => (
-                            <li
-                              key={label}
-                              className={`track__step ${i < currentStep
-                                  ? "is-done"
-                                  : ""
-                                } ${i === currentStep
-                                  ? "is-current"
-                                  : ""
-                                }`}
-                            >
-                              <span className="track__dot">
-                                <Icon size={14} />
-                              </span>
-
-                              <span className="track__label">
-                                {label}
-                              </span>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    </div>
-                  );
-                })()
-              ) : (
-                <p className="muted">No active orders.</p>
-              )}
-            </section>
-          )}
-
-          {view === "orders" && (
-            <section className="card">
-              <div className="card__head">
-                <h2 className="card__title">Past Orders</h2>
-              </div>
-
-              {pastOrders.length > 0 ? (
-                <ul className="rows">
-                  {pastOrders.map((order) => {
-                    const display = getOrderDisplay(order);
-
-                    return (
-                      <li
-                        key={order._id}
-                        className="row"
-                      >
-                        <Img
-                          className="row__img"
-                          src={getImageUrl(display.image)}
-                          alt={display.name}
-                        />
-
-                        <div className="row__main">
-                          <p className="row__name">
-                            {display.name}
-                          </p>
-
-                          <p className="muted row__meta">
-                            #{order.orderNumber} · Placed{" "}
-                            {formatOrderDate(order.createdAt)}
-                          </p>
-                        </div>
-
-                        <div className="row__end">
-                          <p className="order__price">
-                            {formatINR(order.totalAmount)}
-                          </p>
-
-                          <span className="badge">
-                            {order.orderStatus === "DELIVERED"
-                              ? `DELIVERED ${order.deliveredAt
-                                ? formatOrderDate(
-                                  order.deliveredAt
-                                )
-                                : ""
-                              }`
                               : order.orderStatus}
                           </span>
                         </div>
@@ -1155,28 +1017,61 @@ console.log('currentStep:', currentStep, 'activeOrder.orderStatus:', activeOrder
           <p className="muted vt__sub">
             {getOrderDisplay(modal.order).name}
           </p>
-          <ol className="vt">
-            {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => (
-              <li
-                key={label}
-                className={`vt__item ${
-                  i < getCurrentStep(modal.order.orderStatus) ? "is-done" : ""
-                } ${
-                  i === getCurrentStep(modal.order.orderStatus)
-                    ? "is-current"
-                    : ""
-                }`}
-              >
-                <span className="track__dot">
-                  <Icon size={14} />
-                </span>
-                <div>
-                  <p className="vt__label">{label}</p>
-                  <p className="muted vt__when">{when}</p>
+
+          {loadingTracking ? (
+            <p className="muted" style={{ padding: "16px 0" }}>
+              Fetching live tracking details from Velocity...
+            </p>
+          ) : trackingData ? (
+            <div style={{ marginBottom: "16px" }}>
+              <p><strong>Courier:</strong> {trackingData.courierName || "Velocity Partner"}</p>
+              <p><strong>AWB Code:</strong> {trackingData.awbCode}</p>
+              <p><strong>Status:</strong> <span className="badge">{trackingData.status}</span></p>
+
+              {trackingData.activities?.length > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  <p style={{ fontWeight: 600, marginBottom: "8px" }}>Live Tracking History:</p>
+                  <ol className="vt">
+                    {trackingData.activities.map((act, index) => (
+                      <li key={index} className="vt__item is-done">
+                        <span className="track__dot">
+                          <Check size={14} />
+                        </span>
+                        <div>
+                          <p className="vt__label">{act.activity || act.status}</p>
+                          <p className="muted vt__when">{act.location} · {act.date}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-              </li>
-            ))}
-          </ol>
+              )}
+            </div>
+          ) : (
+            <ol className="vt">
+              {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => (
+                <li
+                  key={label}
+                  className={`vt__item ${
+                    i < getCurrentStep(modal.order.orderStatus) ? "is-done" : ""
+                  } ${
+                    i === getCurrentStep(modal.order.orderStatus)
+                      ? "is-current"
+                      : ""
+                  }`}
+                >
+                  <span className="track__dot">
+                    <Icon size={14} />
+                  </span>
+                  <div>
+                    <p className="vt__label">{label}</p>
+                    <p className="muted vt__when">{when}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+
           <div className="form__actions">
             <button className="btn" onClick={close}>
               Done
