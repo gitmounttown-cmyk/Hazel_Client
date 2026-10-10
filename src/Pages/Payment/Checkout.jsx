@@ -824,7 +824,8 @@ console.log("Cleaned address data:", cleaned);
       const liveDiscount = 0;
       const liveAmountAfterDiscount = Math.max(0, liveSubtotal - liveDiscount);
       const liveShipping = 0;
-      const liveTax = Math.round(liveAmountAfterDiscount * 0.09);
+      // const liveTax = Math.round(liveAmountAfterDiscount * 0.09);
+      const liveTax = Math.round(0 * 0.09);
       const liveTotal = liveAmountAfterDiscount + liveShipping + liveTax;
 
       const formattedAddress = {
