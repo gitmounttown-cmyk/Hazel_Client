@@ -1,7 +1,6 @@
 import axiosInstance from "../api/axiosInstance";
 import { getGuestId } from "../helpers/guestId";
 
-
 const getWishlistOwner = () => {
   const token = localStorage.getItem("hazelToken");
 
@@ -22,7 +21,7 @@ const getWishlistOwner = () => {
 
 const BASE = "/payments";
 
-// Create Razorpay order
+// Create Razorpay order (with guest support)
 export const createOrder = async (data) => {
   const { isGuest, guestId } = getWishlistOwner();
 
@@ -35,7 +34,7 @@ export const createOrder = async (data) => {
   return response.data;
 };
 
-// Verify Razorpay payment signature
+// Verify Razorpay payment signature (with guest support)
 export const verifyPayment = async (data) => {
   const { isGuest, guestId } = getWishlistOwner();
 

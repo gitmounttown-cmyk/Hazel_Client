@@ -176,86 +176,72 @@ function ProfileForm({ profile, onSave, onCancel }) {
   const [err, setErr] = useState({});
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
 
+  const submit = async (e) => {
+    e.preventDefault();
 
-const submit = async (e) => {
-  e.preventDefault();
+    const er = {};
 
-  const er = {};
+    if (!f.name?.trim()) {
+      er.name = "Enter your name";
+    }
 
-  if (!f.name?.trim()) {
-    er.name = "Enter your name";
-  }
+    if (!/^\d{10}$/.test(f.phone || "")) {
+      er.phone = "Enter a 10-digit mobile number";
+    }
 
-  if (!/^\d{10}$/.test(f.phone || "")) {
-    er.phone = "Enter a 10-digit mobile number";
-  }
+    if (!/^\S+@\S+\.\S+$/.test(f.email || "")) {
+      er.email = "Enter a valid email address";
+    }
 
-  if (!/^\S+@\S+\.\S+$/.test(f.email || "")) {
-    er.email = "Enter a valid email address";
-  }
+    setErr(er);
 
-  setErr(er);
+    if (Object.keys(er).length > 0) return;
 
-  if (Object.keys(er).length > 0) return;
-
-  try {
-    // await axiosInstance.put("/users/update/profile", {
-    //   name: f.name.trim(),
-    //   email: f.email.trim(),
-    //   phone: f.phone.trim(),
-    // });
-    const response = await updateUserData({
-      name: f.name.trim(),
-      email: f.email.trim(),
-      phone: f.phone.trim(),
-    });
-    console.log("Profile update response:", response);
-
-    if(response.success) {
-      toast.success(response?.message || "Profile updated successfully!");
-
-    // Update localStorage without requiring a `user` variable
-    const storedUser = localStorage.getItem("hazelUser");
-
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-
-      const newStoredUser = {
-        ...parsedUser,
+    try {
+      const response = await updateUserData({
         name: f.name.trim(),
-        fullName: f.name.trim(),
         email: f.email.trim(),
         phone: f.phone.trim(),
-      };
-
-      localStorage.setItem("hazelUser", JSON.stringify(newStoredUser));
-      window.dispatchEvent(new Event("storage"));
-    }
-
-    // Notify parent component if required
-    if (typeof onSave === "function") {
-      onSave({
-        ...f,
-        name: f.name.trim(),
       });
+      console.log("Profile update response:", response);
+
+      if (response.success) {
+        toast.success(response?.message || "Profile updated successfully!");
+
+        const storedUser = localStorage.getItem("hazelUser");
+
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+
+          const newStoredUser = {
+            ...parsedUser,
+            name: f.name.trim(),
+            fullName: f.name.trim(),
+            email: f.email.trim(),
+            phone: f.phone.trim(),
+          };
+
+          localStorage.setItem("hazelUser", JSON.stringify(newStoredUser));
+          window.dispatchEvent(new Event("storage"));
+        }
+
+        if (typeof onSave === "function") {
+          onSave({
+            ...f,
+            name: f.name.trim(),
+          });
+        }
+      } else {
+        toast.error(response?.message || "Failed to update profile.");
+      }
+    } catch (err) {
+      console.error("Error updating profile:", err.response?.data || err.message);
+
+      alert(
+        err.response?.data?.message || "Failed to save changes to database."
+      );
     }
-  }else {
-    toast.error(response?.message || "Failed to update profile.");
-  }
-
-  } catch (err) {
-    console.error(
-      "Error updating profile:",
-      err.response?.data || err.message
-    );
-
-    alert(
-      err.response?.data?.message ||
-        "Failed to save changes to database."
-    );
-  }
-};
-
+  };
 
   return (
     <form className="form" onSubmit={submit} noValidate>
@@ -313,15 +299,25 @@ function AddressForm({ address, onSave, onCancel }) {
   const submit = (e) => {
     e.preventDefault();
     const er = {};
+
+    const cleanPincode = digits(String(f.pincode || ""), 6);
+    const cleanMobile = digits(String(f.mobileNumber || ""), 10);
+
     if (!f.fullName?.trim()) er.fullName = "Enter the recipient's name";
     if (!f.houseNo?.trim()) er.houseNo = "Enter house / flat number";
     if (!f.city?.trim()) er.city = "Enter city";
     if (!f.state?.trim()) er.state = "Enter state";
-    if (!/^\d{6}$/.test(f.pincode)) er.pincode = "Enter a 6-digit pincode";
-    if (!/^\d{10}$/.test(f.mobileNumber)) er.mobileNumber = "Enter a 10-digit mobile number";
+    if (!/^\d{6}$/.test(cleanPincode)) er.pincode = "Enter a 6-digit pincode";
+    if (!/^\d{10}$/.test(cleanMobile)) er.mobileNumber = "Enter a 10-digit mobile number";
 
     setErr(er);
-    if (!Object.keys(er).length) onSave(f);
+    if (!Object.keys(er).length) {
+      onSave({
+        ...f,
+        pincode: cleanPincode,
+        mobileNumber: cleanMobile,
+      });
+    }
   };
 
   return (
@@ -370,17 +366,31 @@ function AddressForm({ address, onSave, onCancel }) {
       <Field
         label="Pincode"
         value={f.pincode || ""}
-        onChange={(e) => set("pincode", digits(e.target.value, 6))}
+        onChange={(e) => {
+          const val = digits(e.target.value, 6);
+          set("pincode", val);
+          if (err.pincode && /^\d{6}$/.test(val)) {
+            setErr((prev) => ({ ...prev, pincode: undefined }));
+          }
+        }}
         error={err.pincode}
         inputMode="numeric"
+        maxLength={6}
         autoComplete="postal-code"
       />
       <Field
         label="Mobile number"
         value={f.mobileNumber || ""}
-        onChange={(e) => set("mobileNumber", digits(e.target.value, 10))}
+        onChange={(e) => {
+          const val = digits(e.target.value, 10);
+          set("mobileNumber", val);
+          if (err.mobileNumber && /^\d{10}$/.test(val)) {
+            setErr((prev) => ({ ...prev, mobileNumber: undefined }));
+          }
+        }}
         error={err.mobileNumber}
         inputMode="numeric"
+        maxLength={10}
         autoComplete="tel-national"
       />
       <label className="check span2">

@@ -42,6 +42,10 @@ import Video from "../Pages/admin/videos/Video";
 
 import Checkout from "../Pages/Payment/Checkout";
 import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
+<<<<<<< HEAD
+=======
+import OrderFailure from "../Pages/OrderFailure/OrderFailure";
+>>>>>>> dev
 
 import Loader from "../../src/Components/Loader/Loader"
 
@@ -67,6 +71,10 @@ const AppRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
+<<<<<<< HEAD
+=======
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+>>>>>>> dev
           <Route path="/loader" element={<Loader />} />
 
         </Route>

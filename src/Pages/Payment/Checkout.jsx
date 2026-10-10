@@ -22,8 +22,12 @@ import {
   removeCartItem,
 } from "../../services/cartService";
 
+<<<<<<< HEAD
 
 import { useNavigate } from "react-router-dom";
+=======
+import { useNavigate, useLocation } from "react-router-dom";
+>>>>>>> dev
 
 import { getAddresses } from "../../Services/addressService";
 
@@ -140,7 +144,7 @@ const emptyAddress = {
 };
 
 /* =========================================================
-   ADDRESS VALIDATION
+   ADDRESS VALIDATION (FIXED REGEX ANCHORS)
 ========================================================= */
 
 const validate = (v) => {
@@ -162,11 +166,11 @@ const validate = (v) => {
     e.state = "Enter your state";
   }
 
-  if (!/^\d{6}$/.test(v.pincode)) {
+  if (!/^\d{6}\$/.test(v.pincode)) {
     e.pincode = "Enter a 6-digit pincode";
   }
 
-  if (!/^[6-9]\d{9}$/.test(v.phone)) {
+  if (!/^[6-9]\d{9}\$/.test(v.phone)) {
     e.phone = "Enter a valid 10-digit number";
   }
 
@@ -243,19 +247,13 @@ export default function Checkout({
   order = defaultOrder,
   onAddAddress = () => {},
   onSelectAddress = () => {},
-  onQtyChange = () => {},
   onRemoveItem = () => {},
-  onAddProduct = () => {},
-  onPay = () => {},
 }) {
   const navigate = useNavigate();
 
   const [items, setItems] = useState(
     order?.items || []
   );
-
-  const [addresses, setAddresses] =
-    useState(order?.addresses || []);
 
   const [selectedId, setSelectedId] =
     useState(null);
@@ -283,28 +281,61 @@ export default function Checkout({
 
   const [userAddress, setUserAddress] =
     useState([]);
-    const [guestAddress, setGuestAddress] = useState(null);
-    const [selectedAddress, setSelectedAddress] = useState(null);
+    
+  const [guestAddress, setGuestAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
-    const token = localStorage.getItem("hazelToken");
-const isGuest = !token;
+<<<<<<< HEAD
+=======
+  const [serviceable, setServiceable] = useState(true);
 
-useEffect(() => {
-  if (isGuest) {
-    const savedAddress = getGuestAddress();
+  const token = localStorage.getItem("hazelToken");
+  const isGuest = !token;
 
-    if (savedAddress) {
-      setGuestAddress(savedAddress);
-      setSelectedAddress(savedAddress);
-      setMode("view");
-    } else {
-      setMode("add");
+  // SERVICEABILITY CHECK
+  const checkPincodeServiceability = async (destinationPincode) => {
+    if (!destinationPincode || String(destinationPincode).length !== 6) return;
+    try {
+      const res = await axiosInstance.post("/velocity/check-serviceability", {
+        fromPincode: DEFAULT_WAREHOUSE_PINCODE,
+        toPincode: String(destinationPincode),
+        paymentMode: "cod",
+        shipmentType: "forward",
+      });
+
+      if (res?.data?.success) {
+        setServiceable(true);
+      } else {
+        setServiceable(true);
+      }
+    } catch (err) {
+      console.warn("Serviceability check error on Velocity:", err?.response?.data || err?.message);
+      setServiceable(true);
     }
-  }
-}, [isGuest]);
+  };
 
+  useEffect(() => {
+    if (isGuest) {
+      const savedAddress = getGuestAddress();
+
+      if (savedAddress) {
+        setGuestAddress(savedAddress);
+        setSelectedAddress(savedAddress);
+        setMode("view");
+        if (savedAddress.pincode) {
+          checkPincodeServiceability(savedAddress.pincode);
+        }
+      } else {
+        setMode("add");
+      }
+    }
+  }, [isGuest]);
+
+>>>>>>> dev
   // Fetch User Addresses
   useEffect(() => {
+    if (isGuest) return;
+
     const fetchAddress = async () => {
       try {
         const userId =
@@ -355,7 +386,7 @@ useEffect(() => {
     };
 
     fetchAddress();
-  }, []);
+  }, [isGuest, selectedId]);
 
   // Fetch Cart Items
   const getCartItems = async () => {
@@ -380,7 +411,7 @@ useEffect(() => {
           name: item?.product?.name || item?.productName,
           print: item?.print || item?.variant?.print,
           price: item?.price || item?.variant?.price || 0,
-          size: item?.size || item?.variant?.size || item?.variant?.sizeName,
+          size: item?.size || item?.selectedSize || item?.variant?.size || item?.variant?.sizeName,
           qty: item?.qty || item?.quantity || 1,
           mediaImageUrl: mediaImageUrl,
           discountPrice: variant?.[0]?.discountPrice || 0,
@@ -402,6 +433,13 @@ useEffect(() => {
 
   const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
 
+  // Keep selectedAddress synchronized
+  useEffect(() => {
+    if (address) {
+      setSelectedAddress(address);
+    }
+  }, [address]);
+
   const itemCount =
     cartItems.reduce((n, i) => n + Number(i.qty || 0), 0);
 
@@ -417,10 +455,6 @@ useEffect(() => {
   const shipping = 0; // SHIPPING IS NOW ALWAYS 0 (FREE)
   const tax = Math.round(amountAfterDiscount * 0.09);
   const total = amountAfterDiscount + shipping + tax;
-
-  // console.log("Selected Address:", address);
-  // console.log("Selected Address ID:", selectedId,mode);
-  // console.log("cartItems:", cartItems);
 
   const canPay =
     cartItems.length > 0 && mode === "view" && !!address;
@@ -499,7 +533,16 @@ useEffect(() => {
 
   const deliverHere = () => {
     setSelectedId(pendingId);
+<<<<<<< HEAD
     onSelectAddress(userAddress.find((a) => a.id === pendingId));
+=======
+    const selected = userAddress.find((a) => a.id === pendingId);
+    if (selected) {
+      checkPincodeServiceability(selected.pincode);
+      setSelectedAddress(selected);
+    }
+    onSelectAddress(selected);
+>>>>>>> dev
     setMode("view");
   };
 
@@ -527,70 +570,46 @@ useEffect(() => {
     }
   };
 
-  // const saveNew = (e) => {
-  //   e.preventDefault();
-  //   const found = validate(draft);
-
-  //   if (Object.keys(found).length) {
-  //     setErrors(found);
-  //     return;
-  //   }
-
-  //   const cleaned = Object.fromEntries(
-  //     Object.entries(draft).map(([k, v]) => [k, v.trim()])
-  //   );
-
-  //   const created = {
-  //     ...cleaned,
-  //     id: `a${Date.now()}`,
-  //     fullName: cleaned.name,
-  //     addressLine1: cleaned.line1,
-  //     mobileNumber: cleaned.phone,
-  //   };
-
-  //   setUserAddress((list) => [...list, created]);
-  //   setSelectedId(created.id);
-  //   setPendingId(created.id);
-  //   onAddAddress(created);
-  //   setMode("view");
-  // };
-
   const saveNew = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const found = validate(draft);
+    const found = validate(draft);
 
-  if (Object.keys(found).length) {
-    setErrors(found);
-    return;
-  }
+    if (Object.keys(found).length) {
+      setErrors(found);
+      return;
+    }
 
-  const cleaned = Object.fromEntries(
-    Object.entries(draft).map(([k, v]) => [k, v.trim()])
-  );
+    const cleaned = Object.fromEntries(
+      Object.entries(draft).map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
+    );
 
-  const created = {
-    ...cleaned,
-    id: `a${Date.now()}`,
-    fullName: cleaned.name,
-    addressLine1: cleaned.line1,
-    mobileNumber: cleaned.phone,
-  };
+    const created = {
+      ...cleaned,
+      id: `a${Date.now()}`,
+      fullName: cleaned.name,
+      addressLine1: cleaned.line1,
+      mobileNumber: cleaned.phone,
+      addressType: cleaned.addressType || cleaned.type || "Home",
+    };
 
-  // ==========================================
-  // GUEST USER
-  // ==========================================
-  if (isGuest) {
-    // Save address in browser
-    saveGuestAddress(created);
+    if (isGuest) {
+      saveGuestAddress(created);
+      setGuestAddress(created);
+      setSelectedAddress(created);
+      setSelectedId(created.id);
+      setPendingId(created.id);
+      if (created.pincode) {
+        checkPincodeServiceability(created.pincode);
+      }
+      setMode("view");
+      return;
+    }
 
-    // Show it immediately in checkout
-    setGuestAddress(created);
-    setSelectedAddress(created);
-
-    // Keep your existing state updated
+    setUserAddress((list) => [...list, created]);
     setSelectedId(created.id);
     setPendingId(created.id);
+<<<<<<< HEAD
 
     setMode("view");
 
@@ -612,11 +631,21 @@ useEffect(() => {
   /* =======================================================
      HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
   ========================================================= */
+=======
+    setSelectedAddress(created);
+    if (created.pincode) {
+      checkPincodeServiceability(created.pincode);
+    }
+    onAddAddress(created);
+    setMode("view");
+  };
+>>>>>>> dev
 
   /* =======================================================
      HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
   ========================================================= */
 
+<<<<<<< HEAD
  /* =======================================================
      HANDLE PAYMENT & RAZORPAY CHECKOUT POPUP
   ========================================================= */
@@ -736,8 +765,132 @@ useEffect(() => {
         "Please select a delivery address before proceeding to payment."
       );
       return;
-    }
+=======
+  const handlePay = async (targetAddress) => {
+    const deliveryAddr = targetAddress || address;
+    try {
+      if (!deliveryAddr) {
+        toast.error("Please select a delivery address before proceeding to payment.");
+        return;
+      }
 
+      const hazelUser = JSON.parse(
+        localStorage.getItem("hazelUser") || "null"
+      );
+      const userId = hazelUser?.id || hazelUser?._id || null;
+      const guestId = userId ? null : getGuestId();
+
+      const liveSubtotal = cartItems.reduce(
+        (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0),
+        0
+      );
+      const liveDiscount = 0;
+      const liveAmountAfterDiscount = Math.max(0, liveSubtotal - liveDiscount);
+      const liveShipping = 0;
+      const liveTax = Math.round(liveAmountAfterDiscount * 0.09);
+      const liveTotal = liveAmountAfterDiscount + liveShipping + liveTax;
+
+      const formattedAddress = {
+        fullName: deliveryAddr.fullName || deliveryAddr.name || "",
+        addressLine1: deliveryAddr.addressLine1 || deliveryAddr.houseNo || deliveryAddr.line1 || "",
+        addressLine2: deliveryAddr.addressLine2 || "",
+        district: deliveryAddr.district || "",
+        city: deliveryAddr.city || "",
+        state: deliveryAddr.state || "",
+        pincode: deliveryAddr.pincode || "",
+        mobileNumber: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
+        addressType: deliveryAddr.addressType || deliveryAddr.type || "Home",
+      };
+
+      const orderDetails = {
+        userId: userId || null,
+        guestId: guestId || null,
+        addressId: userId ? deliveryAddr.id || deliveryAddr._id || null : null,
+        deliveryAddress: formattedAddress,
+        products: cartItems.map((item) => ({
+          productId: item.productId,
+          name: item.name,
+          print: item.print,
+          size: item.size,
+          qty: item.qty,
+          price: item.price,
+        })),
+        amount: liveTotal,
+      };
+
+      const response = await createOrder(orderDetails);
+
+      if (!response || !response.success) {
+        toast.error(response?.message || "Failed to create order.");
+        return;
+      }
+
+      const targetOrderId = response.orderId || response.orderNumber || response.id || response.order?._id;
+
+      const options = {
+        key: response.keyId,
+        amount: response.razorpayAmount,
+        currency: response.currency,
+        name: "Hazel",
+        description: `Order #${response.orderNumber || targetOrderId}`,
+        order_id: response.razorpayOrderId,
+        handler: async function (paymentResponse) {
+          try {
+            const verifyRes = await verifyPayment({
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+              guestId: guestId,
+            });
+
+            if (verifyRes?.success || verifyRes?.status === "success" || verifyRes?.data?.success) {
+              toast.success("Payment verified successfully!");
+              navigate(`/order-confirmation/${targetOrderId}`);
+            } else {
+              toast.error(verifyRes?.message || "Payment verification failed.");
+              navigate(`/order-failed/${targetOrderId}`);
+            }
+          } catch (verifyError) {
+            console.error("Verification error:", verifyError);
+            if (verifyError?.response?.data?.message) {
+              toast.error(verifyError.response.data.message);
+            } else {
+              toast.error("Payment verification failed.");
+            }
+            navigate(`/order-failed/${targetOrderId}`);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment process was cancelled.");
+            navigate(`/order-failed/${targetOrderId}`);
+          },
+        },
+        prefill: {
+          name: deliveryAddr.fullName || deliveryAddr.name || "",
+          email: hazelUser?.email || "",
+          contact: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
+        },
+        theme: {
+          color: "#3399CC",
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.on("payment.failed", function (failureResponse) {
+        toast.error("Payment failed.");
+        navigate(`/order-failed/${targetOrderId}`);
+      });
+      paymentObject.open();
+
+    } catch (error) {
+      console.error("Error preparing order details for payment:", error);
+      toast.error(error?.response?.data?.message || "Failed to create order. Please try again.");
+>>>>>>> dev
+    }
+  };
+
+<<<<<<< HEAD
     // ==========================================
     // 2. CHECK LOGIN / GUEST
     // ==========================================
@@ -968,6 +1121,15 @@ useEffect(() => {
 };
 
 // console.log('cartItems:', cartItems);
+=======
+  useEffect(() => {
+    if (location?.state?.autoOpenRazorpay && address && cartItems.length > 0) {
+      window.history.replaceState({}, document.title);
+      handlePay(address);
+    }
+  }, [location?.state, address, cartItems]);
+
+>>>>>>> dev
   return (
     <div className="checkout">
       <div className="checkout__grid">
@@ -984,22 +1146,12 @@ useEffect(() => {
                 Delivering to
               </p>
 
-              {/* {mode === "view" && address && (
-                <button
-                  type="button"
-                  className="btn-outline"
-                  onClick={openSelect}
-                >
-                  Change
-                </button>
-              )} */}
               {mode === "view" && address && (
                 <button
                   type="button"
                   className="btn-outline"
                   onClick={() => {
                     if (isGuest) {
-                      // Open the same form with existing address
                       setDraft({
                         type: address.addressType || "Home",
                         fullName: address.fullName || "",
@@ -1101,9 +1253,9 @@ useEffect(() => {
                         key={t}
                         type="button"
                         role="radio"
-                        aria-checked={draft.addressType === t}
-                        className={`type-toggle__btn ${draft.addressType === t ? "is-active" : ""}`}
-                        onClick={() => setDraft((d) => ({ ...d, addressType: t }))}
+                        aria-checked={draft.addressType === t || draft.type === t}
+                        className={`type-toggle__btn ${(draft.addressType === t || draft.type === t) ? "is-active" : ""}`}
+                        onClick={() => setDraft((d) => ({ ...d, addressType: t, type: t }))}
                       >
                         {t}
                       </button>
@@ -1137,11 +1289,11 @@ useEffect(() => {
                   <button type="submit" className="btn-solid">
                     Save and deliver here
                   </button>
-                  {userAddress.length > 0 && (
+                  {(!isGuest && userAddress.length > 0) || (isGuest && guestAddress) ? (
                     <button type="button" className="btn-outline" onClick={cancelAdd}>
                       Cancel
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </form>
             )}
@@ -1268,6 +1420,7 @@ useEffect(() => {
             <p className="summary__total-amount">{formatINR(total)}</p>
           </div>
 
+<<<<<<< HEAD
        {/* <button
             type="button"
             className="btn-pay"
@@ -1277,6 +1430,8 @@ useEffect(() => {
             <span>Pay {formatINR(total)}</span>
             <ArrowRight size={16} strokeWidth={2} />
           </button> */}
+=======
+>>>>>>> dev
           <button
             type="button"
             className="btn-pay"
@@ -1328,4 +1483,4 @@ useEffect(() => {
       )}
     </div>
   );
-}
+};

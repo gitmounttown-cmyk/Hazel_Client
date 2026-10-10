@@ -26,7 +26,7 @@ import reviewPhoto3 from "../../../assets/Trending/img3.png";
 import relatedPhoto from "../../../assets/Trending/img4.png";
 import { getProductById, getProducts } from "../../../services/productService";
 import toast from "react-hot-toast";
-import { getAllReviews, createReview } from "../../../Services/reviewService"; // ✅ Added createReview service import
+import { getProductReviews, createReview } from "../../../Services/reviewService"; // ✅ Fixed: Imported public getProductReviews instead of admin getAllReviews
 import { formatCurrency } from "../../../utils/currencyFormat";
 import { formatTimeAgo, getDeliveryDate, formatCountdown } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
@@ -286,7 +286,6 @@ export default function ProductPage() {
   }, [id]);
 
   useEffect(() => {
-    // if (!id || !isLoggedIn()) return;
     if (!id) return;
     const checkProductWishlist = async () => {
       try {
@@ -343,17 +342,12 @@ export default function ProductPage() {
     setVariantMedia(uniqueImages);
   }, [productDetails]);
 
-  // ✅ Fixed: Fetch reviews and strictly filter them for the current product id only
+  // ✅ Fixed: Replaced unauthorized getAllReviews() with public getProductReviews(id)
   useEffect(() => {
     if (!id) return;
-    getAllReviews()
+    getProductReviews(id)
       .then((response) => {
-        const allReviews = response?.data?.data || [];
-        // Filter reviews strictly matching current product ID
-        const productReviews = allReviews.filter((review) => {
-          const reviewProductId = typeof review.product === "object" ? review.product?._id : review.product;
-          return String(reviewProductId) === String(id);
-        });
+        const productReviews = response?.data?.data || response?.data || [];
         setReviews(productReviews);
       })
       .catch((error) => {
@@ -471,10 +465,6 @@ export default function ProductPage() {
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
-    // if (!isLoggedIn()) {
-    //   toast.error("Please log in to use wishlist.");
-    //   return;
-    // }
     if (!id) return;
     try {
       setWishlistLoading(true);
@@ -490,7 +480,6 @@ export default function ProductPage() {
         setWishlisted(true);
         if (response?.data) {
           toast.success(response?.data?.message || "Added to wishlist");
-          //checkwishlist api
           const checkResponse = await checkWishlist(id);
           setWishlisted(
             checkResponse?.data?.isWishlisted ??
@@ -508,10 +497,6 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = async () => {
-    // if (!isLoggedIn()) {
-    //   toast.error("Please log in to add items to your cart.");
-    //   return;
-    // }
     const cartItem = {
       productId: productDetails._id,
       variantId: selectedVariant._id,
@@ -531,10 +516,6 @@ export default function ProductPage() {
   };
 
   const handleBuyNow = (productId, variantId) => {
-    // if (!isLoggedIn()) {
-    //   toast.error("Please log in to proceed with the purchase.");
-    //   return;
-    // }
     const itemExistsInCart = cartItems.some(
       (item) => String(item?.product?._id || item?.productId) === String(productId)
     );
@@ -573,40 +554,6 @@ export default function ProductPage() {
     setShowReviewModal(false);
   };
 
-  const handleReviewImages = (e) => {
-    const files = Array.from(e.target.files || []);
-    e.target.value = "";
-    if (!files.length) return;
-    const remaining = REVIEW_MAX_IMAGES - reviewImages.length;
-    if (remaining <= 0) {
-      toast.error(`You can add up to ${REVIEW_MAX_IMAGES} photos`);
-      return;
-    }
-    const valid = files.filter((file) => {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Only image files are allowed");
-        return false;
-      }
-      if (file.size > REVIEW_MAX_IMAGE_MB * 1024 * 1024) {
-        toast.error(`${file.name} is larger than ${REVIEW_MAX_IMAGE_MB}MB`);
-        return false;
-      }
-      return true;
-    });
-    const accepted = valid.slice(0, remaining).map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setReviewImages((prev) => [...prev, ...accepted]);
-  };
-
-  const handleRemoveReviewImage = (index) => {
-    const target = reviewImages[index];
-    if (target) URL.revokeObjectURL(target.preview);
-    setReviewImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // ✅ Connected to API to save review in database and update UI dynamically
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!reviewRating) {
@@ -699,14 +646,12 @@ export default function ProductPage() {
 
   return (
     <div className="pp">
-      {/* ============ PRODUCT SECTION ============ */}
       <section className="pp-product">
         <div className="pp-breadcrumb">
           <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {productDetails?.name || "Product Name"}
         </div>
 
         <div className="pp-grid">
-          {/* ---- gallery ---- */}
           <div className="pp-gallery-panel">
             <div className="pp-main-image">
               <img
@@ -739,7 +684,6 @@ export default function ProductPage() {
             </div>
           </div>
 
-          {/* ---- info ---- */}
           <div className="pp-info">
             <div className="pp-eyebrow">
               {productDetails?.variants?.[0]?.fabric || null}
@@ -883,7 +827,6 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ---- details + delivery ---- */}
         <div className="pp-lower">
           <div className="pp-details">
             <h2 className="pp-h2">Product Details</h2>
@@ -975,7 +918,6 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* ============ REVIEWS SECTION ============ */}
       <section className="pp-reviews">
         <div className="pp-reviews-head">
           <div>
@@ -1098,7 +1040,6 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* ================= WRITE A REVIEW POPUP ================= */}
       {showReviewModal && (
         <div className="pp-rvm-overlay" onClick={closeReviewModal}>
           <div
