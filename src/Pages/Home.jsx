@@ -5,20 +5,18 @@ import TrendingProducts from "../components/TrendingProducts/TrendingProducts";
 import NewArrivals from "../components/NewArrivals/NewArrivals";
 import Videos from "../Components/Videos/Videos";
 // import DailyUsageBanner from "../Components/DailyUsageBanner/DailyUsageBanner";
-
+import Loader from "../../src/Components/Loader/Loader";
 const Home = () => {
   return (
     <>
+      <Loader />
       <Hero />
       <ShopByCategory />
-      <Videos/>
+      <Videos />
       <TrendingProducts />
       {/* <DailyUsageBanner /> */}
       <NewArrivals />
       {/* <FestivalBanner /> */}
-      
-      
-      
     </>
   );
 };
