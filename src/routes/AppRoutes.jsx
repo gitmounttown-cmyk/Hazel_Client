@@ -45,6 +45,8 @@ import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
 import OrderFailure from "../Pages/OrderFailure/OrderFailure";
 
 import Loader from "../../src/Components/Loader/Loader"
+import Terms from "../Pages/TermsandConditions/Terms"
+import PrivacyPolicy from "../Pages/PrivacyPolicy/PrivacyPolicy"
 
 const AppRoutes = () => {
   return (
@@ -70,6 +72,9 @@ const AppRoutes = () => {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
           <Route path="/loader" element={<Loader />} />
+
+          <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
+          <Route path="/Terms" element={<Terms />} />
 
           {/* ORDER FAILURE ROUTES */}
           <Route path="/order-failed" element={<OrderFailure />} />
