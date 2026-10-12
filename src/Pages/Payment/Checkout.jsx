@@ -152,11 +152,11 @@ const validate = (v) => {
     e.state = "Enter your state";
   }
 
-  if (!/^\d{6}\$/.test(v.pincode)) {
+  if (!/^\d{6}$/.test(v.pincode)) {
     e.pincode = "Enter a 6-digit pincode";
   }
 
-  if (!/^[6-9]\d{9}\$/.test(v.phone)) {
+  if (!/^[6-9]\d{9}$/.test(v.phone)) {
     e.phone = "Enter a valid 10-digit number";
   }
 
