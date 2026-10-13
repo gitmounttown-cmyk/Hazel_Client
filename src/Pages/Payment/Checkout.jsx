@@ -814,6 +814,8 @@ console.log("Cleaned address data:", cleaned);
   const handlePay = async (targetAddress) => {
     const deliveryAddr = targetAddress || address;
     try {
+      setLoading(true);
+      setLoadingAPI(true);
       if (!deliveryAddr) {
         toast.error("Please select a delivery address before proceeding to payment.");
         return;
@@ -937,6 +939,9 @@ console.log("Cleaned address data:", cleaned);
     } catch (error) {
       console.error("Error preparing order details for payment:", error);
       toast.error(error?.response?.data?.message || "Failed to create order. Please try again.");
+    } finally {
+      setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
