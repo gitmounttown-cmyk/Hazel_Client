@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import "./PrivacyPolicy.css";
 
 /* ---------- Edit these once ---------- */
-const COMPANY = "Hazelcart";
+const COMPANY = "Hazel";
 const SITE = "https://hazelcart.com";
-const EMAIL = "privacy@hazelcart.com";
-const ADDRESS = "[Your registered business address]";
+const EMAIL = "hazelcart.com@gmail.com";
+const MOBILE = "+91 86673 01625";
 const UPDATED = "October 10, 2026";
 /* ------------------------------------ */
 
@@ -247,7 +247,7 @@ const sections = [
         <address>
           {COMPANY}
           <br />
-          {ADDRESS}
+          {MOBILE}
           <br />
           <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
         </address>
