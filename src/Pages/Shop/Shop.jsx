@@ -202,9 +202,26 @@ function useShopData() {
     []
   );
 
-  useEffect(() => {
-    fetchProductsFromBackend(activeFilters, sort, page);
-  }, [activeFilters, sort, page, fetchProductsFromBackend]);
+  // useEffect(() => {
+  //   fetchProductsFromBackend(activeFilters, sort, page);
+  // }, [activeFilters, sort, page, fetchProductsFromBackend]);
+
+
+useEffect(() => {
+  const fetchProducts = async () => {
+    setLoading(true);
+
+    try {
+      await fetchProductsFromBackend(activeFilters, sort, page);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, [activeFilters, sort, page, fetchProductsFromBackend]);
 
   const toggleStagedCheckbox = useCallback((key, value) => {
     setStagedFilters((prev) => {
