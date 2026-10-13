@@ -11,6 +11,7 @@ import {
 import CartForm from "./CartForm";
 
 import "./Cart.css";
+import Loader from "../Loader/Loader";
 
 const Cart = () => {
   const [cart, setCart] = useState({
@@ -24,10 +25,12 @@ const Cart = () => {
   const [showForm, setShowForm] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [loadingAPI, setLoadingAPI] = useState(false);
 
   const fetchCart = async () => {
     try {
       setLoading(true);
+      setLoadingAPI(true);
 
       const response = await getCart();
 
@@ -48,6 +51,7 @@ const Cart = () => {
       alert(error.response?.data?.message || "Failed to fetch cart");
     } finally {
       setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
@@ -198,6 +202,7 @@ const Cart = () => {
 
   return (
     <div className="cart-page">
+      <Loader show={loadingAPI} />
       <div className="cart-container">
         <div className="cart-header">
           <div>
