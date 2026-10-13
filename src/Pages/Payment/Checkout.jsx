@@ -32,6 +32,7 @@ import axiosInstance from "../../api/axiosInstance";
 import toast from "react-hot-toast";
 import { getGuestAddress, saveGuestAddress } from "../../helpers/guestAddress";
 import { getGuestId } from "../../helpers/guestId";
+import Loader from "../../Components/Loader/Loader";
 
 const formatINR = (n) =>
   `₹${Number(n || 0).toLocaleString("en-IN")}`;
@@ -342,6 +343,8 @@ export default function Checkout({
 
   const token = localStorage.getItem("hazelToken");
   const isGuest = !token;
+  const [loading, setLoading] = useState(false);
+  const [loadingAPI, setLoadingAPI] = useState(false);
 
   const checkPincodeServiceability = async (destinationPincode) => {
     if (!destinationPincode || String(destinationPincode).length !== 6) return;
@@ -445,6 +448,8 @@ export default function Checkout({
 
   const getCartItems = async () => {
     try {
+      setLoading(true);
+      setLoadingAPI(true);
       const cartData = await getCart();
       const backendCartItems = cartData?.cart?.items || [];
       const productDetailsList = [];
@@ -478,6 +483,9 @@ export default function Checkout({
       setCartItems(productDetailsList);
     } catch (error) {
       console.error("Error fetching cart items:", error);
+    } finally {
+      setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
@@ -806,6 +814,8 @@ console.log("Cleaned address data:", cleaned);
   const handlePay = async (targetAddress) => {
     const deliveryAddr = targetAddress || address;
     try {
+      setLoading(true);
+      setLoadingAPI(true);
       if (!deliveryAddr) {
         toast.error("Please select a delivery address before proceeding to payment.");
         return;
@@ -929,6 +939,9 @@ console.log("Cleaned address data:", cleaned);
     } catch (error) {
       console.error("Error preparing order details for payment:", error);
       toast.error(error?.response?.data?.message || "Failed to create order. Please try again.");
+    } finally {
+      setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
@@ -941,6 +954,7 @@ console.log("Cleaned address data:", cleaned);
 
   return (
     <div className="checkout">
+      <Loader show={loadingAPI} />
       <div className="checkout__grid">
         <section className="checkout__main">
           <p className="eyebrow">Secure Checkout</p>
