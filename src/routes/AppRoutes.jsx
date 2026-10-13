@@ -43,7 +43,7 @@ import Video from "../Pages/admin/videos/Video";
 import Checkout from "../Pages/Payment/Checkout";
 import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
 import OrderFailure from "../Pages/OrderFailure/OrderFailure";
-
+import OrderTracking from "../Pages/OrderTracking/OrderTracking";
 import Loader from "../../src/Components/Loader/Loader"
 
 const AppRoutes = () => {
@@ -74,6 +74,7 @@ const AppRoutes = () => {
           {/* ORDER FAILURE ROUTES */}
           <Route path="/order-failed" element={<OrderFailure />} />
           <Route path="/order-failed/:orderId" element={<OrderFailure />} />
+         <Route path="/track-order" element={<OrderTracking />} />
         </Route>
 
         {/* =================================

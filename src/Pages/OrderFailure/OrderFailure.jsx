@@ -1,16 +1,75 @@
+import React, { useState, useEffect } from "react";
 import { X, AlertCircle, ArrowRight } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getPaymentByOrder } from "../../Services/paymentService";
+import toast from "react-hot-toast";
 import "./OrderFailure.css";
 
-/* Put your product image import or path here */
-import img1 from "../../assets/Trending/img2.png";
-
-const failedOrder = {
-  id: "#LR-92841",
-  total: "₹4,904",
-  item: { name: "Admire Maxi", variant: "Print: Green Floral • Size: XL", qty: "1", price: "₹4,999" },
-};
+const formatINR = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
 export default function PaymentFailure() {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        setLoading(true);
+        const targetId = orderId || localStorage.getItem("latestOrderId");
+
+        if (!targetId) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await getPaymentByOrder(targetId);
+        // Robustly extract order data from any response shape
+        const resolvedOrder = response?.order || response?.data?.order || response?.data || response;
+        if (resolvedOrder) {
+          setOrderData(resolvedOrder);
+        }
+      } catch (error) {
+        console.error("Error fetching failed order details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [orderId]);
+
+  const id = orderData?.orderNumber || orderData?._id || orderData?.id || orderId || localStorage.getItem("latestOrderId") || "#LR-92841";
+  
+  // Fallback total amount calculation
+  const rawTotal = orderData?.amount || orderData?.totalAmount || orderData?.total || localStorage.getItem("latestOrderTotal") || 0;
+  const total = formatINR(rawTotal);
+
+  const storedProductInfo = localStorage.getItem("latestOrderedProduct")
+    ? JSON.parse(localStorage.getItem("latestOrderedProduct"))
+    : null;
+
+  const items = orderData?.products || orderData?.items || (storedProductInfo ? [storedProductInfo] : []);
+  const firstItem = items[0] || {};
+
+  const productId = firstItem.productId || firstItem.product?._id || firstItem.product || storedProductInfo?.productId;
+
+  const rawImage = firstItem.mediaImageUrl || firstItem.image || firstItem.product?.image || storedProductInfo?.image;
+  const itemImage = rawImage
+    ? `${import.meta.env.VITE_UPLOAD_URL || import.meta.env.VITE_API_URL}${rawImage}`
+    : null;
+
+  const itemName = firstItem.name || firstItem.productName || firstItem.product?.name || storedProductInfo?.name || "Order Item";
+  const itemPrint = firstItem.print || storedProductInfo?.print || "";
+  const itemSize = firstItem.size || firstItem.selectedSize || storedProductInfo?.size || "";
+  const itemVariant = [itemPrint ? `Print: ${itemPrint}` : "", itemSize ? `Size: ${itemSize}` : ""].filter(Boolean).join(" • ");
+  
+  // Check sellingPrice, price, mrp, or fallback to total amount if single item
+  const rawPrice = firstItem.sellingPrice || firstItem.price || firstItem.mrp || storedProductInfo?.price || storedProductInfo?.sellingPrice || rawTotal;
+  const itemPrice = formatINR(rawPrice);
+
   return (
     <div className="pf">
       <main className="pf__wrap">
@@ -38,47 +97,59 @@ export default function PaymentFailure() {
           </p>
 
           <div className="pf__actions-hero">
-            <button type="button" className="pf__btn pf__btn--primary">
+            <button
+              type="button"
+              className="pf__btn pf__btn--primary"
+              onClick={() => navigate("/checkout", { state: { autoOpenRazorpay: true, orderId: id } })}
+            >
               Try Again
               <ArrowRight size={18} className="pf__arrow" />
             </button>
-            <button type="button" className="pf__btn pf__btn--ghost">
+            <button
+              type="button"
+              className="pf__btn pf__btn--ghost"
+              onClick={() => navigate("/checkout", { state: { selectPaymentMethod: true } })}
+            >
               Change Payment Method
             </button>
           </div>
         </header>
 
-        {/* Pending Order Details Card */}
+        {/* Pending Order Details Card Container */}
         <section className="pf__card" aria-label="Pending order details">
-          <span className="pf__section-label">Pending Order Details</span>
+          <span className="pf__section-label">
+            Pending Order Details {productId ? `(ID: ${typeof productId === 'string' ? productId.slice(-6) : ''})` : ""}
+          </span>
 
           <div className="pf__item">
-            <img
-              className="pf__img"
-              src={img1}
-              alt={failedOrder.item.name}
-              loading="lazy"
-            />
+            {itemImage && (
+              <img
+                className="pf__img"
+                src={itemImage}
+                alt={itemName}
+                loading="lazy"
+              />
+            )}
             <div className="pf__item-info">
               <div className="pf__item-row">
-                <h2 className="pf__item-name">{failedOrder.item.name}</h2>
-                <span className="pf__item-qty">Qty: {failedOrder.item.qty}</span>
+                <h2 className="pf__item-name">{itemName}</h2>
               </div>
-              <p className="pf__item-variant">{failedOrder.item.variant}</p>
-              <p className="pf__item-price">{failedOrder.item.price}</p>
+              {itemVariant && <p className="pf__item-variant">{itemVariant}</p>}
+              <p className="pf__item-price">{itemPrice}</p>
             </div>
           </div>
 
           <hr className="pf__rule" />
 
+          {/* Total Row */}
           <div className="pf__total-row">
             <div>
               <span className="pf__label">Total Amount</span>
-              <p className="pf__value">{failedOrder.total}</p>
+              <p className="pf__value">{total}</p>
             </div>
             <div className="pf__order-id-box">
               <span className="pf__label">Order ID</span>
-              <p className="pf__id-val">{failedOrder.id}</p>
+              <p className="pf__id-val">{id}</p>
             </div>
           </div>
         </section>

@@ -14,9 +14,9 @@ const OrderTracking = () => {
     steps: [
       { title: "ORDER PLACED", date: "PENDING", status: "pending" },
       { title: "ORDER CONFIRMED", date: "PENDING", status: "pending" },
-      { title: "PACKED", date: "PENDING", status: "pending" },
+    //   { title: "PACKED", date: "PENDING", status: "pending" },
       { title: "SHIPPED", date: "PENDING", status: "pending" },
-      { title: "OUT FOR DELIVERY", date: "PENDING", status: "pending" },
+    //   { title: "OUT FOR DELIVERY", date: "PENDING", status: "pending" },
       { title: "DELIVERED", date: "PENDING", status: "pending" }
     ]
   });
@@ -37,51 +37,19 @@ const OrderTracking = () => {
 
       if (response?.data?.success && response?.data?.data) {
         const shipment = response.data.data;
-        const currentStatus = (shipment.status || "CONFIRMED").toUpperCase();
-
-        // Evaluate dynamic progress based on actual order status or history
-        const isPlaced = Boolean(shipment.createdAt);
-        const isConfirmed = isPlaced && (currentStatus !== "PENDING" || shipment.confirmedAt);
-        const isPacked = isConfirmed && (currentStatus.includes("PACK") || currentStatus.includes("MANIFEST") || shipment.packedAt || currentStatus.includes("SHIP") || currentStatus.includes("DELIVER"));
-        const isShipped = isPacked && (currentStatus.includes("SHIP") || currentStatus.includes("IN_TRANSIT") || currentStatus.includes("OUT") || currentStatus.includes("DELIVER") || shipment.awbCode);
-        const isOutForDelivery = isShipped && (currentStatus.includes("OUT_FOR_DELIVERY") || currentStatus.includes("OUT FOR DELIVERY"));
-        const isDelivered = currentStatus.includes("DELIVERED");
+        const history = shipment.trackingHistory || [];
 
         const updatedSteps = [
-          { 
-            title: "ORDER PLACED", 
-            date: shipment.createdAt ? new Date(shipment.createdAt).toLocaleString() : "COMPLETED", 
-            status: isPlaced ? "completed" : "pending" 
-          },
-          { 
-            title: "ORDER CONFIRMED", 
-            date: shipment.confirmedAt ? new Date(shipment.confirmedAt).toLocaleString() : (isConfirmed ? "COMPLETED" : "PENDING"), 
-            status: isConfirmed ? (isPacked ? "completed" : "current") : "pending" 
-          },
-          { 
-            title: "PACKED", 
-            date: shipment.packedAt ? new Date(shipment.packedAt).toLocaleString() : (isPacked ? "COMPLETED" : "PENDING"), 
-            status: isPacked ? (isShipped ? "completed" : "current") : "pending" 
-          },
-          { 
-            title: "SHIPPED", 
-            date: shipment.awbCode ? `AWB: ${shipment.awbCode}` : (isShipped ? "COMPLETED" : "PENDING"), 
-            status: isShipped ? (isOutForDelivery || isDelivered ? "completed" : "current") : "pending" 
-          },
-          { 
-            title: "OUT FOR DELIVERY", 
-            date: isOutForDelivery ? "CURRENT" : "PENDING", 
-            status: isOutForDelivery ? "current" : (isDelivered ? "completed" : "pending") 
-          },
-          { 
-            title: "DELIVERED", 
-            date: shipment.deliveredAt ? new Date(shipment.deliveredAt).toLocaleString() : (isDelivered ? "COMPLETED" : "PENDING"), 
-            status: isDelivered ? "completed" : "pending" 
-          }
+          { title: "ORDER PLACED", date: shipment.createdAt ? new Date(shipment.createdAt).toLocaleString() : "COMPLETED", status: "completed" },
+          { title: "ORDER CONFIRMED", date: "COMPLETED", status: "completed" },
+        //   { title: "PACKED", date: history.some(h => h.activity?.toLowerCase().includes("pack")) ? "COMPLETED" : "PENDING", status: history.some(h => h.activity?.toLowerCase().includes("pack")) ? "completed" : "pending" },
+          { title: "SHIPPED", date: shipment.awbCode ? `AWB: ${shipment.awbCode}` : "PENDING", status: shipment.status === "SHIPPED" ? "current" : "completed" },
+        //   { title: "OUT FOR DELIVERY", date: shipment.status === "OUT_FOR_DELIVERY" ? "CURRENT" : "PENDING", status: shipment.status === "OUT_FOR_DELIVERY" ? "current" : "pending" },
+          { title: "DELIVERED", date: shipment.status === "DELIVERED" ? "COMPLETED" : "PENDING", status: shipment.status === "DELIVERED" ? "completed" : "pending" }
         ];
 
         setTrackingData({
-          statusMessage: `Current Status: ${shipment.status || "CONFIRMED"}`,
+          statusMessage: `Current Status: ${shipment.status || "Package is being processed."}`,
           steps: updatedSteps,
         });
         toast.success("Order status retrieved successfully!");
@@ -98,6 +66,7 @@ const OrderTracking = () => {
 
   return (
     <div className="order-tracking-container">
+      {/* Header section / Breadcrumb notice */}
       <div className="tracking-header-top">
         <span className="order-updates-label">ORDER UPDATES</span>
         <h1 className="tracking-main-title">WHERE IS YOUR<br />ORDER?</h1>
@@ -107,6 +76,7 @@ const OrderTracking = () => {
       </div>
 
       <div className="tracking-content-grid">
+        {/* Left Form Card */}
         <div className="tracking-form-card">
           <form onSubmit={handleTrackOrder}>
             <div className="input-group">
@@ -143,6 +113,7 @@ const OrderTracking = () => {
           </p>
         </div>
 
+        {/* Right Timeline Card */}
         <div className="tracking-timeline-card">
           <div className="timeline-banner-quote">
             "{trackingData.statusMessage}"
