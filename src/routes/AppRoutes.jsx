@@ -44,9 +44,10 @@ import Checkout from "../Pages/Payment/Checkout";
 import OrderConfirmation from "../Pages/OrderConfirmation/OrderConfirmation";
 import OrderFailure from "../Pages/OrderFailure/OrderFailure";
 
-import Loader from "../../src/Components/Loader/Loader"
-import Terms from "../Pages/TermsandConditions/Terms"
-import PrivacyPolicy from "../Pages/PrivacyPolicy/PrivacyPolicy"
+import Loader from "../../src/Components/Loader/Loader";
+import Terms from "../Pages/TermsandConditions/Terms";
+import PrivacyPolicy from "../Pages/PrivacyPolicy/PrivacyPolicy";
+import ScrollToTopButton from "../Pages/ScrolltoTopButton/ScrolltoTopButton";
 
 const AppRoutes = () => {
   return (
@@ -70,7 +71,10 @@ const AppRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+          <Route
+            path="/order-confirmation/:orderId"
+            element={<OrderConfirmation />}
+          />
           <Route path="/loader" element={<Loader />} />
 
           <Route path="//privacy-policy" element={<PrivacyPolicy />} />
@@ -132,6 +136,7 @@ const AppRoutes = () => {
           <Route path="/admin/inventory" element={<Inventory />} />
         </Route>
       </Routes>
+      <ScrollToTopButton />
     </BrowserRouter>
   );
 };
