@@ -59,8 +59,8 @@ const Footer = () => {
 
           <a onClick={() => navigate("/about")}>About Us</a>
           <a onClick={() => navigate("/shop")}>Shipping &amp; Returns</a>
-          <a onClick={() => navigate("/privacy")}>Privacy Policy</a>
-          <a onClick={() => navigate("/terms")}>Terms</a>
+          <a onClick={() => navigate("/privacy-policy")}>Privacy Policy</a>
+          <a onClick={() => navigate("/terms-of-condition")}>Terms & Condition</a>
         </div>
 
         {/* Contact */}
