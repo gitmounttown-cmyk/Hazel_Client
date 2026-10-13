@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import "./Terms.css";
 
 /* ---------- Edit these once ---------- */
-const COMPANY = "Hazelcart"; // your legal / trading name
+const COMPANY = "Hazel"; // your legal / trading name
 const SITE = "https://hazelcart.com";
-const EMAIL = "support@hazelcart.com";
-const ADDRESS = "[Your registered business address]";
-const GOVERNING_LAW = "[Your State / Country]";
+const EMAIL = "hazelcart.com@gmail.com";
+const MOBILE = "+91 86673 01625";
+const GOVERNING_LAW = "[Tamil Nadu / India]";
 const UPDATED = "October 10, 2026";
 const RETURN_WINDOW_DAYS = 7; // change to match your return policy
 /* ------------------------------------ */
@@ -315,7 +315,7 @@ const sections = [
         <address>
           {COMPANY}
           <br />
-          {ADDRESS}
+          {MOBILE}
           <br />
           <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
         </address>
