@@ -1,0 +1,416 @@
+/* Hazelcart – Terms and Conditions
+   Mobile-first. Breakpoints:
+   base   0–479    small phones (320px and up)
+   480    large phones
+   640    landscape phones / small tablets
+   768    tablets
+   900    desktop (sidebar layout)
+   1200   large desktop
+   1536   extra-large / 4K
+*/
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap");
+
+.terms {
+  --hz-bg: #fcfbf8;
+  --hz-primary: #f1cb62;
+  --hz-ink: #292626;
+  --hz-surface: #fbf6e9;
+  --hz-surface-2: #faf4e2;
+  --hz-muted: rgba(41, 38, 38, 0.74);
+  --hz-line: rgba(41, 38, 38, 0.14);
+
+  --hz-header-offset: 0px; /* set to your sticky site header height, e.g. 64px */
+  --hz-toc-h: 4rem; /* height of the mobile chip strip */
+  --hz-gutter: 1rem;
+  --hz-padL: max(var(--hz-gutter), env(safe-area-inset-left, 0px));
+  --hz-padR: max(var(--hz-gutter), env(safe-area-inset-right, 0px));
+
+  --hz-heading: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --hz-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  background: var(--hz-bg);
+  color: var(--hz-ink);
+  font-family: var(--hz-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: clip; /* stops sideways scroll, keeps sticky working */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-wrap: break-word;
+}
+
+.terms *,
+.terms *::before,
+.terms *::after {
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+.terms__container {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: var(--hz-padL);
+  padding-right: var(--hz-padR);
+}
+
+/* ---------- Hero ---------- */
+.terms__hero {
+  background: var(--hz-surface);
+  padding-block: 2rem 1.75rem;
+  border-bottom: 2px dashed var(--hz-primary); /* stitched seam */
+}
+
+.terms__title {
+  font-family: var(--hz-heading);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 8vw, 3.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.9rem;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.terms__intro {
+  max-width: 52ch;
+  margin: 0 0 1.25rem;
+  font-size: clamp(0.975rem, 2.6vw, 1.15rem);
+  color: var(--hz-muted);
+}
+
+.terms__updated {
+  display: inline-block;
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  background: var(--hz-primary);
+  color: var(--hz-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: 999px;
+}
+
+/* ---------- Layout (mobile: stacked block so sticky works) ---------- */
+.terms__layout {
+  display: block;
+  padding-block: 0 3rem;
+}
+
+.terms__content {
+  width: 100%;
+  min-width: 0;
+  max-width: 72ch;
+}
+
+/* ---------- Table of contents: mobile chip strip ---------- */
+.terms__toc {
+  position: sticky;
+  top: var(--hz-header-offset);
+  z-index: 5;
+  margin-left: calc(var(--hz-padL) * -1);
+  margin-right: calc(var(--hz-padR) * -1);
+  margin-bottom: 1.5rem;
+  padding: 0.6rem var(--hz-padR) 0.6rem var(--hz-padL);
+  background: var(--hz-bg);
+  border-bottom: 1px solid var(--hz-line);
+}
+
+.terms__toc-heading {
+  display: none;
+}
+
+.terms__toc-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.terms__toc-list::-webkit-scrollbar {
+  display: none;
+}
+
+.terms__toc-list li {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.terms__toc-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem; /* 44px touch target */
+  padding: 0 1rem;
+  white-space: nowrap;
+  color: var(--hz-muted);
+  background: var(--hz-surface-2);
+  border: 1px solid var(--hz-line);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    color 0.15s,
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.terms__toc-list a:hover {
+  color: var(--hz-ink);
+}
+
+.terms__toc-list a.is-active {
+  color: var(--hz-ink);
+  font-weight: 600;
+  background: var(--hz-primary);
+  border-color: var(--hz-primary);
+}
+
+/* ---------- Content ---------- */
+.terms__section {
+  padding-bottom: 1.75rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--hz-line);
+  scroll-margin-top: calc(var(--hz-header-offset) + var(--hz-toc-h) + 0.75rem);
+}
+
+.terms__section:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.terms__section h2 {
+  font-family: var(--hz-heading);
+  font-weight: 600;
+  font-size: clamp(1.15rem, 4.6vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.8rem;
+}
+
+.terms__num {
+  display: inline-block;
+  padding-bottom: 1px;
+  box-shadow: inset 0 -0.35em 0 var(--hz-primary);
+}
+
+.terms__section p {
+  margin: 0 0 1rem;
+}
+
+.terms__section ul {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.terms__section li {
+  margin-bottom: 0.4rem;
+  padding-left: 0.2rem;
+}
+
+.terms__section li::marker {
+  color: #c79a14;
+}
+
+.terms__section a {
+  color: var(--hz-ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--hz-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.terms__section a:hover {
+  background: var(--hz-primary);
+  text-decoration-color: transparent;
+}
+
+.terms__section address {
+  font-style: normal;
+  padding: 0.9rem 1rem;
+  background: var(--hz-surface);
+  border-left: 4px solid var(--hz-primary);
+  border-radius: 0 8px 8px 0;
+  overflow-wrap: anywhere;
+}
+
+.terms a:focus-visible {
+  outline: 3px solid var(--hz-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ================= Very small phones (≤359px) ================= */
+@media (max-width: 359px) {
+  .terms {
+    --hz-gutter: 0.875rem;
+    font-size: 0.9375rem;
+  }
+  .terms__toc-list a {
+    padding: 0 0.85rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ================= Large phones (≥480px) ================= */
+@media (min-width: 480px) {
+  .terms {
+    --hz-gutter: 1.25rem;
+  }
+  .terms__hero {
+    padding-block: 2.5rem 2.25rem;
+  }
+  .terms__section {
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
+/* ================= Landscape phones / small tablets (≥640px) ================= */
+@media (min-width: 640px) {
+  .terms {
+    --hz-gutter: 1.75rem;
+  }
+  .terms__hero {
+    padding-block: 3.25rem 2.75rem;
+  }
+  .terms__layout {
+    padding-block: 0 4rem;
+  }
+}
+
+/* ================= Tablets (≥768px) ================= */
+@media (min-width: 768px) {
+  .terms {
+    --hz-gutter: 2rem;
+    --hz-toc-h: 4.25rem;
+  }
+  .terms__hero {
+    padding-block: 4rem 3.25rem;
+  }
+  .terms__content {
+    max-width: 68ch;
+  }
+  .terms__section p,
+  .terms__section li {
+    font-size: 1.025rem;
+  }
+}
+
+/* Short landscape phones: keep the sticky strip from eating the screen */
+@media (max-height: 480px) and (orientation: landscape) {
+  .terms__toc {
+    position: static;
+  }
+  .terms__section {
+    scroll-margin-top: calc(var(--hz-header-offset) + 0.75rem);
+  }
+}
+
+/* ================= Desktop (≥900px): sidebar ================= */
+@media (min-width: 900px) {
+  .terms__layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+    padding-block: 3rem 5rem;
+  }
+
+  .terms__toc {
+    top: calc(var(--hz-header-offset) + 1.5rem);
+    margin: 0;
+    padding: 0 0.5rem 0 0;
+    background: transparent;
+    border-bottom: 0;
+    max-height: calc(100vh - var(--hz-header-offset) - 3rem);
+    max-height: calc(100dvh - var(--hz-header-offset) - 3rem);
+    overflow-y: auto;
+  }
+
+  .terms__toc-heading {
+    display: block;
+    font-family: var(--hz-heading);
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .terms__toc-list {
+    display: block;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .terms__toc-list li {
+    flex: none;
+  }
+
+  .terms__toc-list a {
+    display: block;
+    min-height: 0;
+    padding: 0.4rem 0.75rem;
+    white-space: normal;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+    font-size: 0.925rem;
+    line-height: 1.35;
+  }
+
+  .terms__toc-list a:hover {
+    background: var(--hz-surface-2);
+  }
+
+  .terms__toc-list a.is-active {
+    background: var(--hz-surface);
+    border-left-color: var(--hz-primary);
+  }
+
+  .terms__section {
+    scroll-margin-top: calc(var(--hz-header-offset) + 1.5rem);
+  }
+}
+
+/* ================= Large desktop (≥1200px) ================= */
+@media (min-width: 1200px) {
+  .terms__container {
+    max-width: 1200px;
+  }
+  .terms__layout {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 4rem;
+  }
+}
+
+/* ================= Extra-large / 4K (≥1536px) ================= */
+@media (min-width: 1536px) {
+  .terms {
+    font-size: 1.0625rem;
+  }
+  .terms__container {
+    max-width: 1360px;
+  }
+  .terms__content {
+    max-width: 76ch;
+  }
+}

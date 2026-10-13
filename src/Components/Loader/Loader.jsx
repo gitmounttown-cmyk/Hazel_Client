@@ -241,75 +241,111 @@ const STEP = 1600; // ms per garment
  * Waits for the page to load AND minDuration, then fades out.
  * Usage: render <Loader /> once at the top of <App />.
  */
-export default function Loader({ minDuration = 2200, exitDuration = 500 }) {
-  const [phase, setPhase] = useState("loading"); // loading -> leaving -> done
+
+
+export default function Loader({
+  show,
+  minDuration = 2200,
+  exitDuration = 500,
+}) {
+  const [phase, setPhase] = useState("loading");
   const [index, setIndex] = useState(0);
 
-  useEffect(() => {
-    if (phase !== "loading") return;
-    const id = setInterval(
-      () => setIndex((i) => (i + 1) % GARMENTS.length),
-      STEP,
-    );
-    return () => clearInterval(id);
-  }, [phase]);
+  // If "show" is supplied, use controlled API loading.
+  // Otherwise, preserve the automatic page loader.
+  const controlled = typeof show === "boolean";
 
   useEffect(() => {
-    if (phase === "done") return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [phase]);
+    if (controlled) return;
 
-  useEffect(() => {
     let minTimePassed = false;
     let pageLoaded = document.readyState === "complete";
+
     const tryFinish = () => {
-      if (minTimePassed && pageLoaded) setPhase("leaving");
+      if (minTimePassed && pageLoaded) {
+        setPhase("leaving");
+      }
     };
+
     const timer = setTimeout(() => {
       minTimePassed = true;
       tryFinish();
     }, minDuration);
+
     const onLoad = () => {
       pageLoaded = true;
       tryFinish();
     };
-    if (!pageLoaded) window.addEventListener("load", onLoad);
+
+    if (!pageLoaded) {
+      window.addEventListener("load", onLoad);
+    }
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener("load", onLoad);
     };
-  }, [minDuration]);
+  }, [controlled, minDuration]);
 
   useEffect(() => {
-    if (phase !== "leaving") return;
-    const t = setTimeout(() => setPhase("done"), exitDuration);
-    return () => clearTimeout(t);
-  }, [phase, exitDuration]);
+    if (controlled) {
+      setPhase(show ? "loading" : "done");
+      return;
+    }
 
-  if (phase === "done") return null;
+    if (phase !== "leaving") return;
+
+    const timer = setTimeout(() => setPhase("done"), exitDuration);
+    return () => clearTimeout(timer);
+  }, [controlled, show, phase, exitDuration]);
+
+  useEffect(() => {
+    if (phase !== "loading") return;
+
+    const timer = setInterval(
+      () => setIndex((i) => (i + 1) % GARMENTS.length),
+      STEP
+    );
+
+    return () => clearInterval(timer);
+  }, [phase]);
+
+  const visible = controlled ? show : phase !== "done";
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   const garment = GARMENTS[index];
 
   return (
     <div
-      className={`hz-loader ${phase === "leaving" ? "is-leaving" : ""}`}
-      style={{ "--hz-exit": `${exitDuration}ms`, "--hz-step": `${STEP}ms` }}
+      className={`hz-loader ${
+        !controlled && phase === "leaving" ? "is-leaving" : ""
+      }`}
+      style={{
+        "--hz-exit": `${exitDuration}ms`,
+        "--hz-step": `${STEP}ms`,
+      }}
       role="status"
       aria-live="polite"
       aria-label="Loading"
     >
       <div className="hz-spinner" aria-hidden="true">
-        {/* round track + spinning gold arc */}
         <svg className="hz-spinner__ring" viewBox="0 0 100 100">
           <circle className="hz-spinner__track" cx="50" cy="50" r="46" />
           <circle className="hz-spinner__arc" cx="50" cy="50" r="46" />
         </svg>
 
-        {/* garment swaps inside the circle */}
         <span className="hz-spinner__icon" key={index}>
           {garment.image ? (
             <img
@@ -328,3 +364,4 @@ export default function Loader({ minDuration = 2200, exitDuration = 500 }) {
     </div>
   );
 }
+

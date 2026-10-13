@@ -1,6 +1,8 @@
 import { Toaster} from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import Loader from './Components/Loader/Loader';
+
 
 const googleClientId =  import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -23,6 +25,7 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
+      <Loader />
       <AppRoutes />
       <Toaster
         position="top-right"
@@ -34,6 +37,7 @@ function App() {
           },
         }}
       />     
+
 
  </GoogleOAuthProvider>
   );

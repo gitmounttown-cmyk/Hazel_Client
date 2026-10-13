@@ -8,14 +8,17 @@ import {
 } from "../../../src/Services/wishlistService";
 
 import "./Wishlist.css";
+import Loader from "../Loader/Loader";
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingAPI, setLoadingAPI] = useState(false);
 
   const fetchWishlist = async () => {
     try {
       setLoading(true);
+      setLoadingAPI(true);
 
       const response = await getWishlist();
 
@@ -30,6 +33,7 @@ const Wishlist = () => {
       alert(error.response?.data?.message || "Failed to fetch wishlist");
     } finally {
       setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
@@ -152,6 +156,7 @@ const Wishlist = () => {
 
   return (
     <div className="wishlist-page">
+      <Loader show={loadingAPI} />
       <div className="wishlist-container">
         <div className="wishlist-header">
           <div>

@@ -31,6 +31,7 @@ import { formatCurrency } from "../../../utils/currencyFormat";
 import { formatTimeAgo, getDeliveryDate, formatCountdown } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { getUserAddresses, getAddresses } from "../../../Services/addressService";
+import Loader from "../../../Components/Loader/Loader";
 
 /* ---------- inline icons ---------- */
 const Star = ({ filled = true }) => (
@@ -238,6 +239,8 @@ export default function ProductPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingAPI, setLoadingAPI] = useState(false);
 
   const { id } = useParams();
   const [countdown, setCountdown] = useState("");
@@ -272,18 +275,44 @@ export default function ProductPage() {
     fetchCartItems();
   }, []);
 
-  useEffect(() => {
-    getProductById(id)
-      .then((response) => {
-        setProductDetails(response?.data?.data);
-        if (response?.data?.data?.relatedProducts?.length > 0) {
-          setRelatedProducts(response?.data?.data?.relatedProducts);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching product details:", error);
-      });
-  }, [id]);
+  // useEffect(() => {
+  //   getProductById(id)
+  //     .then((response) => {
+  //       setProductDetails(response?.data?.data);
+  //       if (response?.data?.data?.relatedProducts?.length > 0) {
+  //         setRelatedProducts(response?.data?.data?.relatedProducts);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching product details:", error);
+  //     });
+  // }, [id]);
+
+
+useEffect(() => {
+  const fetchProductDetails = async () => {
+    setLoading(true);
+    setLoadingAPI(true);
+    try {
+      const response = await getProductById(id);
+
+      setProductDetails(response?.data?.data);
+
+      if (response?.data?.data?.relatedProducts?.length > 0) {
+        setRelatedProducts(response.data.data.relatedProducts);
+      } else {
+        setRelatedProducts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    } finally {
+      setLoading(false);
+      setLoadingAPI(false);
+    }
+  };
+
+  fetchProductDetails();
+}, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -646,6 +675,7 @@ export default function ProductPage() {
 
   return (
     <div className="pp">
+      <Loader show={loadingAPI} />
       <section className="pp-product">
         <div className="pp-breadcrumb">
           <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {productDetails?.name || "Product Name"}
