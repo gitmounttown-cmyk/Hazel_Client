@@ -31,6 +31,7 @@ import { formatCurrency } from "../../../utils/currencyFormat";
 import { formatTimeAgo, getDeliveryDate, formatCountdown } from "../../../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { getUserAddresses, getAddresses } from "../../../Services/addressService";
+import Loader from "../../../Components/Loader/Loader";
 
 /* ---------- inline icons ---------- */
 const Star = ({ filled = true }) => (
@@ -239,6 +240,7 @@ export default function ProductPage() {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingAPI, setLoadingAPI] = useState(false);
 
   const { id } = useParams();
   const [countdown, setCountdown] = useState("");
@@ -290,7 +292,7 @@ export default function ProductPage() {
 useEffect(() => {
   const fetchProductDetails = async () => {
     setLoading(true);
-
+    setLoadingAPI(true);
     try {
       const response = await getProductById(id);
 
@@ -305,6 +307,7 @@ useEffect(() => {
       console.error("Error fetching product details:", error);
     } finally {
       setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
@@ -672,6 +675,7 @@ useEffect(() => {
 
   return (
     <div className="pp">
+      <Loader show={loadingAPI} />
       <section className="pp-product">
         <div className="pp-breadcrumb">
           <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {productDetails?.name || "Product Name"}

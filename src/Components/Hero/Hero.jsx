@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getHeroSlides, getImageUrl } from "../../Services/heroService";
 import "./Hero.css";
+import Loader from "../Loader/Loader";
 
 const Hero = () => {
   const [slides, setSlides] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingAPI, setLoadingAPI] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSlides = async () => {
+      setLoadingAPI(true);
       try {
         const response = await getHeroSlides();
         if (response.success && response.data.length > 0) {
@@ -20,6 +23,7 @@ const Hero = () => {
         console.error("Failed to fetch hero slides:", error);
       } finally {
         setLoading(false);
+        setLoadingAPI(false);
       }
     };
     fetchSlides();
@@ -41,6 +45,7 @@ const Hero = () => {
 
   return (
     <section className="hero-section">
+      <Loader show={loadingAPI} />
       <div className="hero-background-wrapper">
         {slides.map((slide, index) => {
           const imageUrl = getImageUrl(slide.image);
