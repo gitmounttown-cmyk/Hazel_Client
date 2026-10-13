@@ -651,37 +651,24 @@ export default function AccountDashboard() {
     };
   };
 
-  // Safe array resolution sorted newest first
   const ordersList = Array.isArray(orders) ? orders : [];
-
-  // Active Order is the newest order (index 0)
   const activeOrder = ordersList.length > 0 ? ordersList[0] : null;
-
-  // Past Orders includes ALL previous orders (sliced from index 1)
   const pastOrders = ordersList.length > 1 ? ordersList.slice(1) : [];
 
   const getCurrentStep = (status) => {
-    switch (status) {
-      case "PENDING":
-        return -1;
-      case "CONFIRMED":
-        return 0;
-      case "PACKED":
-        return 1;
-      case "SHIPPED":
-        return 2;
-      case "DELIVERED":
-        return 3;
-      default:
-        return -1;
-    }
+    const st = (status || "").toUpperCase();
+    if (st.includes("DELIVER")) return 3;
+    if (st.includes("SHIP") || st.includes("TRANSIT") || st.includes("OUT")) return 2;
+    if (st.includes("PACK") || st.includes("MANIFEST")) return 1;
+    if (st.includes("CONFIRM") || st.includes("PLACE")) return 0;
+    return 0;
   };
 
   const getOrderSteps = (order) => [
     {
       label: "Confirmed",
       icon: Check,
-      when: order.confirmedAt ? formatOrderDateTime(order.confirmedAt) : "",
+      when: order.confirmedAt ? formatOrderDateTime(order.confirmedAt) : formatOrderDateTime(order.createdAt),
     },
     {
       label: "Packed",
@@ -1022,53 +1009,53 @@ export default function AccountDashboard() {
             <p className="muted" style={{ padding: "16px 0" }}>
               Fetching live tracking details from Velocity...
             </p>
-          ) : trackingData ? (
-            <div style={{ marginBottom: "16px" }}>
-              <p><strong>Courier:</strong> {trackingData.courierName || "Velocity Partner"}</p>
-              <p><strong>AWB Code:</strong> {trackingData.awbCode}</p>
-              <p><strong>Status:</strong> <span className="badge">{trackingData.status}</span></p>
-
-              {trackingData.activities?.length > 0 && (
-                <div style={{ marginTop: "16px" }}>
-                  <p style={{ fontWeight: 600, marginBottom: "8px" }}>Live Tracking History:</p>
-                  <ol className="vt">
-                    {trackingData.activities.map((act, index) => (
-                      <li key={index} className="vt__item is-done">
-                        <span className="track__dot">
-                          <Check size={14} />
-                        </span>
-                        <div>
-                          <p className="vt__label">{act.activity || act.status}</p>
-                          <p className="muted vt__when">{act.location} · {act.date}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
+          ) : trackingData?.activities && trackingData.activities.length > 0 ? (
+            <div style={{ marginTop: "12px" }}>
+              <p style={{ fontSize: "13px", fontWeight: "600", marginBottom: "8px" }}>
+                Status: <span className="badge">{trackingData.status}</span>
+              </p>
+              <ol className="vt">
+                {trackingData.activities.map((act, index) => (
+                  <li key={index} className="vt__item is-done">
+                    <span className="track__dot">
+                      <Check size={14} />
+                    </span>
+                    <div>
+                      <p className="vt__label">{act.activity || act.status}</p>
+                      <p className="muted vt__when">{act.location ? `${act.location} · ` : ""}{act.date}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
           ) : (
             <ol className="vt">
-              {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => (
-                <li
-                  key={label}
-                  className={`vt__item ${
-                    i < getCurrentStep(modal.order.orderStatus) ? "is-done" : ""
-                  } ${
-                    i === getCurrentStep(modal.order.orderStatus)
-                      ? "is-current"
-                      : ""
-                  }`}
-                >
-                  <span className="track__dot">
-                    <Icon size={14} />
-                  </span>
-                  <div>
-                    <p className="vt__label">{label}</p>
-                    <p className="muted vt__when">{when}</p>
-                  </div>
-                </li>
-              ))}
+              {getOrderSteps(modal.order).map(({ label, icon: Icon, when }, i) => {
+                const currentStep = getCurrentStep(
+                  trackingData?.status || modal.order.orderStatus
+                );
+                const isDone = i < currentStep;
+                const isCurrent = i === currentStep;
+
+                return (
+                  <li
+                    key={label}
+                    className={`vt__item ${isDone ? "is-done" : ""} ${
+                      isCurrent ? "is-current" : ""
+                    }`}
+                  >
+                    <span className="track__dot">
+                      <Icon size={14} />
+                    </span>
+                    <div>
+                      <p className="vt__label">{label}</p>
+                      <p className="muted vt__when">
+                        {when || (isDone ? "Completed" : isCurrent ? "In Progress" : "Pending")}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           )}
 

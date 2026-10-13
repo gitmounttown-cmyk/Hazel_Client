@@ -152,11 +152,11 @@ const validate = (v) => {
     e.state = "Enter your state";
   }
 
-  if (!/^\d{6}\$/.test(v.pincode)) {
+  if (!/^\d{6}$/.test(v.pincode)) {
     e.pincode = "Enter a 6-digit pincode";
   }
 
-  if (!/^[6-9]\d{9}\$/.test(v.phone)) {
+  if (!/^[6-9]\d{9}$/.test(v.phone)) {
     e.phone = "Enter a valid 10-digit number";
   }
 
@@ -635,6 +635,7 @@ export default function Checkout({
         deliveryAddress: formattedAddress,
         products: cartItems.map((item) => ({
           productId: item.productId,
+          variantId: item.variantId, // Added variantId to fix the 500 error
           name: item.name,
           print: item.print,
           size: item.size,
@@ -653,7 +654,6 @@ export default function Checkout({
 
       const targetOrderId = response.orderId || response.orderNumber || response.id || response.order?._id;
 
-      // ✅ SAVE TO LOCALSTORAGE FOR INSTANT CONFIRMATION RENDERING
       localStorage.setItem("latestOrderId", targetOrderId);
       localStorage.setItem("latestOrderTotal", liveTotal);
       localStorage.setItem("guestShippingInfo", JSON.stringify(formattedAddress));

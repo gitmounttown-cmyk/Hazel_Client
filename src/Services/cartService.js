@@ -1,11 +1,9 @@
 import axiosInstance from "../api/axiosInstance";
 import { getGuestId } from "../helpers/guestId";
 
-
 const getWishlistOwner = () => {
   const token = localStorage.getItem("hazelToken");
 
-  // Logged-in user
   if (token) {
     return {
       isGuest: false,
@@ -13,7 +11,6 @@ const getWishlistOwner = () => {
     };
   }
 
-  // Guest user
   return {
     isGuest: true,
     guestId: getGuestId(),
@@ -30,16 +27,12 @@ export const addToCart = async (cartItem) => {
 
     const requestData = {
       ...cartItem,
-
-      // Send guestId only for guest
       ...(isGuest && { guestId }),
     };
     const response = await axiosInstance.post("/cart/add", requestData);
-    // Ensure response.data is returned so controllers/components can read response.data.success
     return response.data;
   } catch (error) {
     console.error("Error adding to cart:", error);
-    // Return error response data if available so the frontend toast catches the backend message
     if (error.response && error.response.data) {
       return error.response.data;
     }
@@ -58,14 +51,14 @@ export const getCart = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching cart:", error);
-    throw error;
+    console.warn("Error fetching cart (safe fallback):", error?.response?.data || error.message);
+    // Return a safe empty cart structure instead of throwing to prevent console crash
+    return { success: false, cart: { items: [] } };
   }
 };
 
 export const updateCartItem = async (data) => {
   try {
-    // Aligned with backend router.put("/update")
     const response = await axiosInstance.put("/cart/update", data);
     return response.data;
   } catch (error) {
@@ -81,7 +74,6 @@ export const removeCartItem = async (data) => {
       ...data,
       ...(isGuest && { guestId }),
     };
-    // Aligned with backend router.delete("/remove") using body payload
     const response = await axiosInstance.delete("/cart/remove", { data: requestData });
     return response.data;
   } catch (error) {
@@ -90,28 +82,11 @@ export const removeCartItem = async (data) => {
   }
 };
 
-// export const clearCart = async () => {
-//   try {
-//     const { isGuest, guestId } = getWishlistOwner();
-//     const requestData = {
-//       ...(isGuest && { guestId }),
-//     };
-//     // Added missing "/cart" prefix
-//     const response = await axiosInstance.delete("/cart/clear", { data: requestData });
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error clearing cart:", error);
-//     throw error;
-//   }
-// };
-
 export const clearCart = async () => {
   try {
     const { isGuest, guestId } = getWishlistOwner();
 
     const requestData = isGuest ? { guestId } : {};
-
-    console.log("Request payload:", requestData);
 
     const response = await axiosInstance.delete("/cart/clear", {
       data: requestData,

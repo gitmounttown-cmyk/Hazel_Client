@@ -171,6 +171,16 @@ const Navbar = () => {
             Contact Us
           </NavLink>
         </li>
+
+        <li>
+          <NavLink
+            to="/track-order"
+            onClick={closeMobileMenu}
+            className={({ isActive }) => (isActive ? "active-link" : "")}
+          >
+           Order Tracking
+          </NavLink>
+        </li>
       </ul>
 
       {/* <div className="nav-right-section">
