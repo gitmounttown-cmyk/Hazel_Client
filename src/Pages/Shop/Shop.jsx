@@ -10,6 +10,7 @@ import {
 } from "../../Services/wishlistService";
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
+import Loader from "../../Components/Loader/Loader";
 const STATIC_FILTER_GROUPS = [
   {
     key: "size",
@@ -93,6 +94,7 @@ function useShopData() {
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingAPI, setLoadingAPI] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -210,6 +212,7 @@ function useShopData() {
 useEffect(() => {
   const fetchProducts = async () => {
     setLoading(true);
+    setLoadingAPI(true);
 
     try {
       await fetchProductsFromBackend(activeFilters, sort, page);
@@ -217,6 +220,7 @@ useEffect(() => {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
+      setLoadingAPI(false);
     }
   };
 
@@ -753,6 +757,7 @@ export default function ShopPage() {
     toggleStagedCheckbox,
     applyFilters,
     clearAll,
+    loadingAPI,
   } = useShopData();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -805,6 +810,7 @@ export default function ShopPage() {
 
   return (
     <div className="shop-page">
+      <Loader show={loadingAPI} />
       <div ref={shopRef} className="shop-body">
         <Sidebar
           filterGroups={filterGroups}
