@@ -73,8 +73,8 @@ const AppRoutes = () => {
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
           <Route path="/loader" element={<Loader />} />
 
-          <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
-          <Route path="/Terms" element={<Terms />} />
+          <Route path="//privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-condition" element={<Terms />} />
 
           {/* ORDER FAILURE ROUTES */}
           <Route path="/order-failed" element={<OrderFailure />} />
