@@ -238,6 +238,7 @@ export default function ProductPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { id } = useParams();
   const [countdown, setCountdown] = useState("");
@@ -272,18 +273,43 @@ export default function ProductPage() {
     fetchCartItems();
   }, []);
 
-  useEffect(() => {
-    getProductById(id)
-      .then((response) => {
-        setProductDetails(response?.data?.data);
-        if (response?.data?.data?.relatedProducts?.length > 0) {
-          setRelatedProducts(response?.data?.data?.relatedProducts);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching product details:", error);
-      });
-  }, [id]);
+  // useEffect(() => {
+  //   getProductById(id)
+  //     .then((response) => {
+  //       setProductDetails(response?.data?.data);
+  //       if (response?.data?.data?.relatedProducts?.length > 0) {
+  //         setRelatedProducts(response?.data?.data?.relatedProducts);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching product details:", error);
+  //     });
+  // }, [id]);
+
+
+useEffect(() => {
+  const fetchProductDetails = async () => {
+    setLoading(true);
+
+    try {
+      const response = await getProductById(id);
+
+      setProductDetails(response?.data?.data);
+
+      if (response?.data?.data?.relatedProducts?.length > 0) {
+        setRelatedProducts(response.data.data.relatedProducts);
+      } else {
+        setRelatedProducts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProductDetails();
+}, [id]);
 
   useEffect(() => {
     if (!id) return;
