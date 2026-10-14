@@ -188,3 +188,59 @@
   padding: 30px;
   color: #666155;
 }
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets and Medium Screens (Widths below 768px) */
+@media screen and (max-width: 768px) {
+  .prod-page {
+    padding: 16px;
+  }
+
+  /* Enables smooth horizontal scrolling for product tabular data */
+  .prod-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .prod-table {
+    min-width: 620px; /* Ensures product details and status badges remain clear */
+  }
+
+  .prod-table thead th,
+  .prod-table tbody td {
+    padding: 12px 14px;
+  }
+}
+
+/* Mobile Devices (Widths below 576px) */
+@media screen and (max-width: 576px) {
+  .prod-page {
+    padding: 12px;
+  }
+
+  /* Stacks page title and "Add" button vertically */
+  .prod-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .prod-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .prod-table thead th,
+  .prod-table tbody td {
+    padding: 10px 12px;
+  }
+
+  .prod-thumb {
+    width: 32px;
+    height: 32px;
+  }
+}

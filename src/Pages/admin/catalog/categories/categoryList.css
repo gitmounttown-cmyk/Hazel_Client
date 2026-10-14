@@ -183,3 +183,59 @@
   padding: 30px;
   color: #666155;
 }
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets (Widths below 768px) */
+@media screen and (max-width: 768px) {
+  .cat-page {
+    padding: 16px;
+  }
+
+  /* Make table scrollable horizontally to prevent overflow */
+  .cat-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cat-table {
+    min-width: 600px; /* Ensures table headers don't squish */
+  }
+
+  .cat-table thead th,
+  .cat-table tbody td {
+    padding: 12px 14px;
+  }
+}
+
+/* Mobile Devices (Widths below 576px) */
+@media screen and (max-width: 576px) {
+  .cat-page {
+    padding: 12px;
+  }
+
+  /* Stack page header controls vertically on small screens */
+  .cat-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .cat-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .cat-table thead th,
+  .cat-table tbody td {
+    padding: 10px 12px;
+  }
+
+  .cat-thumb {
+    width: 32px;
+    height: 32px;
+  }
+}

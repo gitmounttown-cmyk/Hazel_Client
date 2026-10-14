@@ -1,5 +1,5 @@
 /* ==== Hazel Admin - Sidebar ==== */
-/* Color tokens (kept local to this file so the component is drop-in portable) */
+/* Color tokens */
 .hz-sidebar {
   --hz-maroon: #292626;
   --hz-maroon-dark: #f1cb62;
@@ -19,6 +19,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  z-index: 1000;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hz-sidebar::-webkit-scrollbar {
@@ -29,6 +31,47 @@
   border-radius: 4px;
 }
 
+/* --- Mobile Hamburger Trigger --- */
+.hz-sidebar__hamburger-trigger {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 998;
+  background: var(--hz-maroon-dark);
+  border: 1px solid rgba(41, 38, 38, 0.2);
+  color: #292626;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hz-sidebar__hamburger-trigger:hover {
+  background: #faf4e2;
+}
+
+/* --- Overlay Backdrop --- */
+.hz-sidebar__overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: hzFadeIn 0.2s ease-in-out;
+}
+
+@keyframes hzFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* --- Logo --- */
 .hz-sidebar__logo {
   display: flex;
@@ -36,6 +79,7 @@
   gap: 10px;
   padding: 22px 20px;
   border-bottom: 1px solid rgba(41, 38, 38, 0.15);
+  position: relative;
 }
 
 .hz-sidebar__logo-icon {
@@ -69,6 +113,24 @@
   letter-spacing: 1.5px;
   color: var(--hz-text-muted);
   margin-top: 2px;
+}
+
+/* Close button on mobile inside logo header */
+.hz-sidebar__close-btn {
+  display: none;
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #292626;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hz-sidebar__close-btn:hover {
+  background: rgba(41, 38, 38, 0.1);
 }
 
 /* --- Nav --- */
@@ -185,10 +247,40 @@
   opacity: 1;
 }
 
-/* --- Responsive --- */
+/* --- Responsive Rules for Mobile & Tablet --- */
 @media (max-width: 992px) {
+  .hz-sidebar__hamburger-trigger {
+    display: flex;
+  }
+
+  .hz-sidebar__close-btn {
+    display: flex;
+  }
+
+  .hz-sidebar__overlay {
+    display: block;
+  }
+
   .hz-sidebar {
-    width: 220px;
-    min-width: 220px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 270px;
+    min-width: 270px;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .hz-sidebar--open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .hz-sidebar {
+    width: 82vw;
+    min-width: 82vw;
   }
 }
