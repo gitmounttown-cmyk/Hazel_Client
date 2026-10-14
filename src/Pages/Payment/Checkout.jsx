@@ -916,6 +916,8 @@ console.log("Cleaned address data:", cleaned);
         modal: {
           ondismiss: function () {
             toast.error("Payment process was cancelled.");
+            // Restore scrolling when the customer closes Razorpay.
+            document.body.style.removeProperty("overflow");
             navigate(`/order-failed/${targetOrderId}`);
           },
         },
