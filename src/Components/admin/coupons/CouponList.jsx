@@ -73,7 +73,8 @@ console.log("Fetched categories:", response);
       const response = await getProducts();
 
       if (response?.data?.success) {
-        setProducts(response?.data?.data || []);
+        const activeProducts = Array.isArray(response?.data?.data) ? response?.data?.data.filter((p) => p.isActive) : [];
+        setProducts(activeProducts);
       } else {
         setProducts([]);
         toast.error(

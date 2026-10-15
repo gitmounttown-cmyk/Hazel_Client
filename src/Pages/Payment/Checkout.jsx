@@ -456,7 +456,8 @@ export default function Checkout({
 
       backendCartItems.forEach((item) => {
         const variant = item?.product?.variants || [];
-        const mediaImageUrl = variant?.[0]?.media?.[0]?.imageURL || "";
+        const tumbnailId = item?.product?.variants?.find((v) => v.thumbnailId)?.thumbnailId;
+        const mediaImageUrl = variant?.flatMap((v) => v.media || []).find((mediaItem) => mediaItem._id === tumbnailId)?.imageURL || item?.product?.image || item?.product?.productImage || item?.product?.images?.[0] || "";
         const sizes = variant?.[0]?.sizes || [];
 
         const selectedSize = sizes.filter(
@@ -898,9 +899,11 @@ console.log("Cleaned address data:", cleaned);
 
             if (verifyRes?.success || verifyRes?.status === "success" || verifyRes?.data?.success) {
               toast.success("Payment verified successfully!");
+              document.body.style.removeProperty("overflow");
               navigate(`/order-confirmation/${targetOrderId}`);
             } else {
               toast.error(verifyRes?.message || "Payment verification failed.");
+              document.body.style.removeProperty("overflow");
               navigate(`/order-failed/${targetOrderId}`);
             }
           } catch (verifyError) {
@@ -910,13 +913,13 @@ console.log("Cleaned address data:", cleaned);
             } else {
               toast.error("Payment verification failed.");
             }
+            document.body.style.removeProperty("overflow");
             navigate(`/order-failed/${targetOrderId}`);
           }
         },
         modal: {
           ondismiss: function () {
             toast.error("Payment process was cancelled.");
-            // Restore scrolling when the customer closes Razorpay.
             document.body.style.removeProperty("overflow");
             navigate(`/order-failed/${targetOrderId}`);
           },
@@ -934,6 +937,7 @@ console.log("Cleaned address data:", cleaned);
       const paymentObject = new window.Razorpay(options);
       paymentObject.on("payment.failed", function (failureResponse) {
         toast.error("Payment failed.");
+        document.body.style.removeProperty("overflow");
         navigate(`/order-failed/${targetOrderId}`);
       });
       paymentObject.open();

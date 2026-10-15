@@ -159,3 +159,62 @@
   padding: 30px;
   color: #666155;
 }
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets and Medium Viewports (Widths below 768px) */
+@media screen and (max-width: 768px) {
+  .color-page {
+    padding: 16px;
+  }
+
+  /* Enables smooth horizontal scrolling for tabular color data */
+  .color-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .color-table {
+    min-width: 560px; /* Prevents swatch, code, and actions from squishing */
+  }
+
+  .color-table thead th,
+  .color-table tbody td {
+    padding: 12px 14px;
+  }
+
+  .color-desc {
+    max-width: 200px;
+  }
+}
+
+/* Mobile Devices (Widths below 576px) */
+@media screen and (max-width: 576px) {
+  .color-page {
+    padding: 12px;
+  }
+
+  /* Stacks page title and "Add" button vertically */
+  .color-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .color-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .color-table thead th,
+  .color-table tbody td {
+    padding: 10px 12px;
+  }
+
+  .color-desc {
+    max-width: 140px;
+  }
+}

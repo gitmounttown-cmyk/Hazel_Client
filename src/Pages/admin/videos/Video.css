@@ -231,3 +231,93 @@
   text-align: center;
   color: #666155;
 }
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets and Medium Screens (992px and below) */
+@media screen and (max-width: 992px) {
+  .video-page {
+    padding: 30px 30px;
+  }
+}
+
+/* Tablets (768px and below) */
+@media screen and (max-width: 768px) {
+  .video-page {
+    padding: 20px;
+  }
+
+  /* Horizontal scrolling for the video table to prevent layout break */
+  .video-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .video-table {
+    min-width: 600px;
+  }
+
+  .video-modal-overlay {
+    padding: 16px;
+  }
+
+  .video-modal {
+    padding: 20px;
+  }
+}
+
+/* Mobile Devices (576px and below) */
+@media screen and (max-width: 576px) {
+  .video-page {
+    padding: 12px;
+  }
+
+  .video-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .video-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .video-table th,
+  .video-table td {
+    padding: 12px 10px;
+  }
+
+  .video-preview {
+    width: 120px;
+    height: 70px;
+  }
+
+  .video-form-group input {
+    font-size: 16px; /* Prevents auto-zoom on mobile safari */
+  }
+
+  .video-form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .video-form-actions button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Small Mobile Devices (380px and below) */
+@media screen and (max-width: 380px) {
+  .video-modal {
+    padding: 15px;
+  }
+
+  .video-form-preview video {
+    max-height: 180px;
+  }
+}

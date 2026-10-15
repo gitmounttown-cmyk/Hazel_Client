@@ -460,18 +460,351 @@
   white-space: nowrap;
 }
 
-/* --- Responsive --- */
+/* ============================================================
+   RESPONSIVE (all devices)
+   Breakpoints:
+   - >= 1600px : large desktop / TV
+   - <= 1280px : small laptop
+   - <= 1180px : tablet landscape
+   - <= 900px  : tablet portrait
+   - <= 640px  : large phones
+   - <= 480px  : phones
+   - <= 360px  : small phones
+   ============================================================ */
+
+/* Prevent grid/flex children from overflowing their column
+   (stops tables & charts from stretching the page sideways) */
+.hz-dashboard {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.hz-dashboard *,
+.hz-dashboard *::before,
+.hz-dashboard *::after {
+  box-sizing: border-box;
+}
+
+.hz-dashboard__row > *,
+.hz-dashboard__col > *,
+.hz-summary-grid > * {
+  min-width: 0;
+}
+
+.hz-card {
+  max-width: 100%;
+}
+
+/* Tables scroll horizontally inside their card instead of breaking layout */
+.hz-orders-card,
+.hz-products-card {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hz-orders-card .hz-table {
+  min-width: 580px;
+}
+
+/* Let columns size to their content so long values never overlap */
+.hz-card .hz-table {
+  table-layout: auto;
+}
+
+.hz-card .hz-table thead th,
+.hz-card .hz-table tbody td {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Long order IDs (e.g. HZORD-1791975417330-4677) need room */
+.hz-card .hz-table tbody td.hz-table__id {
+  min-width: 200px;
+  white-space: nowrap;
+}
+
+.hz-products-card .hz-table {
+  min-width: 440px;
+}
+
+.hz-table thead th,
+.hz-table tbody td {
+  white-space: nowrap;
+}
+
+/* Product cell: keep it a real table-cell so columns size correctly,
+   thumbnail is pinned to the left, name wraps neatly beside it */
+.hz-table tbody td.hz-table__product {
+  display: table-cell;
+  position: relative;
+  vertical-align: middle;
+  white-space: normal;
+  min-width: 200px;
+  padding-left: 56px;
+  overflow-wrap: anywhere;
+}
+
+.hz-table tbody td.hz-table__product .hz-table__thumb {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hz-activity-list__message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Large desktop / TV */
+@media (min-width: 1600px) {
+  .hz-dashboard {
+    max-width: 1560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Small laptop */
+@media (max-width: 1280px) {
+  .hz-summary-grid,
+  .hz-dashboard__row,
+  .hz-dashboard__col {
+    gap: 16px;
+  }
+
+  .hz-dashboard__row {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+
+  .hz-summary-card {
+    padding: 16px;
+  }
+
+  .hz-summary-card__icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .hz-summary-card__value {
+    font-size: 20px;
+  }
+}
+
+/* Tablet landscape */
 @media (max-width: 1180px) {
   .hz-summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .hz-dashboard__row {
     grid-template-columns: 1fr;
   }
+
+  /* Right column: inventory + activities side by side when space allows */
+  .hz-dashboard__col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
 }
 
-@media (max-width: 560px) {
+/* Tablet portrait */
+@media (max-width: 900px) {
+  .hz-dashboard__col {
+    grid-template-columns: 1fr;
+  }
+
+  .hz-dashboard__heading {
+    margin-bottom: 20px;
+  }
+
+  .hz-chart-placeholder {
+    height: 220px;
+  }
+}
+
+/* Large phones */
+@media (max-width: 640px) {
+  .hz-dashboard__heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .hz-dashboard__heading-left h1 {
+    font-size: 21px;
+  }
+
+  .hz-dashboard__date {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .hz-summary-grid {
+    gap: 12px;
+  }
+
+  .hz-summary-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .hz-summary-card__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hz-summary-card__label {
+    font-size: 12px;
+  }
+
+  .hz-summary-card__value {
+    font-size: 18px;
+  }
+
+  .hz-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  /* Sales header: title on top, toggle below, full width */
+  .hz-sales-card .hz-card__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .hz-range-toggle {
+    width: 100%;
+  }
+
+  .hz-range-toggle__btn {
+    flex: 1;
+    min-height: 38px; /* comfortable touch target */
+    padding: 8px 10px;
+  }
+
+  .hz-chart-placeholder {
+    height: 200px;
+  }
+
+  /* Inventory: stack donut above legend */
+  .hz-inventory-card__body {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .hz-inventory-card__legend {
+    width: 100%;
+  }
+
+  .hz-activity-list__item {
+    align-items: flex-start;
+  }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  .hz-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .hz-summary-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .hz-dashboard__heading-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .hz-dashboard__heading-left {
+    gap: 10px;
+  }
+
+  .hz-dashboard__heading-left h1 {
+    font-size: 19px;
+  }
+
+  .hz-dashboard__heading-left p {
+    font-size: 12px;
+  }
+
+  .hz-dashboard__row,
+  .hz-dashboard__col {
+    gap: 12px;
+  }
+
+  .hz-dashboard__row {
+    margin-bottom: 12px;
+  }
+
+  .hz-card {
+    padding: 14px;
+  }
+
+  .hz-card__header h2 {
+    font-size: 15px;
+  }
+
+  .hz-table thead th,
+  .hz-table tbody td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .hz-table tbody td.hz-table__product {
+    padding-left: 54px;
+  }
+
+  .hz-badge {
+    padding: 3px 10px;
+    font-size: 11px;
+  }
+
+  .hz-activity-list {
+    gap: 12px;
+  }
+
+  .hz-activity-list__message {
+    font-size: 12px;
+  }
+
+  .hz-activity-list__time {
+    font-size: 11px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 360px) {
   .hz-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hz-summary-card {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .hz-dashboard__heading-left h1 {
+    font-size: 18px;
+  }
+
+  .hz-inventory-card__chart {
+    transform: scale(0.92);
+  }
+}
+
+/* Landscape phones (short viewport) */
+@media (max-height: 480px) and (orientation: landscape) {
+  .hz-chart-placeholder {
+    height: 180px;
   }
 }
