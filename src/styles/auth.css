@@ -527,7 +527,7 @@
 }
 
 .otp-timer strong {
-  color: var(--hazel-burgundy);
+  color: #777;
 }
 
 .resend-button {

@@ -1,600 +1,176 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import {
-  sendOTP,
-  verifyOTP,
-} from "../../services/authService";
-
+import { sendOTP, verifyOTP } from "../../services/authService";
 import "../../styles/auth.css";
-
 import toast from "react-hot-toast";
 import verifyOtpImage from "../../assets/images/verify-otp-left.png";
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
   const inputRefs = useRef([]);
-
-  const [mobileNumber] = useState(() => {
-    return sessionStorage.getItem("hazelMobileNumber") || "";
-  });
-
-  const [otp, setOtp] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
-
+  const [mobileNumber] = useState(() => sessionStorage.getItem("hazelMobileNumber") || "");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [timer, setTimer] = useState(30);
 
-  // ============================================================
-  // DEVELOPMENT OTP POPUP
-  // ============================================================
-  const [devOtp, setDevOtp] = useState("");
-  const [showOtpPopup, setShowOtpPopup] = useState(false);
-
-  // ============================================================
-  // GET MOBILE NUMBER
-  // ============================================================
   useEffect(() => {
     if (!mobileNumber) {
-      navigate("/login", {
-        replace: true,
-      });
+      navigate("/login", { replace: true });
     }
   }, [mobileNumber, navigate]);
 
-  // ============================================================
-  // GET OTP FROM SESSION STORAGE
-  // ============================================================
   useEffect(() => {
-    const storedOTP = sessionStorage.getItem("hazelDevOTP");
-
-    if (storedOTP) {
-      setDevOtp(storedOTP);
-      setShowOtpPopup(true);
-    }
-  }, []);
-
-  // ============================================================
-  // COUNTDOWN
-  // ============================================================
-  useEffect(() => {
-    if (timer <= 0) {
-      return;
-    }
-
+    if (timer <= 0) return;
     const interval = setInterval(() => {
       setTimer((previous) => previous - 1);
     }, 1000);
-
     return () => clearInterval(interval);
   }, [timer]);
 
-  // ============================================================
-  // OTP INPUT
-  // ============================================================
   const handleOTPChange = (index, value) => {
-    if (!/^\d*$/.test(value)) {
-      return;
-    }
-
-    if (value.length > 1) {
-      return;
-    }
+    if (!/^\d*$/.test(value)) return;
+    if (value.length > 1) return;
 
     const newOTP = [...otp];
     newOTP[index] = value;
-
     setOtp(newOTP);
     setError("");
 
-    // Move next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // ============================================================
-  // BACKSPACE
-  // ============================================================
   const handleKeyDown = (index, e) => {
-    if (
-      e.key === "Backspace" &&
-      !otp[index] &&
-      index > 0
-    ) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-const handleCloseOtpPopup = () => {
-  setShowOtpPopup(false);
-
-  setTimeout(() => {
-    inputRefs.current[0]?.focus();
-  }, 100);
-};
-
-  // ============================================================
-  // VERIFY OTP
-  // ============================================================
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
-
     setError("");
     setSuccess("");
 
     const enteredOTP = otp.join("");
-
     if (enteredOTP.length !== 6) {
-      setError(
-        "Please enter the complete 6-digit OTP."
-      );
+      setError("Please enter the complete 6-digit OTP.");
       return;
     }
 
     try {
       setLoading(true);
-
-      const response = await verifyOTP(
-        mobileNumber,
-        enteredOTP
-      );
-
-      // console.log(
-      //   "verify_otp_response",
-      //   response
-      // );
+      const response = await verifyOTP(mobileNumber, enteredOTP);
 
       if (response.success) {
         const user = response.user;
+        if (response.token) localStorage.setItem("hazelToken", response.token);
+        if (response.user) localStorage.setItem("hazelUser", JSON.stringify(response.user));
 
-        // =====================================================
-        // SAVE TOKEN
-        // =====================================================
-        if (response.token) {
-          localStorage.setItem(
-            "hazelToken",
-            response.token
-          );
-        }
+        setSuccess("OTP verified successfully.");
+        sessionStorage.removeItem("hazelMobileNumber");
 
-        // =====================================================
-        // SAVE USER (Preserves custom name if already edited!)
-        // =====================================================
-        if (response.user) {
-          const existingUserStr = localStorage.getItem("hazelUser");
-          let customName = "";
-
-          if (existingUserStr) {
-            try {
-              const parsedExisting = JSON.parse(existingUserStr);
-              // Preserve name if phone matches or general session exists
-              if (
-                parsedExisting.phone === mobileNumber || 
-                parsedExisting.mobileNumber === mobileNumber ||
-                parsedExisting.name && parsedExisting.name !== "Customer"
-              ) {
-                customName = parsedExisting.name || parsedExisting.fullName;
-              }
-            } catch (err) {
-              console.error("Error reading existing user:", err);
-            }
-          }
-
-          const finalUserToSave = {
-            ...response.user,
-            name: customName || response.user.name || "Customer",
-            fullName: customName || response.user.fullName || response.user.name || "Customer",
-            phone: response.user.phone || response.user.mobileNumber || mobileNumber
-          };
-
-          localStorage.setItem(
-            "hazelUser",
-            JSON.stringify(finalUserToSave)
-          );
-        }
-
-        setSuccess(
-          "OTP verified successfully."
-        );
-
-        sessionStorage.removeItem(
-          "hazelMobileNumber"
-        );
-
-        sessionStorage.removeItem(
-          "hazelDevOTP"
-        );
-
-        // =====================================================
-        // GO HOME
-        // =====================================================
         setTimeout(() => {
-          toast.success(
-            response?.message ||
-              "OTP verified successfully."
-          );
-
-          // console.log(
-          //   "User data:",
-          //   user
-          // );
-
-          if (
-            user &&
-            user.role === "admin"
-          ) {
-            navigate("/admin/dashboard");
-          } else if (
-            user &&
-            user.role === "customer"
-          ) {
-            navigate("/");
-          } else {
-            navigate("/login");
-          }
+          toast.success(response?.message || "OTP verified successfully.");
+          if (user?.role === "admin") navigate("/admin/dashboard");
+          else navigate("/");
         }, 700);
       } else {
-        toast.error(
-          response?.message ||
-            "Invalid OTP."
-        );
-
-        setError(
-          response.message ||
-            "Invalid OTP."
-        );
+        toast.error(response?.message || "Invalid OTP.");
+        setError(response.message || "Invalid OTP.");
       }
     } catch (error) {
-      setError(
-        error.message
-      );
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ============================================================
-  // RESEND OTP
-  // ============================================================
   const handleResendOTP = async () => {
-    if (timer > 0) {
-      return;
-    }
+    if (timer > 0) return;
 
     try {
       setResendLoading(true);
       setError("");
       setSuccess("");
 
-      const response = await sendOTP(
-        mobileNumber
-      );
-
+      const response = await sendOTP(mobileNumber);
       if (response.success) {
-        setOtp([
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-        ]);
-
+        setOtp(["", "", "", "", "", ""]);
         setTimer(30);
-
-        setSuccess(
-          "A new OTP has been sent."
-        );
-
-        // =====================================================
-        // SHOW NEW OTP IN POPUP
-        // =====================================================
-        if (response.otp) {
-          sessionStorage.setItem(
-            "hazelDevOTP",
-            response.otp
-          );
-
-          setDevOtp(response.otp);
-          setShowOtpPopup(true);
-        }
-
+        setSuccess("A new OTP has been sent to your mobile.");
         inputRefs.current[0]?.focus();
       } else {
-        setError(
-          response.message ||
-            "Unable to resend OTP."
-        );
+        setError(response.message || "Unable to resend OTP.");
       }
     } catch (error) {
-      setError(
-        error.message
-      );
+      setError(error.message);
     } finally {
       setResendLoading(false);
     }
   };
 
-  // ============================================================
-  // CHANGE MOBILE
-  // ============================================================
-  const handleChangeNumber = () => {
-    sessionStorage.removeItem(
-      "hazelMobileNumber"
-    );
-
-    sessionStorage.removeItem(
-      "hazelDevOTP"
-    );
-
-    navigate("/login");
-  };
-
   return (
     <div className="auth-page">
-
-      {/* =====================================================
-          LEFT IMAGE
-      ====================================================== */}
       <div className="auth-image-section">
-
-        <img
-          src={verifyOtpImage}
-          alt="Hazel Fashion"
-          className="auth-background-image"
-        />
-
+        <img src={verifyOtpImage} alt="Hazel Fashion" className="auth-background-image" />
         <div className="auth-image-overlay"></div>
-
         <div className="auth-image-content">
-
-          <div className="auth-small-title">
-            HAZEL E-COMMERCE
-          </div>
-
-          <h1>
-            Feel Comfortable
-            <br />
-            Every Day
-          </h1>
-
-          <p>
-            Soft. Stylish. Made for You.
-          </p>
-
-          <div className="auth-feature-list">
-
-            <span>
-              ✓ Premium Quality
-            </span>
-
-            <span>
-              ✓ Comfortable Styles
-            </span>
-
-            <span>
-              ✓ Made for Every Mom
-            </span>
-
-          </div>
-
+          <div className="auth-small-title">HAZEL E-COMMERCE</div>
+          <h1>Feel Comfortable<br />Every Day</h1>
+          <p>Soft. Stylish. Made for You.</p>
         </div>
       </div>
-
-      {/* =====================================================
-          OTP FORM
-      ====================================================== */}
       <div className="auth-form-section">
-
         <div className="auth-card">
-
-          {/* Logo */}
-          <div className="hazel-logo">
-
-            <div className="logo-icon">
-              H
-            </div>
-
-            <div>
-              <h2>HAZEL</h2>
-              <span>E-COMMERCE</span>
-            </div>
-
-          </div>
-
-          {/* Heading */}
           <div className="auth-heading">
-
-            <h1>
-              Verify Your Mobile Number
-            </h1>
-
-            <p>
-              We've sent a verification code
-              to your mobile number.
-            </p>
-
+            <h1>Verify Your Mobile Number</h1>
+            <p>We've sent a verification code to your mobile number via SMS.</p>
           </div>
-
-          {/* Mobile */}
           <div className="otp-mobile">
-
             +91 {mobileNumber}
-
-            <button
-              type="button"
-              onClick={handleChangeNumber}
-            >
-              Change
-            </button>
-
+            <button type="button" onClick={() => navigate("/login")}>Change</button>
           </div>
-
-          {/* OTP FORM */}
-          <form
-            onSubmit={handleVerifyOTP}
-          >
-
-            <label className="otp-label">
-              Enter OTP
-            </label>
-
+          <form onSubmit={handleVerifyOTP}>
+            <label className="otp-label">Enter OTP</label>
             <div className="otp-input-container">
-
-              {otp.map(
-                (digit, index) => (
-                  <input
-                    key={index}
-                    ref={(element) =>
-                      (inputRefs.current[
-                        index
-                      ] = element)
-                    }
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) =>
-                      handleOTPChange(
-                        index,
-                        e.target.value
-                      )
-                    }
-                    onKeyDown={(e) =>
-                      handleKeyDown(
-                        index,
-                        e
-                      )
-                    }
-                    className={
-                      digit
-                        ? "otp-input filled"
-                        : "otp-input"
-                    }
-                  />
-                )
-              )}
-
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOTPChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className={digit ? "otp-input filled" : "otp-input"}
+                />
+              ))}
             </div>
-
-            {/* Timer */}
-            <div className="otp-timer">
-
+            {/* Timer container block with forced visibility style */}
+            <div className="otp-timer" style={{ display: "block", textAlign: "center", margin: "15px 0" }}>
               {timer > 0 ? (
-                <>
-                  Resend OTP in{" "}
-                  <strong>
-                    00:
-                    {String(
-                      timer
-                    ).padStart(
-                      2,
-                      "0"
-                    )}
-                  </strong>
-                </>
+                <span style={{ fontSize: "14px", color: "#666" }}>
+                  Resend OTP in <strong>00:{String(timer).padStart(2, "0")}</strong>
+                </span>
               ) : (
-                <button
-                  type="button"
-                  onClick={
-                    handleResendOTP
-                  }
-                  disabled={
-                    resendLoading
-                  }
-                  className="resend-button"
-                >
-                  {resendLoading
-                    ? "Sending..."
-                    : "Resend OTP"}
+                <button type="button" onClick={handleResendOTP} disabled={resendLoading} className="resend-button">
+                  {resendLoading ? "Sending..." : "Resend OTP"}
                 </button>
               )}
-
             </div>
-
-            {/* Error */}
-            {error && (
-              <div className="auth-error">
-                {error}
-              </div>
-            )}
-
-            {/* Success */}
-            {success && (
-              <div className="auth-success">
-                {success}
-              </div>
-            )}
-
-            {/* Verify */}
-            <button
-              type="submit"
-              className="auth-primary-button"
-              disabled={loading}
-            >
-              {loading
-                ? "Verifying..."
-                : "Verify OTP"}
+            {error && <div className="auth-error">{error}</div>}
+            {success && <div className="auth-success">{success}</div>}
+            <button type="submit" className="auth-primary-button" disabled={loading}>
+              {loading ? "Verifying..." : "Verify OTP"}
             </button>
-
           </form>
-
-          {/* Security Message */}
-          <div className="security-message">
-
-            <span>🔒</span>
-
-            <p>
-              Your OTP is confidential.
-              Never share it with anyone.
-            </p>
-
-          </div>
-
         </div>
       </div>
-
-  
-    {showOtpPopup && devOtp && (
-  <div className="hazel-dev-otp-overlay">
-    <div className="hazel-dev-otp-popup">
-      <h2>Welcome to Hazel</h2>
-
-      <p>Your OTP is</p>
-
-      <div className="hazel-dev-otp-code">
-        {devOtp}
-      </div>
-
-      <span className="hazel-dev-otp-note">
-        Enjoy your Shopping
-      </span>
-
-      <button
-        type="button"
-        className="hazel-dev-otp-button"
-        onClick={handleCloseOtpPopup}
-      >
-        OK
-      </button>
-    </div>
-  </div>
-)}
     </div>
   );
 };

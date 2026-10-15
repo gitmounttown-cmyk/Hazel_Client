@@ -1,55 +1,29 @@
-import axios from "axios";
 import axiosInstance from "../api/axiosInstance";
-
-// ============================================================
-// SEND OTP
-// ============================================================
 
 export const sendOTP = async (mobileNumber) => {
   try {
     const response = await axiosInstance.post(
       `/auth/send-otp`,
-      {
-        mobileNumber,
-      }
+      { mobileNumber }
     );
-
     return response.data;
   } catch (error) {
     const message =
       error.response?.data?.message ||
       "Unable to send OTP.";
-
-    throw new Error(message, {
-      cause: error,
-    });
+    throw new Error(message, { cause: error });
   }
 };
 
-// ============================================================
-// VERIFY OTP
-// ============================================================
-
-export const verifyOTP = async (
-  mobileNumber,
-  otp
-) => {
+export const verifyOTP = async (mobileNumber, otp) => {
   try {
     const response = await axiosInstance.post(
       `/auth/verify-otp`,
-      {
-        mobileNumber,
-        otp,
-      }
+      { mobileNumber, otp }
     );
-
     return response.data;
   } catch (error) {
-    console.error(
-      "Verify OTP Error:",
-      error
-    );
-
+    console.error("Verify OTP Error:", error);
     throw (
       error.response?.data || {
         success: false,
@@ -59,28 +33,15 @@ export const verifyOTP = async (
   }
 };
 
-// ============================================================
-// RESEND OTP
-// ============================================================
-
-export const resendOTP = async (
-  mobileNumber
-) => {
+export const resendOTP = async (mobileNumber) => {
   try {
     const response = await axiosInstance.post(
       `/auth/resend-otp`,
-      {
-        mobileNumber,
-      }
+      { mobileNumber }
     );
-
     return response.data;
   } catch (error) {
-    console.error(
-      "Resend OTP Error:",
-      error
-    );
-
+    console.error("Resend OTP Error:", error);
     throw (
       error.response?.data || {
         success: false,
@@ -90,66 +51,46 @@ export const resendOTP = async (
   }
 };
 
-// ============================================================
-// GOOGLE LOGIN
-// ============================================================
-
-export const googleLogin = async (
-  credential
-) => {
+export const googleLogin = async (credential) => {
   try {
     const response = await axiosInstance.post(
       `/auth/google`,
-      {
-        credential,
-      }
+      { credential }
     );
-
     return response.data;
   } catch (error) {
-    console.error(
-      "Google Login Error:",
-      error
-    );
-
+    console.error("Google Login Error:", error);
     throw (
       error.response?.data || {
         success: false,
-        message:
-          "Unable to login with Google.",
+        message: "Unable to login with Google.",
       }
     );
   }
 };
 
-// check if user is logged in
 export const isLoggedIn = () => {
   const token = localStorage.getItem("hazelToken");
-  return !!token; // returns true if token exists, false otherwise
-}
+  return !!token;
+};
 
-//add logout function to clear localStorage and sessionStorage
 export const logout = () => {
   localStorage.removeItem("hazelToken");
   localStorage.removeItem("hazelUser");
   sessionStorage.removeItem("hazelMobileNumber");
   localStorage.clear();
   sessionStorage.clear();
-}
+};
 
-//update user data use api
 export const updateUserData = async (userData) => {
   try {
-    // Make API call to update user data
     const response = await axiosInstance.put(
       `/users/update/profile`,
-      {
-        ...userData,
-      }
+      { ...userData }
     );
     return response.data;
   } catch (error) {
     console.error("Update User Data Error:", error);
     throw error;
   }
-}
+};
