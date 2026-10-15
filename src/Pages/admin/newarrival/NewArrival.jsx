@@ -66,8 +66,11 @@ const NewArrival = () => {
         page: 1,
         limit: 1000,
       });
-
-      setProducts(response.data?.data || response.data?.products || []);
+      // Filter active products only
+      const activeProducts = Array.isArray(response.data?.data)
+        ? response.data.data.filter((p) => p.isActive)
+        : [];
+      setProducts(activeProducts);
     } catch (error) {
       console.error("FETCH PRODUCTS ERROR:", error);
     }

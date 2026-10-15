@@ -53,9 +53,10 @@ const ProductList = () => {
 
         const list = res?.data?.data;
         const totalPagesCount = res?.data?.pages || 1;
-
+        // filter active product only
+        const activeProducts = Array.isArray(list) ? list.filter((p) => p.isActive) : [];
         if (!ignore) {
-          setProducts(Array.isArray(list) ? list : []);
+          setProducts(activeProducts);
           setTotalPages(totalPagesCount);
         }
       } catch (err) {
@@ -109,6 +110,12 @@ const ProductList = () => {
 
   const getThumbnail = (product) => {
     for (const variant of product.variants || []) {
+      if(variant.thumbnailId) {
+        const media = variant.media?.find((m) => m._id === variant.thumbnailId);
+        if (media?.imageURL) {
+          return media.imageURL;
+        }
+      }
       const media =
         variant.media?.find((m) => m.type === "image") ||
         variant.media?.[0];

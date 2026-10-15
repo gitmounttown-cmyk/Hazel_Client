@@ -55,51 +55,127 @@ const emptyVariant = () => ({
   isActive: true,
   sizes: [emptySize()],
   existingMedia: [],
+  // NEW: Thumbnail and deletion fields
+  thumbnailId: null,
+  thumbnailPendingIndex: null,
+  removedMediaIds: [],
+
   pendingFiles: [],
   pendingPreviews: [],
   details: []
 });
 
+// const variantsFromProduct = (product) => {
+//   if (!product?.variants?.length) return [emptyVariant()];
+
+//   return product.variants.map((v) => ({
+//     localId: nextLocalId(),
+//     color: v.color || "",
+//     fabric: v.fabric || "",
+//     feel: v.feel || "",
+//     lining: v.lining || "",
+//     sleeves: v.sleeves || "",
+//     finishing: v.finishing || "",
+//     pocket: v.pocket || "",
+//     price: v.price ?? "",
+//     discountPrice: v.discountPrice ?? "",
+//     offerType: v.offer?.type || "none",
+//     offerValue: v.offer?.value ?? "",
+//     offerStartDate: v.offer?.startDate ? v.offer.startDate.substring(0, 10) : "",
+//     offerEndDate: v.offer?.endDate ? v.offer.endDate.substring(0, 10) : "",
+//     isActive: v.isActive !== undefined ? v.isActive : true,
+//     sizes:
+//       v.sizes?.length > 0
+//         ? v.sizes.map((s) => ({
+//             localId: nextLocalId(),
+//             size: s.size || "",
+//             stockQuantity: s.stockQuantity ?? "",
+//             isActive: s.isActive !== undefined ? s.isActive : true,
+//           }))
+//         : [emptySize()],
+//     existingMedia: v.media || [],
+//      // NEW: Thumbnail and deletion fields
+//       thumbnailId: v.thumbnailId || media[0]?._id || null,
+//       thumbnailPendingIndex: null,
+//       removedMediaIds: [],
+      
+//     pendingFiles: [],
+//     pendingPreviews: [],
+//     details: v.details?.length > 0
+//       ? v.details.map((d) => ({
+//           localId: nextLocalId(),
+//           key: d.key || "",
+//           value: d.value || "",
+//         }))
+//       : [],
+//   }));
+// };
+
+
 const variantsFromProduct = (product) => {
   if (!product?.variants?.length) return [emptyVariant()];
 
-  return product.variants.map((v) => ({
-    localId: nextLocalId(),
-    color: v.color || "",
-    fabric: v.fabric || "",
-    feel: v.feel || "",
-    lining: v.lining || "",
-    sleeves: v.sleeves || "",
-    finishing: v.finishing || "",
-    pocket: v.pocket || "",
-    price: v.price ?? "",
-    discountPrice: v.discountPrice ?? "",
-    offerType: v.offer?.type || "none",
-    offerValue: v.offer?.value ?? "",
-    offerStartDate: v.offer?.startDate ? v.offer.startDate.substring(0, 10) : "",
-    offerEndDate: v.offer?.endDate ? v.offer.endDate.substring(0, 10) : "",
-    isActive: v.isActive !== undefined ? v.isActive : true,
-    sizes:
-      v.sizes?.length > 0
-        ? v.sizes.map((s) => ({
-            localId: nextLocalId(),
-            size: s.size || "",
-            stockQuantity: s.stockQuantity ?? "",
-            isActive: s.isActive !== undefined ? s.isActive : true,
-          }))
-        : [emptySize()],
-    existingMedia: v.media || [],
-    pendingFiles: [],
-    pendingPreviews: [],
-    details: v.details?.length > 0
-      ? v.details.map((d) => ({
-          localId: nextLocalId(),
-          key: d.key || "",
-          value: d.value || "",
-        }))
-      : [],
-  }));
+  return product.variants.map((v) => {
+    const media = v.media || [];
+
+    return {
+      localId: nextLocalId(),
+      color: v.color || "",
+      fabric: v.fabric || "",
+      feel: v.feel || "",
+      lining: v.lining || "",
+      sleeves: v.sleeves || "",
+      finishing: v.finishing || "",
+      pocket: v.pocket || "",
+      price: v.price ?? "",
+      discountPrice: v.discountPrice ?? "",
+
+      offerType: v.offer?.type || "none",
+      offerValue: v.offer?.value ?? "",
+      offerStartDate: v.offer?.startDate
+        ? v.offer.startDate.substring(0, 10)
+        : "",
+      offerEndDate: v.offer?.endDate
+        ? v.offer.endDate.substring(0, 10)
+        : "",
+
+      isActive: v.isActive !== undefined ? v.isActive : true,
+
+      sizes:
+        v.sizes?.length > 0
+          ? v.sizes.map((s) => ({
+              localId: nextLocalId(),
+              size: s.size || "",
+              stockQuantity: s.stockQuantity ?? "",
+              isActive:
+                s.isActive !== undefined ? s.isActive : true,
+            }))
+          : [emptySize()],
+
+      // Existing media from backend
+      existingMedia: media,
+
+      // NEW: Thumbnail and deletion fields
+      thumbnailId: v.thumbnailId || media[0]?._id || null,
+      thumbnailPendingIndex: null,
+      removedMediaIds: [],
+
+      // Newly selected media
+      pendingFiles: [],
+      pendingPreviews: [],
+
+      details:
+        v.details?.length > 0
+          ? v.details.map((d) => ({
+              localId: nextLocalId(),
+              key: d.key || "",
+              value: d.value || "",
+            }))
+          : [],
+    };
+  });
 };
+
 
 const ProductForm = ({ product, onClose, onSuccess }) => {
   const [categoryId, setCategoryId] = useState(product?.categoryId?._id || product?.categoryId || "");
@@ -108,7 +184,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
   const [about, setAbout] = useState(product?.description?.about || "");
   const [itemDetails, setItemDetails] = useState(product?.description?.itemDetails || "");
   const [isActive, setIsActive] = useState(product?.isActive !== undefined ? product.isActive : true);
-
+console.log("ProductForm initialized with product:", product);
   const [variants, setVariants] = useState(variantsFromProduct(product));
 
   const [categories, setCategories] = useState([]);
@@ -188,27 +264,120 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
     );
   };
 
-  const handleVariantMediaChange = (variantIndex, e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+  // const handleVariantMediaChange = (variantIndex, e) => {
+  //   const files = Array.from(e.target.files);
+  //   if (files.length === 0) return;
 
-    setVariants((prev) =>
-      prev.map((v, i) =>
-        i === variantIndex
-          ? {
-              ...v,
-              pendingFiles: files,
-              pendingPreviews: files.map((file) => URL.createObjectURL(file)),
-            }
-          : v
-      )
-    );
-  };
+  //   setVariants((prev) =>
+  //     prev.map((v, i) =>
+  //       i === variantIndex
+  //         ? {
+  //             ...v,
+  //             pendingFiles: files,
+  //             pendingPreviews: files.map((file) => URL.createObjectURL(file)),
+  //           }
+  //         : v
+  //     )
+  //   );
+  // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  
+const handleVariantMediaChange = (variantIndex, e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
 
+  setVariants((prev) =>
+    prev.map((v, i) => {
+      if (i !== variantIndex) return v;
+
+      return {
+        ...v,
+        pendingFiles: [...(v.pendingFiles || []), ...files],
+        pendingPreviews: [
+          ...(v.pendingPreviews || []),
+          ...files.map((file) => URL.createObjectURL(file)),
+        ],
+      };
+    })
+  );
+
+  // Allow selecting the same file again
+  e.target.value = "";
+};
+
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setSubmitting(true);
+
+  //   const variantsPayload = variants.map((v) => ({
+  //     color: v.color,
+  //     fabric: v.fabric,
+  //     feel: v.feel,
+  //     lining: v.lining,
+  //     sleeves: v.sleeves,
+  //     finishing: v.finishing,
+  //     pocket: v.pocket,
+  //     price: v.price === "" ? 0 : Number(v.price),
+  //     discountPrice: v.discountPrice === "" ? null : Number(v.discountPrice),
+  //     offer: {
+  //       type: v.offerType,
+  //       value: v.offerValue === "" ? 0 : Number(v.offerValue),
+  //       startDate: v.offerStartDate || null,
+  //       endDate: v.offerEndDate || null,
+  //     },
+  //     isActive: v.isActive,
+  //     sizes: v.sizes
+  //       .filter((s) => s.size)
+  //       .map((s) => ({
+  //         size: s.size,
+  //         stockQuantity: s.stockQuantity === "" ? 0 : Number(s.stockQuantity),
+  //         isActive: s.isActive,
+  //       })),
+  //     media: v.existingMedia,
+  //     details: (v.details || []).filter((d) => d.key && d.value).map((d) => ({
+  //       key: d.key,
+  //       value: d.value,
+  //     })),
+  //   }));
+
+  //   const formData = new FormData();
+  //   if (categoryId) formData.append("categoryId", categoryId);
+  //   if (brandId) formData.append("brandId", brandId);
+  //   formData.append("name", name);
+  //   formData.append("description", JSON.stringify({ about, itemDetails }));
+  //   formData.append("variants", JSON.stringify(variantsPayload));
+  //   formData.append("isActive", isActive);
+
+  //   // Append pending files directly to Multipart Form under 'media'
+  //   variants.forEach((v) => {
+  //     if (v.pendingFiles && v.pendingFiles.length > 0) {
+  //       v.pendingFiles.forEach((file) => {
+  //         formData.append("media", file);
+  //       });
+  //     }
+  //   });
+
+  //   try {
+  //     if (product?._id) {
+  //       await updateProduct(product._id, formData);
+  //     } else {
+  //       await createProduct(formData);
+  //     }
+  //     onSuccess();
+  //   } catch (err) {
+  //     alert(err.response?.data?.message || "Failed to save product.");
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
+  
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
+
+  try {
     const variantsPayload = variants.map((v) => ({
       color: v.color,
       fabric: v.fabric,
@@ -217,8 +386,11 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
       sleeves: v.sleeves,
       finishing: v.finishing,
       pocket: v.pocket,
+
       price: v.price === "" ? 0 : Number(v.price),
-      discountPrice: v.discountPrice === "" ? null : Number(v.discountPrice),
+      discountPrice:
+        v.discountPrice === "" ? null : Number(v.discountPrice),
+
       offer: {
         type: v.offerType,
         value: v.offerValue === "" ? 0 : Number(v.offerValue),
@@ -230,46 +402,70 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
         .filter((s) => s.size)
         .map((s) => ({
           size: s.size,
-          stockQuantity: s.stockQuantity === "" ? 0 : Number(s.stockQuantity),
+          stockQuantity:
+            s.stockQuantity === "" ? 0 : Number(s.stockQuantity),
           isActive: s.isActive,
         })),
+
+      // Existing media retained in the form
       media: v.existingMedia,
-      details: (v.details || []).filter((d) => d.key && d.value).map((d) => ({
-        key: d.key,
-        value: d.value,
-      })),
+
+      // Thumbnail selection
+      thumbnailId: v.thumbnailId || null,
+      thumbnailPendingIndex:  v.thumbnailPendingIndex ?? null,
+
+      // Existing media requested for deletion
+      removedMediaIds: v.removedMediaIds || [],
+
+      details: (v.details || [])
+        .filter((d) => d.key && d.value)
+        .map((d) => ({
+          key: d.key,
+          value: d.value,
+        })),
     }));
 
     const formData = new FormData();
     if (categoryId) formData.append("categoryId", categoryId);
     if (brandId) formData.append("brandId", brandId);
     formData.append("name", name);
-    formData.append("description", JSON.stringify({ about, itemDetails }));
+    formData.append(
+      "description",
+      JSON.stringify({ about, itemDetails })
+    );
     formData.append("variants", JSON.stringify(variantsPayload));
-    formData.append("isActive", isActive);
+    formData.append("isActive", String(isActive));
 
-    // Append pending files directly to Multipart Form under 'media'
-    variants.forEach((v) => {
-      if (v.pendingFiles && v.pendingFiles.length > 0) {
-        v.pendingFiles.forEach((file) => {
-          formData.append("media", file);
-        });
-      }
+    // Upload new files in the same order as pendingFiles.
+    // The backend must use this order to resolve thumbnailPendingIndex.
+    variants.forEach((v, variantIndex) => {
+      (v.pendingFiles || []).forEach((file) => {
+        formData.append("media", file);
+
+        // Optional metadata identifying the uploaded file's variant.
+        // The backend must explicitly support this field if used.
+        formData.append(
+          "mediaVariantIndex",
+          String(variantIndex)
+        );
+      });
     });
 
-    try {
-      if (product?._id) {
-        await updateProduct(product._id, formData);
-      } else {
-        await createProduct(formData);
-      }
-      onSuccess();
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to save product.");
-    } finally {
-      setSubmitting(false);
+    if (product?._id) {
+      await updateProduct(product._id, formData);
+    } else {
+      await createProduct(formData);
     }
-  };
+
+    onSuccess();
+  } catch (err) {
+    console.error("Product save failed:", err);
+    alert(err.response?.data?.message || "Failed to save product.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const addDetail = (vIndex) => {
   setVariants((prev) =>
@@ -323,6 +519,73 @@ const removeDetail = (vIndex, dIndex) => {
           }
         : variant
     )
+  );
+};
+
+const removeExistingMedia = (variantIndex, mediaIndex) => {
+  setVariants((prev) =>
+    prev.map((variant, index) => {
+      if (index !== variantIndex) return variant;
+
+      const media = variant.existingMedia[mediaIndex];
+      if (!media) return variant;
+
+      const existingMedia = variant.existingMedia.filter(
+        (_, i) => i !== mediaIndex
+      );
+
+      const removedMediaIds = media._id
+        ? [...(variant.removedMediaIds || []), media._id]
+        : variant.removedMediaIds || [];
+
+      let thumbnailId = variant.thumbnailId;
+      let thumbnailPendingIndex = variant.thumbnailPendingIndex;
+
+      if (thumbnailId === media._id) {
+        thumbnailId = existingMedia[0]?._id || null;
+        thumbnailPendingIndex = null;
+      }
+
+      return {
+        ...variant,
+        existingMedia,
+        removedMediaIds,
+        thumbnailId,
+        thumbnailPendingIndex,
+      };
+    })
+  );
+};
+
+const removePendingMedia = (variantIndex, mediaIndex) => {
+  setVariants((prev) =>
+    prev.map((variant, index) => {
+      if (index !== variantIndex) return variant;
+
+      const pendingMedia = [...(variant.pendingMedia || [])];
+      const pendingPreviews = [...(variant.pendingPreviews || [])];
+
+      pendingMedia.splice(mediaIndex, 1);
+      pendingPreviews.splice(mediaIndex, 1);
+
+      let thumbnailPendingIndex = variant.thumbnailPendingIndex;
+
+      if (thumbnailPendingIndex === mediaIndex) {
+        thumbnailPendingIndex = null;
+      } else if (
+        thumbnailPendingIndex !== null &&
+        thumbnailPendingIndex > mediaIndex
+      ) {
+        thumbnailPendingIndex -= 1;
+      }
+
+      return {
+        ...variant,
+        pendingMedia,
+        pendingPreviews,
+        thumbnailPendingIndex,
+      };
+    })
   );
 };
 
@@ -684,7 +947,7 @@ const removeDetail = (vIndex, dIndex) => {
                     </div>
 
                     {/* MEDIA */}
-                    <div className="prod-form-group">
+                    {/* <div className="prod-form-group">
                       <label>
                         Media for {variant.color || `Color ${vIndex + 1}`}{" "}
                         {product && "(adds to this color's existing media)"}
@@ -710,6 +973,188 @@ const removeDetail = (vIndex, dIndex) => {
                             ))}
                           </div>
                         )}
+                        <label className="prod-form-file-label">
+                          Choose Images / Videos
+                          <input
+                            type="file"
+                            accept="image/*,video/*"
+                            multiple
+                            onChange={(e) => handleVariantMediaChange(vIndex, e)}
+                            hidden
+                          />
+                        </label>
+                      </div>
+                    </div> */}
+                    
+                    {/* MEDIA */}
+                    <div className="prod-form-group">
+                      <label>
+                        Media for {variant.color || `Color ${vIndex + 1}`}
+                      </label>
+
+                      <div className="prod-form-image-upload">
+                        {(variant.existingMedia.length > 0 ||
+                          variant.pendingPreviews.length > 0) && (
+                          <div className="prod-form-image-preview-list">
+                            {/* EXISTING MEDIA */}
+                            {variant.existingMedia.map((media, mi) => {
+                              const isThumbnail =
+                                variant.thumbnailId === media._id ||
+                                (!variant.thumbnailId && mi === 0);
+
+                              return (
+                                <div
+                                  className={`prod-media-item ${
+                                    isThumbnail ? "is-thumbnail" : ""
+                                  }`}
+                                  key={media._id || `existing-${mi}`}
+                                >
+                                  {media.type === "video" ? (
+                                    <video
+                                      src={getImageUrl(media.imageURL)}
+                                      className="prod-form-image-preview"
+                                      controls
+                                    />
+                                  ) : (
+                                    <img
+                                      src={getImageUrl(media.imageURL)}
+                                      alt={`${variant.color} media ${mi + 1}`}
+                                      className="prod-form-image-preview"
+                                    />
+                                  )}
+
+                                  {isThumbnail && (
+                                    <span className="prod-thumbnail-badge">
+                                      Thumbnail
+                                    </span>
+                                  )}
+
+                                  {/* <button
+                                    type="button"
+                                    className="prod-media-thumbnail-btn"
+                                    onClick={() =>
+                                      updateVariantField(
+                                        vIndex,
+                                        "thumbnailId",
+                                        media._id
+                                      )
+                                    }
+                                    title="Set as main thumbnail"
+                                  >
+                                    Set thumbnail
+                                  </button> */}
+
+                                  {/* <button
+                                    type="button"
+                                    className="prod-media-thumbnail-btn"
+                                    onClick={() => {
+                                      updateVariantField(vIndex, "thumbnailId", null);
+                                      updateVariantField(vIndex, "thumbnailPendingIndex", pi);
+                                    }}
+                                    title="Set as main thumbnail"
+                                  >
+                                    {isThumbnail ? "Main Thumbnail ✓" : "Set thumbnail"}
+                                  </button> */}
+
+                                  
+                                  <button
+                                    type="button"
+                                    className="prod-media-thumbnail-btn"
+                                    onClick={() => {
+                                      updateVariantField(
+                                        vIndex,
+                                        "thumbnailId",
+                                        media._id
+                                      );
+
+                                      updateVariantField(
+                                        vIndex,
+                                        "thumbnailPendingIndex",
+                                        null
+                                      );
+                                    }}
+                                    title="Set as main thumbnail"
+                                  >
+                                    {isThumbnail ? "Main Thumbnail ✓" : "Set thumbnail"}
+                                  </button>
+
+
+                                  <button
+                                    type="button"
+                                    className="prod-media-delete-btn"
+                                    onClick={() => removeExistingMedia(vIndex, mi)}
+                                    aria-label="Delete media"
+                                    title="Delete media"
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              );
+                            })}
+
+                            {/* NEWLY SELECTED MEDIA */}
+                            {variant.pendingPreviews.map((src, pi) => {
+                              const isThumbnail =
+                                variant.thumbnailPendingIndex === pi &&
+                                variant.thumbnailId === null;
+
+                              return (
+                                <div
+                                  className={`prod-media-item ${
+                                    isThumbnail ? "is-thumbnail" : ""
+                                  }`}
+                                  key={`pending-${pi}`}
+                                >
+                                  {src.startsWith("blob:") || src.startsWith("data:") ? (
+                                    <img
+                                      src={src}
+                                      alt={`New media ${pi + 1}`}
+                                      className="prod-form-image-preview"
+                                    />
+                                  ) : (
+                                    <img
+                                      src={src}
+                                      alt={`New media ${pi + 1}`}
+                                      className="prod-form-image-preview"
+                                    />
+                                  )}
+
+                                  {isThumbnail && (
+                                    <span className="prod-thumbnail-badge">
+                                      Thumbnail
+                                    </span>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    className="prod-media-thumbnail-btn"
+                                    onClick={() => {
+                                      updateVariantField(vIndex, "thumbnailId", null);
+                                      updateVariantField(
+                                        vIndex,
+                                        "thumbnailPendingIndex",
+                                        pi
+                                      );
+                                    }}
+                                  >
+                                    Set thumbnail
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="prod-media-delete-btn"
+                                    onClick={() => removePendingMedia(vIndex, pi)}
+                                    aria-label="Remove selected media"
+                                    title="Remove selected media"
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
                         <label className="prod-form-file-label">
                           Choose Images / Videos
                           <input

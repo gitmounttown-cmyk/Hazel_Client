@@ -368,6 +368,10 @@ useEffect(() => {
       return variant.media.map((mediaItem) => mediaItem.imageURL);
     });
     const uniqueImages = [...new Set(images)];
+    //get media index use thumbnailId
+     const thumbnailMediaIndex = productDetails.variants.flatMap((variant) => variant.media?.map((mediaItem, index) => ({ mediaItem, index }))).find(({ mediaItem }) => mediaItem._id === productDetails.variants.find(v => v.thumbnailId)?.thumbnailId)?.index;
+     console.log("Thumbnail media for product", productDetails._id, ":", thumbnailMediaIndex);
+     setActiveThumb(thumbnailMediaIndex ?? 0);
     setVariantMedia(uniqueImages);
   }, [productDetails]);
 
@@ -672,7 +676,8 @@ useEffect(() => {
       },
     });
   };
-
+// console.log("variantMedia Details:", variantMedia);
+// console.log('activeThumb:', activeThumb);
   return (
     <div className="pp">
       <Loader show={loadingAPI} />

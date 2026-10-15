@@ -148,14 +148,15 @@ function useShopData() {
 
         const response = await API.get(`/products/all?${params.toString()}`);
         const rawData = response.data?.data || response.data?.products || [];
-        
-        const totalCount = response.data?.total || response.data?.totalProducts || rawData.length;
+        // Filter active products only
+        const activeProducts = Array.isArray(rawData) ? rawData.filter((p) => p.isActive) : [];
+        const totalCount = response.data?.total || response.data?.totalProducts || activeProducts.length;
         setTotal(totalCount);
 
-        const formatted = rawData.map((item, idx) => {
+        const formatted = activeProducts.map((item, idx) => {
           const firstVariant = item.variants?.[0] || {};
-          const rawImage =
-            firstVariant.media?.[0]?.imageURL || firstVariant.images?.[0] || "";
+          const tumbNailVariant = item.variants?.find((v) => v.thumbnailId) || firstVariant;
+          const rawImage = tumbNailVariant.media?.find((m) => m._id === tumbNailVariant.thumbnailId)?.imageURL || tumbNailVariant.media?.[0]?.imageURL || "";
           const imageUrl = rawImage.startsWith("http")
             ? rawImage
             : `${BACKEND_BASE_URL}${rawImage}`;

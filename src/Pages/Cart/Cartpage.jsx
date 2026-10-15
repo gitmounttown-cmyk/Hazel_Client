@@ -81,13 +81,21 @@ function CartItemRow({ item, onDecrease, onIncrease, onRemove, loadingItem, getC
     item.productName || product.name || product.productName || "Product";
 
   const productMedia = product?.variants?.filter((variant) => variant.media && variant.media.length > 0);
+  // console.log("Product media for item:", productMedia);
+  const thumbnailId = product?.variants?.find((v) => v.thumbnailId)?.thumbnailId;
+  // console.log("Thumbnail ID for product:", thumbnailId);
+   let thumbnailMedia = null;
+  if(thumbnailId) {
+//find media item with thumbnailId in productMedia
+  thumbnailMedia = productMedia?.flatMap((variant) => variant.media || []).find((mediaItem) => mediaItem._id === thumbnailId);
+  // console.log("Thumbnail media for product:", thumbnailMedia);
+  }
   const productImage =
     item.image ||
     product.image ||
     product.productImage ||
-    product.images?.[0] ||
-    productMedia?.[0]?.media?.[0]?.imageURL ||
-    "";
+    product.images?.[0] || thumbnailMedia? thumbnailMedia.imageURL : "" ;
+
   const size = item.size || item.variant?.size || item.variant?.sizeName || "";
   const color = item.color || item.variant?.color || item.variant?.colorName || "";
 
