@@ -31,7 +31,7 @@ const navConfig = [
     icon: LayoutGrid,
     children: [
       { label: "Categories", path: "/admin/catalog/categories" },
-      { label: "Sub Categories", path: "/admin/catalog/subcategories" },
+      // { label: "Sub Categories", path: "/admin/catalog/subcategories" },
       { label: "Brands", path: "/admin/catalog/brands" },
       { label: "Product Length", path: "/admin/catalog/product-length" },
       // { label: "Neck Patterns", path: "/admin/catalog/neck-patterns" },
