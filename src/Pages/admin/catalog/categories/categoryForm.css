@@ -6,6 +6,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 16px; /* Added touch padding for viewport edges */
 }
 
 .cat-form-card {
@@ -171,4 +172,69 @@
 
 .cat-btn-secondary:hover {
   background: #faf4e2;
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets and Mobile Devices (Widths below 600px) */
+@media screen and (max-width: 600px) {
+  .cat-form-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .cat-form-header {
+    padding: 16px 18px;
+  }
+
+  .cat-form-body {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  /* Stack form rows vertically on smaller screens */
+  .cat-form-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Adjust inputs for proper zoom on iOS Safari */
+  .cat-form-group input,
+  .cat-form-group textarea,
+  .cat-form-group select {
+    font-size: 16px;
+  }
+
+  /* Make file button fill available space */
+  .cat-form-file-label {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Full-width action buttons for small screens */
+  .cat-form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .cat-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Very Small Mobile Screens (Widths below 380px) */
+@media screen and (max-width: 380px) {
+  .cat-form-overlay {
+    padding: 8px;
+  }
+
+  .cat-form-image-upload {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

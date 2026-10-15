@@ -6,6 +6,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 16px; /* Spacing from screen edges on small viewports */
 }
 
 .brand-form-card {
@@ -171,4 +172,69 @@
 
 .brand-btn-secondary:hover {
   background: #faf4e2;
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets and Mobile Devices (Widths below 600px) */
+@media screen and (max-width: 600px) {
+  .brand-form-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .brand-form-header {
+    padding: 16px 18px;
+  }
+
+  .brand-form-body {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  /* Stack horizontal form rows into a vertical column */
+  .brand-form-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Set input font-size to 16px to prevent unwanted automatic zoom on iOS Safari */
+  .brand-form-group input,
+  .brand-form-group textarea,
+  .brand-form-group select {
+    font-size: 16px;
+  }
+
+  /* Make file trigger button span full width */
+  .brand-form-file-label {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Full-width action buttons stacked vertically (Primary action on top) */
+  .brand-form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .brand-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Extra Small Mobile Screens (Widths below 380px) */
+@media screen and (max-width: 380px) {
+  .brand-form-overlay {
+    padding: 8px;
+  }
+
+  .brand-form-image-upload {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -16,6 +16,7 @@
   padding: 0 28px;
   background: var(--hz-maroon);
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 /* --- Search --- */
@@ -29,6 +30,7 @@
   border: 1px solid rgba(41, 38, 38, 0.15);
   border-radius: 10px;
   padding: 10px 16px;
+  transition: all 0.2s ease;
 }
 
 .hz-header__search-icon {
@@ -54,6 +56,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-shrink: 0;
 }
 
 .hz-header__icon-btn {
@@ -69,6 +72,7 @@
   color: var(--hz-text-muted);
   cursor: pointer;
   transition: background 0.15s ease;
+  flex-shrink: 0;
 }
 
 .hz-header__icon-btn:hover {
@@ -106,6 +110,7 @@
   border: none;
   cursor: pointer;
   padding: 4px;
+  border-radius: 8px;
 }
 
 .hz-header__avatar {
@@ -139,16 +144,19 @@
   color: #292626;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .hz-header__profile-role {
   color: var(--hz-text-muted);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .hz-header__chevron {
   color: var(--hz-text-muted);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .hz-header__chevron--open {
@@ -186,12 +194,97 @@
   color: #b3261e;
 }
 
-/* --- Responsive --- */
+/* ==========================================================================
+   Responsive Breakpoints (Tablets, Mobiles, and Small Screens)
+   ========================================================================== */
+
+/* --- Tablets & Small Laptops (<= 1024px) --- */
+@media (max-width: 1024px) {
+  .hz-header {
+    padding: 0 20px;
+    gap: 16px;
+  }
+
+  .hz-header__search {
+    max-width: 300px;
+  }
+}
+
+/* --- Medium Tablets / iPad Portrait (<= 768px) --- */
 @media (max-width: 768px) {
+  .hz-header {
+    height: 68px;
+    padding: 0 16px;
+    gap: 12px;
+  }
+
   .hz-header__search {
     max-width: 220px;
+    padding: 8px 12px;
+    margin-left: auto;
   }
+
+  /* Hide role on tablets to save space */
+  .hz-header__profile-role {
+    display: none;
+  }
+
+  .hz-header__actions {
+    gap: 10px;
+  }
+}
+
+/* --- Mobile Devices (<= 576px) --- */
+@media (max-width: 576px) {
+  .hz-header {
+    height: 62px;
+    padding: 0 12px;
+  }
+
+  /* Hide admin name on smaller mobile screens, showing avatar only */
   .hz-header__profile-text {
     display: none;
+  }
+
+  .hz-header__search {
+    padding: 8px 10px;
+    margin-left: auto;
+  }
+
+  .hz-header__search-input {
+    font-size: 13px;
+  }
+
+  .hz-header__icon-btn,
+  .hz-header__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hz-header__icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .hz-header__badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+}
+
+/* --- Extra Small Mobile Screens (<= 400px) --- */
+@media (max-width: 400px) {
+  .hz-header__chevron {
+    display: none; /* Hide chevron to conserve space */
+  }
+
+  .hz-header__search-input::placeholder {
+    color: transparent; /* Shrink search placeholder on tiny screens */
+  }
+
+  .hz-header__search {
+    min-width: 40px;
+    margin-left: 50px;
   }
 }

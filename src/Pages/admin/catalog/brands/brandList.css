@@ -187,3 +187,67 @@
   padding: 30px;
   color: #666155;
 }
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* Tablets and Medium Viewports (Widths below 768px) */
+@media screen and (max-width: 768px) {
+  .brand-page {
+    padding: 16px;
+  }
+
+  /* Enables smooth horizontal scrolling for tabular data without breaking card layout */
+  .brand-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .brand-table {
+    min-width: 600px; /* Prevents columns from compressing unnaturally */
+  }
+
+  .brand-table thead th,
+  .brand-table tbody td {
+    padding: 12px 14px;
+  }
+
+  .brand-desc {
+    max-width: 200px;
+  }
+}
+
+/* Mobile Devices (Widths below 576px) */
+@media screen and (max-width: 576px) {
+  .brand-page {
+    padding: 12px;
+  }
+
+  /* Stacks page title and action button vertically */
+  .brand-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .brand-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .brand-table thead th,
+  .brand-table tbody td {
+    padding: 10px 12px;
+  }
+
+  .brand-thumb {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-desc {
+    max-width: 150px;
+  }
+}
