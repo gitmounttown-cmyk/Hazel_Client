@@ -21,7 +21,7 @@ import {
   removeCartItem,
 } from "../../services/cartService";
 
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 import { createAddress, getAddresses } from "../../Services/addressService";
 
@@ -1329,7 +1329,7 @@ console.log("Cleaned address data:", cleaned);
           </p>
 
           <p className="summary__terms">
-            By placing this order, you agree to our <a href="/terms">Terms &amp; Conditions</a> and <a href="/privacy">Privacy Policy</a>.
+            By placing this order, you agree to our <a onClick={() => navigate("/terms-of-condition")}>Terms &amp; Conditions</a> and <a onClick={() => navigate("/privacy-policy")}>Privacy Policy</a>.
           </p>
         </aside>
       </div>

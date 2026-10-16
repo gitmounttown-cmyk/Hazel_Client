@@ -8,7 +8,7 @@ import {
   removeWishlistItem,
   getWishlist
 } from "../../Services/wishlistService";
-import { addToCart } from "../../Services/cartService";
+import { addToCart, getCart } from "../../Services/cartService";
 import { isUserLoggedIn } from "../../utils/auth"; 
 import toast from "react-hot-toast";
 import { getGuestId } from "../../helpers/guestId";
@@ -18,6 +18,7 @@ const TrendingProducts = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [wishlistStatus, setWishlistStatus] = useState({});
   const [wishlistLoading, setWishlistLoading] = useState({});
+  const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
 
   const sliderRef = useRef(null);
@@ -59,8 +60,20 @@ const TrendingProducts = () => {
   }
 };
 
+// Fetch all cart items
+const fetchAllCartItems = async () => {
+  try {
+    const response = await getCart();
+    // console.log("Fetched cart items:", response);
+    setCartItems(response?.cart?.items || []);
+  } catch (error) {
+    console.error("Error fetching cart items:", error);
+  }
+}
+
 useEffect(() => {
   fetchAllWishlist();
+  fetchAllCartItems();
 }, []);
 
   useEffect(() => {
@@ -211,13 +224,21 @@ useEffect(() => {
   };
 
   const handleAddToCart = async (e, product) => {
+    // console.log("Attempting to add product to cart:", product);
     e.stopPropagation();
-    if (!isUserLoggedIn()) {
-      toast.error("Please log in to add items to your cart.");
-      navigate("/login");
+    // if (!isUserLoggedIn()) {
+    //   toast.error("Please log in to add items to your cart.");
+    //   navigate("/login");
+    //   return;
+    // }
+    // console.log("Cart items:", cartItems);
+const isAlreadyInCart = cartItems.some((item) => item?.product?._id === product.id);
+// console.log("isAlreadyInCart:", isAlreadyInCart);
+    if (isAlreadyInCart) {
+      toast.success("Product is already in the cart.");
+      navigate("/cartpage");
       return;
     }
-
     try {
       const cartItem = {
         productId: product.id,
@@ -227,9 +248,10 @@ useEffect(() => {
       };
 
       const response = await addToCart(cartItem);
+      // console.log("Add to cart response:", response);
       if (response?.success !== false) {
         toast.success("Product added to cart!");
-        // navigate("/cartpage");
+        navigate("/cartpage");
       } else {
         toast.error(response?.message || "Failed to add item to cart.");
       }

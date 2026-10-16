@@ -59,7 +59,13 @@ export const getCart = async () => {
 
 export const updateCartItem = async (data) => {
   try {
-    const response = await axiosInstance.put("/cart/update", data);
+    const { isGuest, guestId } = getWishlistOwner();
+
+    const requestData = {
+      ...data,
+      ...(isGuest && { guestId }),
+    };
+    const response = await axiosInstance.put("/cart/update", requestData);
     return response.data;
   } catch (error) {
     console.error("Error updating cart item:", error);
