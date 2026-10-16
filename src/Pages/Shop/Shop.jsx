@@ -73,7 +73,7 @@ function useShopData() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialSubCat = searchParams.get("subCategoryId");
-  const initialCategory = searchParams.get("category");
+  const initialCategory = searchParams.get("categoryId");
 
   const [stagedFilters, setStagedFilters] = useState(() => {
     const initial = {};
@@ -100,7 +100,7 @@ function useShopData() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const subCat = params.get("subCategoryId");
-    const cat = params.get("category");
+    const cat = params.get("categoryId");
 
     const newFilters = {
       subCategoryId: subCat ? [subCat] : undefined,

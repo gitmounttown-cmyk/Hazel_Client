@@ -9,6 +9,7 @@ const VideoForm = ({
   editingVideo,
   onSuccess,
   onCancel,
+  categories
 }) => {
     console.log("editingVideo in VideoForm:", editingVideo); // Debugging line
   const [title, setTitle] = useState("");
@@ -16,6 +17,8 @@ const VideoForm = ({
   const [price, setPrice] = useState("");
 
   const [video, setVideo] = useState(null);
+
+  const [categoryId, setCategoryId] = useState("");
 
   const [preview, setPreview] = useState("");
 
@@ -36,6 +39,8 @@ const VideoForm = ({
 
       setPrice(editingVideo.price || "");
 
+      setCategoryId(editingVideo.categoryId || "");
+
       setVideo(null);
 
       if (editingVideo.videoUrl) {
@@ -46,6 +51,7 @@ const VideoForm = ({
     } else {
       setTitle("");
       setPrice("");
+      setCategoryId("");
       setVideo(null);
       setPreview("");
     }
@@ -137,6 +143,11 @@ const VideoForm = ({
         price
       );
 
+      formData.append(
+        "categoryId",
+        categoryId
+      );
+
       // MUST be "video"
       if (video) {
         formData.append(
@@ -201,6 +212,26 @@ const VideoForm = ({
       )}
 
       {/* TITLE */}
+      <div className="video-form-group">
+
+        <label>
+          Category
+        </label>
+
+        <select
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+        >
+          <option value="">Select a category</option>
+          {categories.map((category) => (
+            <option key={category._id} value={category._id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+
+      </div>
+
       <div className="video-form-group">
 
         <label>
