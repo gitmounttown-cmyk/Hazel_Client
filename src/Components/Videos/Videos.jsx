@@ -44,6 +44,7 @@ export default function ShopTheLookSection() {
               title: item.title,
               price: cleanPrice,
               videoUrl: videoSource,
+              categoryId: item.categoryId || "",
             };
           });
           setLooks(formattedData);
@@ -106,7 +107,7 @@ export default function ShopTheLookSection() {
 
         <div className="looks-container" ref={containerRef}>
           {looks.map((item) => (
-            <div key={item._id} className="look-card" onClick={() => navigate("/shop")}
+            <div key={item._id} className="look-card" onClick={() => navigate("/shop?categoryId=" + item.categoryId)}
       style={{ cursor: "pointer" }}>
               <video 
                 src={item.videoUrl} 
@@ -119,7 +120,7 @@ export default function ShopTheLookSection() {
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>
-                <p className="look-price">₹ {formatCurrency(item.price)}</p>
+                {/* <p className="look-price">₹ {formatCurrency(item.price)}</p> */}
 
 
               </div>

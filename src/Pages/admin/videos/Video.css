@@ -232,6 +232,19 @@
   color: #666155;
 }
 
+/* add css for select dropdown for category selection */
+.video-form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #faf4e2;
+  border-radius: 6px;
+  background: #fcfbf8;
+  color: #292626;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
 /* ==========================================================================
    RESPONSIVE MEDIA QUERIES
    ========================================================================== */

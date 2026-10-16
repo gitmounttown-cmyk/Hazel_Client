@@ -4,6 +4,7 @@ import {
   getVideos,
   deleteVideo,
 } from "../../../Services/videoService";
+import { getCategories } from "../../../Services/categoryService";
 
 import VideoForm from "./VideoForm";
 
@@ -21,6 +22,7 @@ const Video = () => {
   const [error, setError] = useState("");
 
   const [showForm, setShowForm] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   const API_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
@@ -50,8 +52,24 @@ const Video = () => {
     }
   };
 
+  // ==========================================
+  // Fetch categories (if needed for future use)
+  // ==========================================
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories();
+      console.log("Fetched categories:", response);
+      if (response.data.success) {
+        setCategories(response.data.data || []);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchVideos();
+    fetchCategories();
   }, []);
 
   // ==========================================
@@ -181,6 +199,7 @@ const Video = () => {
               editingVideo={editingVideo}
               onSuccess={handleFormSuccess}
               onCancel={handleCancel}
+              categories={categories}
             />
 
           </div>
