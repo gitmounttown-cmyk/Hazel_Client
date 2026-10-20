@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { getProducts, deleteProduct } from "../../../../services/productService";
 import ProductForm from "./ProductForm";
 import "./productList.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../../context/AdminSearchContext";
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "";
@@ -35,52 +37,130 @@ const ProductList = () => {
   
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const { searchQuery } = useAdminSearch();
+  useEffect(() => {
+  setPage(1);
+}, [searchQuery]);
+
+const filteredProducts = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering products with query:", query);
+  if (!query) return products;
+
+  return products.filter((product) => {
+    const name = product.name || product.productName || "";
+
+    const brand =
+      typeof product.brand === "object"
+        ? product.brand?.name || ""
+        : product.brand || "";
+
+    const colors = (product.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brand, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [products, searchQuery]);
+
+  // useEffect(() => {
+  //   let ignore = false;
+
+  //   const fetchProducts = async () => {
+  //     try {
+  //       setLoading(true);
+  //       setError(null);
+
+  //       const params = {
+  //         page: page,
+  //         limit: PAGE_SIZE,
+  //         search: searchQuery.trim(),
+  //       };
+
+  //       const res = await getProducts(params);
+
+  //       const list = res?.data?.data;
+  //       const totalPagesCount = res?.data?.pages || 1;
+  //       // filter active product only
+  //       const activeProducts = Array.isArray(list) ? list.filter((p) => p.isActive) : [];
+  //       if (!ignore) {
+  //         setProducts(activeProducts);
+  //         setTotalPages(totalPagesCount);
+  //       }
+  //     } catch (err) {
+  //       if (!ignore) {
+  //         setError(
+  //           err?.response?.data?.message ||
+  //             err?.message ||
+  //             "Failed to load products"
+  //         );
+  //         setProducts([]);
+  //       }
+  //     } finally {
+  //       if (!ignore) {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   };
+
+  //   fetchProducts();
+
+  //   return () => {
+  //     ignore = true;
+  //   };
+  // }, [page, refreshKey]);
 
   useEffect(() => {
-    let ignore = false;
+  let ignore = false;
 
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const params = {
-          page: page,
-          limit: PAGE_SIZE,
-        };
+      const params = {
+        page,
+        limit: PAGE_SIZE,
+        search: searchQuery.trim(),
+      };
 
-        const res = await getProducts(params);
+      const res = await getProducts(params);
 
-        const list = res?.data?.data;
-        const totalPagesCount = res?.data?.pages || 1;
-        // filter active product only
-        const activeProducts = Array.isArray(list) ? list.filter((p) => p.isActive) : [];
-        if (!ignore) {
-          setProducts(activeProducts);
-          setTotalPages(totalPagesCount);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setError(
-            err?.response?.data?.message ||
-              err?.message ||
-              "Failed to load products"
-          );
-          setProducts([]);
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
+      const list = res?.data?.data;
+      const totalPagesCount = res?.data?.pages || 1;
+
+      const activeProducts = Array.isArray(list)
+        ? list.filter((p) => p.isActive)
+        : [];
+
+      if (!ignore) {
+        setProducts(activeProducts);
+        setTotalPages(totalPagesCount);
       }
-    };
+    } catch (err) {
+      if (!ignore) {
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Failed to load products"
+        );
+        setProducts([]);
+      }
+    } finally {
+      if (!ignore) {
+        setLoading(false);
+      }
+    }
+  };
 
-    fetchProducts();
+  fetchProducts();
 
-    return () => {
-      ignore = true;
-    };
-  }, [page, refreshKey]); 
+  return () => {
+    ignore = true;
+  };
+}, [page, refreshKey, searchQuery]);
   
   const refresh = useCallback(() => {
     setRefreshKey((k) => k + 1);
@@ -178,14 +258,14 @@ const ProductList = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.length === 0 ? (
+                {filteredProducts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="prod-empty">
                       No products found.
                     </td>
                   </tr>
                 ) : (
-                  products.map((product, index) => {
+                  filteredProducts.map((product, index) => {
                     const thumbnail = getThumbnail(product);
                     const absoluteIndex = (page - 1) * PAGE_SIZE + index + 1;
                     

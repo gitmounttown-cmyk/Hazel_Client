@@ -5,6 +5,8 @@ import {
 } from "../../../../services/categoryService";
 import CategoryForm from "./CategoryForm";
 import "./categoryList.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../../context/AdminSearchContext";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
@@ -15,6 +17,34 @@ const CategoryList = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // used to trigger a refetch
+  const [page, setPage] = useState(1);
+  const { searchQuery } = useAdminSearch();
+  useEffect(() => {
+  setPage(1);
+}, [searchQuery]);
+
+const filteredCategories = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering categories with query:", query);
+  if (!query) return categories;
+
+  return categories.filter((category) => {
+    const name = category.name || "";
+
+    const brand =
+      typeof category.brand === "object"
+        ? category.brand?.name || ""
+        : category.brand || "";
+
+    const colors = (category.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brand, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [categories, searchQuery]);
 
   useEffect(() => {
     let ignore = false; // guards against setting state after unmount / stale response
@@ -24,7 +54,7 @@ const CategoryList = () => {
         setLoading(true);
         setError(null);
 
-        const res = await getCategories({ page: 1, limit: 20 });
+        const res = await getCategories({ page: 1, limit: 20, search: searchQuery });
         console.log("Raw categories response:", res.data);
 
         const list = res?.data?.data;
@@ -128,14 +158,14 @@ const CategoryList = () => {
               </tr>
             </thead>
             <tbody>
-              {categories.length === 0 ? (
+              {filteredCategories.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="cat-empty">
                     No categories found.
                   </td>
                 </tr>
               ) : (
-                categories.map((cat, index) => (
+                filteredCategories.map((cat, index) => (
                   <tr key={cat._id}>
                     <td className="cat-sno">{index + 1}</td>
                     <td>

@@ -9,6 +9,8 @@ import { getCategories } from "../../../Services/categoryService";
 import VideoForm from "./VideoForm";
 
 import "./Video.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../context/AdminSearchContext";
 
 const Video = () => {
   const [videos, setVideos] = useState([]);
@@ -24,7 +26,36 @@ const Video = () => {
   const [showForm, setShowForm] = useState(false);
   const [categories, setCategories] = useState([]);
 
+  const [page, setPage] = useState(1);
+    const { searchQuery } = useAdminSearch();
+    useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
   const API_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
+
+   const filteredVideos = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+  // console.log("Filtering videos with query:", query);
+    if (!query) return videos;
+  
+    return videos.filter((video) => {
+      // console.log("Filtering video:", video);
+      const name = video.title || "";
+      const brandName =
+        typeof video.brand === "object"
+          ? video.brand?.name || ""
+          : video.brand || "";
+  
+      const colors = (video.variants || [])
+        .map((variant) => variant.color || "")
+        .join(" ");
+  
+      return [name, brandName, colors].some((value) =>
+        value.toLowerCase().includes(query)
+      );
+    });
+  }, [videos, searchQuery]);
 
   // ==========================================
   // FETCH VIDEOS
@@ -214,7 +245,7 @@ const Video = () => {
           <div className="video-loading">
             Loading videos...
           </div>
-        ) : videos.length === 0 ? (
+        ) : filteredVideos.length === 0 ? (
           <div className="video-empty">
             No videos found
           </div>
@@ -234,7 +265,7 @@ const Video = () => {
 
             <tbody>
 
-              {videos.map((video, index) => (
+              {filteredVideos.map((video, index) => (
 
                 <tr key={video._id}>
 

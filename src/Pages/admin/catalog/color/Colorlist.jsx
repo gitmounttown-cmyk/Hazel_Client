@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { getColors, deleteColor } from "../../../../services/colorService";
 import ColorForm from "./ColorForm";
 import "./colorList.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../../context/AdminSearchContext";
 
 const ColorList = () => {
   const [colors, setColors] = useState([]);
@@ -10,6 +12,34 @@ const ColorList = () => {
   const [editingColor, setEditingColor] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const { searchQuery } = useAdminSearch();
+  useEffect(() => {
+  setPage(1);
+}, [searchQuery]);
+
+const filteredColors = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering colors with query:", query);
+  if (!query) return colors;
+
+  return colors.filter((color) => {
+    const name = color.name || "";
+
+    const brandName =
+      typeof color.brand === "object"
+        ? color.brand?.name || ""
+        : color.brand || "";
+
+    const colors = (color.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brandName, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [colors, searchQuery]);
 
   useEffect(() => {
     let ignore = false;
@@ -19,7 +49,7 @@ const ColorList = () => {
         setLoading(true);
         setError(null);
 
-        const res = await getColors({ page: 1, limit: 20 });
+        const res = await getColors({ page: 1, limit: 20, search: searchQuery });
         const list = res?.data?.data;
 
         if (!ignore) {
@@ -106,14 +136,14 @@ const ColorList = () => {
               </tr>
             </thead>
             <tbody>
-              {colors.length === 0 ? (
+              {filteredColors.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="color-empty">
                     No colors found.
                   </td>
                 </tr>
               ) : (
-                colors.map((color, index) => (
+                filteredColors.map((color, index) => (
                   <tr key={color._id}>
                     <td className="color-sno">{index + 1}</td>
                     <td>

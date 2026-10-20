@@ -8,6 +8,8 @@ import {
 import AdminTrendingProductsForm from "./AdminTrendingProductsForm";
 
 import "./AdminTrendingProducts.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../context/AdminSearchContext";
 
 const AdminTrendingProducts = () => {
   const [trendingProducts, setTrendingProducts] = useState([]);
@@ -17,6 +19,38 @@ const AdminTrendingProducts = () => {
   const [showForm, setShowForm] = useState(false);
 
   const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const { searchQuery } = useAdminSearch();
+    useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+    const filteredTrendingProducts = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering trending products with query:", query);
+  if (!query) return trendingProducts;
+
+  return trendingProducts.filter((trendingProduct) => {
+    const name = (trendingProduct.products || [])
+      .map((productItem) => productItem.product?.name || "")
+      .join(" ");
+
+      console.log("Product names for filtering:", name);
+
+    const brandName =
+      typeof trendingProduct.brand === "object"
+        ? trendingProduct.brand?.name || ""
+        : trendingProduct.brand || "";
+
+    const colors = (trendingProduct.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brandName, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [trendingProducts, searchQuery]);
 
   const fetchTrendingProducts = async () => {
     try {
@@ -135,22 +169,22 @@ const AdminTrendingProducts = () => {
             <h3>Trending Product List</h3>
 
             <span>
-              {trendingProducts.length} section
-              {trendingProducts.length !== 1 ? "s" : ""}
+              {filteredTrendingProducts.length} section
+              {filteredTrendingProducts.length !== 1 ? "s" : ""}
             </span>
           </div>
 
-          {loading && trendingProducts.length === 0 ? (
+          {loading && filteredTrendingProducts.length === 0 ? (
             <div className="admin-trending-empty">
               Loading trending products...
             </div>
-          ) : trendingProducts.length === 0 ? (
+          ) : filteredTrendingProducts.length === 0 ? (
             <div className="admin-trending-empty">
               No trending products found
             </div>
           ) : (
             <div className="admin-trending-list">
-              {trendingProducts.map((trendingProduct) => (
+              {filteredTrendingProducts.map((trendingProduct) => (
                 <div className="admin-trending-card" key={trendingProduct._id}>
                   <div className="admin-trending-card-content">
                     <div className="admin-trending-card-top">

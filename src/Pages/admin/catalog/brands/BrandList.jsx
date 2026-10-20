@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { getBrands, deleteBrand } from "../../../../services/brandService";
 import BrandForm from "./BrandForm";
 import "./brandList.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../../context/AdminSearchContext";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
 
@@ -12,6 +14,34 @@ const BrandList = () => {
   const [editingBrand, setEditingBrand] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const { searchQuery } = useAdminSearch();
+  useEffect(() => {
+  setPage(1);
+}, [searchQuery]);
+
+const filteredBrands = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering brands with query:", query);
+  if (!query) return brands;
+
+  return brands.filter((brand) => {
+    const name = brand.name || "";
+
+    const brandName =
+      typeof brand.brand === "object"
+        ? brand.brand?.name || ""
+        : brand.brand || "";
+
+    const colors = (brand.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brandName, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [brands, searchQuery]);
 
   useEffect(() => {
     let ignore = false;
@@ -21,7 +51,7 @@ const BrandList = () => {
         setLoading(true);
         setError(null);
 
-        const res = await getBrands({ page: 1, limit: 20 });
+        const res = await getBrands({ page: 1, limit: 20, search: searchQuery });
         const list = res?.data?.data;
 
         if (!ignore) {
@@ -111,14 +141,14 @@ const BrandList = () => {
               </tr>
             </thead>
             <tbody>
-              {brands.length === 0 ? (
+              {filteredBrands.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="brand-empty">
                     No brands found.
                   </td>
                 </tr>
               ) : (
-                brands.map((brand, index) => (
+                filteredBrands.map((brand, index) => (
                   <tr key={brand._id}>
                     <td className="brand-sno">{index + 1}</td>
                     <td>

@@ -8,12 +8,42 @@ import {
 import AddressForm from "./AddressForm";
 
 import "./Address.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../context/AdminSearchContext";
 
 const Address = () => {
   const [addresses, setAddresses] = useState([]);
   const [editingAddress, setEditingAddress] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const { searchQuery } = useAdminSearch();
+  useEffect(() => {
+  setPage(1);
+}, [searchQuery]);
+
+const filteredAddresses = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering addresses with query:", query);
+  if (!query) return addresses;
+
+  return addresses.filter((address) => {
+    const name = address.fullName || "";
+
+    const brandName =
+      typeof address.brand === "object"
+        ? address.brand?.name || ""
+        : address.brand || "";
+
+    const colors = (address.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brandName, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [addresses, searchQuery]);
 
   const fetchAddresses = async () => {
     try {
@@ -132,18 +162,18 @@ const Address = () => {
             <h3>Address List</h3>
 
             <span>
-              {addresses.length} address
-              {addresses.length !== 1 ? "es" : ""}
+              {filteredAddresses.length} address
+              {filteredAddresses.length !== 1 ? "es" : ""}
             </span>
           </div>
 
-          {loading && addresses.length === 0 ? (
+          {loading && filteredAddresses.length === 0 ? (
             <div className="address-empty">Loading addresses...</div>
-          ) : addresses.length === 0 ? (
+          ) : filteredAddresses.length === 0 ? (
             <div className="address-empty">No addresses found</div>
           ) : (
             <div className="address-list">
-              {addresses.map((address) => (
+              {filteredAddresses.map((address) => (
                 <div className="address-list-card" key={address._id}>
                   <div className="address-list-content">
                     <div className="address-card-top">

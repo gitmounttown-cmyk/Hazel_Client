@@ -3,9 +3,11 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import "./AdminLayout.css";
+import { AdminSearchProvider } from "../../../context/AdminSearchContext";
 
 const AdminLayout = () => {
   return (
+    <AdminSearchProvider>
     <div className="hz-admin-layout">
       <Sidebar />
 
@@ -17,6 +19,7 @@ const AdminLayout = () => {
         </div>
       </div>
     </div>
+    </AdminSearchProvider>
   );
 };
 

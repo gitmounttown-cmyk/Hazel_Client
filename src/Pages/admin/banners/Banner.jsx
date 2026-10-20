@@ -3,6 +3,8 @@ import { getBanners, deleteBanner } from "../../../Services/bannerService";
 
 import BannerForm from "./BannerForm";
 import "./Banner.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../context/AdminSearchContext";
 
 const Banner = () => {
   const [banners, setBanners] = useState([]);
@@ -11,8 +13,36 @@ const Banner = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
-
+  const [page, setPage] = useState(1);
+    const { searchQuery } = useAdminSearch();
+    useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+  
   const API_BASE_URL = import.meta.env.VITE_UPLOAD_URL;
+
+  const filteredBanners = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering banners with query:", query);
+  if (!query) return banners;
+
+  return banners.filter((banner) => {
+    const name = banner.name || banner.bannerType || "";
+
+    const brandName =
+      typeof banner.brand === "object"
+        ? banner.brand?.name || ""
+        : banner.brand || "";
+
+    const colors = (banner.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brandName, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [banners, searchQuery]);
 
   const fetchBanners = async () => {
     try {
@@ -134,7 +164,7 @@ const Banner = () => {
       <div className="banner-table-card">
         {loading ? (
           <div className="banner-loading">Loading banners...</div>
-        ) : banners.length === 0 ? (
+        ) : filteredBanners.length === 0 ? (
           <div className="banner-empty">No banners found</div>
         ) : (
           <table className="banner-table">
@@ -149,7 +179,7 @@ const Banner = () => {
             </thead>
 
             <tbody>
-              {banners.map((banner, index) => (
+              {filteredBanners.map((banner, index) => (
                 <tr key={banner._id}>
                   <td className="banner-sno">{index + 1}</td>
 

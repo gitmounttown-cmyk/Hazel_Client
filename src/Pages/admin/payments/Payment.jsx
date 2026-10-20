@@ -64,7 +64,7 @@ const Payment = () => {
   };
 
   useEffect(() => {
-    fetchPayments();
+    // fetchPayments();
   }, [page, status, gateway, paymentMethod]);
 
   const handleStatusChange = async (paymentId, newStatus) => {
@@ -80,7 +80,7 @@ const Payment = () => {
           response.data.message || "Payment status updated successfully",
         );
 
-        fetchPayments();
+        // fetchPayments();
       }
     } catch (error) {
       console.error("Status Update Error:", error);
@@ -108,7 +108,7 @@ const Payment = () => {
       if (response.data.success) {
         setMessage("Payment deleted successfully");
 
-        fetchPayments();
+        // fetchPayments();
       }
     } catch (error) {
       console.error("Delete Payment Error:", error);
@@ -150,7 +150,7 @@ const Payment = () => {
     setMessage("Payment created successfully");
     setError("");
     setPage(1);
-    fetchPayments();
+    // fetchPayments();
   };
 
   const handleCancelForm = () => {
@@ -165,9 +165,9 @@ const Payment = () => {
           <p>View and manage all customer payments</p>
         </div>
         <div className="payment-header-actions">
-          <button className="payment-refresh-btn" onClick={fetchPayments}>
+          {/* <button className="payment-refresh-btn" onClick={fetchPayments}>
             Refresh
-          </button>
+          </button> */}
           <button type="button" className="payment-add-btn" onClick={handleAdd}>
             + Add Payment
           </button>

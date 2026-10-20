@@ -3,6 +3,7 @@ import { Search, Bell, ChevronDown } from "lucide-react";
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../Services/authService";
+import { useAdminSearch } from "../../../context/AdminSearchContext";
 
 const Header = ({
   adminName = "Admin",
@@ -11,6 +12,7 @@ const Header = ({
   notificationCount = 3,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { searchQuery, setSearchQuery } = useAdminSearch();
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -38,6 +40,8 @@ const Header = ({
           type="text"
           placeholder="Search here..."
           className="hz-header__search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 

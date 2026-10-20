@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { getLengths, deleteLength } from "../../../../services/lengthService";
 import LengthForm from "./LengthForm";
 import "./lengthList.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../../context/AdminSearchContext";
 
 const LengthList = () => {
   const [lengths, setLengths] = useState([]);
@@ -10,6 +12,34 @@ const LengthList = () => {
   const [editingLength, setEditingLength] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const { searchQuery } = useAdminSearch();
+  useEffect(() => {
+  setPage(1);
+}, [searchQuery]);
+
+  const filteredLengths = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase();
+// console.log("Filtering lengths with query:", query);
+  if (!query) return lengths;
+
+  return lengths.filter((length) => {
+    const name = length.name || "";
+
+    const brandName =
+      typeof length.brand === "object"
+        ? length.brand?.name || ""
+        : length.brand || "";
+
+    const colors = (length.variants || [])
+      .map((variant) => variant.color || "")
+      .join(" ");
+
+    return [name, brandName, colors].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
+}, [lengths, searchQuery]);
 
   useEffect(() => {
     let ignore = false;
@@ -19,7 +49,7 @@ const LengthList = () => {
         setLoading(true);
         setError(null);
 
-        const res = await getLengths({ page: 1, limit: 20 });
+        const res = await getLengths({ page: 1, limit: 20, search: searchQuery });
         const list = res?.data?.data;
 
         if (!ignore) {
@@ -106,14 +136,14 @@ const LengthList = () => {
               </tr>
             </thead>
             <tbody>
-              {lengths.length === 0 ? (
+              {filteredLengths.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="length-empty">
                     No product lengths found.
                   </td>
                 </tr>
               ) : (
-                lengths.map((len, index) => (
+                filteredLengths.map((len, index) => (
                   <tr key={len._id}>
                     <td className="length-sno">{index + 1}</td>
                     <td className="length-name-text">{len.name}</td>

@@ -9,6 +9,8 @@ import {
 
 import OrderForm from "./orderForm";
 import "./Order.css";
+import { useMemo } from "react";
+import { useAdminSearch } from "../../../context/AdminSearchContext";
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
@@ -49,6 +51,34 @@ const Order = () => {
 
   const [actionLoading, setActionLoading] = useState(false);
 
+    const { searchQuery } = useAdminSearch();
+    useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const filteredOrders = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+  // console.log("Filtering orders with query:", query);
+    if (!query) return orders;
+  
+    return orders.filter((order) => {
+      // console.log("Filtering order:", order);
+      const orderNumber = order.orderNumber || "";
+      const brandName =
+        typeof order.brand === "object"
+          ? order.brand?.name || ""
+          : order.brand || "";
+  
+      const colors = (order.variants || [])
+        .map((variant) => variant.color || "")
+        .join(" ");
+  
+      return [orderNumber, brandName, colors].some((value) =>
+        value.toLowerCase().includes(query)
+      );
+    });
+  }, [orders, searchQuery]);
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -57,6 +87,7 @@ const Order = () => {
       const params = {
         page,
         limit: 20,
+        search: searchQuery.trim(),
       };
 
       if (status) {
@@ -423,14 +454,14 @@ const Order = () => {
               </thead>
 
               <tbody>
-                {orders.length === 0 ? (
+                {filteredOrders.length === 0 ? (
                   <tr>
                     <td colSpan="10" className="order-empty">
                       No orders found
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order, index) => (
+                  filteredOrders.map((order, index) => (
                     <tr key={order._id}>
                       <td className="order-sno">
                         {(page - 1) * pagination.limit + index + 1}
