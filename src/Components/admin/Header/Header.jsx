@@ -5,32 +5,86 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../../Services/authService";
 import { useAdminSearch } from "../../../context/AdminSearchContext";
 
+// Sample notifications (replace with API data later)
+const SAMPLE_NOTIFICATIONS = [
+  {
+    id: 1,
+    title: "New user registered",
+    message: "Rahul Kumar just created an account.",
+    time: "2 min ago",
+    read: false,
+  },
+  {
+    id: 2,
+    title: "New order received",
+    message: "Order #1045 has been placed.",
+    time: "15 min ago",
+    read: false,
+  },
+  {
+    id: 3,
+    title: "Payment successful",
+    message: "₹2,500 received for Order #1042.",
+    time: "1 hour ago",
+    read: false,
+  },
+  {
+    id: 4,
+    title: "Server update",
+    message: "System maintenance completed successfully.",
+    time: "Yesterday",
+    read: true,
+  },
+  {
+    id: 5,
+    title: "Support ticket",
+    message: "Priya raised a new support ticket.",
+    time: "2 days ago",
+    read: true,
+  },
+];
+
 const Header = ({
   adminName = "Admin",
   adminRole = "Super Admin",
   avatarUrl,
-  notificationCount = 3,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
   const { searchQuery, setSearchQuery } = useAdminSearch();
   const menuRef = useRef(null);
+  const notifRef = useRef(null);
   const navigate = useNavigate();
 
-  // Close the profile dropdown when clicking outside of it
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const markAsRead = (id) =>
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
+
+  const markAllAsRead = () =>
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
   const handleLogout = () => {
     logout();
     navigate("/login");
-  }
+  };
 
   return (
     <header className="hz-header">
@@ -46,30 +100,70 @@ const Header = ({
       </div>
 
       <div className="hz-header__actions">
-        <button
-          type="button"
-          className="hz-header__icon-btn"
-          aria-label="Notifications"
-        >
-          <Bell size={20} />
-          {notificationCount > 0 && (
-            <span className="hz-header__badge">{notificationCount}</span>
+        {/* Notifications */}
+        <div className="hz-header__notif" ref={notifRef}>
+          <button
+            type="button"
+            className="hz-header__icon-btn"
+            aria-label="Notifications"
+            onClick={() => {
+              setNotifOpen((prev) => !prev);
+              setMenuOpen(false);
+            }}
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="hz-header__badge">{unreadCount}</span>
+            )}
+          </button>
+
+          {notifOpen && (
+            <div className="hz-header__notif-dropdown">
+              <div className="hz-header__notif-head">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <button type="button" onClick={markAllAsRead}>
+                    Mark all as read
+                  </button>
+                )}
+              </div>
+
+              <div className="hz-header__notif-list">
+                {notifications.length === 0 ? (
+                  <p className="hz-header__notif-empty">No notifications</p>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={
+                        "hz-header__notif-item" +
+                        (n.read ? "" : " hz-header__notif-item--unread")
+                      }
+                      onClick={() => markAsRead(n.id)}
+                    >
+                      <span className="hz-header__notif-dot" />
+                      <div className="hz-header__notif-body">
+                        <p className="hz-header__notif-title">{n.title}</p>
+                        <p className="hz-header__notif-msg">{n.message}</p>
+                        <span className="hz-header__notif-time">{n.time}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           )}
-        </button>
+        </div>
 
-        {/* <button
-          type="button"
-          className="hz-header__icon-btn"
-          aria-label="Settings"
-        >
-          <Settings size={20} />
-        </button> */}
-
+        {/* Profile */}
         <div className="hz-header__profile" ref={menuRef}>
           <button
             type="button"
             className="hz-header__profile-btn"
-            onClick={() => setMenuOpen((prev) => !prev)}
+            onClick={() => {
+              setMenuOpen((prev) => !prev);
+              setNotifOpen(false);
+            }}
           >
             <span className="hz-header__avatar">
               {avatarUrl ? (
@@ -100,9 +194,6 @@ const Header = ({
               >
                 My Profile
               </button>
-              {/* <button type="button" className="hz-header__dropdown-item">
-                Account Settings
-              </button> */}
               <button
                 type="button"
                 className="hz-header__dropdown-item hz-header__dropdown-item--danger"

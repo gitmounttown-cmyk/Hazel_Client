@@ -8,11 +8,66 @@ import {
   ChevronDown,
   LogOut,
   Settings,
+  Bell,
 } from "lucide-react";
 import logo from "../../assets/images/Logo.png";
 import "./Navbar.css";
 
-const Navbar = () => {
+// ============================================================
+// HELPERS (counts + notifications)
+// ============================================================
+
+// Shows 99+ for big numbers
+const formatCount = (n) => (n > 99 ? "99+" : String(n));
+
+// Reads a number from localStorage. Works if the stored value is an
+// array (uses its length) or a plain number.
+const readStoredCount = (key) => {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    if (Array.isArray(value)) return value.length;
+    return Number(value) || 0;
+  } catch (error) {
+    return 0;
+  }
+};
+
+// Sample notifications (shown until real ones are saved in localStorage).
+// Delete this array and return [] below when you connect real data.
+const SAMPLE_NOTIFICATIONS = [
+  {
+    id: 1,
+    title: "Order confirmed",
+    message: "Your order #1024 has been placed successfully.",
+    time: "2 min ago",
+    read: false,
+  },
+  {
+    id: 2,
+    title: "New arrivals are here",
+    message: "Check out the latest collection in our shop.",
+    time: "1 hour ago",
+    read: false,
+  },
+];
+
+const readStoredNotifications = () => {
+  try {
+    const raw = localStorage.getItem("hazelNotifications");
+    if (raw === null) return SAMPLE_NOTIFICATIONS;
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value : [];
+  } catch (error) {
+    return SAMPLE_NOTIFICATIONS;
+  }
+};
+
+
+const Navbar = ({
+  wishlistCount: wishlistCountProp,
+  cartCount: cartCountProp,
+  notifications: notificationsProp,
+}) => {
   const navigate = useNavigate();
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -22,10 +77,20 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // ============================================================
-  // GET LOGGED-IN USER
-  // ============================================================
+  // ---- NEW: counts + notifications state ----
+  const [storedWishlistCount, setStoredWishlistCount] = useState(0);
+  const [storedCartCount, setStoredCartCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const notificationRef = useRef(null);
 
+  const wishlistCount =
+    wishlistCountProp !== undefined ? wishlistCountProp : storedWishlistCount;
+  const cartCount =
+    cartCountProp !== undefined ? cartCountProp : storedCartCount;
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  
   useEffect(() => {
     const storedUser = localStorage.getItem("hazelUser");
 
@@ -40,9 +105,31 @@ const Navbar = () => {
     }
   }, []);
 
-  // ============================================================
-  // CLOSE USER DROPDOWN WHEN CLICKING OUTSIDE
-  // ============================================================
+  useEffect(() => {
+    const refresh = () => {
+      setStoredWishlistCount(readStoredCount("hazelWishlist"));
+      setStoredCartCount(readStoredCount("hazelCart"));
+      if (notificationsProp === undefined) {
+        setNotifications(readStoredNotifications());
+      }
+    };
+
+    refresh();
+
+    window.addEventListener("storage", refresh);
+    window.addEventListener("hazel:update", refresh);
+
+    return () => {
+      window.removeEventListener("storage", refresh);
+      window.removeEventListener("hazel:update", refresh);
+    };
+  }, [notificationsProp]);
+
+  useEffect(() => {
+    if (notificationsProp !== undefined) {
+      setNotifications(notificationsProp);
+    }
+  }, [notificationsProp]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -58,6 +145,30 @@ const Navbar = () => {
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") setIsNotificationOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
@@ -79,7 +190,38 @@ const Navbar = () => {
     }
 
     // Customer -> toggle dropdown menu
+    setIsNotificationOpen(false);
     setIsUserDropdownOpen((prev) => !prev);
+  };
+
+  // ============================================================
+  // NEW: NOTIFICATION ACTIONS
+  // ============================================================
+
+  const saveNotifications = (updated) => {
+    setNotifications(updated);
+    if (notificationsProp === undefined) {
+      try {
+        localStorage.setItem("hazelNotifications", JSON.stringify(updated));
+      } catch (error) {
+        console.error("Could not save notifications:", error);
+      }
+    }
+  };
+
+  const handleNotificationClick = () => {
+    setIsUserDropdownOpen(false);
+    setIsNotificationOpen((prev) => !prev);
+  };
+
+  const markNotificationRead = (id) => {
+    saveNotifications(
+      notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
+  };
+
+  const markAllRead = () => {
+    saveNotifications(notifications.map((n) => ({ ...n, read: true })));
   };
 
   // ============================================================
@@ -178,7 +320,7 @@ const Navbar = () => {
             onClick={closeMobileMenu}
             className={({ isActive }) => (isActive ? "active-link" : "")}
           >
-           Order Tracking
+            Order Tracking
           </NavLink>
         </li>
       </ul>
@@ -225,12 +367,101 @@ const Navbar = () => {
             />
           </form>
         </div>
-        <Link to="/wishlist">
-          <Heart className="nav-icon" title="Wishlist" />
+
+        {/* NOTIFICATION (new) */}
+        <div className="notification-wrapper" ref={notificationRef}>
+          <button
+            type="button"
+            className="notification-button"
+            onClick={handleNotificationClick}
+            aria-label={
+              unreadCount > 0
+                ? `Notifications, ${unreadCount} unread`
+                : "Notifications"
+            }
+            aria-haspopup="true"
+            aria-expanded={isNotificationOpen}
+          >
+            <span className="icon-badge-wrapper">
+              <Bell className="nav-icon" />
+              <span className="icon-badge">{formatCount(unreadCount)}</span>
+            </span>
+          </button>
+
+          {isNotificationOpen && (
+            <div
+              className="notification-dropdown"
+              role="dialog"
+              aria-label="Notifications"
+            >
+              <div className="notification-header">
+                <span className="notification-title">Notifications</span>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    className="notification-mark-all"
+                    onClick={markAllRead}
+                  >
+                    Mark all as read
+                  </button>
+                )}
+              </div>
+
+              <div className="user-dropdown-divider"></div>
+
+              {notifications.length === 0 ? (
+                <div className="notification-empty">
+                  <Bell size={26} />
+                  <p>No notifications yet</p>
+                </div>
+              ) : (
+                <ul className="notification-list">
+                  {notifications.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className={`notification-item ${
+                          item.read ? "" : "unread"
+                        }`}
+                        onClick={() => markNotificationRead(item.id)}
+                      >
+                        <span className="notification-dot"></span>
+                        <span className="notification-content">
+                          <span className="notification-item-title">
+                            {item.title}
+                          </span>
+                          {item.message && (
+                            <span className="notification-item-message">
+                              {item.message}
+                            </span>
+                          )}
+                          {item.time && (
+                            <span className="notification-item-time">
+                              {item.time}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Link to="/wishlist" aria-label="Wishlist">
+          <span className="icon-badge-wrapper">
+            <Heart className="nav-icon" title="Wishlist" />
+            <span className="icon-badge">{formatCount(wishlistCount)}</span>
+          </span>
         </Link>
 
-        <Link to="/cartpage">
-          <ShoppingBag className="nav-icon" title="Cart" />
+        <Link to="/cartpage" aria-label="Cart">
+          <span className="icon-badge-wrapper">
+            <ShoppingBag className="nav-icon" title="Cart" />
+            <span className="icon-badge">{formatCount(cartCount)}</span>
+          </span>
         </Link>
 
         {/* USER */}

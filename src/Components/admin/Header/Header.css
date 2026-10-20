@@ -10,7 +10,7 @@
   justify-content: space-between;
   gap: 24px;
   width: 100%;
-  height: 76px;
+  height: 85px;
   flex-shrink: 0;
   margin: 0;
   padding: 0 28px;
@@ -286,5 +286,260 @@
   .hz-header__search {
     min-width: 40px;
     margin-left: 50px;
+  }
+}
+
+/* =========================================
+   NOTIFICATION DROPDOWN - RESPONSIVE
+   Mobile-first: base styles are for small phones
+   ========================================= */
+
+.hz-header__notif {
+  position: relative;
+}
+
+/* ---------- Base (small phones, up to 480px) ---------- */
+.hz-header__notif-dropdown {
+  position: fixed;
+  top: calc(var(--hz-header-height, 64px) + 8px);
+  left: 8px;
+  right: 8px;
+  width: auto;
+  max-height: calc(100vh - var(--hz-header-height, 64px) - 24px);
+  max-height: calc(100dvh - var(--hz-header-height, 64px) - 24px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  animation: hz-notif-in 0.18s ease-out;
+}
+
+@keyframes hz-notif-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hz-header__notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.hz-header__notif-head button {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 12px;
+  padding: 6px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hz-header__notif-head button:hover {
+  text-decoration: underline;
+}
+
+.hz-header__notif-list {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hz-header__notif-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  min-height: 44px; /* comfortable touch target */
+  cursor: pointer;
+  border-bottom: 1px solid #f6f6f6;
+  transition: background 0.15s;
+}
+
+.hz-header__notif-item:last-child {
+  border-bottom: none;
+}
+
+.hz-header__notif-item:hover {
+  background: #f9fafb;
+}
+
+.hz-header__notif-item--unread {
+  background: #eff6ff;
+}
+
+.hz-header__notif-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.hz-header__notif-item--unread .hz-header__notif-dot {
+  background: #2563eb;
+}
+
+.hz-header__notif-body {
+  min-width: 0; /* lets long text wrap instead of overflowing */
+  flex: 1;
+}
+
+.hz-header__notif-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  overflow-wrap: anywhere;
+}
+
+.hz-header__notif-msg {
+  margin: 2px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #6b7280;
+  overflow-wrap: anywhere;
+}
+
+.hz-header__notif-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.hz-header__notif-empty {
+  padding: 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Badge stays tidy with 2-3 digit counts */
+.hz-header__badge {
+  min-width: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+}
+
+/* ---------- Large phones / small tablets (481px - 767px) ---------- */
+@media (min-width: 481px) {
+  .hz-header__notif-dropdown {
+    left: auto;
+    right: 12px;
+    width: 360px;
+  }
+
+  .hz-header__notif-title {
+    font-size: 14px;
+  }
+
+  .hz-header__notif-msg {
+    font-size: 13px;
+  }
+}
+
+/* ---------- Tablets (768px - 1023px) ---------- */
+@media (min-width: 768px) {
+  /* switch back to anchoring under the bell icon */
+  .hz-header__notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: -8px;
+    left: auto;
+    width: 370px;
+    max-height: 420px;
+  }
+
+  .hz-header__notif-item {
+    padding: 12px 16px;
+  }
+
+  .hz-header__notif-head {
+    padding: 12px 16px;
+  }
+}
+
+/* ---------- Laptops / desktops (1024px+) ---------- */
+@media (min-width: 1024px) {
+  .hz-header__notif-dropdown {
+    width: 400px;
+    max-height: 460px;
+    right: 0;
+  }
+}
+
+/* ---------- Large screens (1440px+) ---------- */
+@media (min-width: 1440px) {
+  .hz-header__notif-dropdown {
+    width: 440px;
+    max-height: 520px;
+  }
+
+  .hz-header__notif-title {
+    font-size: 15px;
+  }
+
+  .hz-header__notif-msg {
+    font-size: 14px;
+  }
+}
+
+/* ---------- Very small phones (360px and below) ---------- */
+@media (max-width: 360px) {
+  .hz-header__notif-dropdown {
+    left: 4px;
+    right: 4px;
+    border-radius: 10px;
+  }
+
+  .hz-header__notif-head {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .hz-header__notif-item {
+    padding: 10px 12px;
+  }
+}
+
+/* ---------- Phones in landscape (short screens) ---------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hz-header__notif-dropdown {
+    max-height: calc(100vh - var(--hz-header-height, 64px) - 16px);
+    max-height: calc(100dvh - var(--hz-header-height, 64px) - 16px);
+  }
+}
+
+/* ---------- Touch devices: remove hover-only styling ---------- */
+@media (hover: none) {
+  .hz-header__notif-item:hover {
+    background: inherit;
+  }
+
+  .hz-header__notif-item--unread:hover {
+    background: #eff6ff;
+  }
+}
+
+/* ---------- Respect reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hz-header__notif-dropdown {
+    animation: none;
   }
 }
