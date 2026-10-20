@@ -928,12 +928,12 @@ export default function AccountDashboard() {
 
           <footer className="foot">
             <nav className="foot__links">
-              <button
+              {/* <button
                 className="foot__btn"
                 onClick={() => setModal({ type: "help" })}
               >
                 <HelpCircle size={15} /> Help Center
-              </button>
+              </button> */}
               <button
                 className="foot__btn"
                 onClick={() => setModal({ type: "help" })}
@@ -949,14 +949,14 @@ export default function AccountDashboard() {
             </nav>
             <div className="foot__social">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/hazelcart.com1?stkn=MWxiOHRpbm81Mmk5bw%3D%3D"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
               >
                 <Instagram size={16} />
               </a>
-              <a
+              {/* <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
@@ -971,7 +971,7 @@ export default function AccountDashboard() {
                 aria-label="Pinterest"
               >
                 <Pinterest size={16} />
-              </a>
+              </a> */}
             </div>
           </footer>
         </main>
@@ -1078,7 +1078,7 @@ export default function AccountDashboard() {
               days of delivery.
             </p>
             <p>
-              <strong>Contact:</strong> care@example.com · Mon–Sat, 10 am – 7 pm
+              <strong>Contact:</strong> hazelcart.com@gmail.com · Mon–Sat, 10 am – 7 pm
             </p>
           </div>
           <div className="form__actions">

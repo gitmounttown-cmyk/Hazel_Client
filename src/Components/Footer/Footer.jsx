@@ -21,7 +21,7 @@ const Footer = () => {
           </p>
 
           <div className="social-links">
-            <a href="#" aria-label="Instagram">
+            <a href="https://www.instagram.com/hazelcart.com1?stkn=MWxiOHRpbm81Mmk5bw%3D%3D" aria-label="Instagram">
               <svg viewBox="0 0 24 24">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
                 <circle cx="12" cy="12" r="4" />
@@ -29,7 +29,7 @@ const Footer = () => {
               </svg>
             </a>
 
-            <a href="#" aria-label="Facebook">
+            {/* <a href="#" aria-label="Facebook">
               <svg viewBox="0 0 24 24">
                 <path d="M14 8h3V4h-3c-3.3 0-5 1.9-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z" />
               </svg>
@@ -40,7 +40,7 @@ const Footer = () => {
                 <circle cx="12" cy="12" r="9" />
                 <path d="M10 20c1-2 1.4-3.5 1.8-5.2M12 7c-2.2 0-3.5 1.5-3.5 3.4 0 1.4.8 2.4 2 2.4.8 0 1.3-.5 1.3-1.2 0-.5-.3-.9-.3-1.4 0-1 .8-1.8 1.9-1.8 1.4 0 2.2 1 2.2 2.5 0 1.9-1.3 3.5-3.2 3.5" />
               </svg>
-            </a>
+            </a> */}
           </div>
         </div>
 
