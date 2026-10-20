@@ -117,7 +117,7 @@ const ACTIVITY_ICONS = {
 // ============================================================
 
 const INVENTORY_COLORS = {
-  inStock: "#7a1f2b",
+  inStock: "#f1cb62",
   lowStock: "#e3c08a",
   outOfStock: "#f0d9b5",
 };
@@ -487,7 +487,7 @@ const Dashboard = () => {
         {
           name: "Low Stock",
           value: Number(
-            inventory.lowStock?.count || 0
+            inventory.lowStock?.count || 1
           ),
           color:
             INVENTORY_COLORS.lowStock,
@@ -496,7 +496,7 @@ const Dashboard = () => {
         {
           name: "Out of Stock",
           value: Number(
-            inventory.outOfStock?.count || 0
+            inventory.outOfStock?.count || 1
           ),
           color:
             INVENTORY_COLORS.outOfStock,
@@ -680,13 +680,13 @@ const Dashboard = () => {
 
                       <stop
                         offset="0%"
-                        stopColor="#7a1f2b"
+                        stopColor="#f1cb62"
                         stopOpacity={0.25}
                       />
 
                       <stop
                         offset="100%"
-                        stopColor="#7a1f2b"
+                        stopColor="#f1cb62"
                         stopOpacity={0}
                       />
 
@@ -737,12 +737,12 @@ const Dashboard = () => {
                   <Area
                     type="monotone"
                     dataKey="sales"
-                    stroke="#7a1f2b"
+                    stroke="#292626"
                     strokeWidth={2.5}
                     fill="url(#hzSalesFill)"
                     dot={{
                       r: 3,
-                      stroke: "#7a1f2b",
+                      stroke: "#292626",
                       strokeWidth: 2,
                       fill: "#fff",
                     }}

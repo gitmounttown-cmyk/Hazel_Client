@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap");
 
 .navbar {
-  background-color: #F1CB62;
+  background-color: #f1cb62;
   padding: 1rem 3.5rem;
   display: flex;
   align-items: center;
@@ -39,9 +39,9 @@
 }
 
 .nav-links a {
-  color: #6E6139;
+  color: #6e6139;
   text-decoration: none;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.3px;
@@ -51,13 +51,13 @@
 }
 
 .nav-links a:hover {
-  color: #C5A880;
+  color: #c5a880;
 }
 
 .nav-links a.active-link {
-  color:black;
+  color: black;
   font-weight: 500;
-  border-bottom: 2px solid #C5A880;
+  border-bottom: 2px solid #c5a880;
 }
 
 .nav-right-section {
@@ -69,9 +69,11 @@
 .nav-icon {
   width: 20px;
   height: 20px;
-  color: #6E6139;
+  color: #6e6139;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -84,7 +86,7 @@
   display: flex;
   align-items: center;
   position: relative;
-  background: #F6F1EB;
+  background: #f6f1eb;
   border: 1px solid rgba(197, 168, 128, 0.4);
   border-radius: 20px;
   padding: 4px 10px;
@@ -96,14 +98,14 @@
   border: none;
   outline: none;
   color: black;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 0.85rem;
   width: 140px;
   padding-left: 6px;
 }
 
 .search-input::placeholder {
-  color: #6E6139;
+  color: #6e6139;
 }
 
 .nav-right-section a {
@@ -127,7 +129,7 @@
 .hamburger-line {
   width: 100%;
   height: 2.5px;
-  background-color:#24211C;
+  background-color: #24211c;
   border-radius: 2px;
   transition: all 0.3s ease-in-out;
 }
@@ -163,25 +165,24 @@
   justify-content: center;
   gap: 3px;
   cursor: pointer;
-  color:#24211C;
+  color: #24211c;
 }
 
 .navbar-user-button .nav-icon {
-  color: #24211C;
+  color: #24211c;
   cursor: pointer;
 }
 
 .user-chevron {
   width: 14px;
   height: 14px;
-  color:#433E2C;
+  color: #433e2c;
   transition: transform 0.25s ease;
 }
 
 .user-chevron.rotate {
   transform: rotate(180deg);
 }
-
 
 /* =========================================================
    USER DROPDOWN
@@ -193,7 +194,7 @@
   right: 0;
   width: 270px;
 
-  background-color: #F6F1EB;
+  background-color: #f6f1eb;
   border: 1px solid rgba(237, 196, 132, 0.45);
   border-radius: 4px;
 
@@ -204,7 +205,7 @@
   overflow: hidden;
   z-index: 9999;
 
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
 
   animation: userDropdownAnimation 0.2s ease;
 }
@@ -220,7 +221,6 @@
     transform: translateY(0);
   }
 }
-
 
 /* =========================================================
    USER HEADER
@@ -240,18 +240,18 @@
 
   border-radius: 50%;
 
-  background-color: #F1CB62;
-  color:#6E6139 ;
+  background-color: #f1cb62;
+  color: #6e6139;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 18px;
   font-weight: 600;
 
-  border: 1px solid #F1CB62;
+  border: 1px solid #f1cb62;
 }
 
 .user-info {
@@ -262,9 +262,9 @@
 .user-name {
   margin: 0 0 4px;
 
-  color: #6E6139;
+  color: #6e6139;
 
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 15px;
   font-weight: 600;
 
@@ -276,16 +276,15 @@
 .user-email {
   margin: 0;
 
-  color: #6E6139;
+  color: #6e6139;
 
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 12px;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 /* =========================================================
    DIVIDER
@@ -298,7 +297,6 @@
 
   margin: 0 15px;
 }
-
 
 /* =========================================================
    DROPDOWN ITEMS
@@ -319,9 +317,9 @@
 
   cursor: pointer;
 
-  color: #6E6139;
+  color: #6e6139;
 
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 14px;
 
   text-align: left;
@@ -336,33 +334,31 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  color:#6E6139;
+  color: #6e6139;
 }
 
 .user-dropdown-item:hover {
   background-color: rgba(237, 196, 132, 0.12);
-  color: #6E6139;
+  color: #6e6139;
   padding-left: 21px;
 }
 
 .user-dropdown-item:hover svg {
-  color: #6E6139;
+  color: #6e6139;
 }
-
 
 /* =========================================================
    LOGOUT
 ========================================================= */
 
 .logout-item {
-  color: #6E6139;
+  color: #6e6139;
 }
 
 .logout-item:hover {
   background-color: rgba(237, 196, 132, 0.15);
-  color: #6E6139;
+  color: #6e6139;
 }
-
 
 /* =========================================================
    OPTIONAL: FUTURE DROPDOWN ITEMS
@@ -404,7 +400,7 @@
     top: 100%;
     left: 0;
     width: 100%;
-    background-color: #F1CB62;
+    background-color: #f1cb62;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
@@ -414,7 +410,7 @@
     opacity: 0;
     transition: all 0.4s ease-in-out;
     border-bottom: 1px solid rgba(197, 168, 128, 0.2);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   }
 
   .nav-links.mobile-open {
@@ -427,9 +423,9 @@
     gap: 1rem;
   }
 
- .search-container {
-   height: 21px;
-   padding: 3px 6px;
+  .search-container {
+    height: 21px;
+    padding: 3px 6px;
   }
 
   .search-input {
@@ -437,9 +433,8 @@
     font-size: 0.75rem;
   }
 
-
   .search-container.open {
-    width: 140px; 
+    width: 140px;
     background: rgba(255, 255, 255, 0.15);
   }
 
@@ -462,8 +457,291 @@
   .nav-right-section {
     gap: 0.8rem;
   }
- .search-input {
-        padding: 8px 3px 8px 3px;
-        width: 89px;
- }
+  .search-input {
+    padding: 8px 3px 8px 3px;
+    width: 89px;
+  }
+}
+
+/* =========================================================
+   ADD THIS BLOCK AT THE VERY BOTTOM OF YOUR Navbar.css
+   (keep all your existing CSS as it is)
+========================================================= */
+
+/* ---------- COUNT BADGE (wishlist, cart, notification) ---------- */
+
+.icon-badge-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-badge {
+  position: absolute;
+  top: -9px;
+  right: -10px;
+
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #000000; /* black */
+  color: #f1cb62; /* yellow text */
+  border-radius: 999px; /* round */
+
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+
+  pointer-events: none;
+  box-shadow: 0 0 0 2px #f1cb62; /* ring matches navbar colour */
+}
+
+/* ---------- NOTIFICATION BUTTON ---------- */
+
+.notification-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6e6139;
+}
+
+.notification-button:focus-visible {
+  outline: 2px solid #6e6139;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ---------- NOTIFICATION DROPDOWN ---------- */
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: -60px;
+  width: 340px;
+  max-width: calc(100vw - 24px);
+
+  background-color: #f6f1eb;
+  border: 1px solid rgba(237, 196, 132, 0.45);
+  border-radius: 4px;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(90, 24, 39, 0.25);
+
+  overflow: hidden;
+  z-index: 9999;
+
+  font-family: "Playfair Display", serif;
+  animation: userDropdownAnimation 0.2s ease;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 17px;
+}
+
+.notification-title {
+  color: #6e6139;
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.notification-mark-all {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: #6e6139;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.notification-mark-all:hover {
+  color: #000;
+}
+
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 360px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.notification-list li + li {
+  border-top: 1px solid rgba(237, 196, 132, 0.2);
+}
+
+.notification-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 17px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.notification-item:hover {
+  background-color: rgba(237, 196, 132, 0.15);
+}
+
+.notification-item.unread {
+  background-color: rgba(241, 203, 98, 0.18);
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.notification-item.unread .notification-dot {
+  background: #ff2d2d;
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.notification-item-title {
+  color: #433e2c;
+  font-family: "Playfair Display", serif;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.notification-item-message {
+  color: #6e6139;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 12.5px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.notification-item-time {
+  color: #8d8156;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+}
+
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 17px;
+  color: #6e6139;
+}
+
+.notification-empty p {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media screen and (max-width: 1024px) {
+  .notification-dropdown {
+    right: -40px;
+  }
+}
+
+/* Tablet + mobile: dropdown spans the navbar width so it never overflows */
+@media screen and (max-width: 768px) {
+  .notification-wrapper {
+    position: static;
+  }
+
+  .notification-dropdown {
+    top: calc(100% + 8px);
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    max-width: none;
+  }
+
+  .notification-list {
+    max-height: 60vh;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .icon-badge {
+    top: -8px;
+    right: -9px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+
+  .nav-right-section {
+    gap: 0.65rem;
+  }
+
+  .nav-right-section .nav-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .search-input {
+    width: 70px;
+  }
+
+  .notification-dropdown {
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .nav-right-section {
+    gap: 0.5rem;
+  }
+
+  .search-input {
+    width: 50px;
+  }
+
+  .nav-logo-img {
+    height: 32px;
+  }
 }
