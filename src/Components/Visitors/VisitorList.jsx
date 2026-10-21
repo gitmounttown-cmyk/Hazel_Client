@@ -6,24 +6,34 @@ const VisitorList = () => {
   const [stats, setStats] = useState({ totalVisits: 0, uniqueVisitors: 0, uniqueGuests: 0 });
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 15; // Number of logs per page
+
+  const fetchVisitorData = async (page) => {
+    try {
+      setLoading(true);
+      const response = await API.get(`/visitors/all?page=${page}&limit=${limit}`);
+      if (response.data.success) {
+        setStats(response.data.stats);
+        setVisitors(response.data.visitors);
+        if (response.data.pagination) {
+          setCurrentPage(response.data.pagination.currentPage);
+          setTotalPages(response.data.pagination.totalPages);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading visitor analytics:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchVisitorData = async () => {
-      try {
-        const response = await API.get("/visitors/all");
-        if (response.data.success) {
-          setStats(response.data.stats);
-          setVisitors(response.data.visitors);
-        }
-      } catch (error) {
-        console.error("Error loading visitor analytics:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVisitorData();
-  }, []);
+    fetchVisitorData(currentPage);
+  }, [currentPage]);
 
   return (
     <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -36,7 +46,7 @@ const VisitorList = () => {
         </p>
       </div>
 
-      {loading ? (
+      {loading && visitors.length === 0 ? (
         <p>Loading visitor statistics...</p>
       ) : (
         <>
@@ -126,6 +136,48 @@ const VisitorList = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Control Bar */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderTop: "1px solid #e5e7eb", background: "#f9fafb" }}>
+              <span style={{ fontSize: "14px", color: "#4b5563" }}>
+                Page <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong>
+              </span>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1 || loading}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: "1px solid #d1d5db",
+                    background: currentPage === 1 ? "#f3f4f6" : "#ffffff",
+                    color: currentPage === 1 ? "#9ca3af" : "#374151",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    fontWeight: "500",
+                    fontSize: "13px"
+                  }}
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage >= totalPages || loading}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: "1px solid #d1d5db",
+                    background: currentPage >= totalPages ? "#f3f4f6" : "#ffffff",
+                    color: currentPage >= totalPages ? "#9ca3af" : "#374151",
+                    cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+                    fontWeight: "500",
+                    fontSize: "13px"
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+
           </div>
         </>
       )}
