@@ -6,6 +6,8 @@ import {
 } from "../../Services/wishlistService";
 
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { updateNavbarCounts } from "../../utils/navbarCounts";
 
 const HeartIcon = () => (
   <svg
@@ -169,7 +171,7 @@ function WishlistCard({ item, onRemove, removing, navigate }) {
   const image = getProductImage(product);
 
   return (
-    <div className="wl-card" onClick={() => navigate(`/product/${product._id}`)}>
+    <div className="wl-card">
       <div className="wl-card__image">
         {product?.isNew && <span className="wl-card__badge">New</span>}
 
@@ -189,6 +191,7 @@ function WishlistCard({ item, onRemove, removing, navigate }) {
             src={getImageUrl(image)}
             alt={name}
             loading="lazy"
+            onClick={() => navigate(`/product/${product._id}`)}
           />
         ) : (
           <div className="wl-card__img">No Image</div>
@@ -299,6 +302,11 @@ export default function Wishlist() {
       } else {
         setWishlistItems([]);
       }
+      // Update the navbar counts after fetching the wishlist
+      const wishlistCount = data?.wishlist?.items?.length || 0;
+      updateNavbarCounts({
+        wishlistCount: wishlistCount,
+      });
     } catch (err) {
       console.error("FETCH WISHLIST ERROR:", err);
 
@@ -318,7 +326,14 @@ export default function Wishlist() {
     try {
       setRemovingId(productId);
 
-      await removeWishlistItem(productId);
+      await removeWishlistItem(productId).then((res) => {
+        // console.log("Remove wishlist response:", res);
+        const wishlistCount = res?.data?.wishlistCount || 0;
+        toast.success("Removed from wishlist!");
+        updateNavbarCounts({
+          wishlistCount: wishlistCount,
+        });
+      });
 
       setWishlistItems((prev) =>
         prev.filter((item) => item?.product?._id !== productId),

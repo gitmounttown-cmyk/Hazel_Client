@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import logo from "../../assets/images/Logo.png";
 import "./Navbar.css";
+import { getNotifications, updateNotificationRead, markAllNotificationsRead } from "../../Services/notificationService";
+import { formatTimeAgo } from "../../Utils/dateFormat";
 
 // ============================================================
 // HELPERS (counts + notifications)
@@ -83,12 +85,59 @@ const Navbar = ({
   const [notifications, setNotifications] = useState([]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const notificationRef = useRef(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
-  const wishlistCount =
-    wishlistCountProp !== undefined ? wishlistCountProp : storedWishlistCount;
-  const cartCount =
-    cartCountProp !== undefined ? cartCountProp : storedCartCount;
-  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // const wishlistCount =
+  //   wishlistCountProp !== undefined ? wishlistCountProp : storedWishlistCount;
+  // const cartCount =
+  //   cartCountProp !== undefined ? cartCountProp : storedCartCount;
+  const unreadCount = notifications?.filter((n) => !n.isRead).length;
+
+  // ============================================================
+  // get Notifications from api
+  // ============================================================
+  useEffect(() => { 
+  // ============================================================
+    const fetchNotifications = async () => {
+      try {
+        const data = await getNotifications();
+        // console.log("Fetched notifications:", data);
+        if (data.success) {
+          setNotifications(data?.data);
+        } else {
+          console.warn("Failed to fetch notifications:", data);
+          setNotifications([]);
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        setNotifications([]);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+  const handleNavbarUpdate = (event) => {
+    const { cartCount, wishlistCount } = event.detail || {};
+
+    if (cartCount !== undefined) {
+      setCartCount(cartCount);
+    }
+
+    if (wishlistCount !== undefined) {
+      setWishlistCount(wishlistCount);
+    }
+  };
+
+  window.addEventListener("hazel:update", handleNavbarUpdate);
+
+  return () => {
+    window.removeEventListener("hazel:update", handleNavbarUpdate);
+  };
+}, []);
 
   
   useEffect(() => {
@@ -105,29 +154,63 @@ const Navbar = ({
     }
   }, []);
 
-  useEffect(() => {
-    const refresh = () => {
+  // useEffect(() => {
+  //   const refresh = () => {
+  //     setStoredWishlistCount(readStoredCount("hazelWishlist"));
+  //     setStoredCartCount(readStoredCount("hazelCart"));
+  //     if (notificationsProp === undefined) {
+  //       setNotifications(readStoredNotifications());
+  //     }
+  //   };
+
+  //   refresh();
+
+  //   window.addEventListener("storage", refresh);
+  //   window.addEventListener("hazel:update", refresh);
+
+  //   return () => {
+  //     window.removeEventListener("storage", refresh);
+  //     window.removeEventListener("hazel:update", refresh);
+  //   };
+  // }, [notificationsProp]);
+
+  
+useEffect(() => {
+  const refresh = (event) => {
+    const detail = event?.detail;
+
+    if (detail?.wishlistCount !== undefined) {
+      setStoredWishlistCount(detail.wishlistCount);
+    } else {
       setStoredWishlistCount(readStoredCount("hazelWishlist"));
+    }
+
+    if (detail?.cartCount !== undefined) {
+      setStoredCartCount(detail.cartCount);
+    } else {
       setStoredCartCount(readStoredCount("hazelCart"));
-      if (notificationsProp === undefined) {
-        setNotifications(readStoredNotifications());
-      }
-    };
+    }
+console.log('refresh_notification:',notificationsProp)
+    // if (notificationsProp === undefined) {
+    //   setNotifications([]);
+    // }
+  };
 
-    refresh();
+  refresh();
 
-    window.addEventListener("storage", refresh);
-    window.addEventListener("hazel:update", refresh);
+  window.addEventListener("storage", refresh);
+  window.addEventListener("hazel:update", refresh);
 
-    return () => {
-      window.removeEventListener("storage", refresh);
-      window.removeEventListener("hazel:update", refresh);
-    };
-  }, [notificationsProp]);
+  return () => {
+    window.removeEventListener("storage", refresh);
+    window.removeEventListener("hazel:update", refresh);
+  };
+}, [notificationsProp]);
+
 
   useEffect(() => {
     if (notificationsProp !== undefined) {
-      setNotifications(notificationsProp);
+      setNotifications([]);
     }
   }, [notificationsProp]);
 
@@ -214,14 +297,24 @@ const Navbar = ({
     setIsNotificationOpen((prev) => !prev);
   };
 
-  const markNotificationRead = (id) => {
+  const markNotificationRead = async (id) => {
     saveNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      notifications.map((n) => (n?._id === id ? { ...n, isRead: true } : n)),
     );
+    await updateNotificationRead(id).then((response) => {
+      // console.log("Notification marked as read:", response);
+    }).catch((error) => {
+      console.error("Error marking notification as read:", error);
+    });
   };
 
-  const markAllRead = () => {
-    saveNotifications(notifications.map((n) => ({ ...n, read: true })));
+  const markAllRead = async () => {
+    saveNotifications(notifications.map((n) => ({ ...n, isRead: true })));
+    await markAllNotificationsRead().then((response) => {
+      console.log("All notifications marked as read:", response);
+    }).catch((error) => {
+      console.error("Error marking all notifications as read:", error);
+    });
   };
 
   // ============================================================
@@ -247,6 +340,7 @@ const Navbar = ({
     setIsMobileMenuOpen(false);
   };
 
+  // console.log("Navbar props:", { wishlistCount, cartCount, notifications });
   return (
     <nav className="navbar">
       <div className="nav-left-group">
@@ -417,13 +511,13 @@ const Navbar = ({
               ) : (
                 <ul className="notification-list">
                   {notifications.map((item) => (
-                    <li key={item.id}>
+                    <li key={item?._id}>
                       <button
                         type="button"
                         className={`notification-item ${
-                          item.read ? "" : "unread"
+                          item.isRead ? "" : "unread"
                         }`}
-                        onClick={() => markNotificationRead(item.id)}
+                        onClick={() => markNotificationRead(item._id)}
                       >
                         <span className="notification-dot"></span>
                         <span className="notification-content">
@@ -435,9 +529,9 @@ const Navbar = ({
                               {item.message}
                             </span>
                           )}
-                          {item.time && (
+                          {item.createdAt && (
                             <span className="notification-item-time">
-                              {item.time}
+                              {formatTimeAgo(item.createdAt)}
                             </span>
                           )}
                         </span>

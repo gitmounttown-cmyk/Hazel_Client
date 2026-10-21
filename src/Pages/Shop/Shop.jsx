@@ -11,6 +11,8 @@ import {
 import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
 import Loader from "../../Components/Loader/Loader";
+import { updateNavbarCounts } from "../../utils/navbarCounts";
+
 const STATIC_FILTER_GROUPS = [
   {
     key: "size",
@@ -527,12 +529,26 @@ function ProductCard({ product, navigate, wishlistStatus }) {
       setWishlistLoading(true);
 
       if (isWishlisted) {
-        await removeWishlistItem(product.id);
+        await removeWishlistItem(product.id).then((res) => {
+          // console.log("Remove wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          toast.success("Removed from wishlist!");
+          updateNavbarCounts({
+            wishlistCount: wishlistCount,
+          });
+        });
 
         setIsWishlisted(false);
       } else {
         await addToWishlist({
           productId: product.id,
+        }).then((res) => {
+          // console.log("Wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          toast.success("Added to wishlist!");
+          updateNavbarCounts({
+            wishlistCount: wishlistCount,
+          });
         });
 
         setIsWishlisted(true);
@@ -799,6 +815,12 @@ export default function ShopPage() {
         ...prev,
         ...wishlistStatus,
       }));
+
+      // Update the navbar counts after fetching the wishlist
+      const wishlistCount = wishlistItems.length || 0;
+      updateNavbarCounts({
+        wishlistCount: wishlistCount,
+      });
     } catch (error) {
       console.error("Error fetching wishlist:", error);
     }

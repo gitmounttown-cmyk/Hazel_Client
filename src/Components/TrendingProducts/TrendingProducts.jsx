@@ -12,6 +12,7 @@ import { addToCart, getCart } from "../../Services/cartService";
 import { isUserLoggedIn } from "../../utils/auth"; 
 import toast from "react-hot-toast";
 import { getGuestId } from "../../helpers/guestId";
+import { updateNavbarCounts } from "../../utils/navbarCounts";
 
 const TrendingProducts = () => {
   const [products, setProducts] = useState([]);
@@ -55,6 +56,11 @@ const TrendingProducts = () => {
       ...prev,
       ...wishlistStatus,
     }));
+    // Update the navbar counts after fetching the wishlist
+    const wishlistCount = wishlistItems.length || 0;
+    updateNavbarCounts({
+      wishlistCount: wishlistCount,
+    });
   } catch (error) {
     console.error("Error fetching wishlist:", error);
   }
@@ -66,6 +72,11 @@ const fetchAllCartItems = async () => {
     const response = await getCart();
     // console.log("Fetched cart items:", response);
     setCartItems(response?.cart?.items || []);
+    // Update the navbar counts after fetching the cart
+    const cartCount = response?.cart?.totalItems || 0;
+    updateNavbarCounts({
+      cartCount: cartCount,
+    });
   } catch (error) {
     console.error("Error fetching cart items:", error);
   }
@@ -194,12 +205,25 @@ useEffect(() => {
       const isCurrentlyWishlisted = wishlistStatus[productId];
 
       if (isCurrentlyWishlisted) {
-        await removeWishlistItem(productId);
+        await removeWishlistItem(productId).then((res) => {
+          // console.log("Remove wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          updateNavbarCounts({
+            wishlistCount: wishlistCount,
+          });
+        });
         setWishlistStatus((prev) => ({ ...prev, [productId]: false }));
         toast.success("Removed from wishlist");
       } else {
         const guestId = getGuestId();
-        const response = await addToWishlist({ productId, guestId });
+        const response = await addToWishlist({ productId, guestId }).then((res) => {
+          // console.log("Add to wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          updateNavbarCounts({
+            wishlistCount: wishlistCount,
+          });
+          return res;
+        });
         console.log("Add to wishlist response:", response);
         setWishlistStatus((prev) => ({ ...prev, [productId]: true }));
         if (response?.data) {
@@ -248,9 +272,15 @@ const isAlreadyInCart = cartItems.some((item) => item?.product?._id === product.
       };
 
       const response = await addToCart(cartItem);
-      // console.log("Add to cart response:", response);
+      console.log("Add to cart response:", response);
       if (response?.success !== false) {
+        const cart = response?.cart;
         toast.success("Product added to cart!");
+        // update the cart items count in the navbar
+        const cartCount = response?.data?.cartCount || 0;
+        updateNavbarCounts({
+          cartCount: cart?.totalItems || cartCount || 0,
+        });
         navigate("/cartpage");
       } else {
         toast.error(response?.message || "Failed to add item to cart.");

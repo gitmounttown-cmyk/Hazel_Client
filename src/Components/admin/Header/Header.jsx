@@ -4,6 +4,8 @@ import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../Services/authService";
 import { useAdminSearch } from "../../../context/AdminSearchContext";
+import { getAllNotifications, markAllNotificationsRead } from "../../../Services/notificationService";
+import { formatTimeAgo } from "../../../Utils/dateFormat";
 
 // Sample notifications (replace with API data later)
 const SAMPLE_NOTIFICATIONS = [
@@ -51,13 +53,28 @@ const Header = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const { searchQuery, setSearchQuery } = useAdminSearch();
   const menuRef = useRef(null);
   const notifRef = useRef(null);
   const navigate = useNavigate();
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications?.filter((n) => !n?.isRead).length;
+
+  //get all notifications from API
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await getAllNotifications();
+        // console.log("Fetched notifications:", data);
+        setNotifications(data?.data || []);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -75,11 +92,17 @@ const Header = ({
 
   const markAsRead = (id) =>
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
     );
 
-  const markAllAsRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllAsRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -145,7 +168,7 @@ const Header = ({
                       <div className="hz-header__notif-body">
                         <p className="hz-header__notif-title">{n.title}</p>
                         <p className="hz-header__notif-msg">{n.message}</p>
-                        <span className="hz-header__notif-time">{n.time}</span>
+                        <span className="hz-header__notif-time">{formatTimeAgo(n.createdAt)}</span>
                       </div>
                     </div>
                   ))

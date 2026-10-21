@@ -9,6 +9,7 @@ import {
   checkWishlist,
   removeWishlistItem,
 } from "../../../Services/wishlistService";
+import { updateNavbarCounts } from "../../../utils/navbarCounts";
 
 /* ---------- real image assets ---------- */
 import mainPhoto from "../../../assets/Trending/img2.png";
@@ -268,6 +269,12 @@ export default function ProductPage() {
         const cart = response?.data?.cart || response?.cart;
         const items = cart?.items || [];
         setCartItems(items);
+        // Update the navbar counts after fetching the cart
+        const cartCount = cart?.totalItems || 0;
+        // console.log("Fetched cart items:", items, "Cart count:", cartCount);
+        updateNavbarCounts({
+          cartCount: cartCount,
+        });
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
@@ -319,12 +326,19 @@ useEffect(() => {
     const checkProductWishlist = async () => {
       try {
         const response = await checkWishlist(id);
+        // console.log("CHECK WISHLIST RESPONSE:", response);
         setWishlisted(
           response?.data?.isWishlisted ??
             response?.data?.wishlisted ??
             response?.data?.data?.isWishlisted ??
             false
         );
+        // Update the navbar counts after checking the wishlist
+        const wishlistCount = response?.data?.wishlistCount || 0;
+        // console.log("CHECK WISHLIST COUNT:", wishlistCount);
+        updateNavbarCounts({
+          wishlistCount: wishlistCount
+        });
       } catch (error) {
         console.error("CHECK WISHLIST ERROR:", error);
       }
@@ -334,22 +348,34 @@ useEffect(() => {
 
   const handleRelatedWishlist = async (e, productId) => {
     e.stopPropagation();
-    if (!isLoggedIn()) {
-      toast.error("Please log in to use wishlist.");
-      return;
-    }
-    if (!productId) return;
+    // if (!isLoggedIn()) {
+    //   toast.error("Please log in to use wishlist.");
+    //   return;
+    // }
+    // if (!productId) return;
     try {
       setWishlistLoading(true);
       const isCurrentlyWishlisted = relatedWishlisted[productId];
       if (isCurrentlyWishlisted) {
-        await removeWishlistItem(productId);
+        const res = await removeWishlistItem(productId);
+          // console.log("Remove wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          updateNavbarCounts({
+            wishlistCount: wishlistCount,
+          });
+      
         setRelatedWishlisted((prev) => ({ ...prev, [productId]: false }));
         toast.success("Removed from wishlist");
       } else {
-        await addToWishlist({ productId });
-        setRelatedWishlisted((prev) => ({ ...prev, [productId]: true }));
-        toast.success("Added to wishlist");
+        const res = await addToWishlist({ productId });
+          // console.log("Add to wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          updateNavbarCounts({
+            wishlistCount: wishlistCount,
+          });
+          setRelatedWishlisted((prev) => ({ ...prev, [productId]: true }));
+          toast.success("Added to wishlist");
+        
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to update wishlist");
@@ -502,14 +528,25 @@ useEffect(() => {
     try {
       setWishlistLoading(true);
       if (wishlisted) {
-        const response = await removeWishlistItem(id);
+        const response = await removeWishlistItem(id).then((res) => {
+          // console.log("Remove wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          updateNavbarCounts({ wishlistCount: wishlistCount });
+          return res;
+        });
+
         setWishlisted(false);
 
         if (response?.data) {
           toast.success(response?.data?.message || "Removed from wishlist");
         }
       } else {
-        const response = await addToWishlist({ productId: id });
+        const response = await addToWishlist({ productId: id }).then((res) => {
+          // console.log("Add to wishlist response:", res);
+          const wishlistCount = res?.data?.wishlistCount || 0;
+          updateNavbarCounts({ wishlistCount: wishlistCount });
+          return res;
+        });
         setWishlisted(true);
         if (response?.data) {
           toast.success(response?.data?.message || "Added to wishlist");
@@ -543,6 +580,11 @@ useEffect(() => {
       const updatedCart = updatedCartResponse?.data?.cart || updatedCartResponse?.cart;
       setCartItems(updatedCart?.items || []);
       toast.success("Product added");
+      // Update the navbar counts after adding to cart
+      const cartCount = updatedCart?.items?.length || 0;
+      updateNavbarCounts({
+        cartCount: cartCount,
+      });
     } else {
       toast.error(response?.message || "Failed to add item to cart.");
     }

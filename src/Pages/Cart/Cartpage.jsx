@@ -3,6 +3,7 @@ import "./CartPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { getCart, removeCartItem, updateCartItem, clearCart } from "../../Services/cartService";
+import { updateNavbarCounts } from "../../utils/navbarCounts";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5004/api";
 const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -377,6 +378,10 @@ export default function CartPage() {
         const cart = response?.cart;
         setItems(cart?.items || []);
         setCartTotal(Number(cart?.totalAmount || 0));
+        // Update the navbar counts
+        updateNavbarCounts({
+          cartCount: cart?.totalItems || 0,
+        });
       }
     } catch (err) {
       console.error("GET CART ERROR:", err.response?.data || err);
@@ -474,6 +479,10 @@ console.log("Clear cart response:", response);
       if (response?.success) {
         setItems([]);
         setCartTotal(0);
+        // Update the navbar counts
+        updateNavbarCounts({
+          cartCount: 0,
+        });
       }
     } catch (err) {
       console.error("CLEAR CART ERROR:", err.response?.data || err);
