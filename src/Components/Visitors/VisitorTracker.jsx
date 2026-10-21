@@ -9,7 +9,7 @@ const VisitorTracker = () => {
   useEffect(() => {
     const trackVisitor = async () => {
       try {
-        // Retrieve or generate a persistent UUID guest ID matching database cart structures[cite: 14]
+        // Retrieve or generate a persistent UUID guest ID matching database cart structures
         let guestId = localStorage.getItem("hazelGuestId");
         if (!guestId) {
           guestId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -19,10 +19,10 @@ const VisitorTracker = () => {
           localStorage.setItem("hazelGuestId", guestId);
         }
 
-        // Retrieve user token if logged in (for userId tracking)[cite: 14]
+        // Retrieve user token if logged in (for userId tracking)
         const token = localStorage.getItem("hazelToken");
 
-        // Send tracking data to backend for every route change (home, shop, cart, account, etc.)[cite: 14]
+        // Send tracking data to backend for every route change (home, shop, cart, account, etc.)
         await API.post(
           "/visitors/track",
           {

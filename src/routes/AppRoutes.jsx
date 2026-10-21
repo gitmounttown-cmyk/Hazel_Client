@@ -50,10 +50,12 @@ import Terms from "../Pages/TermsandConditions/Terms";
 import PrivacyPolicy from "../Pages/PrivacyPolicy/PrivacyPolicy";
 import ScrollToTopButton from "../Pages/ScrolltoTopButton/ScrolltoTopButton";
 import VisitorList from "../Components/Visitors/VisitorList";
-
+import ProtectedRoute from "./ProtectedRoute";
+import VisitorTracker from "../Components/Visitors/VisitorTracker";
 const AppRoutes = () => {
   return (
     <BrowserRouter>
+    <VisitorTracker />
       <Routes>
         {/* USER LAYOUT ROUTES */}
         <Route element={<UserLayout />}>
@@ -64,7 +66,9 @@ const AppRoutes = () => {
           <Route path="/About" element={<About />} />
 
           {/* Added User Account Overview Route */}
-          <Route path="/account" element={<AccountOverview />} />
+          <Route element={<ProtectedRoute role="user" />}>
+            <Route path="/account" element={<AccountOverview />} />
+          </Route>
 
           <Route path="/product/:id" element={<Productpreview />} />
           <Route path="/contact" element={<Contact />} />
@@ -79,7 +83,7 @@ const AppRoutes = () => {
           />
           <Route path="/loader" element={<Loader />} />
 
-          <Route path="//privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-condition" element={<Terms />} />
 
           {/* ORDER FAILURE ROUTES */}
@@ -100,44 +104,48 @@ const AppRoutes = () => {
         {/* =================================
           ADMIN ROUTES
       ================================= */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/catalog/categories" element={<CategoryList />} />
-          <Route
-            path="/admin/catalog/subcategories"
-            element={<SubCategoryList />}
-          />
-          <Route path="/admin/catalog/brands" element={<BrandList />} />
-          <Route
-            path="/admin/catalog/product-length"
-            element={<LengthList />}
-          />
-          <Route path="/admin/catalog/products" element={<ProductList />} />
-          <Route
-            path="/admin/catalog/product-variants"
-            element={<ProductVariantList />}
-          />
-          <Route path="/admin/catalog/size" element={<SizeList />} />
-          <Route path="/admin/catalog/colors" element={<ColorList />} />
+        <Route element={<ProtectedRoute role="admin" />}>
+          <Route element={<AdminLayout />}>
 
-          {/* add more admin routes here, all under this same AdminLayout wrapper */}
-          <Route path="/admin/coupons" element={<CouponList />} />
-          <Route path="/admin/payments" element={<Payment />} />
-          <Route path="/admin/orders" element={<Order />} />
-          <Route path="/admin/banners" element={<Banner />} />
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/catalog/categories" element={<CategoryList />} />
+            <Route
+              path="/admin/catalog/subcategories"
+              element={<SubCategoryList />}
+            />
+            <Route path="/admin/catalog/brands" element={<BrandList />} />
+            <Route
+              path="/admin/catalog/product-length"
+              element={<LengthList />}
+            />
+            <Route path="/admin/catalog/products" element={<ProductList />} />
+            <Route
+              path="/admin/catalog/product-variants"
+              element={<ProductVariantList />}
+            />
+            <Route path="/admin/catalog/size" element={<SizeList />} />
+            <Route path="/admin/catalog/colors" element={<ColorList />} />
 
-          <Route path="/admin/newArrivals" element={<NewArrival />} />
-          <Route path="/admin/addresses" element={<Address />} />
-          <Route path="/admin/reviews" element={<Review />} />
-          <Route path="/admin/hero-slider" element={<AdminHero />} />
-          <Route path="/admin/myprofile" element={<Profile />} />
-          <Route
-            path="/admin/trending-products"
-            element={<AdminTrendingProducts />}
-          />
-          <Route path="/admin/videos" element={<Video />} />
-          <Route path="/admin/inventory" element={<Inventory />} />
-          <Route path="/admin/visitors" element={<VisitorList />} />
+            {/* add more admin routes here, all under this same AdminLayout wrapper */}
+            <Route path="/admin/coupons" element={<CouponList />} />
+            <Route path="/admin/payments" element={<Payment />} />
+            <Route path="/admin/orders" element={<Order />} />
+            <Route path="/admin/banners" element={<Banner />} />
+
+            <Route path="/admin/newArrivals" element={<NewArrival />} />
+            <Route path="/admin/addresses" element={<Address />} />
+            <Route path="/admin/reviews" element={<Review />} />
+            <Route path="/admin/hero-slider" element={<AdminHero />} />
+            <Route path="/admin/myprofile" element={<Profile />} />
+            <Route
+              path="/admin/trending-products"
+              element={<AdminTrendingProducts />}
+            />
+            <Route path="/admin/videos" element={<Video />} />
+            <Route path="/admin/inventory" element={<Inventory />} />
+            <Route path="/admin/visitors" element={<VisitorList />} />
+
+          </Route>
         </Route>
       </Routes>
       <ScrollToTopButton />
