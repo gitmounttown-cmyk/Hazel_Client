@@ -51,10 +51,11 @@ import PrivacyPolicy from "../Pages/PrivacyPolicy/PrivacyPolicy";
 import ScrollToTopButton from "../Pages/ScrolltoTopButton/ScrolltoTopButton";
 import VisitorList from "../Components/Visitors/VisitorList";
 import ProtectedRoute from "./ProtectedRoute";
-
+import VisitorTracker from "../Components/Visitors/VisitorTracker";
 const AppRoutes = () => {
   return (
     <BrowserRouter>
+    <VisitorTracker />
       <Routes>
         {/* USER LAYOUT ROUTES */}
         <Route element={<UserLayout />}>
@@ -82,7 +83,7 @@ const AppRoutes = () => {
           />
           <Route path="/loader" element={<Loader />} />
 
-          <Route path="//privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-condition" element={<Terms />} />
 
           {/* ORDER FAILURE ROUTES */}

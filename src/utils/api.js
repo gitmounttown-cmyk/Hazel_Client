@@ -1,11 +1,10 @@
 import axios from "axios";
 
-// Automatically detect whether we are running locally or on live production
-const isLocal = window.location.hostname === "localhost" || window.location.hostname === "5004";
-
-const API_BASE_URL = isLocal
-  ? "http://localhost:5004/api"
-  : "https://hazelcart.com/api"; // Live backend API base URL
+// Automatically use Vite environment variable if set, otherwise fallback based on hostname
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (window.location.hostname === "localhost" 
+    ? "http://localhost:5004/api" 
+    : "https://hazelcart.com/api");
 
 const API = axios.create({
   baseURL: API_BASE_URL,
