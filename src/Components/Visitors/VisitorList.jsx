@@ -10,18 +10,25 @@ const VisitorList = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 15; // Number of logs per page
+  const limit = 10; // Exactly 10 items per page
 
-  const fetchVisitorData = async (page) => {
+  const fetchVisitorData = async (pageToFetch) => {
     try {
       setLoading(true);
-      const response = await API.get(`/visitors/all?page=${page}&limit=${limit}`);
+      const response = await API.get(`/visitors/all?page=${pageToFetch}&limit=${limit}`);
+      console.log("Visitor API Response:", response.data); // Debug check
+
       if (response.data.success) {
         setStats(response.data.stats);
         setVisitors(response.data.visitors);
+
+        // Safe pagination fallback check
         if (response.data.pagination) {
-          setCurrentPage(response.data.pagination.currentPage);
           setTotalPages(response.data.pagination.totalPages);
+        } else if (response.data.stats) {
+          // Fallback calculation if pagination object is missing from response
+          const totalLogs = response.data.stats.totalVisits || 0;
+          setTotalPages(Math.ceil(totalLogs / limit) || 1);
         }
       }
     } catch (error) {
@@ -34,6 +41,19 @@ const VisitorList = () => {
   useEffect(() => {
     fetchVisitorData(currentPage);
   }, [currentPage]);
+
+  // Handlers for pagination buttons
+  const handlePrevious = () => {
+    if (currentPage > 1 && !loading) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages && !loading) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
 
   return (
     <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -105,7 +125,6 @@ const VisitorList = () => {
                     </tr>
                   ) : (
                     visitors.map((v) => {
-                      // Determines a clean friendly name or guest label for display
                       const visitorDisplayName = v.userId 
                         ? v.userId.name || v.userId.mobileNumber || "Registered User"
                         : v.guestId 
@@ -140,11 +159,11 @@ const VisitorList = () => {
             {/* Pagination Control Bar */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderTop: "1px solid #e5e7eb", background: "#f9fafb" }}>
               <span style={{ fontSize: "14px", color: "#4b5563" }}>
-                Page <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong>
+                Page <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong> (10 items per page)
               </span>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  onClick={handlePrevious}
                   disabled={currentPage === 1 || loading}
                   style={{
                     padding: "6px 14px",
@@ -160,7 +179,7 @@ const VisitorList = () => {
                   Previous
                 </button>
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  onClick={handleNext}
                   disabled={currentPage >= totalPages || loading}
                   style={{
                     padding: "6px 14px",
