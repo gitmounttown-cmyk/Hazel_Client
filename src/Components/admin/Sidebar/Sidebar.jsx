@@ -313,6 +313,11 @@ const navConfig = [
     icon: Archive,
     path: "/admin/inventory",
   },
+  {
+    label: "Analytics",
+    icon: Eye,
+    path: "/admin/analytics"
+  },
 ];
 
 const Sidebar = () => {
