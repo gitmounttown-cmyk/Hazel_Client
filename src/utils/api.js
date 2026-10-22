@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// FIX: Force localhost if running on localhost, otherwise fallback to production URL
 const API_BASE_URL = 
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5004/api"
@@ -11,7 +10,6 @@ const API = axios.create({
   timeout: 10000,
 });
 
-// Automatically attach Authorization token if available in localStorage
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("hazelToken");

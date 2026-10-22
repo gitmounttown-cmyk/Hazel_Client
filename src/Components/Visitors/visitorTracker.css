@@ -1,4 +1,3 @@
-/* Visitor Metric Card Styling matching your Admin Dashboard */
 .stat-card {
   background: #ffffff;
   border-radius: 12px;
@@ -13,23 +12,6 @@
 .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  flex-shrink: 0;
-}
-
-/* Visitors card icon theme color matching admin yellow/amber accents */
-.visitors-icon {
-  background-color: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
 }
 
 .stat-info h3 {
