@@ -24,6 +24,8 @@ import {
 } from "recharts";
 
 import "./Dashboard.css";
+import { getDashboardData } from "../../../Services/dashboardService";
+import { useNavigate } from "react-router-dom";
 
 // ============================================================
 // API CONFIGURATION
@@ -191,6 +193,7 @@ const SalesTooltip = ({ active, payload, label }) => {
 // ============================================================
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   // ==========================================================
   // DASHBOARD STATE
   // ==========================================================
@@ -233,6 +236,7 @@ const Dashboard = () => {
 
   const [error, setError] = useState(null);
 
+  const [dashboardData, setDashboardData] = useState(null);
   // ==========================================================
   // LOAD MAIN DASHBOARD
   // ==========================================================
@@ -248,199 +252,242 @@ const Dashboard = () => {
   //
   // ==========================================================
 
-  useEffect(() => {
-    let cancelled = false;
+  const getDashboardDateRange = (filter, customFrom, customTo) => {
+  const now = new Date();
 
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true);
+  // Use local calendar dates.
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
-        const res = await fetch(`${DASHBOARD_URL}/all`);
+    return `${year}-${month}-${day}`;
+  };
 
-        if (!res.ok) {
-          throw new Error(
-            `Dashboard request failed with status ${res.status}`
-          );
-        }
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
 
-        const json = await res.json();
+  const end = new Date(start);
 
-        if (!json.success) {
-          throw new Error(
-            json.message || "Failed to load dashboard"
-          );
-        }
+  if (filter === "today") {
+    return {
+      fromDate: formatDate(start),
+      toDate: formatDate(start),
+    };
+  }
 
-        if (cancelled) {
-          return;
-        }
+  if (filter === "week") {
+    // Monday through today.
+    const day = start.getDay();
+    const daysSinceMonday = (day + 6) % 7;
 
-        const data = json.data || {};
+    start.setDate(start.getDate() - daysSinceMonday);
 
-        const {
-          summary,
-          recentOrders,
-          topSellingProducts,
-          inventory,
-          recentActivities,
-        } = data;
+    return {
+      fromDate: formatDate(start),
+      toDate: formatDate(end),
+    };
+  }
 
-        // ------------------------------------------------------
-        // SET DASHBOARD DATA
-        // ------------------------------------------------------
+  if (filter === "month") {
+    start.setDate(1);
 
-        setSummary(summary || null);
+    return {
+      fromDate: formatDate(start),
+      toDate: formatDate(end),
+    };
+  }
 
-        setRecentOrders(
-          Array.isArray(recentOrders)
-            ? recentOrders
-            : []
+  if (filter === "custom") {
+    if (!customFrom || !customTo) {
+      return null;
+    }
+
+    return {
+      fromDate: customFrom,
+      toDate: customTo,
+    };
+  }
+
+  return null;
+};
+
+const range = getDashboardDateRange(
+  dateFilter,
+  customFrom,
+  customTo
+);
+
+
+useEffect(() => {
+  let cancelled = false;
+
+  const fetchDashboard = async () => {
+    // For custom range, wait until both dates are selected.
+    if (!range) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await getDashboardData(
+        range.fromDate,
+        range.toDate
+      );
+
+      // console.log("Selected range:", range);
+      // console.log("Dashboard response:", response);
+
+      if (!response?.success) {
+        throw new Error(
+          response?.message || "Failed to load dashboard"
         );
-
-        setTopProducts(
-          Array.isArray(topSellingProducts)
-            ? topSellingProducts
-            : []
-        );
-
-        setInventory(inventory || null);
-
-        setActivities(
-          Array.isArray(recentActivities)
-            ? recentActivities
-            : []
-        );
-
-        setError(null);
-      } catch (err) {
-        if (cancelled) {
-          return;
-        }
-
-        console.error(
-          "Dashboard load error:",
-          err
-        );
-
-        setError(
-          err.message ||
-            "Something went wrong loading the dashboard."
-        );
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
       }
-    };
 
-    loadDashboardData();
+      if (cancelled) {
+        return;
+      }
 
-    // ----------------------------------------------------------
-    // CLEANUP
-    // ----------------------------------------------------------
+      const data = response.data || {};
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      // Normalize summary values.
+      const summaryData = data.summary || {};
 
-  // ==========================================================
-  // LOAD SALES OVERVIEW
-  // ==========================================================
-  //
-  // This effect runs:
-  //
-  // 1. When Dashboard first loads
-  // 2. When salesRange changes
-  //
-  // ==========================================================
+      const normalizedSummary = {
+        totalVisitors: Number(summaryData.totalVisitors) || 0,
+        totalOrders: Number(summaryData.totalOrders) || 0,
+        totalSales: Number(summaryData.totalSales) || 0,
+        totalCustomers: Number(summaryData.totalCustomers) || 0,
+        totalProducts: Number(summaryData.totalProducts) || 0,
+        totalProductsSold: Number(summaryData.totalProductsSold) || 0,
+        newCustomers: Number(summaryData.newCustomers) || 0,
+        averageSaleValue: Number(summaryData.averageSaleValue) || 0,
+      };
+
+      // console.log("Normalized summary:", normalizedSummary);
+
+      setSummary(normalizedSummary);
+
+      setRecentOrders(
+        Array.isArray(data.recentOrders)
+          ? data.recentOrders
+          : []
+      );
+
+      setTopProducts(
+        Array.isArray(data.topSellingProducts)
+          ? data.topSellingProducts
+          : []
+      );
+
+      setInventory(data.inventory || null);
+
+      setActivities(
+        Array.isArray(data.recentActivities)
+          ? data.recentActivities
+          : []
+      );
+    } catch (error) {
+      if (cancelled) {
+        return;
+      }
+
+      console.error("Dashboard fetch error:", error);
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  };
+
+  fetchDashboard();
+
+  return () => {
+    cancelled = true;
+  };
+}, [range?.fromDate, range?.toDate]);
+
 
   useEffect(() => {
-    let cancelled = false;
+  let cancelled = false;
 
-    const loadSalesData = async () => {
-      try {
-        setSalesLoading(true);
+  const loadSalesData = async () => {
+    if (!range) {
+      setSalesData([]);
+      setSalesLoading(false);
+      return;
+    }
 
-        const res = await fetch(
-          `${DASHBOARD_URL}/sales-overview?range=${salesRange}`
+    try {
+      setSalesLoading(true);
+
+      const params = new URLSearchParams({
+        range: dateFilter,
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+      });
+
+      const res = await fetch(
+        `${DASHBOARD_URL}/sales-overview?${params.toString()}`
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          `Sales request failed with status ${res.status}`
         );
+      }
 
-        if (!res.ok) {
-          throw new Error(
-            `Sales request failed with status ${res.status}`
-          );
-        }
+      const json = await res.json();
 
-        const json = await res.json();
+      if (!json.success) {
+        throw new Error(
+          json.message || "Failed to load sales overview"
+        );
+      }
 
-        if (!json.success) {
-          throw new Error(
-            json.message ||
-              "Failed to load sales overview"
-          );
-        }
+      if (cancelled) return;
 
-        if (cancelled) {
-          return;
-        }
-
-        // ------------------------------------------------------
-        // NORMALIZE SALES DATA
-        // ------------------------------------------------------
-
-        const normalized = (
-          Array.isArray(json.data)
-            ? json.data
-            : []
-        ).map((point) => ({
-          label:
-            salesRange === "today"
-              ? point.label
-              : point.date
+      const normalized = (
+        Array.isArray(json.data) ? json.data : []
+      ).map((point) => ({
+        label:
+          dateFilter === "today"
+            ? point.label
+            : point.date
               ? new Date(
-                  point.date
-                ).toLocaleDateString(
-                  "en-IN",
-                  {
-                    day: "2-digit",
-                    month: "short",
-                  }
-                )
+                  `${point.date}T00:00:00+05:30`
+                ).toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                })
               : "",
+        sales: Number(point.sales) || 0,
+      }));
 
-          sales: Number(point.sales) || 0,
-        }));
+      setSalesData(normalized);
+    } catch (err) {
+      if (cancelled) return;
 
-        setSalesData(normalized);
-      } catch (err) {
-        if (cancelled) {
-          return;
-        }
-
-        console.error(
-          "Sales overview load error:",
-          err
-        );
-
-        setSalesData([]);
-      } finally {
-        if (!cancelled) {
-          setSalesLoading(false);
-        }
+      console.error("Sales overview load error:", err);
+      setSalesData([]);
+    } finally {
+      if (!cancelled) {
+        setSalesLoading(false);
       }
-    };
+    }
+  };
 
-    loadSalesData();
+  loadSalesData();
 
-    // ----------------------------------------------------------
-    // CLEANUP
-    // ----------------------------------------------------------
-
-    return () => {
-      cancelled = true;
-    };
-  }, [salesRange]);
+  return () => {
+    cancelled = true;
+  };
+}, [dateFilter, range?.fromDate, range?.toDate]);
 
   // ==========================================================
   // SALES RANGE CHANGE
@@ -457,17 +504,17 @@ const Dashboard = () => {
   // ==========================================================
   // SUMMARY CARDS
   // ==========================================================
-
+// console.log('summary:', summary?.totalVisitors, summary?.totalOrders, summary?.totalSales, summary?.totalProductsSold, summary?.newCustomers, summary?.totalProducts, summary?.averageSaleValue);
   const summaryCards = [
     {
-      key: "totalSales",
-      label: "Total Sales",
+      key: "totalVisits",
+      label: "Total Visitors",
       value: summary
-        ? formatINR(summary.totalSales)
+        ? Number(summary.totalVisitors || 0).toLocaleString("en-IN")
         : "—",
-      icon: ShoppingBag,
+      icon: Users,
+      navigation: "/admin/visitors",
     },
-
     {
       key: "totalOrders",
       label: "Total Orders",
@@ -477,17 +524,36 @@ const Dashboard = () => {
           ).toLocaleString("en-IN")
         : "—",
       icon: ClipboardList,
+      navigation: "/admin/orders",
     },
-
     {
-      key: "totalCustomers",
-      label: "Total Customers",
+      key: "totalSales",
+      label: "Total Sales",
+      value: summary
+        ? formatINR(summary.totalSales)
+        : "—",
+      icon: ShoppingBag,
+      navigation: "/admin/orders",
+    },
+    {
+      key: "totalProductsSold",
+      label: "Total Products Sold",
+      value: summary
+        ? Number(summary.totalProductsSold || 0).toLocaleString("en-IN")
+        : "—",
+      icon: ShoppingBag,
+      navigation: "/admin/catalog/products",
+    },
+    {
+      key: "totalNewCustomers",
+      label: "New Customers",
       value: summary
         ? Number(
-            summary.totalCustomers || 0
+            summary.newCustomers || 0
           ).toLocaleString("en-IN")
         : "—",
       icon: Users,
+      navigation: "/admin/customers",
     },
 
     {
@@ -499,6 +565,16 @@ const Dashboard = () => {
           ).toLocaleString("en-IN")
         : "—",
       icon: Box,
+      navigation: "/admin/catalog/products",
+    },
+    {
+      key: "averageSaleValue",
+      label: "Average Sale Value",
+      value: summary
+        ? formatINR(summary.averageSaleValue || 0)
+        : "—",
+      icon: ClipboardList,
+      navigation: "/admin/orders",
     },
   ];
 
@@ -541,6 +617,7 @@ const Dashboard = () => {
   // RENDER
   // ==========================================================
 
+  // console.log('summaryCards:', summaryCards);
   return (
     <div className="hz-dashboard">
 
@@ -656,10 +733,12 @@ const Dashboard = () => {
             label,
             value,
             icon: Icon,
+            navigation,
           }) => (
             <div
               className="hz-summary-card"
               key={key}
+              onClick={() => navigation && (navigate(navigation))}
             >
 
               <span className="hz-summary-card__icon">
@@ -710,7 +789,7 @@ const Dashboard = () => {
 
             <div className="hz-range-toggle">
 
-              {RANGE_OPTIONS.map(
+              {/* {RANGE_OPTIONS.map(
                 (opt) => (
                   <button
                     key={opt.key}
@@ -731,7 +810,7 @@ const Dashboard = () => {
                     {opt.label}
                   </button>
                 )
-              )}
+              )} */}
 
             </div>
 

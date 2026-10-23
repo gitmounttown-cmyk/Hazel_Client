@@ -52,6 +52,8 @@ import ScrollToTopButton from "../Pages/ScrolltoTopButton/ScrolltoTopButton";
 import VisitorList from "../Components/Visitors/VisitorList";
 import ProtectedRoute from "./ProtectedRoute";
 import VisitorTracker from "../Components/Visitors/VisitorTracker";
+import CustomerList from "../Pages/admin/customers/customers"; // Import the CustomerList component
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -144,7 +146,7 @@ const AppRoutes = () => {
             <Route path="/admin/videos" element={<Video />} />
             <Route path="/admin/inventory" element={<Inventory />} />
             <Route path="/admin/visitors" element={<VisitorList />} />
-
+            <Route path="/admin/customers" element={<CustomerList />} />
           </Route>
         </Route>
       </Routes>
