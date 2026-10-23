@@ -142,6 +142,29 @@ const RANGE_OPTIONS = [
 ];
 
 // ============================================================
+// DATE FILTER OPTIONS (header filter UI)
+// ============================================================
+
+const DATE_FILTER_OPTIONS = [
+  {
+    key: "today",
+    label: "Today",
+  },
+  {
+    key: "week",
+    label: "This Week",
+  },
+  {
+    key: "month",
+    label: "This Month",
+  },
+  {
+    key: "custom",
+    label: "Custom",
+  },
+];
+
+// ============================================================
 // CUSTOM SALES TOOLTIP
 // ============================================================
 
@@ -189,6 +212,16 @@ const Dashboard = () => {
   const [salesRange, setSalesRange] = useState("today");
 
   const [salesData, setSalesData] = useState([]);
+
+  // ==========================================================
+  // HEADER DATE FILTER STATE (UI)
+  // ==========================================================
+
+  const [dateFilter, setDateFilter] = useState("today");
+
+  const [customFrom, setCustomFrom] = useState("");
+
+  const [customTo, setCustomTo] = useState("");
 
   // ==========================================================
   // LOADING / ERROR STATE
@@ -533,8 +566,70 @@ const Dashboard = () => {
 
         </div>
 
-        <div className="hz-dashboard__date">
-          {formatDateHeading()}
+        {/* ====================================================
+            DATE FILTER (Today / This Week / This Month / Custom)
+        ==================================================== */}
+
+        <div className="hz-dashboard__filter">
+
+          <div className="hz-range-toggle hz-date-filter">
+
+            {DATE_FILTER_OPTIONS.map(
+              (opt) => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  className={
+                    "hz-range-toggle__btn" +
+                    (dateFilter === opt.key
+                      ? " hz-range-toggle__btn--active"
+                      : "")
+                  }
+                  onClick={() =>
+                    setDateFilter(opt.key)
+                  }
+                >
+                  {opt.label}
+                </button>
+              )
+            )}
+
+          </div>
+
+          {dateFilter === "custom" && (
+            <div className="hz-date-custom">
+
+              <input
+                type="date"
+                className="hz-date-custom__input"
+                value={customFrom}
+                max={customTo || undefined}
+                onChange={(event) =>
+                  setCustomFrom(
+                    event.target.value
+                  )
+                }
+              />
+
+              <span className="hz-date-custom__sep">
+                to
+              </span>
+
+              <input
+                type="date"
+                className="hz-date-custom__input"
+                value={customTo}
+                min={customFrom || undefined}
+                onChange={(event) =>
+                  setCustomTo(
+                    event.target.value
+                  )
+                }
+              />
+
+            </div>
+          )}
+
         </div>
 
       </div>

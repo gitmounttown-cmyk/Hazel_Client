@@ -63,14 +63,51 @@
   color: var(--hz-text-muted);
 }
 
-.hz-dashboard__date {
+/* --- Header date filter (Today / This Week / This Month / Custom) --- */
+.hz-dashboard__filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hz-date-filter {
   background: var(--hz-card-bg);
   border: 1px solid #faf4e2;
   border-radius: 10px;
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 4px;
+}
+
+.hz-date-filter .hz-range-toggle__btn {
+  white-space: nowrap;
+}
+
+.hz-date-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hz-card-bg);
+  border: 1px solid #faf4e2;
+  border-radius: 10px;
+  padding: 4px 10px;
+}
+
+.hz-date-custom__input {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
   font-weight: 600;
   color: var(--hz-text-dark);
+  padding: 6px 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.hz-date-custom__sep {
+  font-size: 12px;
+  color: var(--hz-text-muted);
 }
 
 /* --- Summary cards --- */
@@ -637,9 +674,25 @@
     font-size: 21px;
   }
 
-  .hz-dashboard__date {
-    font-size: 13px;
-    padding: 8px 12px;
+  .hz-dashboard__filter {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .hz-date-filter {
+    width: 100%;
+  }
+
+  .hz-date-filter .hz-range-toggle__btn {
+    flex: 1;
+    min-height: 38px; /* comfortable touch target */
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  .hz-date-custom {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .hz-summary-grid {
