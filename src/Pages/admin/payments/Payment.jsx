@@ -33,7 +33,7 @@ const Payment = () => {
 
       const params = {
         page,
-        limit: 20,
+        limit: 10,
       };
 
       if (status) {
@@ -49,9 +49,9 @@ const Payment = () => {
       }
 
       const response = await getAllPayments(params);
-
+      // console.log("Payment Fetch Response:", response);
       if (response.data.success) {
-        setPayments(response.data.data || []);
+        setPayments(response.data.payments || []);
         setPagination(response.data.pagination);
       }
     } catch (error) {
@@ -64,7 +64,7 @@ const Payment = () => {
   };
 
   useEffect(() => {
-    // fetchPayments();
+    fetchPayments();
   }, [page, status, gateway, paymentMethod]);
 
   const handleStatusChange = async (paymentId, newStatus) => {
@@ -80,7 +80,7 @@ const Payment = () => {
           response.data.message || "Payment status updated successfully",
         );
 
-        // fetchPayments();
+        fetchPayments();
       }
     } catch (error) {
       console.error("Status Update Error:", error);
@@ -270,7 +270,7 @@ const Payment = () => {
             <tbody>
               {payments.map((payment) => (
                 <tr key={payment._id}>
-                  <td>
+                  {/* <td>
                     <div className="payment-id">{payment.paymentId || "-"}</div>
 
                     {payment.transactionId && (
@@ -346,7 +346,51 @@ const Payment = () => {
                         Delete
                       </button>
                     </div>
+                  </td> */}
+
+                  <td>
+                    <div className="payment-id">
+                      {payment.paymentId || payment._id || "-"}
+                    </div>
+
+                    {payment.transactionId && (
+                      <small>TXN: {payment.transactionId}</small>
+                    )}
                   </td>
+
+                  <td>
+                    {payment.orderId?.orderNumber ||
+                      payment.orderId?._id ||
+                      payment.ecommerceOrder?._id ||
+                      "-"}
+                  </td>
+
+                  <td>
+                    <div>{payment.customerName || "-"}</div>
+                    <small>{payment.customerEmail || ""}</small>
+                    <small>{payment.customerMobile || ""}</small>
+                  </td>
+
+                  <td className="payment-amount">
+                    {formatAmount(payment.amount)}
+                  </td>
+
+                  <td>{payment.paymentMethod || "-"}</td>
+
+                  <td>{payment.gateway || "OTHER"}</td>
+
+                  <td>
+                    <span
+                      className={`payment-status payment-status--${getStatusClass(
+                        payment.status
+                      )}`}
+                    >
+                      {payment.status}
+                    </span>
+                  </td>
+
+                  <td>{formatDate(payment.createdAt)}</td>
+
                 </tr>
               ))}
             </tbody>
@@ -354,7 +398,7 @@ const Payment = () => {
         )}
       </div>
 
-      {!loading && pagination.totalPages > 1 && (
+      {!loading && pagination?.totalPages > 1 && (
         <div className="payment-pagination">
           <button
             disabled={page <= 1}
