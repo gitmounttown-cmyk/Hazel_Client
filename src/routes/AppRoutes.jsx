@@ -53,6 +53,7 @@ import VisitorList from "../Components/Visitors/VisitorList";
 import ProtectedRoute from "./ProtectedRoute";
 import VisitorTracker from "../Components/Visitors/VisitorTracker";
 import CustomerList from "../Pages/admin/customers/customers"; // Import the CustomerList component
+import AdminLogin from "../Pages/admin/auth/adminLogin"; // Import the CustomerList component
 
 const AppRoutes = () => {
   return (
@@ -99,9 +100,8 @@ const AppRoutes = () => {
       ================================= */}
 
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
-
-        <Route path="/admin/login" element={<Login />} />
 
         {/* =================================
           ADMIN ROUTES

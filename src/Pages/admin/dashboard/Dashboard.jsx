@@ -25,7 +25,7 @@ import {
 
 import "./Dashboard.css";
 import { getDashboardData } from "../../../Services/dashboardService";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // ============================================================
 // API CONFIGURATION
@@ -946,12 +946,11 @@ useEffect(() => {
               Recent Orders
             </h2>
 
-            <a
-              className="hz-card__link"
-              href="/admin/orders"
-            >
+            <Link
+              to="/admin/orders"
+              className="hz-card__link">
               View All
-            </a>
+            </Link>
 
           </div>
 
@@ -1074,12 +1073,12 @@ useEffect(() => {
               Top Selling Products
             </h2>
 
-            <a
+            <Link
+              to="/admin/catalog/products"
               className="hz-card__link"
-              href="/admin/catalog/products"
             >
               View All
-            </a>
+            </Link>
 
           </div>
 
@@ -1132,7 +1131,7 @@ useEffect(() => {
 
                           {product.image ? (
                             <img
-                              src={product.image}
+                              src={import.meta.env.VITE_UPLOAD_URL + product.image}
                               alt={
                                 product.product ||
                                 "Product"
@@ -1188,12 +1187,12 @@ useEffect(() => {
                 Inventory Status
               </h2>
 
-              <a
+              <Link
+                to="/admin/inventory"
                 className="hz-card__link"
-                href="/admin/inventory/stock"
               >
                 View All
-              </a>
+              </Link>
 
             </div>
 
@@ -1373,15 +1372,12 @@ useEffect(() => {
                 Recent Activities
               </h2>
 
-              <a
+              {/* <Link
+                to="/admin/activities"
                 className="hz-card__link"
-                href="#"
-                onClick={(event) =>
-                  event.preventDefault()
-                }
               >
                 View All
-              </a>
+              </Link> */}
 
             </div>
 

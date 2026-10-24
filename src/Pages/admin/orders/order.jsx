@@ -475,15 +475,15 @@ const Order = () => {
 
                       <td>
                         <div className="order-customer-name">
-                          {order.user?.name || "-"}
+                          {order.user?.name || order.shippingAddress?.name || "-"}
                         </div>
 
                         <div className="order-customer-email">
-                          {order.user?.email || ""}
+                          {order.user?.email || order.shippingAddress?.email || "-"}
                         </div>
 
                         <div className="order-customer-mobile">
-                          {order.user?.mobileNumber || ""}
+                          {order.user?.mobileNumber || order.shippingAddress?.mobileNumber || "-"}
                         </div>
                       </td>
 
