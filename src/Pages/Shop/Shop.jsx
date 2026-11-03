@@ -12,6 +12,7 @@ import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
 import Loader from "../../Components/Loader/Loader";
 import { updateNavbarCounts } from "../../utils/navbarCounts";
+import { lockBodyScroll } from "../../utils/scrollLock";
 
 const STATIC_FILTER_GROUPS = [
   {
@@ -152,6 +153,7 @@ function useShopData() {
         const rawData = response.data?.data || response.data?.products || [];
         // Filter active products only
         const activeProducts = Array.isArray(rawData) ? rawData.filter((p) => p.isActive) : [];
+        // const activeProducts = Array.isArray(rawData) ? rawData : [];
         const totalCount = response.data?.total || response.data?.totalProducts || activeProducts.length;
         setTotal(totalCount);
 
@@ -656,9 +658,19 @@ function ProductGrid({
 }) {
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
 
+  const mainRef = useRef(null);
+
+useEffect(() => {
+  document.body.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  });
+}, [page]);
+
   return (
-    <main className="main">
-      <div className="main-scroll">
+    <main className="main" ref={mainRef}>
+      {/* <div className="main-scroll"> */}
         <div className="sort-bar">
           <button className="mobile-filter-btn" onClick={onOpenMobileFilters}>
             Filters
@@ -711,8 +723,8 @@ function ProductGrid({
             <button
               onClick={() => {
                 setPage((prev) => Math.max(prev - 1, 1));
-                const mainScroll = document.querySelector(".main-scroll");
-                if (mainScroll) mainScroll.scrollTop = 0;
+                // const mainScroll = document.querySelector(".main-scroll");
+                // if (mainScroll) mainScroll.scrollTop = 0;
               }}
               disabled={page === 1}
               style={{
@@ -734,8 +746,8 @@ function ProductGrid({
             <button
               onClick={() => {
                 setPage((prev) => Math.min(prev + 1, totalPages));
-                const mainScroll = document.querySelector(".main-scroll");
-                if (mainScroll) mainScroll.scrollTop = 0;
+                // const mainScroll = document.querySelector(".main-scroll");
+                // if (mainScroll) mainScroll.scrollTop = 0;
               }}
               disabled={page >= totalPages}
               style={{
@@ -753,7 +765,7 @@ function ProductGrid({
             </button>
           </div>
         )}
-      </div>
+      {/* </div> */}
     </main>
   );
 }
@@ -830,6 +842,19 @@ export default function ShopPage() {
     fetchAllWishlist();
   }, []);
 
+
+
+useEffect(() => {
+  if (!mobileFiltersOpen) return;
+
+  return lockBodyScroll();
+}, [mobileFiltersOpen]);
+// console.log({
+//   inline: document.body.style.overflow,
+//   computed: getComputedStyle(document.body).overflow,
+//   htmlInline: document.documentElement.style.overflow,
+//   htmlComputed: getComputedStyle(document.documentElement).overflow,
+// });
 
   return (
     <div className="shop-page">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./Loader.css";
+import { lockBodyScroll } from "../../Utils/scrollLock";
 
 /* ------------------------------------------------------------------
    Two garments: Maxi dress and Nighty.
@@ -315,12 +316,10 @@ export default function Loader({
   useEffect(() => {
     if (!visible) return;
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // const previousOverflow = document.body.style.overflow;
+    // document.body.style.overflow = "hidden";
 
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
+    return lockBodyScroll();
   }, [visible]);
 
   if (!visible) return null;
