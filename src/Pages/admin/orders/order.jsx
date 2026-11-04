@@ -11,6 +11,7 @@ import OrderForm from "./orderForm";
 import "./Order.css";
 import { useMemo } from "react";
 import { useAdminSearch } from "../../../context/AdminSearchContext";
+import CommonModal  from "../../../Components/common/CommonModal";
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
@@ -50,6 +51,8 @@ const Order = () => {
   const [cancellationReason, setCancellationReason] = useState("");
 
   const [actionLoading, setActionLoading] = useState(false);
+
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     const { searchQuery } = useAdminSearch();
     useEffect(() => {
@@ -360,6 +363,7 @@ const Order = () => {
     return !nonCancelableStatuses.includes(orderStatus);
   };
 
+  // console.log("selected Orders:", selectedOrder);
   return (
     <div className="order-page">
       <div className="order-page-header">
@@ -442,9 +446,9 @@ const Order = () => {
                 <tr>
                   <th>S.No</th>
                   <th>Order Number</th>
-                  <th>Customer</th>
-                  <th>Items</th>
-                  <th>Total Amount</th>
+                  {/* <th>Customer</th> */}
+                  {/* <th>Items</th> */}
+                  {/* <th>Total Amount</th> */}
                   <th>Payment</th>
                   <th>Payment Status</th>
                   <th>Order Status</th>
@@ -473,7 +477,7 @@ const Order = () => {
                         </span>
                       </td>
 
-                      <td>
+                      {/* <td>
                         <div className="order-customer-name">
                           {order.user?.name || order.shippingAddress?.name || "-"}
                         </div>
@@ -485,13 +489,13 @@ const Order = () => {
                         <div className="order-customer-mobile">
                           {order.user?.mobileNumber || order.shippingAddress?.mobileNumber || "-"}
                         </div>
-                      </td>
+                      </td> */}
 
-                      <td>{order.items?.length || 0}</td>
+                      {/* <td>{order.items?.length || 0}</td> */}
 
-                      <td className="order-amount">
+                      {/* <td className="order-amount">
                         {formatAmount(order.totalAmount)}
-                      </td>
+                      </td> */}
 
                       <td>{order.paymentMethod || "-"}</td>
 
@@ -545,6 +549,17 @@ const Order = () => {
                             </option>
                             <option value="REFUNDED">Refunded</option>
                           </select>
+
+                            <button
+                            type="button"
+                            className="order-icon-btn view"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowDetailsModal(true);
+                            }}
+                          >
+                            View
+                          </button>
 
                           <button
                             type="button"
@@ -768,6 +783,244 @@ const Order = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {showDetailsModal && selectedOrder && (
+        <CommonModal
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedOrder(null);
+          }}
+          title={`Order Details - ${selectedOrder.orderNumber || ""}`}
+          width="800px"
+        >
+          <div className="order-details">
+
+            {/* Customer Details */}
+            <div className="order-detail-section">
+              <h3>Customer Details</h3>
+
+              <div className="order-detail-grid">
+                <div>
+                  <label>Customer Name</label>
+                  <p>
+                    {selectedOrder.user?.name ||
+                      selectedOrder.shippingAddress?.name ||
+                      "Guest Customer"}
+                  </p>
+                </div>
+
+                <div>
+                  <label>Mobile Number</label>
+                  <p>
+                    {selectedOrder.user?.mobileNumber ||
+                      selectedOrder.shippingAddress?.mobileNumber ||
+                      "-"}
+                  </p>
+                </div>
+
+                <div>
+                  <label>Email</label>
+                  <p>{selectedOrder.user?.email || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Order Date</label>
+                  <p>{formatDate(selectedOrder.createdAt)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping Address */}
+            <div className="order-detail-section">
+              <h3>Shipping Address</h3>
+
+              <p>
+                {[
+                  selectedOrder.shippingAddress?.addressLine1,
+                  selectedOrder.shippingAddress?.addressLine2,
+                  selectedOrder.shippingAddress?.city,
+                  selectedOrder.shippingAddress?.district,
+                  selectedOrder.shippingAddress?.state,
+                  selectedOrder.shippingAddress?.pincode,
+                  selectedOrder.shippingAddress?.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+              </p>
+            </div>
+
+            {/* Ordered Items */}
+            {/* <div className="order-detail-section">
+              <h3>Ordered Items</h3>
+
+              <div className="order-detail-items">
+                {selectedOrder.items?.map((item) => (
+                  <div className="order-detail-item" key={item._id}>
+                    <div>
+                      {item.productName && <strong>{item.productName}</strong>}
+                      {item.sku && <p>SKU: {item.sku}</p>}
+                      {item.size && <p>Size: {item.size} | Color: {item.color}</p>}
+                      {item.quantity && <p>Quantity: {item.quantity}</p>}
+                    </div>
+
+                    <strong>{formatAmount(item.totalPrice)}</strong>
+                  </div>
+                ))}
+              </div>
+            </div> */}
+            {/* Ordered Items */}
+            <div className="order-detail-section">
+              <h3>Ordered Items</h3>
+
+              <div className="order-detail-items">
+                {selectedOrder.items?.map((item) => (
+                  <div className="order-detail-item" key={item._id}>
+
+                    <div className="order-detail-product">
+                      <img
+                        src={
+                          item.image
+                            ? `${import.meta.env.VITE_UPLOAD_URL}${item.image}`
+                            : "/defaultimage.png"
+                        }
+                        alt={item.productName || "Product"}
+                        className="order-detail-product-image"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/defaultimage.png";
+                        }}
+                      />
+
+                      <div className="order-detail-product-info">
+                        <strong>{item.productName || "Product"}</strong>
+                        {item.sku && <p>SKU: {item.sku}</p>}
+                        <p>
+                          Size: {item.size || "-"} | Color: {item.color || "-"}
+                        </p>
+                        <p>Quantity: {item.quantity || 0}</p>
+                      </div>
+                    </div>
+
+                    <strong>{formatAmount(item.totalPrice)}</strong>
+
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Details */}
+            <div className="order-detail-section">
+              <h3>Payment Details</h3>
+
+              <div className="order-detail-grid">
+                <div>
+                  <label>Payment Method</label>
+                  <p>{selectedOrder.paymentMethod || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Payment Status</label>
+                  <p>{selectedOrder.paymentStatus || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Razorpay Order ID</label>
+                  <p>{selectedOrder.razorpayOrderId || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Razorpay Payment ID</label>
+                  <p>{selectedOrder.razorpayPaymentId || "-"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="order-detail-section">
+              <h3>Order Summary</h3>
+
+              <div className="order-summary-row">
+                <span>Subtotal</span>
+                <span>{formatAmount(selectedOrder.subtotal)}</span>
+              </div>
+
+              <div className="order-summary-row">
+                <span>Discount</span>
+                <span>{formatAmount(selectedOrder.discountAmount)}</span>
+              </div>
+
+              <div className="order-summary-row">
+                <span>Shipping Charge</span>
+                <span>{formatAmount(selectedOrder.shippingCharge)}</span>
+              </div>
+
+              <div className="order-summary-row">
+                <span>Tax</span>
+                <span>{formatAmount(selectedOrder.taxAmount)}</span>
+              </div>
+
+              <div className="order-summary-row total">
+                <strong>Total Amount</strong>
+                <strong>{formatAmount(selectedOrder.totalAmount)}</strong>
+              </div>
+            </div>
+
+            {/* Tracking Details */}
+            <div className="order-detail-section">
+              <h3>Delivery Details</h3>
+
+              <div className="order-detail-grid">
+                <div>
+                  <label>Order Status</label>
+                  <p>{selectedOrder.orderStatus || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Courier Name</label>
+                  <p>{selectedOrder.courierName || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Tracking Number</label>
+                  <p>{selectedOrder.trackingNumber || "-"}</p>
+                </div>
+
+                <div>
+                  <label>Expected Delivery</label>
+                  <p>{formatDate(selectedOrder.expectedDeliveryDate)}</p>
+                </div>
+              </div>
+
+              {selectedOrder.trackingUrl && (
+                <a
+                  href={selectedOrder.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Track Shipment
+                </a>
+              )}
+            </div>
+
+            {/* Notes */}
+            {(selectedOrder.customerNote || selectedOrder.adminNote) && (
+              <div className="order-detail-section">
+                <h3>Notes</h3>
+
+                {selectedOrder.customerNote && (
+                  <p>Customer Note: {selectedOrder.customerNote}</p>
+                )}
+
+                {selectedOrder.adminNote && (
+                  <p>Admin Note: {selectedOrder.adminNote}</p>
+                )}
+              </div>
+            )}
+
+          </div>
+        </CommonModal>
       )}
     </div>
   );
