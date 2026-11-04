@@ -26,7 +26,7 @@ const Order = () => {
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
-    limit: 20,
+    limit: 10,
     totalPages: 1,
   });
 
@@ -53,6 +53,12 @@ const Order = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const [appliedFromDate, setAppliedFromDate] = useState("");
+  const [appliedToDate, setAppliedToDate] = useState("");
 
     const { searchQuery } = useAdminSearch();
     useEffect(() => {
@@ -89,7 +95,7 @@ const Order = () => {
 
       const params = {
         page,
-        limit: 20,
+        limit: 10,
         search: searchQuery.trim(),
       };
 
@@ -105,6 +111,13 @@ const Order = () => {
         params.search = search.trim();
       }
 
+      if(appliedFromDate) {
+        params.fromDate = appliedFromDate;
+      }
+      if(appliedToDate) {
+        params.toDate = appliedToDate;
+      }
+
       const response = await getAllOrders(params);
 
       if (response.data.success) {
@@ -114,7 +127,7 @@ const Order = () => {
           response.data.pagination || {
             total: 0,
             page: 1,
-            limit: 20,
+            limit: 10,
             totalPages: 1,
           },
         );
@@ -130,7 +143,7 @@ const Order = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [page, status, paymentStatus]);
+  }, [page, status, paymentStatus, searchQuery, appliedFromDate, appliedToDate]);
 
   const handleAdd = () => {
     setShowForm(true);
@@ -163,6 +176,13 @@ const Order = () => {
   const handleRefresh = () => {
     setMessage("");
     setError("");
+    setSearch("");
+    setStatus("");
+    setPaymentStatus("");
+    setAppliedFromDate("");
+    setAppliedToDate("");
+    setFromDate("");
+    setToDate("");
     fetchOrders();
   };
 
@@ -363,6 +383,26 @@ const Order = () => {
     return !nonCancelableStatuses.includes(orderStatus);
   };
 
+  const handleDateFilter = () => {
+  if (fromDate && toDate && fromDate > toDate) {
+    setError("From date cannot be later than To date");
+    return;
+  }
+
+  setError("");
+  setPage(1);
+  setAppliedFromDate(fromDate);
+  setAppliedToDate(toDate);
+};
+
+const handleClearDateFilter = () => {
+  setFromDate("");
+  setToDate("");
+  setAppliedFromDate("");
+  setAppliedToDate("");
+  setPage(1);
+};
+
   // console.log("selected Orders:", selectedOrder);
   return (
     <div className="order-page">
@@ -378,7 +418,7 @@ const Order = () => {
 
       {error && <div className="order-error">{error}</div>}
 
-      <div className="order-filters">
+      {/* <div className="order-filters">
         <form className="order-search-form" onSubmit={handleSearch}>
           <input
             type="text"
@@ -427,6 +467,44 @@ const Order = () => {
           <option value="PARTIALLY_REFUNDED">Partially Refunded</option>
         </select>
 
+        <div className="order-date-filters">
+          <div className="order-date-group">
+            <label>From Date</label>
+            <input
+              type="date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(e) => setFromDate(e.target.value)}
+            />
+          </div>
+
+          <div className="order-date-group">
+            <label>To Date</label>
+            <input
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => setToDate(e.target.value)}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="order-date-apply"
+            onClick={handleDateFilter}
+          >
+            Apply
+          </button>
+
+          <button
+            type="button"
+            className="order-date-clear"
+            onClick={handleClearDateFilter}
+          >
+            Clear
+          </button>
+        </div>
+
         <button
           type="button"
           className="order-refresh-btn"
@@ -434,7 +512,121 @@ const Order = () => {
         >
           Refresh
         </button>
+      </div> */}
+
+      
+<div className="order-filters">
+
+  {/* First Row */}
+  <div className="order-filter-row">
+
+    <form className="order-search-form" onSubmit={handleSearch}>
+      <input
+        type="text"
+        placeholder="Search Order Number"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <button type="submit">Search</button>
+    </form>
+
+    <select
+      className="order-filter-select"
+      value={status}
+      onChange={(e) => {
+        setPage(1);
+        setStatus(e.target.value);
+      }}
+    >
+      <option value="">All Order Status</option>
+      <option value="PENDING">Pending</option>
+      <option value="CONFIRMED">Confirmed</option>
+      <option value="PROCESSING">Processing</option>
+      <option value="SHIPPED">Shipped</option>
+      <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
+      <option value="DELIVERED">Delivered</option>
+      <option value="CANCELLED">Cancelled</option>
+      <option value="RETURN_REQUESTED">Return Requested</option>
+      <option value="RETURNED">Returned</option>
+      <option value="REFUND_REQUESTED">Refund Requested</option>
+      <option value="REFUNDED">Refunded</option>
+    </select>
+
+    <select
+      className="order-filter-select"
+      value={paymentStatus}
+      onChange={(e) => {
+        setPage(1);
+        setPaymentStatus(e.target.value);
+      }}
+    >
+      <option value="">All Payment Status</option>
+      <option value="PENDING">Pending</option>
+      <option value="PROCESSING">Processing</option>
+      <option value="PAID">Paid</option>
+      <option value="FAILED">Failed</option>
+      <option value="REFUNDED">Refunded</option>
+      <option value="PARTIALLY_REFUNDED">Partially Refunded</option>
+    </select>
+
+    <button
+      type="button"
+      className="order-refresh-btn"
+      onClick={handleRefresh}
+    >
+      Refresh
+    </button>
+
+  </div>
+
+  {/* Second Row - Date Filters */}
+  <div className="order-date-filter-row">
+
+    <div className="order-date-filters">
+
+      <div className="order-date-group">
+        <label>From Date</label>
+        <input
+          type="date"
+          value={fromDate}
+          max={toDate || undefined}
+          onChange={(e) => setFromDate(e.target.value)}
+        />
       </div>
+
+      <div className="order-date-group">
+        <label>To Date</label>
+        <input
+          type="date"
+          value={toDate}
+          min={fromDate || undefined}
+          onChange={(e) => setToDate(e.target.value)}
+        />
+      </div>
+
+      <button
+        type="button"
+        className="order-date-apply"
+        onClick={handleDateFilter}
+      >
+        Apply
+      </button>
+
+      <button
+        type="button"
+        className="order-date-clear"
+        onClick={handleClearDateFilter}
+      >
+        Clear
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 
       {loading ? (
         <div className="order-loading">Loading orders...</div>
@@ -448,7 +640,7 @@ const Order = () => {
                   <th>Order Number</th>
                   {/* <th>Customer</th> */}
                   {/* <th>Items</th> */}
-                  {/* <th>Total Amount</th> */}
+                  <th>Total Amount</th>
                   <th>Payment</th>
                   <th>Payment Status</th>
                   <th>Order Status</th>
@@ -493,10 +685,9 @@ const Order = () => {
 
                       {/* <td>{order.items?.length || 0}</td> */}
 
-                      {/* <td className="order-amount">
+                      <td className="order-amount">
                         {formatAmount(order.totalAmount)}
-                      </td> */}
-
+                      </td>
                       <td>{order.paymentMethod || "-"}</td>
 
                       <td>
