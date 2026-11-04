@@ -460,7 +460,7 @@
   cursor: not-allowed;
 }
 
-//order details page
+/* order details page */
 .order-details {
   display: flex;
   flex-direction: column;
