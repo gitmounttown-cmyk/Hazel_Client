@@ -59,7 +59,7 @@ const Order = () => {
 
   const [appliedFromDate, setAppliedFromDate] = useState("");
   const [appliedToDate, setAppliedToDate] = useState("");
-
+const [refreshKey, setRefreshKey] = useState(0);
     const { searchQuery } = useAdminSearch();
     useEffect(() => {
     setPage(1);
@@ -143,7 +143,7 @@ const Order = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [page, status, paymentStatus, searchQuery, appliedFromDate, appliedToDate]);
+  }, [page, status, paymentStatus, searchQuery, appliedFromDate, appliedToDate, refreshKey]);
 
   const handleAdd = () => {
     setShowForm(true);
@@ -173,18 +173,36 @@ const Order = () => {
     }, 0);
   };
 
+  // const handleRefresh = () => {
+  //   setMessage("");
+  //   setError("");
+  //   setSearch("");
+  //   setStatus("");
+  //   setPaymentStatus("");
+  //   setAppliedFromDate("");
+  //   setAppliedToDate("");
+  //   setFromDate("");
+  //   setToDate("");
+  //   fetchOrders();
+  // };
+
   const handleRefresh = () => {
-    setMessage("");
-    setError("");
-    setSearch("");
-    setStatus("");
-    setPaymentStatus("");
-    setAppliedFromDate("");
-    setAppliedToDate("");
-    setFromDate("");
-    setToDate("");
-    fetchOrders();
-  };
+  setMessage("");
+  setError("");
+
+  setSearch("");
+  setStatus("");
+  setPaymentStatus("");
+
+  setAppliedFromDate("");
+  setAppliedToDate("");
+  setFromDate("");
+  setToDate("");
+
+  setPage(1);
+
+  setRefreshKey((prevKey) => prevKey + 1); // Increment the refresh key to trigger a re-fetch
+};
 
   const handleStatusChange = async (orderId, orderStatus) => {
     try {
