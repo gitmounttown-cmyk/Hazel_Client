@@ -586,7 +586,6 @@ useEffect(() => {
       {error && <div className="hz-dashboard__error">{error}</div>}
 
       <div className="hz-summary-grid">
-
         {summaryCards.map(
           ({
             key,
@@ -598,15 +597,24 @@ useEffect(() => {
             <div
               className="hz-summary-card"
               key={key}
-              onClick={() => navigation && (navigate(navigation))}
+              onClick={() => navigation && navigate(navigation)}
             >
-
               <span className="hz-summary-card__icon">
                 <Icon size={22} />
               </span>
+              <div className="hz-summary-card__text">
+                <span className="hz-summary-card__label">{label}</span>
+                <span className="hz-summary-card__value">
+                  {loading ? (
+                    <span className="hz-skeleton hz-skeleton--value" />
+                  ) : (
+                    value
+                  )}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
 
       <div className="hz-dashboard__row">
@@ -775,46 +783,21 @@ useEffect(() => {
                   <td colSpan={3} className="hz-table__empty">No sales yet</td>
                 </tr>
               ) : (
-                topProducts.map(
-                  (product) => (
-                    <tr
-                      key={
-                        product.productId ||
-                        product._id ||
-                        product.product
-                      }
-                    >
-
-                      <td className="hz-table__product">
-
-                        <span className="hz-table__thumb">
-
-                          {product.image ? (
-                            <img
-                              src={import.meta.env.VITE_UPLOAD_URL + product.image}
-                              alt={
-                                product.product ||
-                                "Product"
-                              }
-                            />
-                          ) : (
-                            <span className="hz-table__thumb-fallback" />
-                          )}
-
-                        </span>
-
-                        {product.product ||
-                          "Unknown Product"}
-
-                      </td>
-
-                      <td>
-                        {product.sold || 0}
-                      </td>
-
-                      <td>
-                        {formatINR(
-                          product.revenue
+                topProducts.map((product) => (
+                  <tr key={product.productId || product._id || product.product}>
+                    <td className="hz-table__product">
+                      <span className="hz-table__thumb">
+                        {product.image ? (
+                          <img
+                            src={
+                              product.image.startsWith("http")
+                                ? product.image
+                                : (import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004") + (product.image.startsWith("/") ? "" : "/") + product.image
+                            }
+                            alt={product.product || "Product"}
+                          />
+                        ) : (
+                          <span className="hz-table__thumb-fallback" />
                         )}
                       </span>
                       {product.product || "Unknown Product"}
