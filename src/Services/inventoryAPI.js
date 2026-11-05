@@ -1,16 +1,22 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/inventory"; // Adjust port/URL as per your Express config
+const API_BASE_URL =
+  import.meta.env?.VITE_API_URL || "http://localhost:5004/api";
 
-// Attach Authorization Token if required by verifyToken middleware
-const getAuthHeaders = () => ({
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-});
+const API_URL = `${API_BASE_URL}/inventory`;
+
+// Attach Authorization Token
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("hazelToken") || localStorage.getItem("token");
+  return {
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  };
+};
 
 export const fetchInventory = async (params = {}) => {
-  const { page = 1, limit = 8, search = "", status = "" } = params;
+  const { page = 1, limit = 20, search = "", status = "" } = params;
   const response = await axios.get(`${API_URL}/all`, {
     ...getAuthHeaders(),
     params: { page, limit, search, status },
@@ -18,24 +24,33 @@ export const fetchInventory = async (params = {}) => {
   return response.data;
 };
 
-export const fetchStockOverview = async () => {
-  const response = await axios.get(`${API_URL}/overview`, getAuthHeaders());
+export const fetchInventorySummary = async () => {
+  const response = await axios.get(`${API_URL}/summary`, getAuthHeaders());
   return response.data;
 };
 
-export const stockIn = async (productId, quantity, reason) => {
-  const response = await axios.post(
-    `${API_URL}/stock-in`,
-    { productId, quantity, reason },
+export const updateStock = async (inventoryId, { variantId, sizeId, stockQuantity }) => {
+  const response = await axios.put(
+    `${API_URL}/${inventoryId}/stock`,
+    { variantId, sizeId, stockQuantity },
     getAuthHeaders()
   );
   return response.data;
 };
 
-export const stockOut = async (productId, quantity, reason) => {
+export const syncProductInventory = async (productId) => {
   const response = await axios.post(
-    `${API_URL}/stock-out`,
-    { productId, quantity, reason },
+    `${API_URL}/product/${productId}/sync`,
+    {},
+    getAuthHeaders()
+  );
+  return response.data;
+};
+
+export const syncAllInventory = async () => {
+  const response = await axios.post(
+    `${API_URL}/sync-all`,
+    {},
     getAuthHeaders()
   );
   return response.data;
