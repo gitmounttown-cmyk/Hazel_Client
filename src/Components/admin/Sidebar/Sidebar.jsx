@@ -301,6 +301,7 @@ const navConfig = [
       { label: "Videos", icon: CreditCard, path: "/admin/videos" },
     ],
   },
+  { label: "Customers", icon: Users, path: "/admin/customers" },
   { label: "Orders", icon: ClipboardList, path: "/admin/orders" },
   { label: "Visitors", icon: Eye, path: "/admin/visitors" }, // <-- Placed right below Orders for high visibility
   { label: "Address", icon: Users, path: "/admin/addresses" },

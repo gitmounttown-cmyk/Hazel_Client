@@ -52,7 +52,7 @@ export const createCashfreePayment = (data) =>
   axiosInstance.post("/payments/create", data);
 
 export const getAllPayments = (params = {}) =>
-  axiosInstance.get("/payments/all", { params });
+  axiosInstance.get("/payments/", { params });
 
 export const getPaymentByOrder = (orderId) =>
   axiosInstance.get(`/payments/order/${orderId}`);

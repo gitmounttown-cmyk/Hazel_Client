@@ -25,6 +25,8 @@ import {
 } from "recharts";
 
 import "./Dashboard.css";
+import { getDashboardData } from "../../../Services/dashboardService";
+import { Link, useNavigate } from "react-router-dom";
 
 // ============================================================
 // API CONFIGURATION
@@ -102,6 +104,33 @@ const RANGE_OPTIONS = [
   { key: "month", label: "Month" },
 ];
 
+// ============================================================
+// DATE FILTER OPTIONS (header filter UI)
+// ============================================================
+
+const DATE_FILTER_OPTIONS = [
+  {
+    key: "today",
+    label: "Today",
+  },
+  {
+    key: "week",
+    label: "This Week",
+  },
+  {
+    key: "month",
+    label: "This Month",
+  },
+  {
+    key: "custom",
+    label: "Custom",
+  },
+];
+
+// ============================================================
+// CUSTOM SALES TOOLTIP
+// ============================================================
+
 const SalesTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
   return (
@@ -113,7 +142,10 @@ const SalesTooltip = ({ active, payload, label }) => {
 };
 
 const Dashboard = () => {
-  const location = useLocation(); // Tracks page navigation to trigger fresh fetches
+  const navigate = useNavigate();
+  // ==========================================================
+  // DASHBOARD STATE
+  // ==========================================================
 
   const [summary, setSummary] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
@@ -124,155 +156,336 @@ const Dashboard = () => {
   const [salesRange, setSalesRange] = useState("today");
   const [salesData, setSalesData] = useState([]);
 
+  // ==========================================================
+  // HEADER DATE FILTER STATE (UI)
+  // ==========================================================
+
+  const [dateFilter, setDateFilter] = useState("today");
+
+  const [customFrom, setCustomFrom] = useState("");
+
+  const [customTo, setCustomTo] = useState("");
+
+  // ==========================================================
+  // LOADING / ERROR STATE
+  // ==========================================================
+
   const [loading, setLoading] = useState(true);
   const [salesLoading, setSalesLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [dashboardData, setDashboardData] = useState(null);
   // ==========================================================
   // DYNAMIC DATA LOADER (Triggers on mount, route change, or tab focus)
   // ==========================================================
 
-  useEffect(() => {
-    let cancelled = false;
+  const getDashboardDateRange = (filter, customFrom, customTo) => {
+  const now = new Date();
 
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("hazelToken");
-        const res = await fetch(`${DASHBOARD_URL}/all`, {
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
+  // Use local calendar dates.
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
-        if (!res.ok) {
-          throw new Error(`Dashboard request failed with status ${res.status}`);
-        }
+    return `${year}-${month}-${day}`;
+  };
 
-        const json = await res.json();
-        if (!json.success) {
-          throw new Error(json.message || "Failed to load dashboard");
-        }
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
 
-        if (cancelled) return;
+  const end = new Date(start);
 
-        const data = json.data || {};
-        setSummary(data.summary || null);
-        setRecentOrders(Array.isArray(data.recentOrders) ? data.recentOrders : []);
-        setTopProducts(Array.isArray(data.topSellingProducts) ? data.topSellingProducts : []);
-        setInventory(data.inventory || null);
-        setActivities(Array.isArray(data.recentActivities) ? data.recentActivities : []);
-        setError(null);
-      } catch (err) {
-        if (cancelled) return;
-        console.error("Dashboard load error:", err);
-        setError(err.message || "Something went wrong loading the dashboard.");
-      } finally {
-        if (!cancelled) setLoading(false);
+  if (filter === "today") {
+    return {
+      fromDate: formatDate(start),
+      toDate: formatDate(start),
+    };
+  }
+
+  if (filter === "week") {
+    // Monday through today.
+    const day = start.getDay();
+    const daysSinceMonday = (day + 6) % 7;
+
+    start.setDate(start.getDate() - daysSinceMonday);
+
+    return {
+      fromDate: formatDate(start),
+      toDate: formatDate(end),
+    };
+  }
+
+  if (filter === "month") {
+    start.setDate(1);
+
+    return {
+      fromDate: formatDate(start),
+      toDate: formatDate(end),
+    };
+  }
+
+  if (filter === "custom") {
+    if (!customFrom || !customTo) {
+      return null;
+    }
+
+    return {
+      fromDate: customFrom,
+      toDate: customTo,
+    };
+  }
+
+  return null;
+};
+
+const range = getDashboardDateRange(
+  dateFilter,
+  customFrom,
+  customTo
+);
+
+
+useEffect(() => {
+  let cancelled = false;
+
+  const fetchDashboard = async () => {
+    // For custom range, wait until both dates are selected.
+    if (!range) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await getDashboardData(
+        range.fromDate,
+        range.toDate
+      );
+
+      // console.log("Selected range:", range);
+      // console.log("Dashboard response:", response);
+
+      if (!response?.success) {
+        throw new Error(
+          response?.message || "Failed to load dashboard"
+        );
       }
-    };
 
-    loadDashboardData();
+      if (cancelled) {
+        return;
+      }
 
-    // Auto-refresh when user switches back to this browser tab
-    const handleFocus = () => {
-      loadDashboardData();
-    };
-    window.addEventListener("focus", handleFocus);
+      const data = response.data || {};
 
-    return () => {
-      cancelled = true;
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [location.pathname]); // Re-fetches every time you navigate back to the dashboard
+      // Normalize summary values.
+      const summaryData = data.summary || {};
 
-  // ==========================================================
-  // LOAD SALES OVERVIEW
-  // ==========================================================
+      const normalizedSummary = {
+        totalVisitors: Number(summaryData.totalVisitors) || 0,
+        totalOrders: Number(summaryData.totalOrders) || 0,
+        totalSales: Number(summaryData.totalSales) || 0,
+        totalCustomers: Number(summaryData.totalCustomers) || 0,
+        totalProducts: Number(summaryData.totalProducts) || 0,
+        totalProductsSold: Number(summaryData.totalProductsSold) || 0,
+        newCustomers: Number(summaryData.newCustomers) || 0,
+        averageSaleValue: Number(summaryData.averageSaleValue) || 0,
+      };
+
+      // console.log("Normalized summary:", normalizedSummary);
+
+      setSummary(normalizedSummary);
+
+      setRecentOrders(
+        Array.isArray(data.recentOrders)
+          ? data.recentOrders
+          : []
+      );
+
+      setTopProducts(
+        Array.isArray(data.topSellingProducts)
+          ? data.topSellingProducts
+          : []
+      );
+
+      setInventory(data.inventory || null);
+
+      setActivities(
+        Array.isArray(data.recentActivities)
+          ? data.recentActivities
+          : []
+      );
+    } catch (error) {
+      if (cancelled) {
+        return;
+      }
+
+      console.error("Dashboard fetch error:", error);
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  };
+
+  fetchDashboard();
+
+  return () => {
+    cancelled = true;
+  };
+}, [range?.fromDate, range?.toDate]);
+
 
   useEffect(() => {
-    let cancelled = false;
+  let cancelled = false;
 
-    const loadSalesData = async () => {
-      try {
-        setSalesLoading(true);
-        const token = localStorage.getItem("hazelToken");
-        const res = await fetch(`${DASHBOARD_URL}/sales-overview?range=${salesRange}`, {
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
+  const loadSalesData = async () => {
+    if (!range) {
+      setSalesData([]);
+      setSalesLoading(false);
+      return;
+    }
 
-        if (!res.ok) {
-          throw new Error(`Sales request failed with status ${res.status}`);
-        }
+    try {
+      setSalesLoading(true);
 
-        const json = await res.json();
-        if (!json.success) {
-          throw new Error(json.message || "Failed to load sales overview");
-        }
+      const params = new URLSearchParams({
+        range: dateFilter,
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+      });
 
-        if (cancelled) return;
+      const res = await fetch(
+        `${DASHBOARD_URL}/sales-overview?${params.toString()}`
+      );
 
-        const normalized = (Array.isArray(json.data) ? json.data : []).map((point) => ({
-          label:
-            salesRange === "today"
-              ? point.label
-              : point.date
-              ? new Date(point.date).toLocaleDateString("en-IN", {
+      if (!res.ok) {
+        throw new Error(
+          `Sales request failed with status ${res.status}`
+        );
+      }
+
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(
+          json.message || "Failed to load sales overview"
+        );
+      }
+
+      if (cancelled) return;
+
+      const normalized = (
+        Array.isArray(json.data) ? json.data : []
+      ).map((point) => ({
+        label:
+          dateFilter === "today"
+            ? point.label
+            : point.date
+              ? new Date(
+                  `${point.date}T00:00:00+05:30`
+                ).toLocaleDateString("en-IN", {
                   day: "2-digit",
                   month: "short",
                 })
               : "",
-          sales: Number(point.sales) || 0,
-        }));
+        sales: Number(point.sales) || 0,
+      }));
 
-        setSalesData(normalized);
-      } catch (err) {
-        if (cancelled) return;
-        console.error("Sales overview load error:", err);
-        setSalesData([]);
-      } finally {
-        if (!cancelled) setSalesLoading(false);
+      setSalesData(normalized);
+    } catch (err) {
+      if (cancelled) return;
+
+      console.error("Sales overview load error:", err);
+      setSalesData([]);
+    } finally {
+      if (!cancelled) {
+        setSalesLoading(false);
       }
-    };
+    }
+  };
 
-    loadSalesData();
+  loadSalesData();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [salesRange]);
+  return () => {
+    cancelled = true;
+  };
+}, [dateFilter, range?.fromDate, range?.toDate]);
 
   const handleRangeChange = (key) => {
     if (key === salesRange) return;
     setSalesRange(key);
   };
 
+  // ==========================================================
+  // SUMMARY CARDS
+  // ==========================================================
+// console.log('summary:', summary?.totalVisitors, summary?.totalOrders, summary?.totalSales, summary?.totalProductsSold, summary?.newCustomers, summary?.totalProducts, summary?.averageSaleValue);
   const summaryCards = [
     {
-      key: "totalSales",
-      label: "Total Sales",
-      value: summary ? formatINR(summary.totalSales) : "—",
-      icon: ShoppingBag,
+      key: "totalVisits",
+      label: "Total Visitors",
+      value: summary
+        ? Number(summary.totalVisitors || 0).toLocaleString("en-IN")
+        : "—",
+      icon: Users,
+      navigation: "/admin/visitors",
     },
     {
       key: "totalOrders",
       label: "Total Orders",
       value: summary ? Number(summary.totalOrders || 0).toLocaleString("en-IN") : "—",
       icon: ClipboardList,
+      navigation: "/admin/orders",
     },
     {
-      key: "totalCustomers",
-      label: "Total Customers",
-      value: summary ? Number(summary.totalCustomers || 0).toLocaleString("en-IN") : "—",
+      key: "totalSales",
+      label: "Total Sales",
+      value: summary
+        ? formatINR(summary.totalSales)
+        : "—",
+      icon: ShoppingBag,
+      navigation: "/admin/orders",
+    },
+    {
+      key: "totalProductsSold",
+      label: "Total Products Sold",
+      value: summary
+        ? Number(summary.totalProductsSold || 0).toLocaleString("en-IN")
+        : "—",
+      icon: ShoppingBag,
+      navigation: "/admin/catalog/products",
+    },
+    {
+      key: "totalNewCustomers",
+      label: "New Customers",
+      value: summary
+        ? Number(
+            summary.newCustomers || 0
+          ).toLocaleString("en-IN")
+        : "—",
       icon: Users,
+      navigation: "/admin/customers",
     },
     {
       key: "totalProducts",
       label: "Total Products",
       value: summary ? Number(summary.totalProducts || 0).toLocaleString("en-IN") : "—",
       icon: Box,
+      navigation: "/admin/catalog/products",
+    },
+    {
+      key: "averageSaleValue",
+      label: "Average Sale Value",
+      value: summary
+        ? formatINR(summary.averageSaleValue || 0)
+        : "—",
+      icon: ClipboardList,
+      navigation: "/admin/orders",
     },
   ];
 
@@ -284,6 +497,11 @@ const Dashboard = () => {
       ]
     : [];
 
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
+  // console.log('summaryCards:', summaryCards);
   return (
     <div className="hz-dashboard">
       <div className="hz-dashboard__heading">
@@ -296,21 +514,95 @@ const Dashboard = () => {
             <p>Welcome to Hazel E-commerce Admin Panel</p>
           </div>
         </div>
-        <div className="hz-dashboard__date">{formatDateHeading()}</div>
+
+        {/* ====================================================
+            DATE FILTER (Today / This Week / This Month / Custom)
+        ==================================================== */}
+
+        <div className="hz-dashboard__filter">
+
+          <div className="hz-range-toggle hz-date-filter">
+
+            {DATE_FILTER_OPTIONS.map(
+              (opt) => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  className={
+                    "hz-range-toggle__btn" +
+                    (dateFilter === opt.key
+                      ? " hz-range-toggle__btn--active"
+                      : "")
+                  }
+                  onClick={() =>
+                    setDateFilter(opt.key)
+                  }
+                >
+                  {opt.label}
+                </button>
+              )
+            )}
+
+          </div>
+
+          {dateFilter === "custom" && (
+            <div className="hz-date-custom">
+
+              <input
+                type="date"
+                className="hz-date-custom__input"
+                value={customFrom}
+                max={customTo || undefined}
+                onChange={(event) =>
+                  setCustomFrom(
+                    event.target.value
+                  )
+                }
+              />
+
+              <span className="hz-date-custom__sep">
+                to
+              </span>
+
+              <input
+                type="date"
+                className="hz-date-custom__input"
+                value={customTo}
+                min={customFrom || undefined}
+                onChange={(event) =>
+                  setCustomTo(
+                    event.target.value
+                  )
+                }
+              />
+
+            </div>
+          )}
+
+        </div>
+
       </div>
 
       {error && <div className="hz-dashboard__error">{error}</div>}
 
       <div className="hz-summary-grid">
-        {summaryCards.map(({ key, label, value, icon: Icon }) => (
-          <div className="hz-summary-card" key={key}>
-            <span className="hz-summary-card__icon">
-              <Icon size={22} />
-            </span>
-            <div className="hz-summary-card__text">
-              <span className="hz-summary-card__label">{label}</span>
-              <span className="hz-summary-card__value">
-                {loading ? <span className="hz-skeleton hz-skeleton--value" /> : value}
+
+        {summaryCards.map(
+          ({
+            key,
+            label,
+            value,
+            icon: Icon,
+            navigation,
+          }) => (
+            <div
+              className="hz-summary-card"
+              key={key}
+              onClick={() => navigation && (navigate(navigation))}
+            >
+
+              <span className="hz-summary-card__icon">
+                <Icon size={22} />
               </span>
             </div>
           </div>
@@ -322,18 +614,30 @@ const Dashboard = () => {
           <div className="hz-card__header">
             <h2>Sales Overview</h2>
             <div className="hz-range-toggle">
-              {RANGE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.key}
-                  type="button"
-                  className={
-                    "hz-range-toggle__btn" + (salesRange === opt.key ? " hz-range-toggle__btn--active" : "")
-                  }
-                  onClick={() => handleRangeChange(opt.key)}
-                >
-                  {opt.label}
-                </button>
-              ))}
+
+              {/* {RANGE_OPTIONS.map(
+                (opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className={
+                      "hz-range-toggle__btn" +
+                      (salesRange ===
+                      opt.key
+                        ? " hz-range-toggle__btn--active"
+                        : "")
+                    }
+                    onClick={() =>
+                      handleRangeChange(
+                        opt.key
+                      )
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                )
+              )} */}
+
             </div>
           </div>
 
@@ -383,10 +687,17 @@ const Dashboard = () => {
 
         <div className="hz-card hz-orders-card">
           <div className="hz-card__header">
-            <h2>Recent Orders</h2>
-            <a className="hz-card__link" href="/admin/orders">
+
+            <h2>
+              Recent Orders
+            </h2>
+
+            <Link
+              to="/admin/orders"
+              className="hz-card__link">
               View All
-            </a>
+            </Link>
+
           </div>
 
           <table className="hz-table">
@@ -432,10 +743,18 @@ const Dashboard = () => {
       <div className="hz-dashboard__row">
         <div className="hz-card hz-products-card">
           <div className="hz-card__header">
-            <h2>Top Selling Products</h2>
-            <a className="hz-card__link" href="/admin/catalog/products">
+
+            <h2>
+              Top Selling Products
+            </h2>
+
+            <Link
+              to="/admin/catalog/products"
+              className="hz-card__link"
+            >
               View All
-            </a>
+            </Link>
+
           </div>
 
           <table className="hz-table">
@@ -456,14 +775,46 @@ const Dashboard = () => {
                   <td colSpan={3} className="hz-table__empty">No sales yet</td>
                 </tr>
               ) : (
-                topProducts.map((product) => (
-                  <tr key={product.productId || product._id || product.product}>
-                    <td className="hz-table__product">
-                      <span className="hz-table__thumb">
-                        {product.image ? (
-                          <img src={product.image} alt={product.product || "Product"} />
-                        ) : (
-                          <span className="hz-table__thumb-fallback" />
+                topProducts.map(
+                  (product) => (
+                    <tr
+                      key={
+                        product.productId ||
+                        product._id ||
+                        product.product
+                      }
+                    >
+
+                      <td className="hz-table__product">
+
+                        <span className="hz-table__thumb">
+
+                          {product.image ? (
+                            <img
+                              src={import.meta.env.VITE_UPLOAD_URL + product.image}
+                              alt={
+                                product.product ||
+                                "Product"
+                              }
+                            />
+                          ) : (
+                            <span className="hz-table__thumb-fallback" />
+                          )}
+
+                        </span>
+
+                        {product.product ||
+                          "Unknown Product"}
+
+                      </td>
+
+                      <td>
+                        {product.sold || 0}
+                      </td>
+
+                      <td>
+                        {formatINR(
+                          product.revenue
                         )}
                       </span>
                       {product.product || "Unknown Product"}
@@ -480,10 +831,18 @@ const Dashboard = () => {
         <div className="hz-dashboard__col">
           <div className="hz-card hz-inventory-card">
             <div className="hz-card__header">
-              <h2>Inventory Status</h2>
-              <a className="hz-card__link" href="/admin/inventory">
+
+              <h2>
+                Inventory Status
+              </h2>
+
+              <Link
+                to="/admin/inventory"
+                className="hz-card__link"
+              >
                 View All
-              </a>
+              </Link>
+
             </div>
 
             {loading || !inventory ? (
@@ -542,10 +901,18 @@ const Dashboard = () => {
 
           <div className="hz-card hz-activities-card">
             <div className="hz-card__header">
-              <h2>Recent Activities</h2>
-              <a className="hz-card__link" href="#" onClick={(e) => e.preventDefault()}>
+
+              <h2>
+                Recent Activities
+              </h2>
+
+              {/* <Link
+                to="/admin/activities"
+                className="hz-card__link"
+              >
                 View All
-              </a>
+              </Link> */}
+
             </div>
 
             <ul className="hz-activity-list">
