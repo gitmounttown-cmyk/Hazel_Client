@@ -592,7 +592,7 @@
   animation: inv-fade 0.15s ease-out;
 }
 
-.modal {
+.inventory-modal {
   width: 100%;
   max-width: 480px;
   max-height: calc(100dvh - 32px);
@@ -892,7 +892,7 @@
 .chips {
   flex-wrap: wrap;
 }
-.modal {
+.inventory-modal {
   max-height: calc(100vh - 32px); /* fallback for browsers without dvh */
   max-height: calc(100dvh - 32px);
 }
@@ -910,6 +910,80 @@
   max-height: calc(100vh - 16px);
   max-height: calc(100dvh - 16px);
   overflow-y: auto;
+}
+
+/* .size-expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1;
+  vertical-align: middle;
+} */
+
+.size-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.size-row {
+  background: #f9fafb;
+}
+
+.size-row td {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.size-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 24px;
+}
+
+.size-product strong {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.size-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+
+.size-label {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  font-weight: 500;
+}
+
+.size-row .actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.size-expand svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
 }
 
 /* ---------- Large desktop / TV ---------- */
@@ -1200,7 +1274,7 @@
     align-items: end;
     padding: 0;
   }
-  .modal {
+  .inventory-modal {
     max-width: none;
     max-height: 92vh;
     max-height: 92dvh;
@@ -1315,14 +1389,14 @@
     padding-top: 8px;
     padding-bottom: 8px;
   }
-  .modal {
+  .inventory-modal {
     max-height: calc(100vh - 16px);
     max-height: calc(100dvh - 16px);
     padding: 16px;
   }
 }
 @media (max-width: 720px) and (max-height: 480px) {
-  .modal {
+  .inventory-modal {
     max-height: 100vh;
     max-height: 100dvh;
   }
@@ -1372,7 +1446,7 @@
   }
   .menu,
   .overlay,
-  .modal,
+  .inventory-modal,
   .toast {
     animation: none !important;
   }

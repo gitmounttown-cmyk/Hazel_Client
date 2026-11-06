@@ -55,3 +55,16 @@ export const syncAllInventory = async () => {
   );
   return response.data;
 };
+
+export const deleteProduct = async (inventoryId) => {
+  const response = await axios.delete(`${API_URL}/${inventoryId}`, getAuthHeaders());
+  return response.data;
+};
+
+export const deleteSize = async (inventoryId, variantId, sizeId) => {
+  const response = await axios.delete(
+    `${API_URL}/${inventoryId}/variants/${variantId}/sizes/${sizeId}`,
+    getAuthHeaders()
+  );
+  return response.data;
+};

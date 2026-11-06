@@ -1,3 +1,4 @@
+import React from "react";
 import {
   useCallback,
   useEffect,
@@ -7,6 +8,7 @@ import {
 } from "react";
 
 import "./Inventory.css";
+import { deleteProduct, deleteSize } from "../../../Services/inventoryAPI";
 
 // *============================================================*
 // *API CONFIGURATION*
@@ -47,6 +49,7 @@ const getImageUrl = (imageURL) => {
 // *============================================================*
 
 const statusOf = (stock, threshold = 10) => {
+  // console.log("statusOf called with stock:", stock, "threshold:", threshold);
   const quantity = Number(stock) || 0;
 
   if (quantity <= 0) {
@@ -282,6 +285,26 @@ function Icon({ name }) {
         </svg>
       );
 
+    case "chevron-up":
+      return (
+        <svg {...props}>
+          <path
+            {...p}
+            d="M6 15l6-6 6 6"
+          />
+        </svg>
+      );
+
+    case "chevron-down":
+      return (
+        <svg {...props}>
+          <path
+            {...p}
+            d="M6 9l6 6 6-6"
+          />
+        </svg>
+      );
+
     default:
       return null;
   }
@@ -370,7 +393,7 @@ function Modal({
       }}
     >
       <div
-        className="modal"
+        className="inventory-modal"
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -410,10 +433,12 @@ function Modal({
 
 function UpdateModal({
   product,
+  size,
   onSave,
   onClose,
   saving,
 }) {
+  // console.log("product in UpdateModal:", product,size);
   const [qty, setQty] = useState(
     String(product.stock)
   );
@@ -459,7 +484,8 @@ function UpdateModal({
   return (
     <Modal
       title="Update Stock"
-      subtitle={`${product.name} · ${product.sku}`}
+      subtitle={`${product?.name || "Product"} · ${size?.size || "No Size"
+        } · ${product?.color || "No Color"}`}
       onClose={onClose}
     >
       <form
@@ -588,10 +614,13 @@ function UpdateModal({
 
 function DeleteModal({
   product,
-  onConfirm,
+  size,
   onClose,
   deleting,
+  onConfirm
 }) {
+  // console.log("product in DeleteModal:", product);
+  // console.log("size in DeleteModal:", size);
   return (
     <Modal
       title="Delete Product?"
@@ -599,12 +628,15 @@ function DeleteModal({
       onClose={onClose}
     >
       <p className="modal__text">
-        <strong>
-          {product.name}
-        </strong>{" "}
-        ({product.sku}) will be
-        removed from the inventory
-        view.
+        Are you sure you want to remove{" "}
+        <strong>{product?.name || "Unnamed Product"}</strong>
+        {product?.sku ? ` (${product.sku})` : ""}
+        {size?.size ? (
+          <>
+            {" "}– Size <strong>{size.size}</strong>
+          </>
+        ) : null}
+        {" "}from the inventory view?
       </p>
 
       <div className="modal__foot">
@@ -763,6 +795,23 @@ export default function Inventory() {
   const firstItemRef =
     useRef(null);
 
+  const [expandedProducts, setExpandedProducts] =
+    useState(new Set());
+
+  const toggleExpand = (productId) => {
+    setExpandedProducts((previous) => {
+      const next = new Set(previous);
+
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+
+      return next;
+    });
+  };
+
   // ------------------------------------------------------------
   // FETCH SUMMARY
   // ------------------------------------------------------------
@@ -825,287 +874,675 @@ export default function Inventory() {
   // CONVERT BACKEND DATA TO TABLE ROWS
   // ------------------------------------------------------------
 
-  const flattenInventory =
-    useCallback((inventoryList) => {
-      const rows = [];
+  // const flattenInventory =
+  //   useCallback((inventoryList) => {
+  //     const rows = [];
 
-      inventoryList.forEach(
-        (inventory) => {
-          const product =
-            inventory.productId;
+  //     inventoryList.forEach(
+  //       (inventory) => {
+  //         const product =
+  //           inventory.productId;
 
-          if (!product) {
-            return;
-          }
+  //         if (!product) {
+  //           return;
+  //         }
 
-          const variants =
-            Array.isArray(
-              product.variants
-            )
-              ? product.variants
-              : [];
+  //         const variants =
+  //           Array.isArray(
+  //             product.variants
+  //           )
+  //             ? product.variants
+  //             : [];
 
-          variants.forEach(
-            (variant) => {
-              const sizes =
-                Array.isArray(
-                  variant.sizes
-                )
-                  ? variant.sizes
-                  : [];
+  //             let isFirstProductRow = true;
 
-              // ------------------------------------------------
-              // PRODUCT WITH SIZES
-              // ------------------------------------------------
+  //         variants.forEach(
+  //           (variant) => {
+  //             const sizes =
+  //               Array.isArray(
+  //                 variant.sizes
+  //               )
+  //                 ? variant.sizes
+  //                 : [];
 
-              if (
-                sizes.length > 0
-              ) {
-                sizes.forEach(
-                  (size) => {
-                    const media =
-                      Array.isArray(
-                        variant.media
-                      )
-                        ? variant.media
-                        : [];
+  //             // ------------------------------------------------
+  //             // PRODUCT WITH SIZES
+  //             // ------------------------------------------------
 
-                    const image =
-                      media.find(
-                        (item) =>
-                          item?.imageURL
-                      )?.imageURL ||
-                      "";
+  //             if (sizes.length > 0) {
+  //               // Show only active sizes
+  //               const activeSizes = sizes.filter(
+  //                 (size) => size.isActive === true
+  //               );
 
-                    rows.push({
-                      id: `${inventory._id}-${variant._id}-${size._id}`,
+  //               activeSizes.forEach((size) => {
+  //                 const media = Array.isArray(variant.media)
+  //                   ? variant.media
+  //                   : [];
 
-                      inventoryId:
-                        inventory._id,
+  //                 const image =
+  //                   media.find((item) => item?.imageURL)?.imageURL || "";
 
-                      productId:
-                        product._id,
+  //                 rows.push({
+  //                   id: `${inventory._id}-${variant._id}-${size._id}`,
 
-                      variantId:
-                        variant._id,
+  //                   inventoryId: inventory._id,
+  //                   productId: product._id,
+  //                   variantId: variant._id,
+  //                   sizeId: size._id,
 
-                      sizeId:
-                        size._id,
+  //                   name: product.name || "Unnamed Product",
 
-                      name:
-                        product.name ||
-                        "Unnamed Product",
+  //                   note:
+  //                     product.description?.about ||
+  //                     product.description?.itemDetails ||
+  //                     variant.fabric ||
+  //                     variant.feel ||
+  //                     "Product",
 
-                      note:
-                        product.description?.about ||
-                        product.description?.itemDetails ||
-                        variant.fabric ||
-                        variant.feel ||
-                        "Product",
+  //                   sku: size.sku || "-",
+  //                   barcode: size.barcode || "-",
 
-                      sku:
-                        size.sku ||
-                        "-",
+  //                   category: product.categoryId?.name || "-",
+  //                   brand: product.brandId?.name || "-",
 
-                      barcode:
-                        size.barcode ||
-                        "-",
+  //                   color: variant.color || "-",
+  //                   size: size.size || "-",
 
-                      category:
-                        product.categoryId?.name ||
-                        "-",
+  //                   stock: Number(size.stockQuantity) || 0,
 
-                      brand:
-                        product.brandId?.name ||
-                        "-",
+  //                   threshold: 10,
 
-                      color:
-                        variant.color ||
-                        "-",
+  //                   image: getImageUrl(image),
 
-                      size:
-                        size.size ||
-                        "-",
+  //                   inventoryStatus: inventory.stockStatus,
 
-                      stock:
-                        Number(
-                          size.stockQuantity
-                        ) || 0,
+  //                   totalProductStock:
+  //                     Number(inventory.totalStock) || 0,
+  //                 });
+  //               });
+  //             }
 
-                      threshold: 10,
 
-                      image:
-                        getImageUrl(
-                          image
-                        ),
+  //             // ------------------------------------------------
+  //             // VARIANT WITHOUT SIZES
+  //             // ------------------------------------------------
 
-                      inventoryStatus:
-                        inventory.stockStatus,
+  //             else {
+  //               const media =
+  //                 Array.isArray(
+  //                   variant.media
+  //                 )
+  //                   ? variant.media
+  //                   : [];
 
-                      totalProductStock:
-                        Number(
-                          inventory.totalStock
-                        ) || 0,
-                    });
-                  }
-                );
-              }
+  //               const image =
+  //                 media.find(
+  //                   (item) =>
+  //                     item?.imageURL
+  //                 )?.imageURL ||
+  //                 "";
 
-              // ------------------------------------------------
-              // VARIANT WITHOUT SIZES
-              // ------------------------------------------------
+  //               rows.push({
+  //                 id: `${inventory._id}-${variant._id}`,
 
-              else {
-                const media =
-                  Array.isArray(
-                    variant.media
-                  )
-                    ? variant.media
-                    : [];
+  //                 inventoryId:
+  //                   inventory._id,
 
-                const image =
-                  media.find(
-                    (item) =>
-                      item?.imageURL
-                  )?.imageURL ||
-                  "";
+  //                 productId:
+  //                   product._id,
 
-                rows.push({
-                  id: `${inventory._id}-${variant._id}`,
+  //                 variantId:
+  //                   variant._id,
 
-                  inventoryId:
-                    inventory._id,
+  //                 sizeId: null,
 
-                  productId:
-                    product._id,
+  //                 name:
+  //                   product.name ||
+  //                   "Unnamed Product",
 
-                  variantId:
-                    variant._id,
+  //                 note:
+  //                   product.description?.about ||
+  //                   product.description?.itemDetails ||
+  //                   "Product",
 
-                  sizeId: null,
+  //                 sku:
+  //                   variant.sku ||
+  //                   "-",
 
-                  name:
-                    product.name ||
-                    "Unnamed Product",
+  //                 barcode:
+  //                   variant.barcode ||
+  //                   "-",
 
-                  note:
-                    product.description?.about ||
-                    product.description?.itemDetails ||
-                    "Product",
+  //                 category:
+  //                   product.categoryId?.name ||
+  //                   "-",
 
-                  sku:
-                    variant.sku ||
-                    "-",
+  //                 brand:
+  //                   product.brandId?.name ||
+  //                   "-",
 
-                  barcode:
-                    variant.barcode ||
-                    "-",
+  //                 color:
+  //                   variant.color ||
+  //                   "-",
 
-                  category:
-                    product.categoryId?.name ||
-                    "-",
+  //                 size: "-",
 
-                  brand:
-                    product.brandId?.name ||
-                    "-",
+  //                 stock:
+  //                   Number(
+  //                     variant.quantity
+  //                   ) || 0,
 
-                  color:
-                    variant.color ||
-                    "-",
+  //                 threshold: 10,
 
-                  size: "-",
+  //                 image:
+  //                   getImageUrl(
+  //                     image
+  //                   ),
 
-                  stock:
-                    Number(
-                      variant.quantity
-                    ) || 0,
+  //                 inventoryStatus:
+  //                   inventory.stockStatus,
 
-                  threshold: 10,
+  //                 totalProductStock:
+  //                   Number(
+  //                     inventory.totalStock
+  //                   ) || 0,
+  //               });
+  //             }
+  //           }
+  //         );
 
-                  image:
-                    getImageUrl(
-                      image
-                    ),
+  //         // ------------------------------------------------------
+  //         // PRODUCT HAS NO VARIANTS
+  //         // ------------------------------------------------------
 
-                  inventoryStatus:
-                    inventory.stockStatus,
+  //         if (
+  //           variants.length === 0
+  //         ) {
+  //           rows.push({
+  //             id: inventory._id,
 
-                  totalProductStock:
-                    Number(
-                      inventory.totalStock
-                    ) || 0,
-                });
-              }
-            }
+  //             inventoryId:
+  //               inventory._id,
+
+  //             productId:
+  //               product._id,
+
+  //             variantId: null,
+
+  //             sizeId: null,
+
+  //             name:
+  //               product.name ||
+  //               "Unnamed Product",
+
+  //             note:
+  //               product.description?.about ||
+  //               "Product",
+
+  //             sku: "-",
+
+  //             barcode: "-",
+
+  //             category:
+  //               product.categoryId?.name ||
+  //               "-",
+
+  //             brand:
+  //               product.brandId?.name ||
+  //               "-",
+
+  //             color: "-",
+
+  //             size: "-",
+
+  //             stock:
+  //               Number(
+  //                 inventory.availableStock
+  //               ) || 0,
+
+  //             threshold: 10,
+
+  //             image: "",
+
+  //             inventoryStatus:
+  //               inventory.stockStatus,
+
+  //             totalProductStock:
+  //               Number(
+  //                 inventory.totalStock
+  //               ) || 0,
+  //           });
+  //         }
+  //       }
+  //     );
+
+  //     return rows;
+  //   }, []);
+
+
+    const flattenInventory = useCallback((inventoryList) => {
+  const rows = [];
+
+  // ------------------------------------------------
+  // FILTER ENABLED INVENTORY
+  // ------------------------------------------------
+
+  inventoryList
+    .filter((inventory) => inventory.isEnabled === true)
+    .forEach((inventory) => {
+      const product = inventory.productId;
+
+      if (!product) {
+        return;
+      }
+
+      const variants = Array.isArray(product.variants)
+        ? product.variants
+        : [];
+
+      variants.forEach((variant) => {
+        const sizes = Array.isArray(variant.sizes)
+          ? variant.sizes
+          : [];
+
+        // ------------------------------------------------
+        // PRODUCT WITH SIZES
+        // ------------------------------------------------
+
+        if (sizes.length > 0) {
+          // Show only active sizes
+          const activeSizes = sizes.filter(
+            (size) => size.isActive === true
           );
 
-          // ------------------------------------------------------
-          // PRODUCT HAS NO VARIANTS
-          // ------------------------------------------------------
+          activeSizes.forEach((size) => {
+            const media = Array.isArray(variant.media)
+              ? variant.media
+              : [];
 
-          if (
-            variants.length === 0
-          ) {
+            const image =
+              media.find((item) => item?.imageURL)?.imageURL || "";
+
             rows.push({
-              id: inventory._id,
+              id: `${inventory._id}-${variant._id}-${size._id}`,
 
-              inventoryId:
-                inventory._id,
+              inventoryId: inventory._id,
+              productId: product._id,
+              variantId: variant._id,
+              sizeId: size._id,
 
-              productId:
-                product._id,
-
-              variantId: null,
-
-              sizeId: null,
-
-              name:
-                product.name ||
-                "Unnamed Product",
+              name: product.name || "Unnamed Product",
 
               note:
                 product.description?.about ||
+                product.description?.itemDetails ||
+                variant.fabric ||
+                variant.feel ||
                 "Product",
 
-              sku: "-",
+              sku: size.sku || "-",
+              barcode: size.barcode || "-",
 
-              barcode: "-",
+              category: product.categoryId?.name || "-",
+              brand: product.brandId?.name || "-",
 
-              category:
-                product.categoryId?.name ||
-                "-",
+              color: variant.color || "-",
+              size: size.size || "-",
 
-              brand:
-                product.brandId?.name ||
-                "-",
-
-              color: "-",
-
-              size: "-",
-
-              stock:
-                Number(
-                  inventory.availableStock
-                ) || 0,
+              stock: Number(size.stockQuantity) || 0,
 
               threshold: 10,
 
-              image: "",
+              image: getImageUrl(image),
 
-              inventoryStatus:
-                inventory.stockStatus,
+              inventoryStatus: inventory.stockStatus,
 
               totalProductStock:
-                Number(
-                  inventory.totalStock
-                ) || 0,
+                Number(inventory.totalStock) || 0,
             });
-          }
+          });
         }
-      );
 
-      return rows;
-    }, []);
+        // ------------------------------------------------
+        // VARIANT WITHOUT SIZES
+        // ------------------------------------------------
+
+        else {
+          const media = Array.isArray(variant.media)
+            ? variant.media
+            : [];
+
+          const image =
+            media.find((item) => item?.imageURL)?.imageURL || "";
+
+          rows.push({
+            id: `${inventory._id}-${variant._id}`,
+
+            inventoryId: inventory._id,
+
+            productId: product._id,
+
+            variantId: variant._id,
+
+            sizeId: null,
+
+            name: product.name || "Unnamed Product",
+
+            note:
+              product.description?.about ||
+              product.description?.itemDetails ||
+              "Product",
+
+            sku: variant.sku || "-",
+
+            barcode: variant.barcode || "-",
+
+            category: product.categoryId?.name || "-",
+
+            brand: product.brandId?.name || "-",
+
+            color: variant.color || "-",
+
+            size: "-",
+
+            stock: Number(variant.quantity) || 0,
+
+            threshold: 10,
+
+            image: getImageUrl(image),
+
+            inventoryStatus: inventory.stockStatus,
+
+            totalProductStock:
+              Number(inventory.totalStock) || 0,
+
+            lowStockThreshold: Number(variant.lowStockThreshold) || 10,
+          });
+        }
+      });
+
+      // ------------------------------------------------
+      // PRODUCT HAS NO VARIANTS
+      // ------------------------------------------------
+
+      if (variants.length === 0) {
+        rows.push({
+          id: inventory._id,
+
+          inventoryId: inventory._id,
+
+          productId: product._id,
+
+          variantId: null,
+
+          sizeId: null,
+
+          name: product.name || "Unnamed Product",
+
+          note: product.description?.about || "Product",
+
+          sku: "-",
+
+          barcode: "-",
+
+          category: product.categoryId?.name || "-",
+
+          brand: product.brandId?.name || "-",
+
+          color: "-",
+
+          size: "-",
+
+          stock: Number(inventory.availableStock) || 0,
+
+          threshold: 10,
+
+          image: "",
+
+          inventoryStatus: inventory.stockStatus,
+
+          totalProductStock:
+            Number(inventory.totalStock) || 0,
+        });
+      }
+    });
+
+  return rows;
+}, []);
+    
+
+  // const groupedInventory = useMemo(() => {
+  //   const groups = new Map();
+
+  //   products.forEach((item) => {
+  //     const productId = String(item.productId);
+
+  //     if (!groups.has(productId)) {
+  //       groups.set(productId, {
+  //         id: productId,
+
+  //         inventoryId: item.inventoryId,
+
+  //         productId: item.productId,
+
+  //         name: item.name,
+
+  //         note: item.note,
+
+  //         category: item.category,
+
+  //         brand: item.brand,
+
+  //         color: item.color,
+
+  //         image: item.image,
+
+  //         sku: item.sku,
+
+  //         totalStock:
+  //           Number(item.totalProductStock) || 0,
+
+  //         sizes: [],
+
+  //         variants: []
+  //       });
+  //     }
+
+  //     const group = groups.get(productId);
+
+  //     // PRODUCT WITH SIZE
+  //     if (item.sizeId) {
+  //       group.sizes.push(item);
+  //     }
+
+  //     // VARIANT WITHOUT SIZE
+  //     else if (item.variantId) {
+  //       group.variants.push(item);
+  //     }
+
+  //     // PRODUCT WITHOUT VARIANT
+  //     else {
+  //       group.stock = item.stock;
+  //     }
+  //   });
+
+  //   return Array.from(groups.values());
+  // }, [products]);
+
+  
+const groupedInventory = useMemo(() => {
+  const groups = new Map();
+
+  products.forEach((item) => {
+    const productId = String(item.productId);
+
+    if (!groups.has(productId)) {
+      groups.set(productId, {
+        id: productId,
+        inventoryId: item.inventoryId,
+        productId: item.productId,
+
+        name: item.name,
+        note: item.note,
+        category: item.category,
+        brand: item.brand,
+        color: item.color,
+        image: item.image,
+        sku: item.sku,
+
+        totalStock: 0,
+        totalThreshold: 0,
+        lowStockThreshold: 10,
+
+        sizes: [],
+        variants: [],
+        hasSizes: false,
+      });
+    }
+
+    const group = groups.get(productId);
+
+    // Product with sizes
+    if (item.sizeId) {
+      group.sizes.push(item);
+      group.hasSizes = true;
+
+      group.totalStock += Number(item.stock) || 0;
+
+      group.totalThreshold +=
+        Number(item.threshold) || 0;
+    }
+
+    // Variant without sizes
+    else if (item.variantId) {
+      group.variants.push(item);
+
+      group.totalStock += Number(item.stock) || 0;
+
+      group.totalThreshold +=
+        Number(item.threshold) || 0;
+    }
+
+    // Product without variants
+    else {
+      group.stock = Number(item.stock) || 0;
+
+      group.totalStock += group.stock;
+
+      group.totalThreshold +=
+        Number(item.threshold) || 0;
+    }
+  });
+
+  return Array.from(groups.values());
+}, [products]);
+
+
+
+
+// const productStatusOf = (product) => {
+//   console.log("productStatusOf called with product:", product);
+//   const sizes = product.sizes || [];
+
+//   // Product with sizes
+//   if (sizes.length > 0) {
+//     const totalStock = sizes.reduce(
+//       (total, size) =>
+//         total + (Number(size.stock) || 0),
+//       0
+//     );
+
+//     const totalThreshold = sizes.reduce(
+//       (total, size) =>
+//         total + (Number(size.threshold) || 0),
+//       0
+//     );
+
+//     // All sizes have zero stock
+//     if (totalStock === 0) {
+//       return {
+//         stock: "out",
+//         cls: "badge--danger",
+//         label: "Out of Stock",
+//       };
+//     }
+
+//     // Any size has zero stock
+//     if (
+//       sizes.some(
+//         (size) => Number(size.stock) === 0
+//       )
+//     ) {
+//       return {
+//         stock: "out",
+//         cls: "badge--danger",
+//         label: "Out of Stock",
+//       };
+//     }
+
+//     // Any size is at or below threshold
+//     if (
+//       sizes.some(
+//         (size) =>
+//           Number(size.stock) <=
+//           Number(size.threshold)
+//       )
+//     ) {
+//       return {
+//         stock: "low",
+//         cls: "badge--warning",
+//         label: "Low Stock",
+//       };
+//     }
+
+//     return {
+//       stock: "in",
+//       cls: "badge--success",
+//       label: "In Stock",
+//     };
+//   }
+
+//   // Product without sizes
+//   return statusOf(
+//     product.totalStock,
+//     product.totalThreshold
+//   );
+// };
+const productStatusOf = (product) => {
+  const totalStock = Number(product?.totalStock) || 0;
+
+  // Product-level low stock threshold
+  const lowStockThreshold =
+    Number(product?.lowStockThreshold) || 10;
+
+  // Product Out of Stock
+  if (totalStock <= 0) {
+    return {
+      stock: "out",
+      cls: "badge--danger",
+      label: "Out of Stock",
+    };
+  }
+
+  // Product Low Stock
+  if (totalStock <= lowStockThreshold) {
+    return {
+      stock: "low",
+      cls: "badge--warning",
+      label: "Low Stock",
+    };
+  }
+
+  // Product In Stock
+  return {
+    stock: "in",
+    cls: "badge--success",
+    label: "In Stock",
+  };
+};
+
+
 
   // ------------------------------------------------------------
   // FETCH INVENTORY
@@ -1130,7 +1567,7 @@ export default function Inventory() {
 
         params.set(
           "limit",
-          "20"
+          "10"
         );
 
         if (
@@ -1181,10 +1618,7 @@ export default function Inventory() {
           );
         }
 
-        const flattened =
-          flattenInventory(
-            result.data || []
-          );
+        const flattened = flattenInventory(result.data || []);
 
         setProducts(
           flattened
@@ -1248,7 +1682,7 @@ export default function Inventory() {
   useEffect(() => {
     const availableIds =
       new Set(
-        products.map(
+        groupedInventory.map(
           (item) => item.id
         )
       );
@@ -1280,8 +1714,8 @@ export default function Inventory() {
   // ------------------------------------------------------------
 
   const allChecked =
-    products.length > 0 &&
-    products.every(
+    groupedInventory.length > 0 &&
+    groupedInventory.every(
       (item) =>
         selected.has(item.id)
     );
@@ -1296,14 +1730,14 @@ export default function Inventory() {
             );
 
           if (allChecked) {
-            products.forEach(
+            groupedInventory.forEach(
               (item) =>
                 next.delete(
                   item.id
                 )
             );
           } else {
-            products.forEach(
+            groupedInventory.forEach(
               (item) =>
                 next.add(
                   item.id
@@ -1316,7 +1750,7 @@ export default function Inventory() {
       );
     }, [
       allChecked,
-      products,
+      groupedInventory,
     ]);
 
   // ------------------------------------------------------------
@@ -1570,6 +2004,7 @@ export default function Inventory() {
       product,
       stock
     ) => {
+      // console.log("saveStock called with product:", product, "and stock:", stock);
       if (
         !product.variantId ||
         !product.sizeId
@@ -1660,158 +2095,339 @@ export default function Inventory() {
   // DELETE
   // ------------------------------------------------------------
 
-  const removeProduct =
-    async (product) => {
-      /*
-       * IMPORTANT:
-       *
-       * Your current Inventory backend does NOT
-       * have a DELETE inventory endpoint.
-       *
-       * Therefore we don't call a fake DELETE API.
-       *
-       * Product deletion should be handled from
-       * Product page.
-       */
+  // const removeProduct =
+  //   async (product) => {
+  //     /*
+  //      * IMPORTANT:
+  //      *
+  //      * Your current Inventory backend does NOT
+  //      * have a DELETE inventory endpoint.
+  //      *
+  //      * Therefore we don't call a fake DELETE API.
+  //      *
+  //      * Product deletion should be handled from
+  //      * Product page.
+  //      */
 
-      setDeleting(true);
+  //     setDeleting(true);
 
-      try {
-        setToast(
-          "Delete this product from the Product page."
-        );
+  //     try {
+  //       setToast(
+  //         "Delete this product from the Product page."
+  //       );
 
-        closeModal();
-      } finally {
-        setDeleting(false);
+  //       closeModal();
+  //     } finally {
+  //       setDeleting(false);
+  //     }
+  //   };
+
+  const removeProduct = async (product) => {
+    setDeleting(true);
+
+    try {
+      const result = await deleteProduct(product.inventoryId);
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to remove product from inventory.");
       }
-    };
+
+      setToast("Product removed from inventory successfully.");
+
+      closeModal();
+
+      await fetchInventory();
+    } catch (error) {
+      console.error("Delete product error:", error);
+
+      setToast(
+        error.response?.data?.message ||
+        "Failed to remove product from inventory."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const removeSize = async (size) => {
+  setDeleting(true);
+
+  try {
+    const result = await deleteSize(
+      size.inventoryId,
+      size.variantId,
+      size.sizeId
+    );
+
+    if (!result.success) {
+      throw new Error(result.message || "Failed to remove size.");
+    }
+
+    setToast("Size removed successfully.");
+
+    closeModal();
+
+    await fetchInventory();
+  } catch (error) {
+    console.error("Delete size error:", error);
+
+    setToast(
+      error.response?.data?.message ||
+      "Failed to remove size."
+    );
+  } finally {
+    setDeleting(false);
+  }
+};
 
   // ------------------------------------------------------------
   // EXPORT CSV
   // ------------------------------------------------------------
 
-  const exportInventory =
-    () => {
-      if (
-        products.length === 0
-      ) {
-        setToast(
-          "There is no inventory data to export."
-        );
+  // const exportInventory =
+  //   () => {
+  //     if (
+  //       groupedInventory.length === 0
+  //     ) {
+  //       setToast(
+  //         "There is no inventory data to export."
+  //       );
 
-        return;
-      }
+  //       return;
+  //     }
 
-      const headers = [
-        "Product",
-        "SKU",
-        "Category",
-        "Brand",
-        "Color",
-        "Size",
-        "Stock",
-        "Threshold",
-        "Status",
+  //     const headers = [
+  //       "Product",
+  //       "SKU",
+  //       "Category",
+  //       "Brand",
+  //       "Color",
+  //       "Size",
+  //       "Stock",
+  //       "Threshold",
+  //       "Status",
+  //     ];
+
+  //     const csvRows =
+  //       groupedInventory.map(
+  //         (item) => {
+  //           const stockStatus =
+  //             statusOf(
+  //               item.stock,
+  //               item.threshold
+  //             ).label;
+
+  //           return [
+  //             item.name,
+  //             item.sku,
+  //             item.category,
+  //             item.brand,
+  //             item.color,
+  //             item.size,
+  //             item.stock,
+  //             item.threshold,
+  //             stockStatus,
+  //           ]
+  //             .map(
+  //               (value) =>
+  //                 `"${String(
+  //                   value ?? ""
+  //                 ).replace(
+  //                   /"/g,
+  //                   '""'
+  //                 )}"`
+  //             )
+  //             .join(",");
+  //         }
+  //       );
+
+  //     const csv = [
+  //       headers.join(","),
+  //       ...csvRows,
+  //     ].join("\n");
+
+  //     const blob =
+  //       new Blob(
+  //         [csv],
+  //         {
+  //           type:
+  //             "text/csv;charset=utf-8;",
+  //         }
+  //       );
+
+  //     const url =
+  //       URL.createObjectURL(
+  //         blob
+  //       );
+
+  //     const link =
+  //       document.createElement(
+  //         "a"
+  //       );
+
+  //     link.href = url;
+
+  //     link.download =
+  //       `hazel-inventory-${new Date()
+  //         .toISOString()
+  //         .slice(0, 10)}.csv`;
+
+  //     document.body.appendChild(
+  //       link
+  //     );
+
+  //     link.click();
+
+  //     link.remove();
+
+  //     URL.revokeObjectURL(
+  //       url
+  //     );
+
+  //     setToast(
+  //       "Inventory exported successfully"
+  //     );
+  //   };
+
+    const exportInventory = () => {
+  if (groupedInventory.length === 0) {
+    setToast("There is no inventory data to export.");
+    return;
+  }
+
+  const headers = [
+    "Product",
+    "SKU",
+    "Category",
+    "Brand",
+    "Color",
+    "Size",
+    "Stock",
+    "Threshold",
+    "Status",
+  ];
+
+  // Convert product and size data into Excel rows
+  const exportRows = groupedInventory.flatMap((item) => {
+    const sizes = item.sizes || [];
+
+    // Product-level status
+    const productStatus = productStatusOf(item);
+
+    // Product without sizes
+    if (sizes.length === 0) {
+      return [
+        [
+          item.name,
+          item.sku,
+          item.category,
+          item.brand,
+          item.color,
+          "",
+          item.totalStock ?? 0,
+          item.totalThreshold ?? 0,
+          productStatus.label,
+        ],
       ];
+    }
 
-      const csvRows =
-        products.map(
-          (item) => {
-            const stockStatus =
-              statusOf(
-                item.stock,
-                item.threshold
-              ).label;
-
-            return [
-              item.name,
-              item.sku,
-              item.category,
-              item.brand,
-              item.color,
-              item.size,
-              item.stock,
-              item.threshold,
-              stockStatus,
-            ]
-              .map(
-                (value) =>
-                  `"${String(
-                    value ?? ""
-                  ).replace(
-                    /"/g,
-                    '""'
-                  )}"`
-              )
-              .join(",");
-          }
-        );
-
-      const csv = [
-        headers.join(","),
-        ...csvRows,
-      ].join("\n");
-
-      const blob =
-        new Blob(
-          [csv],
-          {
-            type:
-              "text/csv;charset=utf-8;",
-          }
-        );
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
-
-      const link =
-        document.createElement(
-          "a"
-        );
-
-      link.href = url;
-
-      link.download =
-        `hazel-inventory-${new Date()
-          .toISOString()
-          .slice(0, 10)}.csv`;
-
-      document.body.appendChild(
-        link
+    // Product with individual sizes
+    return sizes.map((size) => {
+      const sizeStatus = statusOf(
+        size.stock,
+        size.threshold
       );
 
-      link.click();
+      return [
+        item.name,
+        size.sku || item.sku,
+        item.category,
+        item.brand,
+        item.color,
+        size.size,
+        size.stock ?? 0,
+        size.threshold ?? 0,
+        sizeStatus.label,
+      ];
+    });
+  });
 
-      link.remove();
+  // Convert values into CSV format
+  const csvRows = exportRows.map((row) =>
+    row
+      .map((value) =>
+        `"${String(value ?? "").replace(/"/g, '""')}"`
+      )
+      .join(",")
+  );
 
-      URL.revokeObjectURL(
-        url
-      );
+  const csv = [
+    headers.join(","),
+    ...csvRows,
+  ].join("\n");
 
-      setToast(
-        "Inventory exported successfully"
-      );
-    };
+  // Create downloadable CSV
+  const blob = new Blob(
+    ["\uFEFF" + csv],
+    {
+      type: "text/csv;charset=utf-8;",
+    }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+
+  link.download = `hazel-inventory-${new Date()
+    .toISOString()
+    .slice(0, 10)}.csv`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  URL.revokeObjectURL(url);
+
+  setToast("Inventory exported successfully");
+};
 
   // ------------------------------------------------------------
   // CURRENT MODAL PRODUCT
   // ------------------------------------------------------------
 
-  const modalProduct =
-    modal
-      ? products.find(
-          (item) =>
-            item.id ===
-            modal.id
-        )
-      : null;
+  // console.log('modal_state', modal);
+  // console.log('modal_grouped_inventory', groupedInventory);
+  // const modalProduct =
+  //   modal
+  //     ? groupedInventory.find(
+  //         (item) =>
+  //           item.id ===
+  //           modal?.product?.id
+  //       )
+  //     : null;
+
+      const modalProduct = modal
+  ? groupedInventory
+      .find(
+        (item) =>
+          item.productId === modal.product.productId
+      )
+  : null;
+
+const modalSize = modalProduct?.sizes?.find(
+  (size) => size.id === modal.product.id
+);
+
+// console.log('modal_product', modalProduct);
+// console.log('modal_size', modalSize);
 
   const menuProduct =
     menu
-      ? products.find(
+      ? groupedInventory.find(
           (item) =>
             item.id ===
             menu.id
@@ -1822,7 +2438,7 @@ export default function Inventory() {
   // PAGINATION
   // ------------------------------------------------------------
 
-  const PER_PAGE = 20;
+  const PER_PAGE = 10;
 
   const start =
     total === 0
@@ -1952,7 +2568,8 @@ export default function Inventory() {
   // ------------------------------------------------------------
   // RENDER
   // ------------------------------------------------------------
-
+// console.log('inventory_products', groupedInventory);
+// console.log('modal_state', modal);
   return (
     <div className="inv">
       <div className="inv__wrap">
@@ -2294,185 +2911,380 @@ export default function Inventory() {
                 {/* ========================================== */}
 
                 {!loading &&
-                  products.map(
-                    (product) => {
-                      const stockStatus =
-                        statusOf(
-                          product.stock,
-                          product.threshold
-                        );
+                  // products.map((product) => {
+                  //     const stockStatus =
+                  //       statusOf(
+                  //         product.stock,
+                  //         product.threshold
+                  //       );
 
-                      return (
-                        <tr
-                          key={
-                            product.id
-                          }
-                          className={
-                            selected.has(
-                              product.id
-                            )
-                              ? "is-selected"
-                              : ""
-                          }
-                        >
+                  //     return (
+                  //       <tr
+                  //         key={
+                  //           product.id
+                  //         }
+                  //         className={
+                  //           selected.has(
+                  //             product.id
+                  //           )
+                  //             ? "is-selected"
+                  //             : ""
+                  //         }
+                  //       >
 
-                          {/* CHECKBOX */}
+                  //         {/* CHECKBOX */}
 
-                          <td className="col-check">
+                  //         <td className="col-check">
+                  //           <input
+                  //             type="checkbox"
+                  //             className="check"
+                  //             checked={selected.has(
+                  //               product.id
+                  //             )}
+                  //             onChange={() =>
+                  //               toggleOne(
+                  //                 product.id
+                  //               )
+                  //             }
+                  //             aria-label={`Select ${product.name}`}
+                  //           />
+                  //         </td>
+
+                  //         {/* PRODUCT */}
+
+                  //         <td className="col-product">
+                  //           <div className="product">
+
+                  //             {product.showProductName && (
+                  //               <Thumb item={product} />
+                  //             )}
+
+                  //             <div className="product__text">
+
+                  //               <strong>
+                  //                 {product.showProductName ? product.name : ""}
+                  //               </strong>
+
+                  //               <span>
+                  //                 {product.color !==
+                  //                 "-"
+                  //                   ? `${product.color} · `
+                  //                   : ""}
+                  //                 {
+                  //                   product.note
+                  //                 }
+                  //               </span>
+
+                  //             </div>
+                  //           </div>
+                  //         </td>
+
+                  //         {/* SKU */}
+
+                  //         <td data-label="SKU">
+                  //           {
+                  //             product.sku
+                  //           }
+                  //         </td>
+
+                  //         {/* CATEGORY */}
+
+                  //         <td data-label="Category">
+                  //           {
+                  //             product.category
+                  //           }
+                  //         </td>
+
+                  //         {/* SIZE */}
+
+                  //         <td data-label="Size">
+                  //           {product.size !==
+                  //           "-"
+                  //             ? product.size
+                  //             : product.color !==
+                  //               "-"
+                  //             ? product.color
+                  //             : "-"}
+                  //         </td>
+
+                  //         {/* STOCK */}
+
+                  //         <td
+                  //           data-label="Stock"
+                  //           className={`stock ${stockStatus.stock}`}
+                  //         >
+                  //           {
+                  //             product.stock
+                  //           }
+                  //         </td>
+
+                  //         {/* THRESHOLD */}
+
+                  //         <td data-label="Threshold">
+                  //           {
+                  //             product.threshold
+                  //           }
+                  //         </td>
+
+                  //         {/* STATUS */}
+
+                  //         <td className="col-status">
+                  //           <span
+                  //             className={`badge ${stockStatus.cls}`}
+                  //           >
+                  //             {
+                  //               stockStatus.label
+                  //             }
+                  //           </span>
+                  //         </td>
+
+                  //         {/* ACTION */}
+
+                  //         <td className="col-action">
+                  //           <div className="actions">
+
+                  //             <button
+                  //               type="button"
+                  //               className={`more ${
+                  //                 menu &&
+                  //                 menu.id ===
+                  //                   product.id
+                  //                   ? "is-open"
+                  //                   : ""
+                  //               }`}
+                  //               aria-label={`More options for ${product.name}`}
+                  //               aria-haspopup="menu"
+                  //               aria-expanded={
+                  //                 !!menu &&
+                  //                 menu.id ===
+                  //                   product.id
+                  //               }
+                  //               onClick={(
+                  //                 event
+                  //               ) =>
+                  //                 openMenu(
+                  //                   event,
+                  //                   product.id
+                  //                 )
+                  //               }
+                  //             >
+                  //               <Icon name="dots" />
+                  //             </button>
+
+                  //           </div>
+                  //         </td>
+
+                  //       </tr>
+                  //     );
+                  //   }
+                  // )
+                  groupedInventory.map((product) => {
+                    const isExpanded = expandedProducts.has(
+                      product.id
+                    );
+// console.log('isExpanded', isExpanded);
+                    const stockStatus = productStatusOf(product);
+
+                    return (
+                      <React.Fragment key={product.id}>
+
+                        {/* MAIN PRODUCT ROW */}
+
+                        <tr>
+
+                          <td>
                             <input
                               type="checkbox"
                               className="check"
-                              checked={selected.has(
-                                product.id
-                              )}
-                              onChange={() =>
-                                toggleOne(
-                                  product.id
-                                )
-                              }
-                              aria-label={`Select ${product.name}`}
+                              checked={selected.has(product.id)}
+                              onChange={() => toggleOne(product.id)}
                             />
                           </td>
-
-                          {/* PRODUCT */}
 
                           <td className="col-product">
                             <div className="product">
 
-                              <Thumb
-                                item={
-                                  product
-                                }
-                              />
+                              <Thumb item={product} />
 
                               <div className="product__text">
-
-                                <strong>
-                                  {
-                                    product.name
-                                  }
-                                </strong>
+                                <strong>{product.name}</strong>
 
                                 <span>
-                                  {product.color !==
-                                  "-"
-                                    ? `${product.color} · `
-                                    : ""}
-                                  {
-                                    product.note
-                                  }
+                                  {product.color !== "-"
+                                    ? product.color
+                                    : product.note}
                                 </span>
-
                               </div>
+
                             </div>
                           </td>
 
-                          {/* SKU */}
+                          <td>{product.sku}</td>
 
-                          <td data-label="SKU">
-                            {
-                              product.sku
-                            }
+                          <td>{product.category}</td>
+
+                          {/* SIZE COUNT */}
+
+                          <td>
+                            <button
+                              type="button"
+                              className="size-expand"
+                              onClick={() => toggleExpand(product.id)}
+                            >
+                              {product.sizes.length > 0
+                                ? `${product.sizes.length} Sizes`
+                                : product.variants.length > 0
+                                  ? `${product.variants.length} Variants`
+                                  : "Product"}
+
+                              <Icon
+                                name={
+                                  isExpanded
+                                    ? "chevron-up"
+                                    : "chevron-down"
+                                }
+                              />
+                            </button>
                           </td>
 
-                          {/* CATEGORY */}
+                          {/* TOTAL STOCK */}
 
-                          <td data-label="Category">
-                            {
-                              product.category
-                            }
+                          {/* TOTAL CURRENT STOCK */}
+
+                          <td className="stock">
+                            {product.totalStock}
                           </td>
 
-                          {/* SIZE */}
+                          {/* TOTAL THRESHOLD */}
 
-                          <td data-label="Size">
-                            {product.size !==
-                            "-"
-                              ? product.size
-                              : product.color !==
-                                "-"
-                              ? product.color
-                              : "-"}
+                          <td>
+                            {product.totalThreshold}
                           </td>
 
-                          {/* STOCK */}
-
-                          <td
-                            data-label="Stock"
-                            className={`stock ${stockStatus.stock}`}
-                          >
-                            {
-                              product.stock
-                            }
-                          </td>
-
-                          {/* THRESHOLD */}
-
-                          <td data-label="Threshold">
-                            {
-                              product.threshold
-                            }
-                          </td>
-
-                          {/* STATUS */}
+                          {/* PRODUCT STATUS */}
 
                           <td className="col-status">
-                            <span
-                              className={`badge ${stockStatus.cls}`}
-                            >
-                              {
-                                stockStatus.label
-                              }
+                            <span className={`badge ${stockStatus.cls}`}>
+                              {stockStatus.label}
                             </span>
                           </td>
 
-                          {/* ACTION */}
+                          {/* PRODUCT DELETE */}
 
-                          <td className="col-action">
-                            <div className="actions">
-
-                              <button
-                                type="button"
-                                className={`more ${
-                                  menu &&
-                                  menu.id ===
-                                    product.id
-                                    ? "is-open"
-                                    : ""
-                                }`}
-                                aria-label={`More options for ${product.name}`}
-                                aria-haspopup="menu"
-                                aria-expanded={
-                                  !!menu &&
-                                  menu.id ===
-                                    product.id
-                                }
-                                onClick={(
-                                  event
-                                ) =>
-                                  openMenu(
-                                    event,
-                                    product.id
-                                  )
-                                }
-                              >
-                                <Icon name="dots" />
-                              </button>
-
-                            </div>
-                          </td>
+                          {/* <td>
+                            <button
+                              type="button"
+                              className="more"
+                              onClick={(event) =>
+                                openMenu(event, product.id)
+                              }
+                            >
+                              <Icon name="dots" />
+                            </button>
+                          </td> */}
 
                         </tr>
-                      );
-                    }
-                  )}
+
+                        {/* EXPANDED SIZE ROWS */}
+
+                        {isExpanded &&
+                          product.sizes.map((size) => {
+
+                            const sizeStatus = statusOf(
+                              size.stock,
+                              size.threshold
+                            );
+
+                            return (
+                              <tr
+                                key={size.id}
+                                className="size-row"
+                              >
+
+                                <td />
+
+                                <td>
+                                  <div className="size-product">
+                                    <span className="size-indicator" />
+
+                                    <strong>
+                                      {product.name}
+                                    </strong>
+                                  </div>
+                                </td>
+
+                                <td>{size.sku}</td>
+
+                                <td>{product.category}</td>
+
+                                <td>
+                                  Size ({size.size})
+                                </td>
+
+                                <td className={`stock ${sizeStatus.stock}`}>
+                                  {size.stock}
+                                </td>
+
+                                <td>{size.threshold}</td>
+
+                                <td>
+                                  <span className={`badge ${sizeStatus.cls}`}>
+                                    {sizeStatus.label}
+                                  </span>
+                                </td>
+
+                                {/* SIZE ACTIONS */}
+
+                                <td>
+                                  <div className="actions">
+
+                                    <button
+                                      type="button"
+                                      className="btn btn--ghost"
+                                      onClick={() =>
+                                        setModal({
+                                          type: "update",
+                                          product: size
+                                        })
+                                      }
+                                    >
+                                      <Icon name="refresh" />
+                                      Update Stock
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      className="btn btn--ghost"
+                                      onClick={() =>
+                                        setModal({
+                                          type: "delete",
+                                          product: size
+                                        })
+                                      }
+                                    >
+                                      <Icon name="trash" />
+                                      Delete
+                                    </button>
+
+                                  </div>
+                                </td>
+
+                              </tr>
+                            );
+                          })}
+
+                      </React.Fragment>
+                    );
+                  })
+                  
+                  }
 
                 {/* ========================================== */}
                 {/* EMPTY */}
                 {/* ========================================== */}
 
                 {!loading &&
-                  products.length ===
+                  groupedInventory.length ===
                     0 && (
                     <tr className="empty">
                       <td
@@ -2606,9 +3418,8 @@ export default function Inventory() {
             </nav>
           </footer>
         </section>
-      </div>
 
-      {/* ==================================================== */}
+        {/* ==================================================== */}
       {/* ACTION MENU */}
       {/* ==================================================== */}
 
@@ -2641,7 +3452,7 @@ export default function Inventory() {
                 }
               </p>
 
-              <button
+              {/* <button
                 type="button"
                 role="menuitem"
                 ref={
@@ -2659,15 +3470,19 @@ export default function Inventory() {
                 <span>
                   Update Stock
                 </span>
-              </button>
+              </button> */}
 
               <button
                 type="button"
                 role="menuitem"
                 className="menu__item menu__item--danger"
                 onClick={() =>
-                  choose(
-                    "delete"
+                  setModal(
+                    {
+                      type: "delete",
+                      product:
+                        menuProduct,
+                    }
                   )
                 }
               >
@@ -2685,7 +3500,7 @@ export default function Inventory() {
       {/* UPDATE MODAL */}
       {/* ==================================================== */}
 
-      {modal &&
+      {/* {modal &&
         modal.type ===
           "update" &&
         modalProduct && (
@@ -2699,28 +3514,31 @@ export default function Inventory() {
             saving={
               saving
             }
-            onSave={(
-              stock
-            ) =>
-              saveStock(
-                modalProduct,
-                stock
-              )
-            }
+            onSave={(stock) => saveStock(modalProduct, stock)}
           />
-        )}
+        )} */}
+
+      {modal?.type === "update" && modalProduct && modalSize && (
+        <UpdateModal
+          product={modalProduct}
+          size={modalSize}
+          onClose={closeModal}
+          saving={saving}
+          onSave={(stock) => saveStock(modalSize, stock)}
+        />
+      )}
 
       {/* ==================================================== */}
       {/* DELETE MODAL */}
       {/* ==================================================== */}
 
-      {modal &&
-        modal.type ===
-          "delete" &&
-        modalProduct && (
+      {modal && modal.type === "delete" && modalProduct && (
           <DeleteModal
             product={
               modalProduct
+            }
+            size={
+              modalSize
             }
             onClose={
               closeModal
@@ -2728,11 +3546,19 @@ export default function Inventory() {
             deleting={
               deleting
             }
-            onConfirm={() =>
-              removeProduct(
-                modalProduct
-              )
-            }
+            // onConfirm={() =>
+            //   removeProduct(
+            //     modalProduct
+            //   )
+            // }
+            onConfirm={() => {
+              console.log('modal_state_onConfirm', modal);
+              if (modal?.product?.size) {
+                removeSize(modal?.product);
+              } else {
+                removeProduct(modal.product);
+              }
+            }}
           />
         )}
 
@@ -2769,6 +3595,8 @@ export default function Inventory() {
           {toast}
         </div>
       )}
+      </div>
+      
     </div>
   );
 }
