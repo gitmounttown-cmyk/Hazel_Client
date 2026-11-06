@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { createProduct, updateProduct } from "../../../../services/productService";
 import { getCategories } from "../../../../services/categoryService";
 import { getBrands } from "../../../../services/brandService";
+import { compressProductImage } from "../../../../utils/compressImage";
 import "./productForm.css";
+import toast from "react-hot-toast";
 
 // Helper function to resolve cleaned image URLs
 const getImageUrl = (imagePath) => {
@@ -282,27 +284,112 @@ console.log("ProductForm initialized with product:", product);
   // };
 
   
-const handleVariantMediaChange = (variantIndex, e) => {
+// const handleVariantMediaChange = (variantIndex, e) => {
+//   const files = Array.from(e.target.files || []);
+//   if (!files.length) return;
+
+//   setVariants((prev) =>
+//     prev.map((v, i) => {
+//       if (i !== variantIndex) return v;
+
+//       return {
+//         ...v,
+//         pendingFiles: [...(v.pendingFiles || []), ...files],
+//         pendingPreviews: [
+//           ...(v.pendingPreviews || []),
+//           ...files.map((file) => URL.createObjectURL(file)),
+//         ],
+//       };
+//     })
+//   );
+
+//   // Allow selecting the same file again
+//   e.target.value = "";
+// };
+
+
+
+// import { compressProductImage } from "../utils/compressImage";
+
+const handleVariantMediaChange = async (variantIndex, e) => {
   const files = Array.from(e.target.files || []);
+
   if (!files.length) return;
 
-  setVariants((prev) =>
-    prev.map((v, i) => {
-      if (i !== variantIndex) return v;
+  const compressedFiles = [];
 
-      return {
-        ...v,
-        pendingFiles: [...(v.pendingFiles || []), ...files],
-        pendingPreviews: [
-          ...(v.pendingPreviews || []),
-          ...files.map((file) => URL.createObjectURL(file)),
-        ],
-      };
-    })
-  );
+  try {
+    for (const file of files) {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
 
-  // Allow selecting the same file again
-  e.target.value = "";
+      // Validate file type
+      if (!isImage && !isVideo) {
+        toast.error("Only images and videos are allowed.");
+        continue;
+      }
+
+      // Compress images only
+      const processedFile = isImage
+        ? await compressProductImage(file)
+        : file;
+
+      // Validate image size after compression
+      if (
+        isImage &&
+        processedFile.size > 600 * 1024
+      ) {
+        toast.error(
+          `${file.name} is larger than 600 KB after compression.`
+        );
+
+        continue;
+      }
+
+      compressedFiles.push(processedFile);
+    }
+
+    if (compressedFiles.length === 0) {
+      return;
+    }
+
+    // Create preview URLs from compressed files
+    const previews = compressedFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    // IMPORTANT: Update both pendingFiles and pendingPreviews
+    setVariants((prev) =>
+      prev.map((variant, index) => {
+        if (index !== variantIndex) {
+          return variant;
+        }
+
+        return {
+          ...variant,
+
+          // Store compressed files for API upload
+          pendingFiles: [
+            ...(variant.pendingFiles || []),
+            ...compressedFiles,
+          ],
+
+          // Store preview URLs for displaying images
+          pendingPreviews: [
+            ...(variant.pendingPreviews || []),
+            ...previews,
+          ],
+        };
+      })
+    );
+  } catch (error) {
+    console.error("Media upload preparation failed:", error);
+
+    toast.error("Failed to process selected images.");
+  } finally {
+    // Allow selecting the same file again
+    e.target.value = "";
+  }
 };
 
 
@@ -1028,34 +1115,6 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
                                       Thumbnail
                                     </span>
                                   )}
-
-                                  {/* <button
-                                    type="button"
-                                    className="prod-media-thumbnail-btn"
-                                    onClick={() =>
-                                      updateVariantField(
-                                        vIndex,
-                                        "thumbnailId",
-                                        media._id
-                                      )
-                                    }
-                                    title="Set as main thumbnail"
-                                  >
-                                    Set thumbnail
-                                  </button> */}
-
-                                  {/* <button
-                                    type="button"
-                                    className="prod-media-thumbnail-btn"
-                                    onClick={() => {
-                                      updateVariantField(vIndex, "thumbnailId", null);
-                                      updateVariantField(vIndex, "thumbnailPendingIndex", pi);
-                                    }}
-                                    title="Set as main thumbnail"
-                                  >
-                                    {isThumbnail ? "Main Thumbnail ✓" : "Set thumbnail"}
-                                  </button> */}
-
                                   
                                   <button
                                     type="button"

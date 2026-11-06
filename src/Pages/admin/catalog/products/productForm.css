@@ -1,3 +1,9 @@
+:root {
+  --primary-maroon: #5A1827;
+  --accent-gold: #C5A880;
+  --bg-cream: #F5F0EB;
+  --text-dark: #3A111A;
+}
 .prod-form-overlay {
   position: fixed;
   inset: 0;
@@ -462,7 +468,7 @@
 }
 
 .prod-media-item.is-thumbnail {
-  border-color: #412fe3;
+  border-color: var(--accent-gold);
 }
 
 .prod-form-image-preview {
@@ -476,7 +482,7 @@
 .prod-thumbnail-badge {
   display: block;
   margin-top: 4px;
-  color: #412fe3;
+  color: var(--accent-gold);
   font-size: 10px;
   font-weight: 700;
   text-align: center;

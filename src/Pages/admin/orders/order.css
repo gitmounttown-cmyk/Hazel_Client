@@ -1,3 +1,10 @@
+:root {
+  --primary-maroon: #5A1827;
+  --accent-gold: #C5A880;
+  --bg-cream: #F5F0EB;
+  --text-dark: #3A111A;
+  --button-color: #f1cb62;
+}
 .order-page {
   padding: 24px;
 }
@@ -17,8 +24,8 @@
 }
 
 .order-add-btn {
-  background: #f1cb62;
-  color: #292626;
+  background: var(--button-color);
+  color: var(--text-dark);
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -84,8 +91,8 @@
 }
 
 .order-search-form button {
-  background: #f1cb62;
-  color: #292626;
+  background: var(--button-color);
+  color: var(--button-color);
   border: none;
   padding: 0 16px;
   border-radius: 8px;
@@ -562,7 +569,7 @@
 .order-search-form input:focus,
 .order-date-group input:focus,
 .order-filter-select:focus {
-  border-color: #412fe3;
+  border-color: var(--accent-gold);
 }
 
 .order-search-form button,
@@ -571,8 +578,8 @@
   padding: 0 16px;
   border: none;
   border-radius: 7px;
-  background: #facb68;
-  color: #29221b;
+  background: var(--button-color);
+  color: var(--text-dark);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
