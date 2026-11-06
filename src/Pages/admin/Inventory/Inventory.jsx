@@ -2414,12 +2414,12 @@ const productStatusOf = (product) => {
   ? groupedInventory
       .find(
         (item) =>
-          item.productId === modal.product.productId
+          item.productId === modal?.product?.productId
       )
   : null;
 
 const modalSize = modalProduct?.sizes?.find(
-  (size) => size.id === modal.product.id
+  (size) => size.id === modal?.product?.id
 );
 
 // console.log('modal_product', modalProduct);
@@ -2793,6 +2793,8 @@ const modalSize = modalProduct?.sizes?.find(
                 onClick={() =>
                   setModal({
                     type: "filter",
+                    product: null,
+                    size: null
                   })
                 }
               >
