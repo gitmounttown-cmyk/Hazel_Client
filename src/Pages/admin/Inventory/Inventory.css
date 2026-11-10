@@ -174,6 +174,14 @@
   width: 100%;
 }
 
+/* Summary Grid */
+/* .stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+} */
+
 .stat {
   display: flex;
   align-items: center;
@@ -193,6 +201,17 @@
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
+
+/* Summary Card */
+/* .stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 14px 12px;
+  overflow: hidden;
+} */
 
 .stat:hover {
   background: #fffaf0;
@@ -238,14 +257,22 @@
   font-size: 23px;
 }
 
+/* Icon */
+/* .stat__icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  font-size: 21px;
+} */
+
 /* Individual Icon Colors */
 .stat__icon--total {
-  color: #4b3820;
+  color: #9a671a;
   background: #fce8c2;
 }
 
-.stat__icon--units {
-  color: #51402b;
+.stat__icon--totalUnits {
+  color: #9a671a;
   background: #fce8c2;
 }
 
@@ -255,12 +282,12 @@
 }
 
 .stat__icon--out {
-  color: #b84b40;
+  color: #9a671a;
   background: #ffe0d9;
 }
 
 .stat__icon--pending {
-  color: #98601c;
+  color: #9a671a;
   background: #ffe6b8;
 }
 
@@ -269,10 +296,10 @@
   height: 30px;
 }
 
-.stat__icon--low {
+/* .stat__icon--low {
   background: #f5d376;
   color: #5c4302;
-}
+} */
 
 .stat__icon--out,
 .stat__icon--pending {
@@ -289,7 +316,7 @@
 } */
 
 /* Text Container */
-.stat__text {
+/* .stat__text {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -297,26 +324,43 @@
   min-width: 0;
   padding-left: 13px;
   border-left: 1px solid #eadfc9;
+} */
+
+/* Text */
+.stat__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding-left: 10px;
+  border-left: 1px solid #eadfc9;
 }
 
 .stat--active .stat__text {
   border-left-color: #e3c473;
 }
 
-/* .stat__value {
+.stat__value {
   font-family: "DM Serif Display", Georgia, serif;
   font-size: 32px;
   line-height: 1.1;
-} */
+}
 
 /* Number */
-.stat__value {
+/* .stat__value {
   color: #302a26;
   font-family: "DM Serif Display", Georgia, serif;
   font-size: 28px;
   font-weight: 700;
   line-height: 1.1;
-}
+} */
+
+/* .stat__value {
+  font-size: 27px;
+  line-height: 1.1;
+} */
 
 /* .stat__label {
   color: var(--muted);
@@ -324,12 +368,23 @@
 } */
 
 /* Label */
-.stat__label {
+/* .stat__label {
   color: #827568;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
   white-space: nowrap;
+} */
+
+.stat__label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
 }
 
 /* Accessibility */
@@ -1109,6 +1164,30 @@
   .inventory-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat {
+    min-height: 78px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .stat__icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    font-size: 18px;
+  }
+
+  .stat__value {
+    font-size: 23px;
+  }
+
+  .stat__label {
+    font-size: 11px;
+  }
 }
 
 /* ---------- Large desktop / TV ---------- */
@@ -1130,9 +1209,12 @@
 
 /* ---------- Laptops ---------- */
 @media (max-width: 1200px) {
-  .stat {
+  /* .stat {
     padding: 14px 16px;
     gap: 12px;
+  } */
+   .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .stat__icon {
     width: 52px;
