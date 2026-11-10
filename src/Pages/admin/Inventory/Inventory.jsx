@@ -105,6 +105,18 @@ function Icon({ name }) {
         </svg>
       );
 
+    //add for units
+    case "units":
+      return (
+        <svg {...props}>
+          <g {...p}>
+            <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+            <path d="m3 12 9 5 9-5" />
+            <path d="m3 17 9 5 9-5" />
+          </g>
+        </svg>
+      );
+
     case "boxSolid":
       return (
         <svg {...props}>
@@ -741,6 +753,7 @@ export default function Inventory() {
   const [summary, setSummary] =
     useState({
       totalProducts: 0,
+      totalUnits: 0,
       lowStockItems: 0,
       outOfStockItems: 0,
       inStockItems: 0,
@@ -857,6 +870,7 @@ export default function Inventory() {
         setSummary(
           result.data || {
             totalProducts: 0,
+            totalUnits: 0,
             lowStockItems: 0,
             outOfStockItems: 0,
             inStockItems: 0,
@@ -2526,15 +2540,21 @@ const modalSize = modalProduct?.sizes?.find(
     {
       key: "total",
       value:
-        summary.totalProducts,
+        summary.totalProducts || 0,
       label: "Total Products",
       icon: "box",
     },
-
+    {
+      key: "totalUnits",
+      value:
+        summary.totalUnits || 0,
+      label: "Total Units",
+      icon: "units",
+    },
     {
       key: "low",
       value:
-        summary.lowStockItems,
+        summary.lowStockItems || 0,
       label: "Low Stock Items",
       icon: "boxSolid",
       active:
@@ -2545,7 +2565,7 @@ const modalSize = modalProduct?.sizes?.find(
     {
       key: "out",
       value:
-        summary.outOfStockItems,
+        summary.outOfStockItems || 0,
       label: "Out of Stock",
       icon: "cart",
       active:
@@ -2556,7 +2576,7 @@ const modalSize = modalProduct?.sizes?.find(
     {
       key: "pending",
       value:
-        summary.inStockItems,
+        summary.inStockItems || 0,
       label: "In Stock",
       icon: "truck",
       active:
