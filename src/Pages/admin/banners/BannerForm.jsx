@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createBanner, updateBanner } from "../../../Services/bannerService";
+import { compressProductImage } from "../../../utils/compressImage";
 
 import "./BannerForm.css";
 
@@ -41,27 +42,96 @@ const BannerForm = ({ editingBanner, onSuccess, onCancel }) => {
     setImageError("");
   };
 
-  const handleImageChange = (e) => {
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files?.[0];
+
+  //   if (!file) return;
+
+  //   const maxSize = 2 * 1024 * 1024;
+
+  //   if (file.size > maxSize) {
+  //     setImage(null);
+  //     setPreview("");
+  //     setImageError("Image is too large. Maximum allowed size is 2MB.");
+  //     setMessage("");
+  //     e.target.value = "";
+  //     return;
+  //   }
+
+  //   setImageError("");
+  //   setMessage("");
+  //   setImage(file);
+  //   setPreview(URL.createObjectURL(file));
+  // };
+
+
+  const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    const maxSize = 2 * 1024 * 1024;
+    const maxSize = 2 * 1024 * 1024; // 2MB
 
-    if (file.size > maxSize) {
+    try {
+      setImageError("");
+      setMessage("");
+
+      // Validate image type
+      if (!file.type.startsWith("image/")) {
+        setImage(null);
+        setPreview("");
+
+        setImageError("Please select a valid image.");
+
+        e.target.value = "";
+        return;
+      }
+
+      // Compress image using existing shared function
+      const compressedFile = await compressProductImage(file);
+
+      // Validate compressed image size
+      if (compressedFile.size > maxSize) {
+        setImage(null);
+        setPreview("");
+
+        setImageError(
+          "Image is too large. Maximum allowed size is 2MB."
+        );
+
+        e.target.value = "";
+        return;
+      }
+
+      // Store compressed image
+      setImage(compressedFile);
+
+      // Generate preview from compressed image
+      const previewUrl = URL.createObjectURL(compressedFile);
+
+      setPreview(previewUrl);
+
+      console.log("Banner image uploaded:", {
+        originalName: file.name,
+        originalSize: `${(file.size / 1024).toFixed(2)} KB`,
+        compressedName: compressedFile.name,
+        compressedSize: `${(compressedFile.size / 1024).toFixed(2)} KB`,
+      });
+
+    } catch (error) {
+      console.error("Banner image processing failed:", error);
+
       setImage(null);
       setPreview("");
-      setImageError("Image is too large. Maximum allowed size is 2MB.");
-      setMessage("");
-      e.target.value = "";
-      return;
-    }
 
-    setImageError("");
-    setMessage("");
-    setImage(file);
-    setPreview(URL.createObjectURL(file));
+      setImageError("Failed to process banner image.");
+
+    } finally {
+      // Allow selecting the same file again
+      e.target.value = "";
+    }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { getHeroSlides, createHeroSlides, updateHeroSlide, deleteHeroSlide, getImageUrl } from "../../../Services/heroService";
 import "./AdminHero.css";
+import { compressProductImage } from "../../../utils/compressImage";
+import toast from "react-hot-toast";
 
 const AdminHero = () => {
   const [slides, setSlides] = useState([]);
@@ -23,13 +25,68 @@ const AdminHero = () => {
     fetchSlides();
   }, []);
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 0) {
-      setImageFiles(files);
-      setPreviews(files.map((file) => URL.createObjectURL(file)));
+  // const handleFileChange = (e) => {
+  //   const files = Array.from(e.target.files);
+  //   if (files.length > 0) {
+  //     setImageFiles(files);
+  //     setPreviews(files.map((file) => URL.createObjectURL(file)));
+  // };
+
+
+
+const handleFileChange = async (e) => {
+  const files = Array.from(e.target.files || []);
+
+  if (files.length === 0) return;
+
+  try {
+    const compressedFiles = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not a valid image.`);
+        continue;
+      }
+
+      // Compress image
+      const compressedFile = await compressProductImage(file);
+
+      // Validate size after compression
+      const maxSize = 2 * 1024 * 1024;
+
+      if (compressedFile.size > maxSize) {
+        toast.error(
+          `${file.name} is larger than 2MB after compression.`
+        );
+        continue;
+      }
+
+      compressedFiles.push(compressedFile);
     }
-  };
+
+    if (compressedFiles.length === 0) {
+      return;
+    }
+
+    // Create previews
+    const previewUrls = compressedFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    // Update state
+    setImageFiles(compressedFiles);
+    setPreviews(previewUrls);
+
+    console.log("Compressed files:", compressedFiles);
+
+  } catch (error) {
+    console.error("Hero slide image processing failed:", error);
+
+    toast.error("Failed to process selected images.");
+  }
+};
+
+
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();

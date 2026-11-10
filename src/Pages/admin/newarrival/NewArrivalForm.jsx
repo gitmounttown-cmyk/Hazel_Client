@@ -4,6 +4,7 @@ import {
   updateNewArrival,
 } from "../../../Services/newArrivalService";
 import { getProducts } from "../../../Services/productService";
+import { compressProductImage } from "../../../utils/compressImage";
 import "./NewArrivalForm.css";
 
 const emptyProduct = {
@@ -109,25 +110,77 @@ const NewArrivalForm = ({ editingArrival, onClose, onSuccess }) => {
     );
   };
 
-  const handleImageChange = (index, file) => {
+  // const handleImageChange = (index, file) => {
+  //   if (!file) return;
+
+  //   if (file.size > 2 * 1024 * 1024) {
+  //     alert("Image is too large. Maximum size is 2MB.");
+  //     return;
+  //   }
+
+  //   setItems((prev) =>
+  //     prev.map((item, itemIndex) =>
+  //       itemIndex === index
+  //         ? {
+  //             ...item,
+  //             image: file,
+  //             preview: URL.createObjectURL(file),
+  //           }
+  //         : item,
+  //     ),
+  //   );
+  // };
+
+
+  const handleImageChange = async (index, file) => {
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Image is too large. Maximum size is 2MB.");
-      return;
-    }
+    try {
+      // Validate image type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select a valid image.");
+        return;
+      }
 
-    setItems((prev) =>
-      prev.map((item, itemIndex) =>
-        itemIndex === index
-          ? {
+      // Compress image using shared function
+      const compressedFile = await compressProductImage(file);
+
+      // Validate size after compression
+      const maxSize = 2 * 1024 * 1024; // 2MB
+
+      if (compressedFile.size > maxSize) {
+        alert("Image is too large. Maximum size is 2MB.");
+        return;
+      }
+
+      // Create preview from compressed image
+      const previewUrl = URL.createObjectURL(compressedFile);
+
+      // Update selected item
+      setItems((prev) =>
+        prev.map((item, itemIndex) =>
+          itemIndex === index
+            ? {
               ...item,
-              image: file,
-              preview: URL.createObjectURL(file),
+              image: compressedFile,
+              preview: previewUrl,
             }
-          : item,
-      ),
-    );
+            : item
+        )
+      );
+
+      console.log("New Arrival Image:", {
+        originalName: file.name,
+        originalSize: `${(file.size / 1024).toFixed(2)} KB`,
+        compressedName: compressedFile.name,
+        compressedSize: `${(compressedFile.size / 1024).toFixed(2)} KB`,
+      });
+
+    } catch (error) {
+      console.error("New arrival image compression failed:", error);
+
+      alert("Failed to process image.");
+    }
   };
 
   const addProduct = () => {
