@@ -145,6 +145,176 @@ const CameraPlusIcon = () => (
   </svg>
 );
 
+/* ---------- NEW: size chart icon ---------- */
+const RulerIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 17 17 3l4 4L7 21z" />
+    <path d="m7 13 2 2M10 10l2 2M13 7l2 2" />
+  </svg>
+);
+
+/* =====================================================
+   NEW: SIZE CHART DATA  (all measurements in inches)
+   ✏️  Edit the numbers below to match your real charts.
+   ===================================================== */
+const SIZE_CHARTS = {
+  /* ---------- CO-ORD SET (Top + Bottom) ---------- */
+  coord: {
+    title: "Co-ord Size Chart",
+    tables: [
+      {
+        name: "TOP",
+        diagram: "top",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+        rows: [
+          ["SHOULDER", 13.5, 14, 14.5, 15, 15.5, 16, 16.5],
+          ["BUST", 34, 36, 38, 40, 42, 44, 46],
+          ["HIPS", 36, 38, 40, 42, 44, 46, 48],
+          ["WAIST", 30, 32, 34, 36, 38, 40, 42],
+          ["FRONT LENGTH", 46, 46, 46, 46, 46, 46, 46],
+        ],
+      },
+      {
+        name: "BOTTOM",
+        diagram: "bottom",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+        rows: [
+          ["WAIST", 30, 32, 34, 36, 38, 40, 42],
+          ["OUTSEAM LENGTH", 38, 38, 38, 38, 38, 38, 38],
+          ["INSEAM LENGTH", 26, 26, 26, 26, 26, 26, 26],
+        ],
+      },
+    ],
+  },
+
+  /* ---------- MAXI DRESS ---------- */
+  /* ✏️ Sample values – replace with your real maxi measurements */
+  maxi: {
+    title: "Maxi Dress Size Chart",
+    tables: [
+      {
+        name: "MAXI DRESS",
+        diagram: "dress",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+        rows: [
+          ["SHOULDER", 13.5, 14, 14.5, 15, 15.5, 16, 16.5],
+          ["BUST", 34, 36, 38, 40, 42, 44, 46],
+          ["WAIST", 30, 32, 34, 36, 38, 40, 42],
+          ["HIPS", 36, 38, 40, 42, 44, 46, 48],
+          ["FRONT LENGTH", 52, 52, 52, 52, 52, 52, 52],
+        ],
+      },
+    ],
+  },
+
+  /* ---------- MATERNITY WEAR ---------- */
+  /* ✏️ Sample values – replace with your real maternity measurements */
+  maternity: {
+    title: "Maternity Wear Size Chart",
+    tables: [
+      {
+        name: "MATERNITY",
+        diagram: "dress",
+        sizes: ["M", "L", "XL", "2XL", "3XL"],
+        rows: [
+          ["SHOULDER", 14.5, 15, 15.5, 16, 16.5],
+          ["BUST", 38, 40, 42, 44, 46],
+          ["WAIST", 36, 38, 40, 42, 44],
+          ["HIPS", 40, 42, 44, 46, 48],
+          ["FRONT LENGTH", 52, 52, 52, 52, 52],
+        ],
+      },
+    ],
+  },
+};
+
+/* Picks which chart to show from the product name / category */
+const getSizeChartType = (product) => {
+  const text = `${product?.name || ""} ${product?.category?.name || product?.category || ""}`;
+  if (/maternity|feeding|nursing|pregnan/i.test(text)) return "maternity";
+  if (/co-?\s?ord|coord|set/i.test(text)) return "coord";
+  return "maxi";
+};
+
+/* ---------- NEW: measurement diagrams (responsive SVG) ---------- */
+const ChartDiagram = ({ type }) => {
+  const line = { stroke: "#222", strokeWidth: 1, fill: "none" };
+  const dash = { stroke: "#222", strokeWidth: 1, strokeDasharray: "2 2", fill: "none" };
+  const txt = { fontSize: 8, fill: "#222", fontFamily: "Poppins, sans-serif" };
+
+  if (type === "bottom") {
+    return (
+      <svg viewBox="0 0 240 240" className="pp-sc-svg" role="img" aria-label="Bottom measurement guide">
+        <text x="6" y="22" {...txt}>WAIST</text>
+        <line x1="40" y1="20" x2="68" y2="20" {...line} />
+        <line x1="70" y1="20" x2="150" y2="20" {...dash} />
+        <path d="M70 24 H150 L158 226 H118 L110 96 L102 226 H62 Z" {...line} />
+        <text x="6" y="126" {...txt}>INSEAM</text>
+        <text x="6" y="136" {...txt}>LENGTH</text>
+        <line x1="46" y1="130" x2="108" y2="130" {...line} />
+        <line x1="108" y1="96" x2="108" y2="226" {...line} />
+        <line x1="182" y1="22" x2="182" y2="228" {...line} />
+        <text x="186" y="124" {...txt}>OUTSEAM</text>
+        <text x="186" y="134" {...txt}>LENGTH</text>
+      </svg>
+    );
+  }
+
+  if (type === "dress") {
+    return (
+      <svg viewBox="0 0 240 240" className="pp-sc-svg" role="img" aria-label="Dress measurement guide">
+        <path d="M88 24 L112 34 L136 24 L146 36 L142 72 L132 98 L166 228 H58 L92 98 L82 72 L78 36 Z" {...line} />
+        <text x="6" y="30" {...txt}>SHOULDER</text>
+        <line x1="50" y1="34" x2="80" y2="34" {...line} />
+        <line x1="80" y1="30" x2="144" y2="30" {...dash} />
+        <text x="6" y="66" {...txt}>BUST</text>
+        <line x1="30" y1="64" x2="80" y2="64" {...line} />
+        <line x1="80" y1="64" x2="144" y2="64" {...dash} />
+        <text x="6" y="98" {...txt}>WAIST</text>
+        <line x1="34" y1="96" x2="90" y2="96" {...line} />
+        <line x1="90" y1="96" x2="134" y2="96" {...dash} />
+        <text x="6" y="132" {...txt}>HIPS</text>
+        <line x1="28" y1="130" x2="82" y2="130" {...line} />
+        <line x1="82" y1="130" x2="142" y2="130" {...dash} />
+        <line x1="190" y1="24" x2="190" y2="228" {...line} />
+        <text x="194" y="122" {...txt}>FRONT</text>
+        <text x="194" y="132" {...txt}>LENGTH</text>
+      </svg>
+    );
+  }
+
+  /* default: top */
+  return (
+    <svg viewBox="0 0 240 240" className="pp-sc-svg" role="img" aria-label="Top measurement guide">
+      <path d="M86 24 L110 34 L134 24 L146 36 L170 120 L160 130 L150 80 L152 226 H70 L72 80 L62 130 L52 120 L76 36 Z" {...line} />
+      <text x="4" y="22" {...txt}>SHOULDER</text>
+      <line x1="46" y1="26" x2="78" y2="30" {...line} />
+      <line x1="78" y1="30" x2="144" y2="30" {...dash} />
+      <text x="4" y="70" {...txt}>BUST</text>
+      <line x1="28" y1="68" x2="72" y2="68" {...line} />
+      <line x1="72" y1="68" x2="150" y2="68" {...dash} />
+      <text x="4" y="104" {...txt}>WAIST</text>
+      <line x1="32" y1="102" x2="72" y2="102" {...line} />
+      <line x1="72" y1="102" x2="150" y2="102" {...dash} />
+      <text x="4" y="136" {...txt}>HIPS</text>
+      <line x1="26" y1="134" x2="70" y2="134" {...line} />
+      <line x1="70" y1="134" x2="152" y2="134" {...dash} />
+      <line x1="196" y1="24" x2="196" y2="228" {...line} />
+      <text x="200" y="122" {...txt}>FRONT</text>
+      <text x="200" y="132" {...txt}>LENGTH</text>
+    </svg>
+  );
+};
+
 const FILTERS = [
   { id: "all", label: "All Reviews" },
   { id: "photos", label: "With Photos" },
@@ -242,6 +412,9 @@ export default function ProductPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingAPI, setLoadingAPI] = useState(false);
+
+  /* NEW: size chart popup state */
+  const [showSizeChart, setShowSizeChart] = useState(false);
 
   const { id } = useParams();
   const [countdown, setCountdown] = useState("");
@@ -684,6 +857,21 @@ useEffect(() => {
     };
   }, [showReviewModal]);
 
+  /* NEW: size chart popup – Esc to close + lock page scroll */
+  useEffect(() => {
+    if (!showSizeChart) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setShowSizeChart(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showSizeChart]);
+
   const RELATED = relatedProducts.map((product) => {
     const variant = product.variants?.[0];
     return {
@@ -718,6 +906,10 @@ useEffect(() => {
       },
     });
   };
+
+  /* NEW: chart to display for this product */
+  const sizeChart = SIZE_CHARTS[getSizeChartType(productDetails)];
+
 // console.log("variantMedia Details:", variantMedia);
 // console.log('activeThumb:', activeThumb);
   return (
@@ -813,6 +1005,18 @@ useEffect(() => {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* ================= NEW: SIZE CHART (between color & size) ================= */}
+            <div className="pp-block pp-sc-block">
+              <button
+                type="button"
+                className="pp-sc-trigger"
+                onClick={() => setShowSizeChart(true)}
+              >
+                <RulerIcon />
+                <span>Size Chart</span>
+              </button>
             </div>
 
             <div className="pp-block">
@@ -1229,6 +1433,76 @@ useEffect(() => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= NEW: SIZE CHART POPUP ================= */}
+      {showSizeChart && sizeChart && (
+        <div className="pp-sc-overlay" onClick={() => setShowSizeChart(false)}>
+          <div
+            className="pp-sc-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pp-sc-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="pp-sc-header">
+              <h3 id="pp-sc-title">{sizeChart.title}</h3>
+              <button
+                type="button"
+                className="pp-sc-close"
+                onClick={() => setShowSizeChart(false)}
+                aria-label="Close size chart"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="pp-sc-body">
+              {sizeChart.tables.map((t) => (
+                <div className="pp-sc-section" key={t.name}>
+                  <p className="pp-sc-note">
+                    All measurements are in <span>inches</span>
+                  </p>
+                  <div className="pp-sc-row">
+                    <div className="pp-sc-table-wrap">
+                      <table className="pp-sc-table">
+                        <thead>
+                          <tr>
+                            <th className="pp-sc-title-cell" colSpan={t.sizes.length + 1}>
+                              {t.name}
+                            </th>
+                          </tr>
+                          <tr>
+                            <th className="pp-sc-head">SIZE</th>
+                            {t.sizes.map((s) => (
+                              <th className="pp-sc-size" key={s}>
+                                {s}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {t.rows.map(([label, ...values]) => (
+                            <tr key={label}>
+                              <th className="pp-sc-head">{label}</th>
+                              {values.map((v, i) => (
+                                <td key={i}>{v}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="pp-sc-diagram">
+                      <ChartDiagram type={t.diagram} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
