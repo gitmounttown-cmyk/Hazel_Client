@@ -2,7 +2,41 @@ import { useState, useEffect } from "react";
 import { createProduct, updateProduct } from "../../../../services/productService";
 import { getCategories } from "../../../../services/categoryService";
 import { getBrands } from "../../../../services/brandService";
+import {
+  getSizeCharts,
+  getSizeChartById,
+  createSizeChart,
+  updateSizeChart,
+} from "../../../../Services/sizeChartService";
+import { Plus, Trash2, Upload, RefreshCw, X } from "lucide-react";
 import "./productForm.css";
+import "../sizechart/sizeChart.css";
+
+const IMAGE_BASE_URL =
+  import.meta.env.VITE_UPLOAD_URL ||
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5004";
+
+const DEFAULT_SC_PARAMETERS = [
+  "SHOULDER",
+  "BUST",
+  "WAIST",
+  "HIPS",
+  "FRONT LENGTH",
+];
+
+const DEFAULT_SC_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
+
+const createDefaultScTable = (name = "TOP", sizes = DEFAULT_SC_SIZES) => ({
+  tableName: name,
+  image: "",
+  images: [],
+  sizes: [...sizes],
+  rows: DEFAULT_SC_PARAMETERS.map((param) => ({
+    parameter: param,
+    values: {},
+  })),
+});
 
 // Helper function to resolve cleaned image URLs
 const getImageUrl = (imagePath) => {
@@ -180,6 +214,7 @@ const variantsFromProduct = (product) => {
 const ProductForm = ({ product, onClose, onSuccess }) => {
   const [categoryId, setCategoryId] = useState(product?.categoryId?._id || product?.categoryId || "");
   const [brandId, setBrandId] = useState(product?.brandId?._id || product?.brandId || "");
+  const [sizeChartId, setSizeChartId] = useState(product?.sizeChartId?._id || product?.sizeChartId || "");
   const [name, setName] = useState(product?.name || "");
   const [about, setAbout] = useState(product?.description?.about || "");
   const [itemDetails, setItemDetails] = useState(product?.description?.itemDetails || "");
@@ -189,22 +224,274 @@ console.log("ProductForm initialized with product:", product);
 
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [sizeCharts, setSizeCharts] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Dedicated Product Size Chart state (each product has its own separate size chart)
+  const [scMode, setScMode] = useState(() => {
+    if (product) {
+      return product.sizeChartId ? "create_separate" : "none";
+    }
+    return "create_separate";
+  });
+  const [selectedExistingScId, setSelectedExistingScId] = useState(
+    product?.sizeChartId?._id || product?.sizeChartId || ""
+  );
+  const [scUnit, setScUnit] = useState("inches");
+  const [scTables, setScTables] = useState(() => [createDefaultScTable("TOP", DEFAULT_SC_SIZES)]);
+  const [scExistingImages, setScExistingImages] = useState([]);
+  const [scNewImageFiles, setScNewImageFiles] = useState([]);
+  const [scTableImageFiles, setScTableImageFiles] = useState({});
+  const [scNewSizeInputs, setScNewSizeInputs] = useState({});
+  const [scNewParamInputs, setScNewParamInputs] = useState({});
+
+  // Populate size chart data when editing an existing product
+  useEffect(() => {
+    if (!product?.sizeChartId) return;
+
+    const populateChart = (sc) => {
+      if (!sc) return;
+      if (sc.unit) setScUnit(sc.unit);
+      if (Array.isArray(sc.tables) && sc.tables.length > 0) {
+        setScTables(
+          sc.tables.map((t) => ({
+            tableName: t.tableName || "STANDARD",
+            image: t.image || "",
+            images: Array.isArray(t.images) ? [...t.images] : (t.image ? [t.image] : []),
+            sizes: Array.isArray(t.sizes) ? [...t.sizes] : [...DEFAULT_SC_SIZES],
+            rows:
+              Array.isArray(t.rows) && t.rows.length > 0
+                ? t.rows.map((r) => ({
+                    parameter: r.parameter || "",
+                    values: { ...(r.values || {}) },
+                  }))
+                : DEFAULT_SC_PARAMETERS.map((p) => ({ parameter: p, values: {} })),
+          }))
+        );
+      }
+      const imgs =
+        Array.isArray(sc.images) && sc.images.length > 0
+          ? [...sc.images]
+          : sc.image
+          ? [sc.image]
+          : [];
+      setScExistingImages(imgs);
+      setSelectedExistingScId(sc._id);
+      setScMode("create_separate");
+    };
+
+    if (typeof product.sizeChartId === "object" && product.sizeChartId._id) {
+      populateChart(product.sizeChartId);
+    } else if (typeof product.sizeChartId === "string") {
+      getSizeChartById(product.sizeChartId)
+        .then((res) => populateChart(res.data?.data))
+        .catch((err) => console.error("Failed to load product size chart:", err));
+    }
+  }, [product]);
+
+  // Collect all unique sizes currently entered in Color Variants
+  const getProductVariantSizes = () => {
+    const collected = [];
+    variants.forEach((v) => {
+      (v.sizes || []).forEach((s) => {
+        if (s?.size && String(s.size).trim()) {
+          collected.push(String(s.size).trim().toUpperCase());
+        }
+      });
+    });
+    return Array.from(new Set(collected));
+  };
+
+  // Sync variant sizes into size chart table columns
+  const handleSyncSizesFromVariants = (tableIndex = null) => {
+    const variantSizes = getProductVariantSizes();
+    if (variantSizes.length === 0) {
+      alert("No sizes found in Color Variants above. Please add sizes under Color Variants first.");
+      return;
+    }
+
+    setScTables((prev) =>
+      prev.map((t, idx) => {
+        if (tableIndex === null || idx === tableIndex) {
+          return {
+            ...t,
+            sizes: [...variantSizes],
+          };
+        }
+        return t;
+      })
+    );
+  };
+
+  // Handlers for embedded size chart builder
+  const handleScTableNameChange = (index, val) => {
+    setScTables((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], tableName: val.toUpperCase() };
+      return copy;
+    });
+  };
+
+  const handleScAddSize = (tableIndex) => {
+    const sizeVal = (scNewSizeInputs[tableIndex] || "").trim().toUpperCase();
+    if (!sizeVal) return;
+
+    setScTables((prev) => {
+      const copy = [...prev];
+      const table = copy[tableIndex];
+      if (!table.sizes.includes(sizeVal)) {
+        table.sizes = [...table.sizes, sizeVal];
+      }
+      return copy;
+    });
+
+    setScNewSizeInputs((prev) => ({ ...prev, [tableIndex]: "" }));
+  };
+
+  const handleScRemoveSize = (tableIndex, sizeToRemove) => {
+    setScTables((prev) => {
+      const copy = [...prev];
+      const table = copy[tableIndex];
+      table.sizes = table.sizes.filter((s) => s !== sizeToRemove);
+      return copy;
+    });
+  };
+
+  const handleScCellValueChange = (tableIndex, rowIndex, size, val) => {
+    setScTables((prev) => {
+      const copy = [...prev];
+      const table = copy[tableIndex];
+      const row = { ...table.rows[rowIndex] };
+      row.values = {
+        ...(row.values || {}),
+        [size]: val,
+      };
+      table.rows[rowIndex] = row;
+      return copy;
+    });
+  };
+
+  const handleScAddParameter = (tableIndex) => {
+    const paramVal = (scNewParamInputs[tableIndex] || "").trim().toUpperCase();
+    if (!paramVal) return;
+
+    setScTables((prev) => {
+      const copy = [...prev];
+      const table = copy[tableIndex];
+      table.rows = [
+        ...table.rows,
+        {
+          parameter: paramVal,
+          values: {},
+        },
+      ];
+      return copy;
+    });
+
+    setScNewParamInputs((prev) => ({ ...prev, [tableIndex]: "" }));
+  };
+
+  const handleScRemoveRow = (tableIndex, rowIndex) => {
+    setScTables((prev) => {
+      const copy = [...prev];
+      copy[tableIndex].rows = copy[tableIndex].rows.filter((_, idx) => idx !== rowIndex);
+      return copy;
+    });
+  };
+
+  const handleScAddTable = () => {
+    setScTables((prev) => [
+      ...prev,
+      createDefaultScTable(
+        prev.length === 1 ? "BOTTOM" : `SECTION ${prev.length + 1}`,
+        prev[0]?.sizes || DEFAULT_SC_SIZES
+      ),
+    ]);
+  };
+
+  const handleScRemoveTable = (index) => {
+    if (scTables.length <= 1) return;
+    setScTables((prev) => prev.filter((_, idx) => idx !== index));
+    setScTableImageFiles((prev) => {
+      const updated = {};
+      let newIdx = 0;
+      for (let i = 0; i < scTables.length; i++) {
+        if (i !== index) {
+          if (prev[i]) updated[newIdx] = prev[i];
+          newIdx++;
+        }
+      }
+      return updated;
+    });
+  };
+
+  // Multi-image diagram guide upload handlers (up to 5 images)
+  const handleScGuideImagesAdd = (fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    const remainingSlots = 5 - (scExistingImages.length + scNewImageFiles.length);
+    if (remainingSlots <= 0) {
+      alert("You can upload a maximum of 5 diagram images.");
+      return;
+    }
+    const filesToAdd = Array.from(fileList).slice(0, remainingSlots);
+    setScNewImageFiles((prev) => [...prev, ...filesToAdd]);
+  };
+
+  const handleScRemoveExistingImage = (idx) => {
+    setScExistingImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleScRemoveNewImage = (idx) => {
+    setScNewImageFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // Section-specific images handlers
+  const handleScSectionImagesAdd = (tIndex, fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    const newFiles = Array.from(fileList);
+    setScTableImageFiles((prev) => ({
+      ...prev,
+      [tIndex]: [...(prev[tIndex] || []), ...newFiles],
+    }));
+  };
+
+  const handleScRemoveExistingSectionImage = (tIndex, imgIdx) => {
+    setScTables((prev) => {
+      const copy = [...prev];
+      const table = { ...copy[tIndex] };
+      const curImages = Array.isArray(table.images) ? [...table.images] : [];
+      curImages.splice(imgIdx, 1);
+      table.images = curImages;
+      table.image = curImages[0] || "";
+      copy[tIndex] = table;
+      return copy;
+    });
+  };
+
+  const handleScRemoveNewSectionImage = (tIndex, fileIdx) => {
+    setScTableImageFiles((prev) => {
+      const list = [...(prev[tIndex] || [])];
+      list.splice(fileIdx, 1);
+      return { ...prev, [tIndex]: list };
+    });
+  };
 
   useEffect(() => {
     let ignore = false;
 
     const fetchOptions = async () => {
       try {
-        const [catRes, brandRes] = await Promise.all([
+        const [catRes, brandRes, scRes] = await Promise.all([
           getCategories({ limit: 100, status: "active" }),
           getBrands({ limit: 100, status: "active" }),
+          getSizeCharts({ limit: 100, status: "true" }),
         ]);
 
         if (!ignore) {
           setCategories(catRes?.data?.data || []);
           setBrands(brandRes?.data?.data || []);
+          setSizeCharts(scRes?.data?.data || []);
         }
       } catch (err) {
         console.error("Failed to load dropdown options:", err);
@@ -378,6 +665,83 @@ const handleSubmit = async (e) => {
   setSubmitting(true);
 
   try {
+    let resolvedSizeChartId = null;
+
+    // 1. If in "create_separate" mode, check if measurements or images were entered
+    if (scMode === "create_separate") {
+      const hasAnyMeasurements = scTables.some((t) =>
+        (t.rows || []).some((r) =>
+          Object.values(r.values || {}).some(
+            (v) => v !== undefined && v !== null && String(v).trim() !== ""
+          )
+        )
+      );
+      const hasAnyImages =
+        scExistingImages.length > 0 ||
+        scNewImageFiles.length > 0 ||
+        Object.values(scTableImageFiles).some((files) => files && files.length > 0);
+
+      // Only create/update a size chart if admin actually entered measurements or diagram images!
+      if (hasAnyMeasurements || hasAnyImages) {
+        const scFormData = new FormData();
+        const scName = name.trim() ? `${name.trim()} Size Chart` : "Product Size Chart";
+        scFormData.append("name", scName);
+        scFormData.append("unit", scUnit);
+        scFormData.append("description", `All measurements are in ${scUnit}`);
+        scFormData.append("isActive", "true");
+        if (categoryId) scFormData.append("categoryId", categoryId);
+        if (product?._id) scFormData.append("productId", product._id);
+
+        const sanitizedTables = scTables.map((t) => ({
+          tableName: t.tableName,
+          sizes: t.sizes,
+          rows: t.rows,
+          image: t.image || (Array.isArray(t.images) ? t.images[0] : "") || "",
+          images: Array.isArray(t.images) ? t.images : [],
+        }));
+        scFormData.append("tables", JSON.stringify(sanitizedTables));
+
+        // Append kept existing guide images
+        scFormData.append("existingImages", JSON.stringify(scExistingImages));
+        if (scExistingImages[0]) {
+          scFormData.append("image", scExistingImages[0]);
+        }
+
+        // Append new guide images (up to 5 images)
+        scNewImageFiles.forEach((file) => {
+          scFormData.append("images", file);
+        });
+
+        // Append section-level images (TOP, BOTTOM, etc.)
+        scTables.forEach((_, tIndex) => {
+          const files = scTableImageFiles[tIndex] || [];
+          files.forEach((file) => {
+            scFormData.append(`table_${tIndex}_images`, file);
+          });
+        });
+
+        const existingScId =
+          product?.sizeChartId?._id ||
+          (typeof product?.sizeChartId === "string" ? product?.sizeChartId : null);
+
+        if (existingScId) {
+          await updateSizeChart(existingScId, scFormData);
+          resolvedSizeChartId = existingScId;
+        } else {
+          const createRes = await createSizeChart(scFormData);
+          resolvedSizeChartId = createRes?.data?.data?._id;
+        }
+      } else {
+        // No measurements or images entered -> admin did not mention a size chart for this product
+        resolvedSizeChartId = null;
+      }
+    } else if (scMode === "select_existing") {
+      resolvedSizeChartId = selectedExistingScId || null;
+    } else {
+      resolvedSizeChartId = null;
+    }
+
+    // 2. Prepare variants payload
     const variantsPayload = variants.map((v) => ({
       color: v.color,
       fabric: v.fabric,
@@ -407,14 +771,9 @@ const handleSubmit = async (e) => {
           isActive: s.isActive,
         })),
 
-      // Existing media retained in the form
       media: v.existingMedia,
-
-      // Thumbnail selection
       thumbnailId: v.thumbnailId || null,
-      thumbnailPendingIndex:  v.thumbnailPendingIndex ?? null,
-
-      // Existing media requested for deletion
+      thumbnailPendingIndex: v.thumbnailPendingIndex ?? null,
       removedMediaIds: v.removedMediaIds || [],
 
       details: (v.details || [])
@@ -425,9 +784,15 @@ const handleSubmit = async (e) => {
         })),
     }));
 
+    // 3. Build product FormData
     const formData = new FormData();
     if (categoryId) formData.append("categoryId", categoryId);
     if (brandId) formData.append("brandId", brandId);
+    if (resolvedSizeChartId) {
+      formData.append("sizeChartId", resolvedSizeChartId);
+    } else {
+      formData.append("sizeChartId", "");
+    }
     formData.append("name", name);
     formData.append(
       "description",
@@ -436,25 +801,31 @@ const handleSubmit = async (e) => {
     formData.append("variants", JSON.stringify(variantsPayload));
     formData.append("isActive", String(isActive));
 
-    // Upload new files in the same order as pendingFiles.
-    // The backend must use this order to resolve thumbnailPendingIndex.
     variants.forEach((v, variantIndex) => {
       (v.pendingFiles || []).forEach((file) => {
         formData.append("media", file);
-
-        // Optional metadata identifying the uploaded file's variant.
-        // The backend must explicitly support this field if used.
-        formData.append(
-          "mediaVariantIndex",
-          String(variantIndex)
-        );
+        formData.append("mediaVariantIndex", String(variantIndex));
       });
     });
 
+    // 4. Save Product
+    let savedProduct;
     if (product?._id) {
-      await updateProduct(product._id, formData);
+      savedProduct = await updateProduct(product._id, formData);
     } else {
-      await createProduct(formData);
+      savedProduct = await createProduct(formData);
+    }
+
+    // 5. Ensure bidirectional link between sizeChart and new product
+    const newProdId = savedProduct?.data?.data?._id || savedProduct?.data?._id;
+    if (newProdId && resolvedSizeChartId && !product?._id) {
+      try {
+        const linkFormData = new FormData();
+        linkFormData.append("productId", newProdId);
+        await updateSizeChart(resolvedSizeChartId, linkFormData);
+      } catch (linkErr) {
+        console.error("Link size chart to product error:", linkErr);
+      }
     }
 
     onSuccess();
@@ -644,6 +1015,8 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
                 ))}
               </select>
             </div>
+
+
 
             <div className="prod-form-group">
               <label>Brand</label>
@@ -1176,6 +1549,343 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
               </div>
             </div>
 
+            {/* DEDICATED PRODUCT SIZE CHART SECTION */}
+            <div className="prod-form-group prod-sizechart-section">
+              <div className="prod-sc-header-row">
+                <div>
+                  <h4 className="prod-sc-section-title">Product Size Chart</h4>
+                  <p className="prod-sc-section-desc">
+                    Each product has its own separate size chart with differing measurements and diagram images.
+                  </p>
+                </div>
+                {scMode === "create_separate" && (
+                  <button
+                    type="button"
+                    className="prod-sc-sync-sizes-btn"
+                    onClick={() => handleSyncSizesFromVariants()}
+                    title="Automatically sync size columns with the sizes configured in Color Variants above"
+                  >
+                    <RefreshCw size={13} /> Sync Sizes From Variants
+                  </button>
+                )}
+              </div>
+
+              {/* Mode Selector Tabs */}
+              <div className="prod-sc-mode-tabs">
+                <button
+                  type="button"
+                  className={`prod-sc-mode-btn ${scMode === "create_separate" ? "active" : ""}`}
+                  onClick={() => setScMode("create_separate")}
+                >
+                  ✨ Create Separate Size Chart For This Product
+                </button>
+                <button
+                  type="button"
+                  className={`prod-sc-mode-btn ${scMode === "select_existing" ? "active" : ""}`}
+                  onClick={() => setScMode("select_existing")}
+                >
+                  📋 Select Existing Template
+                </button>
+                <button
+                  type="button"
+                  className={`prod-sc-mode-btn ${scMode === "none" ? "active" : ""}`}
+                  onClick={() => setScMode("none")}
+                >
+                  ❌ No Size Chart
+                </button>
+              </div>
+
+              {/* Tab 1: Embedded Custom Size Chart Builder for this Product */}
+              {scMode === "create_separate" && (
+                <div className="prod-sc-embedded-builder">
+                  <div className="prod-sc-settings-row">
+                    <div className="prod-sc-setting-item">
+                      <label>Measurement Unit:</label>
+                      <select value={scUnit} onChange={(e) => setScUnit(e.target.value)}>
+                        <option value="inches">Inches (in)</option>
+                        <option value="cm">Centimeters (cm)</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="sc-add-table-btn"
+                      onClick={handleScAddTable}
+                    >
+                      <Plus size={15} /> Add Another Section (e.g. BOTTOM)
+                    </button>
+                  </div>
+
+                  {/* Multi-image Guide Upload (Up to 5 images) */}
+                  <div className="sc-image-upload-zone" style={{ marginBottom: "16px" }}>
+                    <div className="sc-image-zone-header">
+                      <label className="sc-section-label">
+                        Dynamic Diagram / Guide Images (Up to 5 images)
+                      </label>
+                      <span className="sc-image-counter-pill">
+                        {scExistingImages.length + scNewImageFiles.length} / 5 uploaded
+                      </span>
+                    </div>
+
+                    <div className="sc-multi-upload-container">
+                      <div className="sc-guide-thumbs-grid">
+                        {scExistingImages.map((imgSrc, idx) => {
+                          const fullUrl = imgSrc.startsWith("http")
+                            ? imgSrc
+                            : `${IMAGE_BASE_URL.replace(/\/+$/, "")}${imgSrc.startsWith("/") ? "" : "/"}${imgSrc}`;
+                          return (
+                            <div key={`existing-sc-${idx}`} className="sc-guide-thumb-card">
+                              <img src={fullUrl} alt={`Guide ${idx + 1}`} className="sc-guide-thumb-img" />
+                              <span className="sc-thumb-order-badge">#{idx + 1}</span>
+                              <button
+                                type="button"
+                                className="sc-guide-del-btn"
+                                onClick={() => handleScRemoveExistingImage(idx)}
+                                title="Delete image"
+                              >
+                                <X size={13} />
+                              </button>
+                            </div>
+                          );
+                        })}
+
+                        {scNewImageFiles.map((fileObj, idx) => {
+                          const previewUrl = URL.createObjectURL(fileObj);
+                          const displayIdx = scExistingImages.length + idx + 1;
+                          return (
+                            <div key={`new-sc-${idx}`} className="sc-guide-thumb-card sc-guide-thumb-staged">
+                              <img src={previewUrl} alt={`New ${idx + 1}`} className="sc-guide-thumb-img" />
+                              <span className="sc-thumb-order-badge sc-badge-new">#{displayIdx} New</span>
+                              <button
+                                type="button"
+                                className="sc-guide-del-btn"
+                                onClick={() => handleScRemoveNewImage(idx)}
+                                title="Remove pending image"
+                              >
+                                <X size={13} />
+                              </button>
+                            </div>
+                          );
+                        })}
+
+                        {scExistingImages.length + scNewImageFiles.length < 5 && (
+                          <label className="sc-guide-add-box">
+                            <Upload size={22} className="sc-upload-icon" />
+                            <span className="sc-add-main-text">
+                              {scExistingImages.length + scNewImageFiles.length === 0
+                                ? "Click to upload diagram images (Up to 5)"
+                                : `+ Add More (${5 - (scExistingImages.length + scNewImageFiles.length)} left)`}
+                            </span>
+                            <span className="sc-add-sub-text">JPG, PNG, WEBP</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => {
+                                handleScGuideImagesAdd(e.target.files);
+                                e.target.value = "";
+                              }}
+                              hidden
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Table Sections (e.g. TOP, BOTTOM or MAXI DRESS) */}
+                  <div className="sc-tables-builder">
+                    {scTables.map((table, tIndex) => (
+                      <div key={tIndex} className="sc-table-builder-card">
+                        <div className="sc-builder-top-bar">
+                          <div className="sc-table-title-edit">
+                            <label>Section Title:</label>
+                            <input
+                              type="text"
+                              value={table.tableName}
+                              onChange={(e) => handleScTableNameChange(tIndex, e.target.value)}
+                              placeholder="e.g. TOP, BOTTOM, or MAXI DRESS"
+                            />
+                          </div>
+
+                          <div className="sc-builder-actions">
+                            <button
+                              type="button"
+                              className="sc-autofill-btn"
+                              onClick={() => handleSyncSizesFromVariants(tIndex)}
+                              title="Sync sizes from variants"
+                            >
+                              <RefreshCw size={13} /> Sync Variant Sizes
+                            </button>
+
+                            {scTables.length > 1 && (
+                              <button
+                                type="button"
+                                className="sc-remove-section-btn"
+                                onClick={() => handleScRemoveTable(tIndex)}
+                              >
+                                <Trash2 size={15} /> Remove Section
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Size Columns Tags */}
+                        <div className="sc-sizes-config">
+                          <span className="sc-config-label">Columns (Sizes):</span>
+                          <div className="sc-tags-list">
+                            {table.sizes.map((s) => (
+                              <span key={s} className="sc-size-tag">
+                                {s}
+                                <button
+                                  type="button"
+                                  onClick={() => handleScRemoveSize(tIndex, s)}
+                                  aria-label={`Remove size ${s}`}
+                                >
+                                  &times;
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="sc-add-size-inline">
+                            <input
+                              type="text"
+                              placeholder="Add size (e.g. 4XL)"
+                              value={scNewSizeInputs[tIndex] || ""}
+                              onChange={(e) =>
+                                setScNewSizeInputs((prev) => ({
+                                  ...prev,
+                                  [tIndex]: e.target.value,
+                                }))
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleScAddSize(tIndex);
+                                }
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="sc-inline-btn"
+                              onClick={() => handleScAddSize(tIndex)}
+                            >
+                              + Add
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Editable Data Matrix */}
+                        <div className="sc-matrix-wrap">
+                          <table className="sc-matrix-table">
+                            <thead>
+                              <tr>
+                                <th className="sc-m-corner">PARAMETER</th>
+                                {table.sizes.map((s) => (
+                                  <th key={s} className="sc-m-col">
+                                    {s}
+                                  </th>
+                                ))}
+                                <th className="sc-m-action"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {table.rows.map((row, rIndex) => (
+                                <tr key={rIndex}>
+                                  <td className="sc-m-param-name">{row.parameter}</td>
+                                  {table.sizes.map((s) => (
+                                    <td key={s} className="sc-m-cell">
+                                      <input
+                                        type="text"
+                                        value={row.values?.[s] ?? ""}
+                                        onChange={(e) =>
+                                          handleScCellValueChange(
+                                            tIndex,
+                                            rIndex,
+                                            s,
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder="--"
+                                      />
+                                    </td>
+                                  ))}
+                                  <td className="sc-m-delete-cell">
+                                    <button
+                                      type="button"
+                                      className="sc-del-row-btn"
+                                      onClick={() => handleScRemoveRow(tIndex, rIndex)}
+                                      title="Delete row"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Add Row Parameter */}
+                        <div className="sc-add-param-bar">
+                          <input
+                            type="text"
+                            placeholder="New parameter (e.g. OUTSEAM LENGTH)"
+                            value={scNewParamInputs[tIndex] || ""}
+                            onChange={(e) =>
+                              setScNewParamInputs((prev) => ({
+                                ...prev,
+                                [tIndex]: e.target.value,
+                              }))
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleScAddParameter(tIndex);
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="sc-inline-btn"
+                            onClick={() => handleScAddParameter(tIndex)}
+                          >
+                            + Add Parameter Row
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Select Existing Template */}
+              {scMode === "select_existing" && (
+                <div className="prod-sc-template-selector">
+                  <label className="prod-sc-template-label">Select from existing size charts:</label>
+                  <select
+                    value={selectedExistingScId}
+                    onChange={(e) => setSelectedExistingScId(e.target.value)}
+                  >
+                    <option value="">-- Choose a size chart template --</option>
+                    {sizeCharts.map((sc) => (
+                      <option key={sc._id} value={sc._id}>
+                        {sc.name} ({sc.tables?.map((t) => t.tableName).join(" + ") || "STANDARD"})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Tab 3: No Size Chart */}
+              {scMode === "none" && (
+                <div className="prod-sc-none-note">
+                  No size chart will be linked to this product.
+                </div>
+              )}
+            </div>
+
             <div className="prod-form-actions">
               <button type="button" className="prod-btn prod-btn-secondary" onClick={onClose}>
                 Cancel
@@ -1186,6 +1896,7 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
             </div>
           </form>
         )}
+
       </div>
     </div>
   );

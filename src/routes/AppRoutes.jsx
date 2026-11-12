@@ -15,6 +15,7 @@ import ProductList from "../pages/admin/catalog/products/ProductList";
 import ProductVariantList from "../pages/admin/catalog/productVariant/ProductVariant";
 import SizeList from "../pages/admin/catalog/size/SizeList";
 import ColorList from "../pages/admin/catalog/color/Colorlist";
+import SizeChartList from "../pages/admin/catalog/sizechart/SizeChartList";
 import Shop from "../pages/Shop/Shop";
 import About from "../Pages/About/About";
 
@@ -126,6 +127,8 @@ const AppRoutes = () => {
               element={<ProductVariantList />}
             />
             <Route path="/admin/catalog/size" element={<SizeList />} />
+            <Route path="/admin/catalog/size-chart" element={<SizeChartList />} />
+            <Route path="/admin/catalog/size-charts" element={<SizeChartList />} />
             <Route path="/admin/catalog/colors" element={<ColorList />} />
 
             {/* add more admin routes here, all under this same AdminLayout wrapper */}

@@ -5,13 +5,18 @@ import {
   updateTracking,
   cancelOrder,
   deleteOrder,
+  printInvoice,
+  downloadInvoice,
+  sendInvoiceNotification,
 } from "../../../Services/orderService";
 
 import OrderForm from "./orderForm";
 import "./Order.css";
 import { useMemo } from "react";
 import { useAdminSearch } from "../../../context/AdminSearchContext";
-import CommonModal  from "../../../Components/common/CommonModal";
+import CommonModal from "../../../Components/common/CommonModal";
+import toast from "react-hot-toast";
+import { FileText, Printer, Download, Send } from "lucide-react";
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
@@ -51,6 +56,87 @@ const Order = () => {
   const [cancellationReason, setCancellationReason] = useState("");
 
   const [actionLoading, setActionLoading] = useState(false);
+
+  const [showSendInvoiceModal, setShowSendInvoiceModal] = useState(false);
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
+  const [adminDispatchData, setAdminDispatchData] = useState({
+    adminEmail: "mounttowntech@gmail.com",
+    adminMobile: "8667301625, 9629339144",
+    customerEmail: "",
+    customerMobile: "",
+    sendToAdmin: true,
+    sendToCustomer: true,
+  });
+  const [invoiceActionLoading, setInvoiceActionLoading] = useState(false);
+
+  const handlePrintInvoice = async (order) => {
+    try {
+      setInvoiceActionLoading(true);
+      await printInvoice(order._id);
+      toast.success(`Opening invoice for Order #${order.orderNumber || order._id}`);
+    } catch (err) {
+      console.error("Print invoice error:", err);
+      toast.error("Failed to print invoice. Please try again.");
+    } finally {
+      setInvoiceActionLoading(false);
+    }
+  };
+
+  const handleDownloadInvoice = async (order) => {
+    try {
+      setInvoiceActionLoading(true);
+      await downloadInvoice(order._id, order.orderNumber);
+      toast.success("Invoice downloaded successfully!");
+    } catch (err) {
+      console.error("Download invoice error:", err);
+      toast.error("Failed to download invoice.");
+    } finally {
+      setInvoiceActionLoading(false);
+    }
+  };
+
+  const handleOpenSendInvoiceModal = (order) => {
+    setInvoiceOrder(order);
+    setAdminDispatchData({
+      adminEmail: "mounttowntech@gmail.com",
+      adminMobile: "8667301625, 9629339144",
+      customerEmail:
+        order.shippingAddress?.email ||
+        order.billingAddress?.email ||
+        order.user?.email ||
+        order.customerEmail ||
+        "",
+      customerMobile:
+        order.shippingAddress?.mobileNumber ||
+        order.billingAddress?.mobileNumber ||
+        order.user?.mobileNumber ||
+        "",
+      sendToAdmin: true,
+      sendToCustomer: true,
+    });
+    setShowSendInvoiceModal(true);
+  };
+
+  const handleConfirmSendInvoice = async (e) => {
+    e.preventDefault();
+    if (!invoiceOrder) return;
+
+    try {
+      setInvoiceActionLoading(true);
+      const res = await sendInvoiceNotification(invoiceOrder._id, adminDispatchData);
+      if (res.data?.success) {
+        toast.success(res.data.message || "Invoice dispatched to Admin & Customer!");
+        setShowSendInvoiceModal(false);
+      } else {
+        toast.error(res.data?.message || "Failed to dispatch invoice.");
+      }
+    } catch (err) {
+      console.error("Send invoice error:", err);
+      toast.error(err.response?.data?.message || "Failed to dispatch invoice notifications.");
+    } finally {
+      setInvoiceActionLoading(false);
+    }
+  };
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
@@ -770,6 +856,19 @@ const handleClearDateFilter = () => {
                             View
                           </button>
 
+                          {String(order.paymentStatus || "").toUpperCase() === "PAID" && (
+                            <button
+                              type="button"
+                              className="order-icon-btn invoice"
+                              title="Print Tax Invoice"
+                              onClick={() => handlePrintInvoice(order)}
+                              disabled={invoiceActionLoading}
+                            >
+                              <Printer size={13} style={{ marginRight: "3px" }} />
+                              Invoice
+                            </button>
+                          )}
+
                           <button
                             type="button"
                             className="order-icon-btn tracking"
@@ -1006,58 +1105,144 @@ const handleClearDateFilter = () => {
         >
           <div className="order-details">
 
-            {/* Customer Details */}
+            {/* Invoice & Dispatch Bar */}
+            <div className="order-invoice-toolbar">
+              <div className="order-invoice-info">
+                <div className="order-invoice-title">
+                  <FileText size={20} className="order-invoice-icon" />
+                  <div>
+                    <h4>Tax Invoice {selectedOrder.orderNumber ? `#INV-${selectedOrder.orderNumber}` : ""}</h4>
+                    <span className={`order-invoice-badge ${String(selectedOrder.paymentStatus || "").toUpperCase() === "PAID" ? "paid" : "pending"}`}>
+                      {String(selectedOrder.paymentStatus || "").toUpperCase() === "PAID" ? "✓ Payment Completed (PAID)" : `Payment: ${selectedOrder.paymentStatus || "PENDING"}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="order-invoice-btn-group">
+                <button
+                  type="button"
+                  className="order-invoice-btn print"
+                  onClick={() => handlePrintInvoice(selectedOrder)}
+                  disabled={invoiceActionLoading}
+                >
+                  <Printer size={15} />
+                  Print Invoice
+                </button>
+
+                <button
+                  type="button"
+                  className="order-invoice-btn download"
+                  onClick={() => handleDownloadInvoice(selectedOrder)}
+                  disabled={invoiceActionLoading}
+                >
+                  <Download size={15} />
+                  Download PDF
+                </button>
+
+                <button
+                  type="button"
+                  className="order-invoice-btn send"
+                  onClick={() => handleOpenSendInvoiceModal(selectedOrder)}
+                  disabled={invoiceActionLoading}
+                >
+                  <Send size={15} />
+                  Send to Admin Mail & Mobile
+                </button>
+              </div>
+            </div>
+
+            {/* Billing Address Details */}
             <div className="order-detail-section">
-              <h3>Customer Details</h3>
+              <h3>Billing Address (Seller)</h3>
 
               <div className="order-detail-grid">
                 <div>
-                  <label>Customer Name</label>
+                  <label>Company Name</label>
+                  <p>SBS TEXTILES</p>
+                </div>
+
+                <div>
+                  <label>Ph no</label>
+                  <p>+91 86673 01625</p>
+                </div>
+
+                <div>
+                  <label>Email</label>
+                  <p>mounttowntech@gmail.com</p>
+                </div>
+
+                <div>
+                  <label>GSTIN</label>
+                  <p>33CRYPM4674D1ZB</p>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "10px" }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Billing Address</label>
+                <p style={{ margin: "4px 0 0" }}>
+                  NO:51, VENKIDUSAMY ROAD, METTUPALAYAM - 641301, COIMBATORE, TAMIL NADU
+                </p>
+              </div>
+            </div>
+
+            {/* Shipping Address (Customer) */}
+            <div className="order-detail-section">
+              <h3>Shipping Address (Customer)</h3>
+
+              <div className="order-detail-grid">
+                <div>
+                  <label>Recipient Name</label>
                   <p>
-                    {selectedOrder.user?.name ||
-                      selectedOrder.shippingAddress?.name ||
-                      "Guest Customer"}
+                    {selectedOrder.shippingAddress?.name ||
+                      selectedOrder.shippingAddress?.fullName ||
+                      selectedOrder.user?.name ||
+                      "Recipient"}
                   </p>
                 </div>
 
                 <div>
-                  <label>Mobile Number</label>
+                  <label>Ph no</label>
                   <p>
-                    {selectedOrder.user?.mobileNumber ||
-                      selectedOrder.shippingAddress?.mobileNumber ||
+                    {selectedOrder.shippingAddress?.mobileNumber ||
+                      selectedOrder.shippingAddress?.phone ||
+                      selectedOrder.user?.mobileNumber ||
                       "-"}
                   </p>
                 </div>
 
                 <div>
                   <label>Email</label>
-                  <p>{selectedOrder.user?.email || "-"}</p>
+                  <p>
+                    {selectedOrder.shippingAddress?.email ||
+                      selectedOrder.user?.email ||
+                      selectedOrder.customerEmail ||
+                      "-"}
+                  </p>
                 </div>
 
                 <div>
-                  <label>Order Date</label>
-                  <p>{formatDate(selectedOrder.createdAt)}</p>
+                  <label>Delivery Method</label>
+                  <p>{selectedOrder.courierName || "Standard Delivery"}</p>
                 </div>
               </div>
-            </div>
 
-            {/* Shipping Address */}
-            <div className="order-detail-section">
-              <h3>Shipping Address</h3>
-
-              <p>
-                {[
-                  selectedOrder.shippingAddress?.addressLine1,
-                  selectedOrder.shippingAddress?.addressLine2,
-                  selectedOrder.shippingAddress?.city,
-                  selectedOrder.shippingAddress?.district,
-                  selectedOrder.shippingAddress?.state,
-                  selectedOrder.shippingAddress?.pincode,
-                  selectedOrder.shippingAddress?.country,
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
+              <div style={{ marginTop: "10px" }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Delivery Address</label>
+                <p style={{ margin: "4px 0 0" }}>
+                  {[
+                    selectedOrder.shippingAddress?.addressLine1,
+                    selectedOrder.shippingAddress?.addressLine2,
+                    selectedOrder.shippingAddress?.district,
+                    selectedOrder.shippingAddress?.city,
+                    selectedOrder.shippingAddress?.state,
+                    selectedOrder.shippingAddress?.pincode,
+                    selectedOrder.shippingAddress?.country,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              </div>
             </div>
 
             {/* Ordered Items */}
@@ -1229,6 +1414,121 @@ const handleClearDateFilter = () => {
             )}
 
           </div>
+        </CommonModal>
+      )}
+
+      {/* Send Invoice Modal */}
+      {showSendInvoiceModal && invoiceOrder && (
+        <CommonModal
+          isOpen={showSendInvoiceModal}
+          onClose={() => setShowSendInvoiceModal(false)}
+          title={`Dispatch Tax Invoice - #${invoiceOrder.orderNumber || invoiceOrder._id}`}
+          width="560px"
+        >
+          <form className="send-invoice-form" onSubmit={handleConfirmSendInvoice}>
+            <p className="send-invoice-desc">
+              Dispatch the official Tax Invoice PDF via Email attachment and the direct download link via SMS to the Admin and Customer.
+            </p>
+
+            {/* Admin Destination */}
+            <div className="send-invoice-section">
+              <h4>Admin Notifications</h4>
+              <div className="send-invoice-field">
+                <label>Admin Email(s)</label>
+                <input
+                  type="text"
+                  value={adminDispatchData.adminEmail}
+                  onChange={(e) =>
+                    setAdminDispatchData({ ...adminDispatchData, adminEmail: e.target.value })
+                  }
+                  placeholder="e.g. mounttowntech@gmail.com"
+                />
+              </div>
+
+              <div className="send-invoice-field">
+                <label>Admin Mobile Number(s)</label>
+                <input
+                  type="text"
+                  value={adminDispatchData.adminMobile}
+                  onChange={(e) =>
+                    setAdminDispatchData({ ...adminDispatchData, adminMobile: e.target.value })
+                  }
+                  placeholder="e.g. 8667301625, 9629339144"
+                />
+              </div>
+
+              <label className="send-invoice-check">
+                <input
+                  type="checkbox"
+                  checked={adminDispatchData.sendToAdmin}
+                  onChange={(e) =>
+                    setAdminDispatchData({ ...adminDispatchData, sendToAdmin: e.target.checked })
+                  }
+                />
+                Send Invoice Copy to Admin (Email & SMS)
+              </label>
+            </div>
+
+            {/* Customer Destination */}
+            <div className="send-invoice-section">
+              <h4>Customer Notifications</h4>
+              <div className="send-invoice-field">
+                <label>Customer Email</label>
+                <input
+                  type="email"
+                  value={adminDispatchData.customerEmail}
+                  onChange={(e) =>
+                    setAdminDispatchData({ ...adminDispatchData, customerEmail: e.target.value })
+                  }
+                  placeholder="customer@example.com"
+                />
+              </div>
+
+              <div className="send-invoice-field">
+                <label>Customer Mobile Number</label>
+                <input
+                  type="text"
+                  value={adminDispatchData.customerMobile}
+                  onChange={(e) =>
+                    setAdminDispatchData({ ...adminDispatchData, customerMobile: e.target.value })
+                  }
+                  placeholder="10-digit mobile number"
+                />
+              </div>
+
+              <label className="send-invoice-check">
+                <input
+                  type="checkbox"
+                  checked={adminDispatchData.sendToCustomer}
+                  onChange={(e) =>
+                    setAdminDispatchData({ ...adminDispatchData, sendToCustomer: e.target.checked })
+                  }
+                />
+                Send Invoice Copy to Customer (Email & SMS)
+              </label>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px" }}>
+              <button
+                type="button"
+                className="order-date-clear"
+                onClick={() => setShowSendInvoiceModal(false)}
+                disabled={invoiceActionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="order-invoice-btn send"
+                disabled={invoiceActionLoading || (!adminDispatchData.sendToAdmin && !adminDispatchData.sendToCustomer)}
+                style={{ padding: "8px 18px", fontSize: "13px" }}
+              >
+                <Send size={15} />
+                {invoiceActionLoading ? "Dispatching..." : "Send Invoice Now"}
+              </button>
+            </div>
+          </form>
         </CommonModal>
       )}
     </div>

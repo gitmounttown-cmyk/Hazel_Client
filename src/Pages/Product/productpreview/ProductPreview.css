@@ -248,14 +248,30 @@
   color: var(--black);
 }
 
-.pp-size-guide {
+.pp-size-guide,
+.pp-size-chart-btn {
   border: none;
   background: none;
-  font-size: 12px;
-  color: var(--gray);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #333;
   text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
-  padding: 0;
+  padding: 2px 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.pp-size-guide:hover,
+.pp-size-chart-btn:hover {
+  color: #c9931b;
+}
+
+.pp-ruler-icon {
+  color: #c9931b;
 }
 
 .pp-colors {

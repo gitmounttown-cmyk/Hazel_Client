@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Package,
   Image as ImageIcon,
+  Printer,
 } from "lucide-react";
 
 import {
@@ -26,6 +27,7 @@ import {
 
 import "./Dashboard.css";
 import { getDashboardData } from "../../../Services/dashboardService";
+import { printInvoice } from "../../../Services/orderService";
 import { Link, useNavigate } from "react-router-dom";
 
 // ============================================================
@@ -720,11 +722,11 @@ useEffect(() => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="hz-table__empty">Loading…</td>
+                  <td colSpan={5} className="hz-table__empty">Loading…</td>
                 </tr>
               ) : recentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="hz-table__empty">No orders yet</td>
+                  <td colSpan={5} className="hz-table__empty">No orders yet</td>
                 </tr>
               ) : (
                 recentOrders.map((order) => {
