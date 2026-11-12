@@ -493,6 +493,27 @@
   color: #555;
 }
 
+.pp-details-sc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fdf5de;
+  color: #a87920;
+  border: 1px solid #fae5ae;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pp-details-sc-btn:hover {
+  background: #d99b26;
+  color: #ffffff;
+  border-color: #d99b26;
+}
+
 .pp-delivery-card {
   border: 1px solid var(--line);
   border-radius: 12px;

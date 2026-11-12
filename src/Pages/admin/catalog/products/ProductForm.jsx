@@ -231,12 +231,7 @@ console.log("ProductForm initialized with product:", product);
   const [submitting, setSubmitting] = useState(false);
 
   // Dedicated Product Size Chart state (each product has its own separate size chart)
-  const [scMode, setScMode] = useState(() => {
-    if (product) {
-      return product.sizeChartId ? "create_separate" : "none";
-    }
-    return "create_separate";
-  });
+  const [scMode, setScMode] = useState("create_separate");
   const [selectedExistingScId, setSelectedExistingScId] = useState(
     product?.sizeChartId?._id || product?.sizeChartId || ""
   );
@@ -325,6 +320,26 @@ console.log("ProductForm initialized with product:", product);
       })
     );
   };
+
+  // Automatically sync variant sizes into size chart table columns whenever variants are edited
+  useEffect(() => {
+    const variantSizes = getProductVariantSizes();
+    if (variantSizes.length > 0) {
+      setScTables((prev) =>
+        prev.map((t) => {
+          const isSame =
+            t.sizes?.length === variantSizes.length &&
+            t.sizes.every((s, i) => s === variantSizes[i]);
+          if (isSame) return t;
+
+          return {
+            ...t,
+            sizes: [...variantSizes],
+          };
+        })
+      );
+    }
+  }, [variants]);
 
   // Handlers for embedded size chart builder
   const handleScTableNameChange = (index, val) => {
@@ -754,73 +769,58 @@ const handleSubmit = async (e) => {
   try {
     let resolvedSizeChartId = null;
 
-    // 1. If in "create_separate" mode, check if measurements or images were entered
+    // 1. If in "create_separate" mode, automatically sync sizes from variants and save the size chart!
     if (scMode === "create_separate") {
-      const hasAnyMeasurements = scTables.some((t) =>
-        (t.rows || []).some((r) =>
-          Object.values(r.values || {}).some(
-            (v) => v !== undefined && v !== null && String(v).trim() !== ""
-          )
-        )
-      );
-      const hasAnyImages =
-        scExistingImages.length > 0 ||
-        scNewImageFiles.length > 0 ||
-        Object.values(scTableImageFiles).some((files) => files && files.length > 0);
+      const variantSizes = getProductVariantSizes();
 
-      // Only create/update a size chart if admin actually entered measurements or diagram images!
-      if (hasAnyMeasurements || hasAnyImages) {
-        const scFormData = new FormData();
-        const scName = name.trim() ? `${name.trim()} Size Chart` : "Product Size Chart";
-        scFormData.append("name", scName);
-        scFormData.append("unit", scUnit);
-        scFormData.append("description", `All measurements are in ${scUnit}`);
-        scFormData.append("isActive", "true");
-        if (categoryId) scFormData.append("categoryId", categoryId);
-        if (product?._id) scFormData.append("productId", product._id);
+      const scFormData = new FormData();
+      const scName = name.trim() ? `${name.trim()} Size Chart` : "Product Size Chart";
+      scFormData.append("name", scName);
+      scFormData.append("unit", scUnit);
+      scFormData.append("description", `All measurements are in ${scUnit}`);
+      scFormData.append("isActive", "true");
+      if (categoryId) scFormData.append("categoryId", categoryId);
+      if (product?._id) scFormData.append("productId", product._id);
 
-        const sanitizedTables = scTables.map((t) => ({
-          tableName: t.tableName,
-          sizes: t.sizes,
-          rows: t.rows,
-          image: t.image || (Array.isArray(t.images) ? t.images[0] : "") || "",
-          images: Array.isArray(t.images) ? t.images : [],
-        }));
-        scFormData.append("tables", JSON.stringify(sanitizedTables));
+      // Automatically ensure table sizes match the variant sizes if variants have sizes
+      const sanitizedTables = scTables.map((t) => ({
+        tableName: t.tableName || "TOP",
+        sizes: variantSizes.length > 0 ? variantSizes : (t.sizes?.length > 0 ? t.sizes : DEFAULT_SC_SIZES),
+        rows: t.rows,
+        image: t.image || (Array.isArray(t.images) ? t.images[0] : "") || "",
+        images: Array.isArray(t.images) ? t.images : [],
+      }));
+      scFormData.append("tables", JSON.stringify(sanitizedTables));
 
-        // Append kept existing guide images
-        scFormData.append("existingImages", JSON.stringify(scExistingImages));
-        if (scExistingImages[0]) {
-          scFormData.append("image", scExistingImages[0]);
-        }
+      // Append kept existing guide images
+      scFormData.append("existingImages", JSON.stringify(scExistingImages));
+      if (scExistingImages[0]) {
+        scFormData.append("image", scExistingImages[0]);
+      }
 
-        // Append new guide images (up to 5 images)
-        scNewImageFiles.forEach((file) => {
-          scFormData.append("images", file);
+      // Append new guide images (up to 5 images)
+      scNewImageFiles.forEach((file) => {
+        scFormData.append("images", file);
+      });
+
+      // Append section-level images (TOP, BOTTOM, etc.)
+      scTables.forEach((_, tIndex) => {
+        const files = scTableImageFiles[tIndex] || [];
+        files.forEach((file) => {
+          scFormData.append(`table_${tIndex}_images`, file);
         });
+      });
 
-        // Append section-level images (TOP, BOTTOM, etc.)
-        scTables.forEach((_, tIndex) => {
-          const files = scTableImageFiles[tIndex] || [];
-          files.forEach((file) => {
-            scFormData.append(`table_${tIndex}_images`, file);
-          });
-        });
+      const existingScId =
+        product?.sizeChartId?._id ||
+        (typeof product?.sizeChartId === "string" ? product?.sizeChartId : null);
 
-        const existingScId =
-          product?.sizeChartId?._id ||
-          (typeof product?.sizeChartId === "string" ? product?.sizeChartId : null);
-
-        if (existingScId) {
-          await updateSizeChart(existingScId, scFormData);
-          resolvedSizeChartId = existingScId;
-        } else {
-          const createRes = await createSizeChart(scFormData);
-          resolvedSizeChartId = createRes?.data?.data?._id;
-        }
+      if (existingScId) {
+        await updateSizeChart(existingScId, scFormData);
+        resolvedSizeChartId = existingScId;
       } else {
-        // No measurements or images entered -> admin did not mention a size chart for this product
-        resolvedSizeChartId = null;
+        const createRes = await createSizeChart(scFormData);
+        resolvedSizeChartId = createRes?.data?.data?._id;
       }
     } else if (scMode === "select_existing") {
       resolvedSizeChartId = selectedExistingScId || null;

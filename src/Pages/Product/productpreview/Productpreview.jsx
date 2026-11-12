@@ -337,41 +337,7 @@ useEffect(() => {
       try {
         const res = await getSizeChartByProductId(productDetails._id);
         if (res?.data?.canShow && res?.data?.data) {
-          const chart = res.data.data;
-
-          // Double verify locally on frontend as well:
-          // "if any one of the size name is not available in the product then it does not shows the sizechart"
-          const chartSizes = [];
-          if (Array.isArray(chart.tables)) {
-            chart.tables.forEach((t) => {
-              if (Array.isArray(t.sizes)) {
-                t.sizes.forEach((s) => chartSizes.push(String(s).trim().toUpperCase()));
-              }
-            });
-          }
-
-          const normalize = (s) => {
-            const clean = String(s || "").trim().toUpperCase();
-            if (clean === "2XL") return "XXL";
-            if (clean === "3XL") return "XXXL";
-            return clean;
-          };
-
-          const prodSizes = (productDetails.variants || []).flatMap((v) =>
-            (v.sizes || [])
-              .filter((s) => s.isActive !== false)
-              .map((s) => normalize(s.size))
-          );
-
-          const hasAllSizes =
-            chartSizes.length > 0 &&
-            chartSizes.every((cs) => prodSizes.includes(normalize(cs)));
-
-          if (hasAllSizes) {
-            setSizeChart(chart);
-          } else {
-            setSizeChart(null);
-          }
+          setSizeChart(res.data.data);
         } else {
           setSizeChart(null);
         }
@@ -993,6 +959,21 @@ useEffect(() => {
                   <dd>{v}</dd>
                 </div>
               ))}
+              {sizeChart && (
+                <div className="pp-details-row pp-details-sc-row">
+                  <dt>Size Guide</dt>
+                  <dd>
+                    <button
+                      type="button"
+                      className="pp-details-sc-btn"
+                      onClick={() => setShowSizeChartModal(true)}
+                    >
+                      <Ruler size={13} style={{ marginRight: 5, verticalAlign: "middle" }} />
+                      View Size Chart ({sizeChart.unit || "inches"})
+                    </button>
+                  </dd>
+                </div>
+              )}
             </dl>
           </div>
 
