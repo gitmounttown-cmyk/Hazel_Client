@@ -73,20 +73,32 @@ const SizeChartModal = ({ isOpen, onClose, chart, activeSize }) => {
         {/* Modal Content */}
         <div className="sc-modal-body">
           {tables.map((table, tIndex) => {
+            // console.log(`Rendering table ${tIndex}:`, table.images);
+            // const sectionImages =
+            //   Array.isArray(table.images) && table.images.length > 0
+            //     ? table.images
+            //     : table.image
+            //     ? [table.image]
+            //     : Array.isArray(chart.images) && chart.images.length > 0
+            //     ? chart.images
+            //     : chart.image
+            //     ? [chart.image]
+            //     : [];
+
             const sectionImages =
               Array.isArray(table.images) && table.images.length > 0
                 ? table.images
                 : table.image
-                ? [table.image]
-                : Array.isArray(chart.images) && chart.images.length > 0
-                ? chart.images
-                : chart.image
-                ? [chart.image]
-                : [];
-
-            const currentImgIndex = activeImageIndexes[tIndex] || 0;
+                  ? [table.image]
+                  : chart.images?.[tIndex]
+                    ? [chart.images[tIndex]]
+                    : [];
+console.log(`sectionImages ${tIndex}:`, sectionImages);
+            // const currentImgIndex = activeImageIndexes[tIndex] || 0;
+            const currentImgIndex = activeImageIndexes[tIndex] ?? 0;
             const displayImage = sectionImages[currentImgIndex] || sectionImages[0] || null;
             const fullImgUrl = getFullImageUrl(displayImage);
+            console.log(`Displaying image for table ${tIndex}:`, fullImgUrl);
             const sizes = Array.isArray(table.sizes) ? table.sizes : [];
             const rows = Array.isArray(table.rows) ? table.rows : [];
 
