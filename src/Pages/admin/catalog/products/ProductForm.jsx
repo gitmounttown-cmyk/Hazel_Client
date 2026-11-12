@@ -389,33 +389,82 @@ console.log("ProductForm initialized with product:", product);
     });
   };
 
+  // const handleScAddParameter = (tableIndex) => {
+  //   const paramVal = (scNewParamInputs[tableIndex] || "").trim().toUpperCase();
+  //   if (!paramVal) return;
+
+  //   setScTables((prev) => {
+  //     const copy = [...prev];
+  //     const table = copy[tableIndex];
+  //     table.rows = [
+  //       ...table.rows,
+  //       {
+  //         parameter: paramVal,
+  //         values: {},
+  //       },
+  //     ];
+  //     return copy;
+  //   });
+
+  //   setScNewParamInputs((prev) => ({ ...prev, [tableIndex]: "" }));
+  // };
+
   const handleScAddParameter = (tableIndex) => {
-    const paramVal = (scNewParamInputs[tableIndex] || "").trim().toUpperCase();
-    if (!paramVal) return;
+  const paramVal = (
+    scNewParamInputs[tableIndex] || ""
+  )
+    .trim()
+    .toUpperCase();
 
-    setScTables((prev) => {
-      const copy = [...prev];
-      const table = copy[tableIndex];
-      table.rows = [
-        ...table.rows,
-        {
-          parameter: paramVal,
-          values: {},
-        },
-      ];
-      return copy;
-    });
+  if (!paramVal) return;
 
-    setScNewParamInputs((prev) => ({ ...prev, [tableIndex]: "" }));
-  };
+  setScTables((prev) =>
+    prev.map((table, index) =>
+      index === tableIndex
+        ? {
+            ...table,
+            rows: [
+              ...table.rows,
+              {
+                parameter: paramVal,
+                values: {},
+              },
+            ],
+          }
+        : table
+    )
+  );
+
+  setScNewParamInputs((prev) => ({
+    ...prev,
+    [tableIndex]: "",
+  }));
+};
+
+  // const handleScRemoveRow = (tableIndex, rowIndex) => {
+  //   console.log('setScTables called with previous state:', scTables);
+  //   console.log(`Removing row ${rowIndex} from table ${tableIndex}`);
+  //   setScTables((prev) => {
+  //     const copy = [...prev];
+  //     copy[tableIndex].rows = copy[tableIndex].rows.filter((_, idx) => idx !== rowIndex);
+  //     return copy;
+  //   });
+  // };
 
   const handleScRemoveRow = (tableIndex, rowIndex) => {
-    setScTables((prev) => {
-      const copy = [...prev];
-      copy[tableIndex].rows = copy[tableIndex].rows.filter((_, idx) => idx !== rowIndex);
-      return copy;
-    });
-  };
+  setScTables((prev) =>
+    prev.map((table, index) =>
+      index === tableIndex
+        ? {
+            ...table,
+            rows: table.rows.filter(
+              (_, idx) => idx !== rowIndex
+            ),
+          }
+        : table
+    )
+  );
+};
 
   const handleScAddTable = () => {
     setScTables((prev) => [
@@ -781,7 +830,7 @@ const handleSubmit = async (e) => {
       scFormData.append("isActive", "true");
       if (categoryId) scFormData.append("categoryId", categoryId);
       if (product?._id) scFormData.append("productId", product._id);
-
+// console.log("Preparing to submit size chart with tables:", scTables, "and variant sizes:", variantSizes);
       // Automatically ensure table sizes match the variant sizes if variants have sizes
       const sanitizedTables = scTables.map((t) => ({
         tableName: t.tableName || "TOP",
@@ -790,6 +839,7 @@ const handleSubmit = async (e) => {
         image: t.image || (Array.isArray(t.images) ? t.images[0] : "") || "",
         images: Array.isArray(t.images) ? t.images : [],
       }));
+      // console.log("Sanitized Size Chart Tables for submission:", sanitizedTables);
       scFormData.append("tables", JSON.stringify(sanitizedTables));
 
       // Append kept existing guide images
