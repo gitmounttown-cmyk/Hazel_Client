@@ -2,11 +2,8 @@ import { useState, useEffect } from "react";
 import { createProduct, updateProduct } from "../../../../services/productService";
 import { getCategories } from "../../../../services/categoryService";
 import { getBrands } from "../../../../services/brandService";
-<<<<<<< HEAD
 import { compressProductImage } from "../../../../utils/compressImage";
-import "./productForm.css";
 import toast from "react-hot-toast";
-=======
 import {
   getSizeCharts,
   getSizeChartById,
@@ -42,7 +39,6 @@ const createDefaultScTable = (name = "TOP", sizes = DEFAULT_SC_SIZES) => ({
     values: {},
   })),
 });
->>>>>>> dev
 
 // Helper function to resolve cleaned image URLs
 const getImageUrl = (imagePath) => {
