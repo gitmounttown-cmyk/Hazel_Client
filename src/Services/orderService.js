@@ -91,3 +91,9 @@ export const printInvoice = async (id) => {
  */
 export const sendInvoiceNotification = (id, data = {}) =>
   axiosInstance.post(`${BASE}/${id}/send-invoice`, data);
+
+/**
+ * Manifest order to Velocity Shipping
+ */
+export const manifestVelocityOrder = (id) =>
+  axiosInstance.post(`/velocity/manifest/${id}`);

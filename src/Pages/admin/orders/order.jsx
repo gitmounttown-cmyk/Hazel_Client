@@ -8,6 +8,7 @@ import {
   printInvoice,
   downloadInvoice,
   sendInvoiceNotification,
+  manifestVelocityOrder,
 } from "../../../Services/orderService";
 
 import OrderForm from "./orderForm";
@@ -56,6 +57,7 @@ const Order = () => {
   const [cancellationReason, setCancellationReason] = useState("");
 
   const [actionLoading, setActionLoading] = useState(false);
+  const [velocityLoading, setVelocityLoading] = useState(null);
 
   const [showSendInvoiceModal, setShowSendInvoiceModal] = useState(false);
   const [invoiceOrder, setInvoiceOrder] = useState(null);
@@ -374,6 +376,32 @@ const [refreshKey, setRefreshKey] = useState(0);
       );
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleManifestVelocity = async (order) => {
+    try {
+      setVelocityLoading(order._id);
+      const res = await manifestVelocityOrder(order._id || order.orderNumber);
+      if (res.data?.success) {
+        toast.success(`Manifested with Velocity! AWB: ${res.data.data?.awbCode || ""}`);
+        await fetchOrders();
+        if (showTrackingForm && selectedOrder?._id === order._id) {
+          setTrackingData((prev) => ({
+            ...prev,
+            courierName: res.data.data?.courierName || prev.courierName,
+            trackingNumber: res.data.data?.awbCode || prev.trackingNumber,
+            trackingUrl: res.data.data?.labelUrl || prev.trackingUrl,
+          }));
+        }
+      } else {
+        toast.error(res.data?.message || "Failed to manifest order");
+      }
+    } catch (err) {
+      console.error("Velocity Manifest Error:", err);
+      toast.error(err.response?.data?.error || err.response?.data?.message || "Failed to manifest with Velocity");
+    } finally {
+      setVelocityLoading(null);
     }
   };
 
@@ -878,6 +906,31 @@ const handleClearDateFilter = () => {
                             Tracking
                           </button>
 
+                          {!order.trackingNumber &&
+                            (String(order.paymentStatus || "").toUpperCase() === "PAID" ||
+                              String(order.paymentMethod || "").toUpperCase() === "COD") &&
+                            order.orderStatus !== "CANCELLED" && (
+                              <button
+                                type="button"
+                                className="order-icon-btn"
+                                style={{
+                                  backgroundColor: "#0284c7",
+                                  color: "#ffffff",
+                                  border: "none",
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  fontWeight: "600",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                }}
+                                title="Manifest / Ship via Velocity"
+                                onClick={() => handleManifestVelocity(order)}
+                                disabled={velocityLoading === order._id}
+                              >
+                                {velocityLoading === order._id ? "Shipping..." : "Ship Velocity"}
+                              </button>
+                            )}
+
                           {canCancelOrder(order.orderStatus) && (
                             <button
                               type="button"
@@ -959,6 +1012,31 @@ const handleClearDateFilter = () => {
               className="order-tracking-body"
               onSubmit={handleTrackingSubmit}
             >
+              {selectedOrder && !trackingData.trackingNumber && (
+                <div style={{ marginBottom: "16px", padding: "10px", background: "#f0f9ff", borderRadius: "8px", border: "1px solid #bae6fd" }}>
+                  <p style={{ margin: "0 0 8px 0", fontSize: "12px", color: "#0369a1" }}>
+                    Automatically ship with Velocity Shipping and fetch live AWB & courier:
+                  </p>
+                  <button
+                    type="button"
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      backgroundColor: "#0284c7",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "6px",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleManifestVelocity(selectedOrder)}
+                    disabled={velocityLoading === selectedOrder._id}
+                  >
+                    {velocityLoading === selectedOrder._id ? "Manifesting with Velocity..." : "🚀 Auto-Generate via Velocity Shipping"}
+                  </button>
+                </div>
+              )}
               <div className="order-tracking-group">
                 <label>Courier Name</label>
 
