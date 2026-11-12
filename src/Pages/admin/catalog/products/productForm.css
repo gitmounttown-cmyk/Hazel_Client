@@ -17,8 +17,8 @@
 
 .prod-form-card {
   background: #fcfbf8;
-  width: 580px;
-  max-width: 92vw;
+  width: 860px;
+  max-width: 95vw;
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 12px;
@@ -518,4 +518,229 @@
   line-height: 1;
   cursor: pointer;
   z-index: 2;
+}
+/* Size Chart Picker & Quick Creator in Product Form */
+.prod-sizechart-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prod-sizechart-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prod-sizechart-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prod-sc-btn-add {
+  background: #fdf5de;
+  border: 1px solid #ebd9a2;
+  color: #8c6007;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.prod-sc-btn-add:hover {
+  background: #f6eaaf;
+  color: #5d3f02;
+}
+
+.prod-sc-btn-edit {
+  background: #f0f4f8;
+  border: 1px solid #d2dbe5;
+  color: #2b5278;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.prod-sc-btn-edit:hover {
+  background: #e2ebf4;
+}
+
+.prod-sc-preview-pill {
+  font-size: 11.5px;
+  color: #5c5243;
+  background: #faf6eb;
+  border: 1px solid #efe4cb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* Dedicated Embedded Product Size Chart Section */
+.prod-sizechart-section {
+  background: #fdfbf7;
+  border: 1px solid #ebd9a2;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 18px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prod-sc-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.prod-sc-section-title {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 700;
+  color: #292626;
+  font-family: inherit;
+}
+
+.prod-sc-section-desc {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #7a7061;
+}
+
+.prod-sc-sync-sizes-btn {
+  background: #edf8eb;
+  border: 1px solid #b7e2b1;
+  color: #1f6b1a;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.prod-sc-sync-sizes-btn:hover {
+  background: #dff2d7;
+  transform: translateY(-1px);
+}
+
+/* Mode selector pills/tabs */
+.prod-sc-mode-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #f3efe6;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.prod-sc-mode-btn {
+  flex: 1;
+  min-width: 150px;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  color: #554e42;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.prod-sc-mode-btn:hover {
+  color: #111;
+}
+
+.prod-sc-mode-btn.active {
+  background: #f1cb62;
+  color: #242018;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.prod-sc-embedded-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.prod-sc-settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #ffffff;
+  padding: 10px 14px;
+  border: 1px solid #ebd9a2;
+  border-radius: 8px;
+}
+
+.prod-sc-setting-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b352b;
+}
+
+.prod-sc-setting-item select {
+  padding: 6px 10px;
+  border: 1px solid #dfd8cc;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.prod-sc-template-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  padding: 16px;
+  border: 1px solid #e7dfd1;
+  border-radius: 8px;
+}
+
+.prod-sc-template-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b352b;
+}
+
+.prod-sc-template-selector select {
+  padding: 10px 12px;
+  border: 1px solid #dfd8cc;
+  border-radius: 6px;
+  font-size: 13.5px;
+  background: #fff;
+}
+
+.prod-sc-none-note {
+  font-size: 13px;
+  color: #7a7061;
+  font-style: italic;
+  padding: 16px;
+  background: #fff;
+  border: 1px dashed #dfd8cc;
+  border-radius: 8px;
+  text-align: center;
 }

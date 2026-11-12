@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { Check, ArrowRight, Truck } from "lucide-react";
+import { Check, ArrowRight, Truck, FileText, Download } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPaymentByOrder } from "../../services/paymentService";
+import { downloadInvoice } from "../../Services/orderService";
 import axiosInstance from "../../api/axiosInstance";
 import toast from "react-hot-toast";
 import "./OrderConfirmation.css";
@@ -16,6 +17,7 @@ export default function OrderConfirmation() {
   const [paymentData, setPaymentData] = useState(null);
   const [trackingInfo, setTrackingInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   // Check if user is a guest (no token)
   const isGuest = !localStorage.getItem("hazelToken");
@@ -67,6 +69,24 @@ export default function OrderConfirmation() {
 
     fetchOrderDetails();
   }, [orderId]);
+
+  const handleDownloadInvoice = async () => {
+    const targetId = orderData?._id || orderId || localStorage.getItem("latestOrderId");
+    if (!targetId) {
+      toast.error("Order reference missing. Please try again.");
+      return;
+    }
+    try {
+      setDownloadingInvoice(true);
+      await downloadInvoice(targetId, orderData?.orderNumber || targetId);
+      toast.success("Invoice downloaded successfully!");
+    } catch (err) {
+      console.error("Invoice download error:", err);
+      toast.error("Failed to download invoice. Please try again later.");
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -145,6 +165,13 @@ export default function OrderConfirmation() {
                 <p className="oc__value">{total}</p>
               </div>
             </div>
+
+            <div style={{ marginTop: "16px", padding: "10px 14px", background: "#FBF7ED", borderRadius: "6px", border: "1px solid #F1E5C8" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "#6B5826" }}>
+                ✓ An invoice notification has also been dispatched to your mobile number and email.
+              </p>
+            </div>
+
             {trackingInfo && (
               <div className="oc__tracking">
                 <span className="oc__label">
@@ -158,6 +185,28 @@ export default function OrderConfirmation() {
 
           <div className="oc__right">
             <div className="oc__actions">
+              {/* Download Tax Invoice Button */}
+              <button
+                type="button"
+                className="oc__btn oc__btn--invoice"
+                onClick={handleDownloadInvoice}
+                disabled={downloadingInvoice}
+                style={{
+                  marginBottom: "12px",
+                  background: "#1A1A1A",
+                  color: "#E2BC5D",
+                  border: "1px solid #E2BC5D",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                <FileText size={16} style={{ marginRight: "6px" }} />
+                {downloadingInvoice ? "Generating Invoice..." : "Download Tax Invoice (PDF)"}
+              </button>
+
               {/* Conditional Track Order Button for Guest Users */}
               {isGuest && (
                 <button

@@ -33,6 +33,9 @@ import { formatTimeAgo, getDeliveryDate, formatCountdown } from "../../../utils/
 import { useNavigate } from "react-router-dom";
 import { getUserAddresses, getAddresses } from "../../../Services/addressService";
 import Loader from "../../../Components/Loader/Loader";
+import { getSizeChartByProductId } from "../../../Services/sizeChartService";
+import SizeChartModal from "../../../Components/SizeChart/SizeChartModal";
+import { Ruler } from "lucide-react";
 
 /* ---------- inline icons ---------- */
 const Star = ({ filled = true }) => (
@@ -374,6 +377,8 @@ export default function ProductPage() {
   const [relatedWishlisted, setRelatedWishlisted] = useState({});
 
   const [productDetails, setProductDetails] = useState(null);
+  const [sizeChart, setSizeChart] = useState(null);
+  const [showSizeChartModal, setShowSizeChartModal] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [variantMedia, setVariantMedia] = useState([]);
   const [userDeliveryAddress, setUserDeliveryAddress] = useState(null);
@@ -493,6 +498,64 @@ useEffect(() => {
 
   fetchProductDetails();
 }, [id]);
+
+  useEffect(() => {
+    // Only show size chart if product exists
+    if (!productDetails?._id) {
+      setSizeChart(null);
+      return;
+    }
+
+    const fetchChart = async () => {
+      try {
+        const res = await getSizeChartByProductId(productDetails._id);
+        if (res?.data?.canShow && res?.data?.data) {
+          const chart = res.data.data;
+
+          // Double verify locally on frontend as well:
+          // "if any one of the size name is not available in the product then it does not shows the sizechart"
+          const chartSizes = [];
+          if (Array.isArray(chart.tables)) {
+            chart.tables.forEach((t) => {
+              if (Array.isArray(t.sizes)) {
+                t.sizes.forEach((s) => chartSizes.push(String(s).trim().toUpperCase()));
+              }
+            });
+          }
+
+          const normalize = (s) => {
+            const clean = String(s || "").trim().toUpperCase();
+            if (clean === "2XL") return "XXL";
+            if (clean === "3XL") return "XXXL";
+            return clean;
+          };
+
+          const prodSizes = (productDetails.variants || []).flatMap((v) =>
+            (v.sizes || [])
+              .filter((s) => s.isActive !== false)
+              .map((s) => normalize(s.size))
+          );
+
+          const hasAllSizes =
+            chartSizes.length > 0 &&
+            chartSizes.every((cs) => prodSizes.includes(normalize(cs)));
+
+          if (hasAllSizes) {
+            setSizeChart(chart);
+          } else {
+            setSizeChart(null);
+          }
+        } else {
+          setSizeChart(null);
+        }
+      } catch (err) {
+        console.warn("Size chart not available for this product:", err.message);
+        setSizeChart(null);
+      }
+    };
+
+    fetchChart();
+  }, [productDetails]);
 
   useEffect(() => {
     if (!id) return;
@@ -1022,6 +1085,16 @@ useEffect(() => {
             <div className="pp-block">
               <div className="pp-label-row">
                 <span className="pp-label">Select Size</span>
+                {sizeChart && (
+                  <button
+                    type="button"
+                    className="pp-size-guide"
+                    onClick={() => setShowSizeChartModal(true)}
+                  >
+                    <Ruler size={13} className="pp-ruler-icon" />
+                    <span>Size Chart</span>
+                  </button>
+                )}
               </div>
               <div className="pp-sizes">
                 {SIZES.map((s) => (
@@ -1437,6 +1510,7 @@ useEffect(() => {
         </div>
       )}
 
+<<<<<<< HEAD
       {/* ================= NEW: SIZE CHART POPUP ================= */}
       {showSizeChart && sizeChart && (
         <div className="pp-sc-overlay" onClick={() => setShowSizeChart(false)}>
@@ -1505,6 +1579,16 @@ useEffect(() => {
             </div>
           </div>
         </div>
+=======
+      {/* Dynamic Size Chart Modal */}
+      {sizeChart && (
+        <SizeChartModal
+          isOpen={showSizeChartModal}
+          onClose={() => setShowSizeChartModal(false)}
+          chart={sizeChart}
+          activeSize={activeSize}
+        />
+>>>>>>> dev
       )}
     </div>
   );

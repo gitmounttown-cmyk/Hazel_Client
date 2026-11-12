@@ -285,6 +285,7 @@ const navConfig = [
       { label: "Products", path: "/admin/catalog/products" },
       { label: "Sizes", path: "/admin/catalog/size" },
       { label: "Colors", path: "/admin/catalog/colors" },
+      { label: "Size Chart", path: "/admin/catalog/size-chart" },
     ],
   },
   {

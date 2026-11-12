@@ -942,3 +942,201 @@
     width: 100%;
   }
 }
+
+
+/* ========================================================= */
+/* INVOICE & DISPATCH STYLING */
+/* ========================================================= */
+
+.order-icon-btn.invoice {
+  background: #fbf7ed;
+  color: #8b6d1e;
+  border: 1px solid #e2bc5d;
+  display: inline-flex;
+  align-items: center;
+}
+
+.order-icon-btn.invoice:hover {
+  background: #f3e6c0;
+}
+
+.order-invoice-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #fcfbf8;
+  border: 1px solid #ebdcb5;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.order-invoice-info {
+  display: flex;
+  align-items: center;
+}
+
+.order-invoice-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-invoice-icon {
+  color: #a37c2c;
+  flex-shrink: 0;
+}
+
+.order-invoice-title h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.order-invoice-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-invoice-badge.paid {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+.order-invoice-badge.pending {
+  background: #fef7e0;
+  color: #b06000;
+}
+
+.order-invoice-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.order-invoice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.order-invoice-btn.print {
+  background: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #1a1a1a;
+}
+
+.order-invoice-btn.print:hover {
+  background: #333333;
+}
+
+.order-invoice-btn.download {
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #d1d5db;
+}
+
+.order-invoice-btn.download:hover {
+  background: #f3f4f6;
+}
+
+.order-invoice-btn.send {
+  background: #f1cb62;
+  color: #292626;
+  border: 1px solid #e2bc5d;
+}
+
+.order-invoice-btn.send:hover {
+  background: #e5be50;
+}
+
+.order-invoice-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Send Invoice Modal */
+.send-invoice-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.send-invoice-desc {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.send-invoice-section {
+  background: #fbfbfb;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.send-invoice-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a37c2c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.send-invoice-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.send-invoice-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.send-invoice-field input {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.send-invoice-field input:focus {
+  border-color: #f1cb62;
+}
+
+.send-invoice-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.send-invoice-check input {
+  cursor: pointer;
+}

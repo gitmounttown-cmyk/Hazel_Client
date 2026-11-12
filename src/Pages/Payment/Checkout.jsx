@@ -337,6 +337,17 @@ export default function Checkout({
     useState([]);
     
   const [guestAddress, setGuestAddress] = useState(null);
+  const [sameAsShipping, setSameAsShipping] = useState(true);
+  const [billingDraft, setBillingDraft] = useState({
+    fullName: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    pincode: "",
+    mobileNumber: "",
+    email: "",
+  });
   const [selectedAddress, setSelectedAddress] = useState(null);
 
   const [serviceable, setServiceable] = useState(true);
@@ -848,6 +859,7 @@ console.log("Cleaned address data:", cleaned);
         state: deliveryAddr.state || "",
         pincode: deliveryAddr.pincode || "",
         mobileNumber: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
+        email: deliveryAddr.email || hazelUser?.email || "",
         addressType: deliveryAddr.addressType || deliveryAddr.type || "Home",
       };
 
@@ -856,6 +868,22 @@ console.log("Cleaned address data:", cleaned);
         guestId: guestId || null,
         addressId: userId ? deliveryAddr.id || deliveryAddr._id || null : null,
         deliveryAddress: formattedAddress,
+        billingAddress: sameAsShipping
+          ? formattedAddress
+          : {
+              fullName: billingDraft.fullName || formattedAddress.fullName,
+              addressLine1: billingDraft.addressLine1 || formattedAddress.addressLine1,
+              addressLine2: billingDraft.addressLine2 || "",
+              district: formattedAddress.district,
+              city: billingDraft.city || formattedAddress.city,
+              state: billingDraft.state || formattedAddress.state,
+              pincode: billingDraft.pincode || formattedAddress.pincode,
+              mobileNumber: billingDraft.mobileNumber || formattedAddress.mobileNumber,
+              email: billingDraft.email || formattedAddress.email,
+              addressType: "Billing",
+            },
+        customerEmail: deliveryAddr.email || hazelUser?.email || "",
+        customerMobile: deliveryAddr.mobileNumber || deliveryAddr.phone || "",
         products: cartItems.map((item) => ({
           productId: item.productId,
           variantId: item.variantId, // Added variantId to fix the 500 error
@@ -1013,6 +1041,74 @@ console.log("Cleaned address data:", cleaned);
                   <span>{address.city}, {address.state} - {address.pincode}</span>
                 </p>
                 <p className="delivery__phone">+91 {address.mobileNumber}</p>
+              </div>
+            )}
+
+            {mode === "view" && address && (
+              <div className="billing-address-section" style={{ marginTop: "14px", padding: "14px 16px", background: "#fcfbf7", borderRadius: "10px", border: "1px solid #ebdcb5" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13.5px", fontWeight: "600", color: "#292626" }}>
+                  <input
+                    type="checkbox"
+                    checked={sameAsShipping}
+                    onChange={(e) => setSameAsShipping(e.target.checked)}
+                    style={{ width: "16px", height: "16px", accentColor: "#d99b26" }}
+                  />
+                  <span>Billing address is same as delivery address</span>
+                </label>
+
+                {!sameAsShipping && (
+                  <div style={{ marginTop: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <p style={{ margin: 0, fontSize: "12.5px", color: "#7a7061" }}>
+                      Enter customer billing address (for tax invoice):
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                      <input
+                        type="text"
+                        placeholder="Billing Name *"
+                        value={billingDraft.fullName}
+                        onChange={(e) => setBillingDraft((b) => ({ ...b, fullName: e.target.value }))}
+                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", fontSize: "13px" }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Billing Phone Number *"
+                        value={billingDraft.mobileNumber}
+                        onChange={(e) => setBillingDraft((b) => ({ ...b, mobileNumber: e.target.value }))}
+                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", fontSize: "13px" }}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Address Line 1 (House/Street) *"
+                      value={billingDraft.addressLine1}
+                      onChange={(e) => setBillingDraft((b) => ({ ...b, addressLine1: e.target.value }))}
+                      style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", fontSize: "13px" }}
+                    />
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+                      <input
+                        type="text"
+                        placeholder="City *"
+                        value={billingDraft.city}
+                        onChange={(e) => setBillingDraft((b) => ({ ...b, city: e.target.value }))}
+                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", fontSize: "13px" }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="State *"
+                        value={billingDraft.state}
+                        onChange={(e) => setBillingDraft((b) => ({ ...b, state: e.target.value }))}
+                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", fontSize: "13px" }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Pincode *"
+                        value={billingDraft.pincode}
+                        onChange={(e) => setBillingDraft((b) => ({ ...b, pincode: e.target.value }))}
+                        style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "6px", fontSize: "13px" }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
