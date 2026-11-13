@@ -744,3 +744,49 @@
   border-radius: 8px;
   text-align: center;
 }
+
+/* Drag handle */
+.sc-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 7px;
+  color: #9a8877;
+  cursor: grab;
+  font-size: 17px;
+  font-weight: 700;
+  user-select: none;
+}
+
+.sc-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Draggable size tags */
+.sc-size-tag {
+  cursor: grab;
+  user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sc-size-tag:active {
+  cursor: grabbing;
+}
+
+/* Draggable parameter rows */
+.sc-draggable-row {
+  cursor: grab;
+  transition: background 0.2s ease;
+}
+
+.sc-draggable-row:active {
+  cursor: grabbing;
+}
+
+.sc-draggable-row:hover {
+  background: #fff8eb;
+}
+
+.sc-draggable-row .sc-m-param-name {
+  white-space: nowrap;
+}

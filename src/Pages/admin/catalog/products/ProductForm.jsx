@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createProduct, updateProduct } from "../../../../services/productService";
 import { getCategories } from "../../../../services/categoryService";
 import { getBrands } from "../../../../services/brandService";
@@ -242,40 +242,91 @@ console.log("ProductForm initialized with product:", product);
   const [scTableImageFiles, setScTableImageFiles] = useState({});
   const [scNewSizeInputs, setScNewSizeInputs] = useState({});
   const [scNewParamInputs, setScNewParamInputs] = useState({});
+  const [isSizeChartLoaded, setIsSizeChartLoaded] = useState(false);
+  const scDragRef = useRef(null);
 
   // Populate size chart data when editing an existing product
   useEffect(() => {
     if (!product?.sizeChartId) return;
 
+    // const populateChart = (sc) => {
+    //   if (!sc) return;
+    //   if (sc.unit) setScUnit(sc.unit);
+    //   if (Array.isArray(sc.tables) && sc.tables.length > 0) {
+    //     setScTables(
+          
+    //       sc.tables.map((t) => (
+    //         console.log("Populating size chart tables from existing size chart:", t.sizes),
+    //         {
+
+    //         tableName: t.tableName || "STANDARD",
+    //         image: t.image || "",
+    //         images: Array.isArray(t.images) ? [...t.images] : (t.image ? [t.image] : []),
+    //         sizes: Array.isArray(t.sizes) ? [...t.sizes] : [...DEFAULT_SC_SIZES],
+    //         rows:
+    //           Array.isArray(t.rows) && t.rows.length > 0
+    //             ? t.rows.map((r) => ({
+    //                 parameter: r.parameter || "",
+    //                 values: { ...(r.values || {}) },
+    //               }))
+    //             : DEFAULT_SC_PARAMETERS.map((p) => ({ parameter: p, values: {} })),
+    //       }))
+    //     );
+    //   }
+    //   const imgs =
+    //     Array.isArray(sc.images) && sc.images.length > 0
+    //       ? [...sc.images]
+    //       : sc.image
+    //       ? [sc.image]
+    //       : [];
+    //   setScExistingImages(imgs);
+    //   setSelectedExistingScId(sc._id);
+    //   setScMode("create_separate");
+    // };
+
     const populateChart = (sc) => {
       if (!sc) return;
+
       if (sc.unit) setScUnit(sc.unit);
+
       if (Array.isArray(sc.tables) && sc.tables.length > 0) {
         setScTables(
           sc.tables.map((t) => ({
             tableName: t.tableName || "STANDARD",
             image: t.image || "",
-            images: Array.isArray(t.images) ? [...t.images] : (t.image ? [t.image] : []),
-            sizes: Array.isArray(t.sizes) ? [...t.sizes] : [...DEFAULT_SC_SIZES],
-            rows:
-              Array.isArray(t.rows) && t.rows.length > 0
-                ? t.rows.map((r) => ({
-                    parameter: r.parameter || "",
-                    values: { ...(r.values || {}) },
-                  }))
-                : DEFAULT_SC_PARAMETERS.map((p) => ({ parameter: p, values: {} })),
+            images: Array.isArray(t.images)
+              ? [...t.images]
+              : t.image
+                ? [t.image]
+                : [],
+            sizes: Array.isArray(t.sizes)
+              ? [...t.sizes]
+              : [...DEFAULT_SC_SIZES],
+            rows: Array.isArray(t.rows) && t.rows.length > 0
+              ? t.rows.map((r) => ({
+                parameter: r.parameter || "",
+                values: { ...(r.values || {}) },
+              }))
+              : DEFAULT_SC_PARAMETERS.map((p) => ({
+                parameter: p,
+                values: {},
+              })),
           }))
         );
       }
-      const imgs =
-        Array.isArray(sc.images) && sc.images.length > 0
-          ? [...sc.images]
-          : sc.image
+
+      const imgs = Array.isArray(sc.images) && sc.images.length > 0
+        ? [...sc.images]
+        : sc.image
           ? [sc.image]
           : [];
+
       setScExistingImages(imgs);
       setSelectedExistingScId(sc._id);
       setScMode("create_separate");
+      setIsSizeChartLoaded(true);
+
+      // Keep your remaining existing code here
     };
 
     if (typeof product.sizeChartId === "object" && product.sizeChartId._id) {
@@ -287,18 +338,105 @@ console.log("ProductForm initialized with product:", product);
     }
   }, [product]);
 
+  // const tableSizeChartId =
+  //   typeof product?.sizeChartId === "object"
+  //     ? product?.sizeChartId?._id
+  //     : product?.sizeChartId;
+
+  // useEffect(() => {
+  //   if (!tableSizeChartId) return;
+
+  //   const populateChart = (sc) => {
+  //     if (!sc) return;
+
+  //     if (sc.unit) {
+  //       setScUnit(sc.unit);
+  //     }
+
+  //     if (Array.isArray(sc.tables) && sc.tables.length > 0) {
+  //       setScTables(
+  //         sc.tables.map((t) => ({
+  //           tableName: t.tableName || "STANDARD",
+  //           image: t.image || "",
+  //           images: Array.isArray(t.images)
+  //             ? [...t.images]
+  //             : t.image
+  //               ? [t.image]
+  //               : [],
+
+  //           // Preserve saved size order
+  //           sizes: Array.isArray(t.sizes)
+  //             ? [...t.sizes]
+  //             : [...DEFAULT_SC_SIZES],
+
+  //           rows:
+  //             Array.isArray(t.rows) && t.rows.length > 0
+  //               ? t.rows.map((r) => ({
+  //                 parameter: r.parameter || "",
+  //                 values: { ...(r.values || {}) },
+  //               }))
+  //               : DEFAULT_SC_PARAMETERS.map((p) => ({
+  //                 parameter: p,
+  //                 values: {},
+  //               })),
+  //         }))
+  //       );
+  //     }
+
+  //     const imgs =
+  //       Array.isArray(sc.images) && sc.images.length > 0
+  //         ? [...sc.images]
+  //         : sc.image
+  //           ? [sc.image]
+  //           : [];
+
+  //     setScExistingImages(imgs);
+  //     setSelectedExistingScId(sc._id);
+  //     setScMode("create_separate");
+  //   };
+
+  //   if (
+  //     typeof product.sizeChartId === "object" &&
+  //     product.sizeChartId?._id
+  //   ) {
+  //     populateChart(product.sizeChartId);
+  //   } else {
+  //     getSizeChartById(tableSizeChartId)
+  //       .then((res) => populateChart(res.data?.data))
+  //       .catch((err) =>
+  //         console.error("Failed to load product size chart:", err)
+  //       );
+  //   }
+  // }, [tableSizeChartId]);
   // Collect all unique sizes currently entered in Color Variants
+  // const getProductVariantSizes = () => {
+  //   const collected = [];
+  //   variants.forEach((v) => {
+  //     (v.sizes || []).forEach((s) => {
+  //       if (s?.size && String(s.size).trim()) {
+  //         collected.push(String(s.size).trim().toUpperCase());
+  //       }
+  //     });
+  //   });
+  //   return Array.from(new Set(collected));
+  // };
+
   const getProductVariantSizes = () => {
-    const collected = [];
-    variants.forEach((v) => {
-      (v.sizes || []).forEach((s) => {
-        if (s?.size && String(s.size).trim()) {
-          collected.push(String(s.size).trim().toUpperCase());
-        }
-      });
+  const collected = [];
+
+  variants.forEach((v) => {
+    (v.sizes || []).forEach((s) => {
+      const size = String(s?.size || "").trim().toUpperCase();
+
+      if (size && !collected.includes(size)) {
+        collected.push(size);
+      }
     });
-    return Array.from(new Set(collected));
-  };
+  });
+
+  return collected;
+};
+  
 
   // Sync variant sizes into size chart table columns
   const handleSyncSizesFromVariants = (tableIndex = null) => {
@@ -322,24 +460,98 @@ console.log("ProductForm initialized with product:", product);
   };
 
   // Automatically sync variant sizes into size chart table columns whenever variants are edited
-  useEffect(() => {
-    const variantSizes = getProductVariantSizes();
-    if (variantSizes.length > 0) {
-      setScTables((prev) =>
-        prev.map((t) => {
-          const isSame =
-            t.sizes?.length === variantSizes.length &&
-            t.sizes.every((s, i) => s === variantSizes[i]);
-          if (isSame) return t;
+  // useEffect(() => {
+  //   const variantSizes = getProductVariantSizes();
+  //   if (variantSizes.length > 0) {
+  //     setScTables((prev) =>
+  //       prev.map((t) => {
+  //         const isSame =
+  //           t.sizes?.length === variantSizes.length &&
+  //           t.sizes.every((s, i) => s === variantSizes[i]);
+  //         if (isSame) return t;
 
-          return {
-            ...t,
-            sizes: [...variantSizes],
-          };
-        })
-      );
-    }
-  }, [variants]);
+  //         return {
+  //           ...t,
+  //           sizes: [...variantSizes],
+  //         };
+  //       })
+  //     );
+  //     setTimeout(() => {
+  //       console.log("Auto-synced size chart tables with variant sizes:", scTables);
+  //     }, 0);
+  //   }
+  // }, [variants]);
+
+//   useEffect(() => {
+//   const variantSizes = getProductVariantSizes();
+
+//   if (!variantSizes.length) return;
+
+//   setScTables((prev) =>
+//     prev.map((t) => {
+//       // Preserve existing size chart order
+//       const existingSizes = t.sizes || [];
+
+//       const isSame =
+//         existingSizes.length === variantSizes.length &&
+//         existingSizes.every(
+//           (size, index) => size === variantSizes[index]
+//         );
+
+//       if (isSame) return t;
+
+//       return {
+//         ...t,
+//         sizes: [...variantSizes],
+//       };
+//     })
+//   );
+//       setTimeout(() => {
+//         console.log("Auto-synced size chart tables with variant sizes:", scTables);
+//       }, 0);
+// }, [variants]);
+
+  // useEffect(() => {
+  //   if (!isSizeChartLoaded) return;
+  //   const variantSizes = getProductVariantSizes();
+
+  //   console.log("Before sync:", scTables);
+  //   console.log("New variant sizes:", variantSizes);
+
+  //   if (!variantSizes.length) return;
+
+  //   setScTables((prev) => {
+  //     const updated = prev.map((table) => ({
+  //       ...table,
+  //       sizes: [...variantSizes],
+  //     }));
+
+  //     console.log("Updated size chart:", updated);
+
+  //     return updated;
+  //   });
+  // }, [variants, isSizeChartLoaded]);
+
+  useEffect(() => {
+  if (!isSizeChartLoaded) return;
+
+  const variantSizes = getProductVariantSizes();
+
+  if (!variantSizes.length) return;
+
+  setScTables((prev) =>
+    prev.map((table) => {
+      if (table.sizes?.length) {
+        return table;
+      }
+
+      return {
+        ...table,
+        sizes: [...variantSizes],
+      };
+    })
+  );
+}, [variants, isSizeChartLoaded]);
 
   // Handlers for embedded size chart builder
   const handleScTableNameChange = (index, val) => {
@@ -832,13 +1044,60 @@ const handleSubmit = async (e) => {
       if (product?._id) scFormData.append("productId", product._id);
 // console.log("Preparing to submit size chart with tables:", scTables, "and variant sizes:", variantSizes);
       // Automatically ensure table sizes match the variant sizes if variants have sizes
+      // const sanitizedTables = scTables.map((t) => ({
+      //   tableName: t.tableName || "TOP",
+      //   sizes: variantSizes.length > 0 ? variantSizes : (t.sizes?.length > 0 ? t.sizes : DEFAULT_SC_SIZES),
+      //   rows: t.rows,
+      //   image: t.image || (Array.isArray(t.images) ? t.images[0] : "") || "",
+      //   images: Array.isArray(t.images) ? t.images : [],
+      // }));
+
+      // const sanitizedTables = scTables.map((t) => ({
+      //   tableName: t.tableName || "TOP",
+
+      //   // Preserve the admin's custom drag-and-drop order
+      //   sizes:
+      //     t.sizes?.length > 0
+      //       ? [...t.sizes]
+      //       : variantSizes.length > 0
+      //         ? [...variantSizes]
+      //         : [...DEFAULT_SC_SIZES],
+
+      //   rows: t.rows.map((row) => ({
+      //     ...row,
+      //     values: { ...row.values },
+      //   })),
+
+      //   image:
+      //     t.image ||
+      //     (Array.isArray(t.images) ? t.images[0] : "") ||
+      //     "",
+
+      //   images: Array.isArray(t.images) ? [...t.images] : [],
+      // }));
       const sanitizedTables = scTables.map((t) => ({
         tableName: t.tableName || "TOP",
-        sizes: variantSizes.length > 0 ? variantSizes : (t.sizes?.length > 0 ? t.sizes : DEFAULT_SC_SIZES),
-        rows: t.rows,
-        image: t.image || (Array.isArray(t.images) ? t.images[0] : "") || "",
-        images: Array.isArray(t.images) ? t.images : [],
+
+        // Do not replace manually reordered sizes with variantSizes
+        sizes:
+          Array.isArray(t.sizes) && t.sizes.length > 0
+            ? [...t.sizes]
+            : [...variantSizes],
+
+        rows: (t.rows || []).map((row) => ({
+          parameter: row.parameter,
+          values: { ...(row.values || {}) },
+        })),
+
+        image:
+          t.image ||
+          (Array.isArray(t.images) ? t.images[0] : "") ||
+          "",
+
+        images: Array.isArray(t.images) ? [...t.images] : [],
       }));
+
+// scFormData.append("tables", JSON.stringify(sanitizedTables));
       // console.log("Sanitized Size Chart Tables for submission:", sanitizedTables);
       scFormData.append("tables", JSON.stringify(sanitizedTables));
 
@@ -1096,6 +1355,107 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
     })
   );
 };
+
+const reorderArray = (array, fromIndex, toIndex) => {
+  const updated = [...array];
+
+  const [movedItem] = updated.splice(fromIndex, 1);
+
+  updated.splice(toIndex, 0, movedItem);
+
+  return updated;
+};
+
+const handleScSizeDragStart = (tableIndex, sizeIndex, e) => {
+  scDragRef.current = {
+    type: "size",
+    tableIndex,
+    fromIndex: sizeIndex,
+  };
+
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", String(sizeIndex));
+};
+
+const handleScSizeDrop = (tableIndex, targetIndex, e) => {
+  e.preventDefault();
+
+  const drag = scDragRef.current;
+
+  if (
+    !drag ||
+    drag.type !== "size" ||
+    drag.tableIndex !== tableIndex ||
+    drag.fromIndex === targetIndex
+  ) {
+    scDragRef.current = null;
+    return;
+  }
+
+  setScTables((prev) =>
+    prev.map((table, index) =>
+      index === tableIndex
+        ? {
+            ...table,
+            sizes: reorderArray(
+              table.sizes,
+              drag.fromIndex,
+              targetIndex
+            ),
+          }
+        : table
+    )
+  );
+
+  scDragRef.current = null;
+};
+
+const handleScRowDragStart = (tableIndex, rowIndex, e) => {
+  scDragRef.current = {
+    type: "row",
+    tableIndex,
+    fromIndex: rowIndex,
+  };
+
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", String(rowIndex));
+};
+
+const handleScRowDrop = (tableIndex, targetIndex, e) => {
+  e.preventDefault();
+
+  const drag = scDragRef.current;
+
+  if (
+    !drag ||
+    drag.type !== "row" ||
+    drag.tableIndex !== tableIndex ||
+    drag.fromIndex === targetIndex
+  ) {
+    scDragRef.current = null;
+    return;
+  }
+
+  setScTables((prev) =>
+    prev.map((table, index) =>
+      index === tableIndex
+        ? {
+            ...table,
+            rows: reorderArray(
+              table.rows,
+              drag.fromIndex,
+              targetIndex
+            ),
+          }
+        : table
+    )
+  );
+
+  scDragRef.current = null;
+};
+
+// console.log("scTables_data:", scTables);
+// console.log('scExistingImages:', scExistingImages);
 
   return (
     <div className="prod-form-overlay">
@@ -1842,12 +2202,46 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
                         {/* Size Columns Tags */}
                         <div className="sc-sizes-config">
                           <span className="sc-config-label">Columns (Sizes):</span>
-                          <div className="sc-tags-list">
+                          {/*<div className="sc-tags-list">
                             {table.sizes.map((s) => (
                               <span key={s} className="sc-size-tag">
                                 {s}
                                 <button
                                   type="button"
+                                  onClick={() => handleScRemoveSize(tIndex, s)}
+                                  aria-label={`Remove size ${s}`}
+                                >
+                                  &times;
+                                </button>
+                              </span>
+                            ))}
+                          </div>*/}
+
+                          <div className="sc-tags-list">
+                            {table.sizes.map((s, sIndex) => (
+                              <span
+                                key={s}
+                                className="sc-size-tag"
+                                draggable
+                                onDragStart={(e) =>
+                                  handleScSizeDragStart(tIndex, sIndex, e)
+                                }
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) =>
+                                  handleScSizeDrop(tIndex, sIndex, e)
+                                }
+                                onDragEnd={() => {
+                                  scDragRef.current = null;
+                                }}
+                                title="Drag to reorder size"
+                              >
+                                <span className="sc-drag-handle">⠿</span>
+
+                                {s}
+
+                                <button
+                                  type="button"
+                                  draggable={false}
                                   onClick={() => handleScRemoveSize(tIndex, s)}
                                   aria-label={`Remove size ${s}`}
                                 >
@@ -1901,8 +2295,50 @@ const removePendingMedia = (variantIndex, mediaIndex) => {
                             </thead>
                             <tbody>
                               {table.rows.map((row, rIndex) => (
-                                <tr key={rIndex}>
-                                  <td className="sc-m-param-name">{row.parameter}</td>
+                                // <tr key={rIndex}>
+                                // <tr
+                                //   key={row._id || `${row.parameter}-${rIndex}`}
+                                //   draggable
+                                //   onDragStart={(e) =>
+                                //     handleScRowDragStart(tIndex, rIndex, e)
+                                //   }
+                                //   onDragOver={(e) => e.preventDefault()}
+                                //   onDrop={(e) =>
+                                //     handleScRowDrop(tIndex, rIndex, e)
+                                //   }
+                                //   onDragEnd={() => {
+                                //     scDragRef.current = null;
+                                //   }}
+                                //   className="sc-draggable-row"
+                                // >
+                                  <tr
+                                    key={row._id || `${row.parameter}-${rIndex}`}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => handleScRowDrop(tIndex, rIndex, e)}
+                                    className="sc-draggable-row"
+                                  >
+                                  {/* <td className="sc-m-param-name">{row.parameter}</td> */}
+                                  {/* <td className="sc-m-param-name">
+                                    <span className="sc-drag-handle">⠿</span>
+                                    {row.parameter}
+                                  </td> */}
+                                  <td className="sc-m-param-name">
+                                    <span
+                                      className="sc-drag-handle"
+                                      draggable
+                                      onDragStart={(e) =>
+                                        handleScRowDragStart(tIndex, rIndex, e)
+                                      }
+                                      onDragEnd={() => {
+                                        scDragRef.current = null;
+                                      }}
+                                      title="Drag to reorder parameter"
+                                    >
+                                      ⠿
+                                    </span>
+
+                                    {row.parameter}
+                                  </td>
                                   {table.sizes.map((s) => (
                                     <td key={s} className="sc-m-cell">
                                       <input

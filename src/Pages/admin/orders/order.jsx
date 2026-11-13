@@ -17,7 +17,8 @@ import { useMemo } from "react";
 import { useAdminSearch } from "../../../context/AdminSearchContext";
 import CommonModal from "../../../Components/common/CommonModal";
 import toast from "react-hot-toast";
-import { FileText, Printer, Download, Send } from "lucide-react";
+import { FileText, Printer, Download, Send, MoreHorizontal } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
@@ -70,6 +71,62 @@ const Order = () => {
     sendToCustomer: true,
   });
   const [invoiceActionLoading, setInvoiceActionLoading] = useState(false);
+  
+  const [openActionId, setOpenActionId] = useState(null);
+  const [actionMenuPosition, setActionMenuPosition] = useState({
+    top: 0,
+    left: 0,
+    maxHeight: 400,
+  });
+
+  const handleActionMenu = (e, orderId) => {
+    if (openActionId === orderId) {
+      setOpenActionId(null);
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const menuWidth = 200;
+    const spacing = 8;
+    const viewportHeight = window.innerHeight;
+
+    // Available space above and below the button
+    const spaceBelow = viewportHeight - rect.bottom - spacing;
+    const spaceAbove = rect.top - spacing;
+
+    // Open upward if there is insufficient space below
+    const openUpward = spaceBelow < 300 && spaceAbove > spaceBelow;
+
+    const maxHeight = Math.max(
+      120,
+      Math.min(
+        400,
+        openUpward ? spaceAbove : spaceBelow,
+        viewportHeight - 16
+      )
+    );
+
+    const left = Math.max(
+      8,
+      Math.min(
+        rect.right - menuWidth,
+        window.innerWidth - menuWidth - 8
+      )
+    );
+
+    setActionMenuPosition({
+      left,
+      maxHeight,
+      ...(openUpward
+        ? { bottom: viewportHeight - rect.top + spacing }
+        : { top: rect.bottom + spacing }),
+    });
+
+    setOpenActionId(orderId);
+  };
+
+
 
   const handlePrintInvoice = async (order) => {
     try {
@@ -844,7 +901,7 @@ const handleClearDateFilter = () => {
 
                       <td>{formatDate(order.createdAt)}</td>
 
-                      <td>
+                      {/* <td>
                         <div className="order-actions">
                           <select
                             className="order-status-select"
@@ -951,6 +1008,157 @@ const handleClearDateFilter = () => {
                             Delete
                           </button>
                         </div>
+                      </td> */}
+
+                      <td>
+                        <div className="order-action-dropdown">
+                          <button
+                            type="button"
+                            className="order-more-btn"
+                            title="More Actions"
+                            onClick={(e) => handleActionMenu(e, order._id)}
+                          >
+                            <MoreHorizontal size={22} />
+                          </button>
+                        </div>
+
+                        {openActionId === order._id &&
+                          createPortal(
+                            <>
+                              <div
+                                className="order-dropdown-overlay"
+                                onClick={() => setOpenActionId(null)}
+                              />
+
+                              <div
+                                className="order-dropdown-menu"
+                                style={{
+                                  ...actionMenuPosition,
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {/* Update Order Status */}
+                                <div className="order-dropdown-status">
+                                  <label>Update Status</label>
+
+                                  <select
+                                    className="order-status-select"
+                                    value={order.orderStatus}
+                                    disabled={actionLoading}
+                                    onChange={(e) => {
+                                      handleStatusChange(order._id, e.target.value);
+                                      setOpenActionId(null);
+                                    }}
+                                  >
+                                    <option value="PENDING">Pending</option>
+                                    <option value="CONFIRMED">Confirmed</option>
+                                    <option value="PROCESSING">Processing</option>
+                                    <option value="SHIPPED">Shipped</option>
+                                    <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
+                                    <option value="DELIVERED">Delivered</option>
+                                    <option value="CANCELLED">Cancelled</option>
+                                    <option value="RETURN_REQUESTED">Return Requested</option>
+                                    <option value="RETURNED">Returned</option>
+                                    <option value="REFUND_REQUESTED">Refund Requested</option>
+                                    <option value="REFUNDED">Refunded</option>
+                                  </select>
+                                </div>
+
+                                <div className="order-dropdown-divider" />
+
+                                {/* View */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedOrder(order);
+                                    setShowDetailsModal(true);
+                                    setOpenActionId(null);
+                                  }}
+                                >
+                                  <span>View Order</span>
+                                </button>
+
+                                {/* Invoice */}
+                                {String(order.paymentStatus || "").toUpperCase() === "PAID" && (
+                                  <button
+                                    type="button"
+                                    disabled={invoiceActionLoading}
+                                    onClick={() => {
+                                      setOpenActionId(null);
+                                      handlePrintInvoice(order);
+                                    }}
+                                  >
+                                    <Printer size={15} />
+                                    <span>Print Invoice</span>
+                                  </button>
+                                )}
+
+                                {/* Tracking */}
+                                <button
+                                  type="button"
+                                  disabled={actionLoading}
+                                  onClick={() => {
+                                    setOpenActionId(null);
+                                    handleTrackingOpen(order);
+                                  }}
+                                >
+                                  <span>Tracking</span>
+                                </button>
+
+                                {/* Ship Velocity */}
+                                {!order.trackingNumber &&
+                                  (
+                                    String(order.paymentStatus || "").toUpperCase() === "PAID" ||
+                                    String(order.paymentMethod || "").toUpperCase() === "COD"
+                                  ) &&
+                                  order.orderStatus !== "CANCELLED" && (
+                                    <button
+                                      type="button"
+                                      disabled={velocityLoading === order._id}
+                                      onClick={() => {
+                                        setOpenActionId(null);
+                                        handleManifestVelocity(order);
+                                      }}
+                                    >
+                                      <span>
+                                        {velocityLoading === order._id
+                                          ? "Shipping..."
+                                          : "Ship Velocity"}
+                                      </span>
+                                    </button>
+                                  )}
+
+                                {/* Cancel */}
+                                {canCancelOrder(order.orderStatus) && (
+                                  <button
+                                    type="button"
+                                    className="dropdown-cancel"
+                                    disabled={actionLoading}
+                                    onClick={() => {
+                                      setOpenActionId(null);
+                                      handleCancelOpen(order);
+                                    }}
+                                  >
+                                    <span>Cancel Order</span>
+                                  </button>
+                                )}
+
+                                {/* Delete */}
+                                <button
+                                  type="button"
+                                  className="dropdown-delete"
+                                  disabled={actionLoading}
+                                  onClick={() => {
+                                    setOpenActionId(null);
+                                    handleDelete(order._id);
+                                  }}
+                                >
+                                  <span>Delete Order</span>
+                                </button>
+                              </div>
+                            </>,
+                            document.body
+                          )}
                       </td>
                     </tr>
                   ))
