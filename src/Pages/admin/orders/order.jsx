@@ -19,6 +19,7 @@ import CommonModal from "../../../Components/common/CommonModal";
 import toast from "react-hot-toast";
 import { FileText, Printer, Download, Send, MoreHorizontal } from "lucide-react";
 import { createPortal } from "react-dom";
+import { formatOrderDate } from "../../../utils/dateFormat";
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
@@ -829,7 +830,7 @@ const handleClearDateFilter = () => {
                   <th>Order Number</th>
                   {/* <th>Customer</th> */}
                   {/* <th>Items</th> */}
-                  <th>Total Amount</th>
+                  <th>Amount</th>
                   <th>Payment</th>
                   <th>Payment Status</th>
                   <th>Order Status</th>
@@ -899,7 +900,7 @@ const handleClearDateFilter = () => {
                         </span>
                       </td>
 
-                      <td>{formatDate(order.createdAt)}</td>
+                      <td>{formatOrderDate(order.createdAt)}</td>
 
                       {/* <td>
                         <div className="order-actions">
