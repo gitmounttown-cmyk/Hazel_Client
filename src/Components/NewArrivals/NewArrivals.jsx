@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./NewArrivals.css";
 import axiosInstance from "../../api/axiosInstance";
 import {useNavigate} from "react-router-dom";
+import defaultImage from "../../../public/defaultimage.png"; // Import the default image
 
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
@@ -224,6 +225,9 @@ const NewArrivals = () => {
                 src={activeProduct.image}
                 alt={activeProduct.name}
                 className="main-feature-img"
+                onError={(e) => {
+                  e.target.src = defaultImage; // Fallback image
+                }}
               />
             ) : (
               <div
@@ -285,6 +289,9 @@ const NewArrivals = () => {
                       src={item.image}
                       alt={item.name}
                       className="thumb-img"
+                      onError={(e) => {
+                        e.target.src = defaultImage; // Fallback image
+                      }}
                     />
                   ) : (
                     <div

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getHeroSlides, createHeroSlides, updateHeroSlide, deleteHeroSlide, getImageUrl } from "../../../Services/heroService";
 import "./AdminHero.css";
 import { compressProductImage } from "../../../utils/compressImage";
+import defaultImage from "../../../../public/defaultimage.png"; // Import the default image
 import toast from "react-hot-toast";
 
 const AdminHero = () => {
@@ -178,7 +179,9 @@ const handleFileChange = async (e) => {
             <p style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>Preview:</p>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {previews.map((src, index) => (
-                <img key={index} src={src} alt="Preview" style={{ width: "100px", height: "60px", objectFit: "cover", borderRadius: "4px", border: "1px solid #ddd" }} />
+                <img key={index} src={src} alt="Preview" style={{ width: "100px", height: "60px", objectFit: "cover", borderRadius: "4px", border: "1px solid #ddd" }} onError={(e) => {
+                  e.target.src = defaultImage;
+                }} />
               ))}
             </div>
           </div>
@@ -203,7 +206,9 @@ const handleFileChange = async (e) => {
             const imageUrl = getImageUrl(slide.image);
             return (
               <div key={slide._id} style={{ background: "#fff", border: "1px solid #eee", borderRadius: "6px", overflow: "hidden", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
-                <img src={imageUrl} alt="Hero Preview" style={{ width: "100%", height: "120px", objectFit: "cover" }} />
+                <img src={imageUrl} alt="Hero Preview" style={{ width: "100%", height: "auto", objectFit: "cover" }} onError={(e) => {
+                  e.target.src = defaultImage;
+                }} />
                 <div style={{ padding: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
                   <span style={{ fontSize: "11px", background: "#eef2f7", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold" }}>{slide.tag}</span>
                   <div style={{ display: "flex", gap: "8px" }}>

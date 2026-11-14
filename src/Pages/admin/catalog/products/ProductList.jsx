@@ -4,6 +4,7 @@ import ProductForm from "./ProductForm";
 import "./productList.css";
 import { useMemo } from "react";
 import { useAdminSearch } from "../../../../context/AdminSearchContext";
+import defaultImage from "../../../../../public/defaultimage.png"; // Import the default image
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "";
@@ -281,8 +282,7 @@ const filteredProducts = useMemo(() => {
                                 alt={product.name}
                                 className="prod-thumb"
                                 onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.style.display = "none";
+                                  e.target.src = defaultImage; // Fallback image
                                 }}
                               />
                             ) : (

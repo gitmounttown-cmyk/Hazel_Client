@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getHeroSlides, getImageUrl } from "../../Services/heroService";
 import "./Hero.css";
 import Loader from "../Loader/Loader";
+import defaultImage from "../../assets/Heroslide/slide2.jpg"; // Import the default image
 
 const Hero = () => {
   const [slides, setSlides] = useState([]);
@@ -55,6 +56,9 @@ const Hero = () => {
               src={imageUrl}
               alt="Hero Slide"
               className={`hero-bg-img ${index === currentIndex ? "active" : ""}`}
+              onError={(e) => {
+                e.target.src = defaultImage; // Fallback image
+              }}
             />
           );
         })}

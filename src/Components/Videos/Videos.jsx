@@ -4,11 +4,13 @@ import "./Videos.css";
 import { formatCurrency } from "../../Utils/currencyFormat";
 import { useNavigate } from "react-router-dom";
 import { getVideos } from "../../Services/videoService";
+import defaultImage from "../../../public/no-video.png"; // Import the default image
 
 export default function ShopTheLookSection() {
   const [looks, setLooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [videoError, setVideoError] = useState(false);
   const navigate = useNavigate();
   
   const sectionRef = useRef(null);
@@ -109,14 +111,23 @@ export default function ShopTheLookSection() {
           {looks.map((item) => (
             <div key={item._id} className="look-card" onClick={() => navigate("/shop?categoryId=" + item.categoryId)}
       style={{ cursor: "pointer" }}>
-              <video 
-                src={item.videoUrl} 
-                className="look-video-bg" 
-                muted 
-                loop 
+          {videoError ? (
+            <img 
+              src={defaultImage} 
+              alt={item.title} 
+              className="look-video-bg" 
+            />
+          ) : (
+            <video 
+              src={item.videoUrl} 
+              className="look-video-bg" 
+              muted 
+              loop 
                 playsInline
                 autoPlay
+              onError={(e) => {setVideoError(true); e.target.style.display = 'none';}}
               />
+          )}
 
               <div className="look-info">
                 <h3 className="look-name">{item.title}</h3>

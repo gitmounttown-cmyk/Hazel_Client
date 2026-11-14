@@ -13,6 +13,7 @@ import {
 import { Plus, Trash2, Upload, RefreshCw, X } from "lucide-react";
 import "./productForm.css";
 import "../sizechart/sizeChart.css";
+import defaultImage from "../../../../../public/defaultimage.png"; // Import the default image
 
 const IMAGE_BASE_URL =
   import.meta.env.VITE_UPLOAD_URL ||
@@ -1890,6 +1891,10 @@ const handleScRowDrop = (tableIndex, targetIndex, e) => {
                                       src={getImageUrl(media.imageURL)}
                                       alt={`${variant.color} media ${mi + 1}`}
                                       className="prod-form-image-preview"
+                                      onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = defaultImage;
+                                      }}
                                     />
                                   )}
 
@@ -2104,7 +2109,14 @@ const handleScRowDrop = (tableIndex, targetIndex, e) => {
                             : `${IMAGE_BASE_URL.replace(/\/+$/, "")}${imgSrc.startsWith("/") ? "" : "/"}${imgSrc}`;
                           return (
                             <div key={`existing-sc-${idx}`} className="sc-guide-thumb-card">
-                              <img src={fullUrl} alt={`Guide ${idx + 1}`} className="sc-guide-thumb-img" />
+                              <img
+                                src={fullUrl}
+                                alt={`Guide ${idx + 1}`}
+                                className="sc-guide-thumb-img"
+                                onError={(e) => {
+                                  e.target.src = defaultImage;
+                                }}
+                              />
                               <span className="sc-thumb-order-badge">#{idx + 1}</span>
                               <button
                                 type="button"

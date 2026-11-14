@@ -8,6 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { updateNavbarCounts } from "../../utils/navbarCounts";
+import defaultImage from "../../../public/defaultimage.png"; // Import the default image
 
 const HeartIcon = () => (
   <svg
@@ -192,6 +193,9 @@ function WishlistCard({ item, onRemove, removing, navigate }) {
             alt={name}
             loading="lazy"
             onClick={() => navigate(`/product/${product._id}`)}
+            onError={(e) => {
+              e.target.src = defaultImage; // Fallback image
+            }}
           />
         ) : (
           <div className="wl-card__img">No Image</div>

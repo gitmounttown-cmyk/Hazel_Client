@@ -13,6 +13,7 @@ import { isUserLoggedIn } from "../../utils/auth";
 import toast from "react-hot-toast";
 import { getGuestId } from "../../helpers/guestId";
 import { updateNavbarCounts } from "../../utils/navbarCounts";
+import defaultImage from "../../../public/defaultimage.png"; // Import the default image
 
 const TrendingProducts = () => {
   const [products, setProducts] = useState([]);
@@ -364,8 +365,7 @@ const isAlreadyInCart = cartItems.some((item) => item?.product?._id === product.
               className="trending-image"
               loading="lazy"
               onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "https://placehold.co/400x500/f3f3f3/666666?text=Hazel+Cart";
+                e.target.src = defaultImage; // Fallback image
               }}
             />
           ) : (

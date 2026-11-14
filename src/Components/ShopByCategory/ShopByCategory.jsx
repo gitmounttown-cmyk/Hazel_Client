@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
+import defaultImage from "../../../public/defaultimage.png"; // Import the default image
 
 import "./ShopByCategory.css";
 
@@ -72,6 +73,9 @@ const ShopByCategory = () => {
                   src={cat.image} 
                   alt={cat.name} 
                   className={`category-img category-img-${index}`} 
+                  onError={(e) => {
+                    e.target.src = defaultImage; // Fallback image
+                  }}
                 />
               </div>
 

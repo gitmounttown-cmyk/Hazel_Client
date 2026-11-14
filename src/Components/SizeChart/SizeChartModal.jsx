@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import "./SizeChartModal.css";
+import defaultImage from "../../../public/defaultimage.png"; // Import the default image
 
 const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -184,6 +185,9 @@ console.log(`sectionImages ${tIndex}:`, sectionImages);
                           src={fullImgUrl}
                           alt={`${table.tableName || chart.name} Guide`}
                           className="sc-diagram-img"
+                          onError={(e) => {
+                            e.target.src = defaultImage; // Fallback image
+                          }}
                         />
                       </div>
                       {sectionImages.length > 1 && (

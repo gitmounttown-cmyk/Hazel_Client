@@ -3,6 +3,7 @@ import { Plus, Trash2, Upload, RefreshCw, X } from "lucide-react";
 import { createSizeChart, updateSizeChart } from "../../../../Services/sizeChartService";
 import { getProducts } from "../../../../Services/productService";
 import { getCategories } from "../../../../Services/categoryService";
+import defaultImage from "../../../../../public/defaultimage.png"; // Import the default image
 
 const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -475,6 +476,9 @@ const SizeChartForm = ({ sizeChart, onClose, onSuccess }) => {
                         src={fullUrl}
                         alt={`Guide ${idx + 1}`}
                         className="sc-guide-thumb-img"
+                        onError={(e) => {
+                          e.target.src = defaultImage;
+                        }}
                       />
                       <span className="sc-thumb-order-badge">#{idx + 1}</span>
                       <button

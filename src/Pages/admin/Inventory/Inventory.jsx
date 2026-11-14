@@ -9,6 +9,7 @@ import {
 
 import "./Inventory.css";
 import { deleteProduct, deleteSize } from "../../../Services/inventoryAPI";
+import defaultImage from "../../../../public/defaultimage.png"; // Import the default image
 
 // *============================================================*
 // *API CONFIGURATION*
@@ -334,6 +335,9 @@ function Thumb({ item }) {
         src={item.image}
         alt={item.name}
         loading="lazy"
+        onError={(e) => {
+          e.target.src = defaultImage;
+        }}
       />
     );
   }

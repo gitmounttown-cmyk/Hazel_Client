@@ -4,6 +4,7 @@ import { getSizeCharts, deleteSizeChart } from "../../../../Services/sizeChartSe
 import SizeChartForm from "./SizeChartForm";
 import SizeChartModal from "../../../../Components/SizeChart/SizeChartModal";
 import "./sizeChart.css";
+import defaultImage from "../../../../../public/defaultimage.png"; // Import the default image
 
 const IMAGE_BASE_URL = import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004";
 
@@ -177,6 +178,9 @@ const SizeChartList = () => {
                               src={thumb}
                               alt={chart.name}
                               className="sc-admin-thumb-img"
+                              onError={(e) => {
+                                e.target.src = defaultImage;
+                              }}
                             />
                           </div>
                         ) : (

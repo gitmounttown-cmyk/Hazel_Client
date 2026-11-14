@@ -541,7 +541,7 @@
   width: 64px;
   height: 56px;
   flex: none;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 6px;
 }
 

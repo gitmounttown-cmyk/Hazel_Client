@@ -161,7 +161,7 @@
 .prod-form-image-preview {
   width: 64px;
   height: 64px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
   border: 1px solid #faf4e2;
 }
@@ -471,13 +471,13 @@
   border-color: var(--accent-gold);
 }
 
-.prod-form-image-preview {
+/* .prod-form-image-preview {
   display: block;
   width: 100%;
   height: 76px;
   object-fit: cover;
   border-radius: 6px;
-}
+} */
 
 .prod-thumbnail-badge {
   display: block;
