@@ -100,6 +100,7 @@ console.log("Fetched customers:", response);
   const handleClearSearch = () => {
     setSearchInput("");
     setSearch("");
+    setStatus("all");
     setPage(1);
   };
 
@@ -167,8 +168,8 @@ console.log("Fetched customers:", response);
             aria-label="Filter customers"
           >
             <option value="all">All Customers</option>
-            <option value="active">Active Customers</option>
-            <option value="inactive">Inactive Customers</option>
+            <option value="true">Active Customers</option>
+            <option value="false">Inactive Customers</option>
           </select>
 
           <button type="submit" className="customer-btn customer-primary">
