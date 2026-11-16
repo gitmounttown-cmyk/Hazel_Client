@@ -118,9 +118,18 @@
   overflow: hidden;
 } */
 
+/* .order-table-card {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 10px;
+} */
+
 .order-table-card {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   overflow: hidden;
   background: #fff;
   border-radius: 10px;
@@ -134,8 +143,8 @@
 .order-table-wrapper {
   width: 100%;
   max-width: 100%;
-  /* overflow-x: auto; */
-  /* overflow-y: hidden; */
+  overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
@@ -148,10 +157,18 @@
   font-size: 14px;
 } */
 
-.order-table {
+/* .order-table {
   width: 100%;
   min-width: 1200px;
   border-collapse: collapse;
+  white-space: nowrap;
+} */
+
+.order-table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: separate;
+  border-spacing: 0;
   white-space: nowrap;
 }
 
@@ -164,9 +181,50 @@
 }
 
 /* Actions column */
-.order-table td:last-child,
+/* .order-table td:last-child,
 .order-table th:last-child {
   min-width: 480px;
+} */
+
+.order-table th:last-child,
+.order-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  min-width: 75px;
+  width: 75px;
+  text-align: center;
+  background: #fff;
+  box-shadow: -5px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Actions header */
+.order-table thead th:last-child {
+  z-index: 4;
+  background: #fbf6e9;
+}
+
+.order-action-dropdown {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.order-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.order-more-btn:hover {
+  background: #fbf6e9;
 }
 
 .order-table thead th {
@@ -309,7 +367,7 @@
 
 /* Visible horizontal scrollbar */
 .order-table-wrapper::-webkit-scrollbar {
-  height: 10px;
+  height: 8px;
 }
 
 .order-table-wrapper::-webkit-scrollbar-track {
@@ -335,6 +393,12 @@
   .order-table th,
   .order-table td {
     padding: 10px;
+  }
+
+  .order-table th:last-child,
+  .order-table td:last-child {
+    min-width: 65px;
+    width: 65px;
   }
 }
 
