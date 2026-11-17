@@ -7,11 +7,11 @@ import hazelLogo from "../../assets/images/hazel_logo.jpg";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [mobileNumber, setMobileNumber] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  const handleMobileChange = (e) => {
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     if (!/^\d*$/.test(value)) return;
     if (value.length > 10) return;
@@ -19,7 +19,7 @@ const Login = () => {
     setError("");
   };
 
-  const handleSendOTP = async (e) => {
+  const handleSendOTP = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError("");
 
@@ -42,8 +42,12 @@ const Login = () => {
       } else {
         setError(response.message || "Unable to send OTP.");
       }
-    } catch (error) {
-      setError(error.message || "Unable to send OTP.");
+    } catch (error: unknown) {
+      if(error instanceof Error) {
+        setError(error.message || "Unable to send OTP.");
+      } else {
+        setError("Unable to send OTP.");
+      }
     } finally {
       setLoading(false);
     }
