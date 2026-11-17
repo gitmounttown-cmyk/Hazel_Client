@@ -1,6 +1,7 @@
 export interface SendOTPResponse {
   success: boolean;
   message: string;
+  expiresAt?: string;
 }
 
 export interface VerifyOTPResponse {
@@ -13,6 +14,9 @@ export interface VerifyOTPResponse {
     email?: string;
     mobileNumber: string;
     role?: string;
+    profileImage?: string | null;
+    isVerified?: boolean;
+    isActive?: boolean;
   };
 }
 
@@ -45,4 +49,8 @@ export interface UpdateUserResponse {
   success: boolean;
   message: string;
   user?: Record<string, unknown>;
+}
+export interface APIErrorResponse {
+  success?: boolean;
+  message?: string;
 }

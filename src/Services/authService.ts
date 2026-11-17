@@ -5,15 +5,12 @@ import type {
   VerifyOTPResponse,
   ResendOTPResponse,
   GoogleLoginResponse,
-  updateUserData,
-  UpdateUserResponse
+  UpdateUserData,
+  UpdateUserResponse,
+  APIErrorResponse
 } from "../types/auth.types";
 
-//comman api error response
-export interface APIErrorResponse {
-  success?: boolean;
-  message?: string;
-}
+
 
 export const sendOTP = async (mobileNumber: string): Promise<SendOTPResponse> => {
   try {
@@ -117,7 +114,7 @@ export const logout = (): void => {
   sessionStorage.clear();
 };
 
-export const updateUserData = async (userData: updateUserData): Promise<UpdateUserResponse> => {
+export const updateUserData = async (userData: UpdateUserData): Promise<UpdateUserResponse> => {
   try {
     const response = await axiosInstance.put<UpdateUserResponse>(
       `/users/update/profile`,
