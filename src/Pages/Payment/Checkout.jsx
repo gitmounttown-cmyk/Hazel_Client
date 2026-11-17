@@ -309,11 +309,8 @@ export default function Checkout({
     order?.items || []
   );
 
-  const [selectedId, setSelectedId] =
-    useState(null);
-
-  const [pendingId, setPendingId] =
-    useState(selectedId);
+  const [selectedId, setSelectedId] =  useState(null);
+  const [pendingId, setPendingId] = useState(selectedId || "");
 
   const [mode, setMode] = useState(
     order?.addresses?.length
@@ -348,7 +345,7 @@ export default function Checkout({
     mobileNumber: "",
     email: "",
   });
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  // const [selectedAddress, setSelectedAddress] = useState(null);
 
   const [serviceable, setServiceable] = useState(true);
 
@@ -384,7 +381,7 @@ export default function Checkout({
 
       if (savedAddress) {
         setGuestAddress(savedAddress);
-        setSelectedAddress(savedAddress);
+        // setSelectedAddress(savedAddress);
         setMode("view");
         if (savedAddress.pincode) {
           checkPincodeServiceability(savedAddress.pincode);
@@ -395,67 +392,132 @@ export default function Checkout({
     }
   }, [isGuest]);
 
-  useEffect(() => {
-    if (isGuest) return;
+  // useEffect(() => {
+  //   if (isGuest) return;
 
-    const fetchAddress = async () => {
-      try {
-        const userId =
-          JSON.parse(
-            localStorage.getItem("hazelUser")
-          )?.id;
+  //   const fetchAddress = async () => {
+  //     try {
+  //       const userId =
+  //         JSON.parse(
+  //           localStorage.getItem("hazelUser")
+  //         )?.id;
 
-        if (userId) {
-          const response = await getAddresses();
+  //       if (userId) {
+  //         const response = await getAddresses();
 
-          if (response && response.data) {
-            const userAddresses = [];
+  //         if (response && response.data) {
+  //           const userAddresses = [];
 
-            response?.data?.addresses?.forEach(
-              (address) => {
-                if (address.isDefault) {
-                  setSelectedId(address._id);
-                  checkPincodeServiceability(address.pincode);
-                }
+  //           response?.data?.addresses?.forEach(
+  //             (address) => {
+  //               if (address.isDefault) {
+  //                 setSelectedId(address._id);
+  //                 checkPincodeServiceability(address.pincode);
+  //               }
 
-                const userAddressObj = {
-                  id: address._id,
-                  fullName: address.fullName || address.name,
-                  name: address.fullName || address.name,
-                  houseNo: address.houseNo || address.addressLine1 || "",
-                  addressLine1: address.addressLine1 || address.houseNo || "",
-                  addressLine2: address.addressLine2 || "",
-                  district: address.district || "",
-                  isDefault: address.isDefault,
-                  addressType: address.addressType,
-                  mobileNumber: address.mobileNumber || address.phone,
-                  phone: address.mobileNumber || address.phone,
-                  city: address.city,
-                  state: address.state,
-                  country: address.country || "India",
-                  pincode: address.pincode,
-                };
+  //               const userAddressObj = {
+  //                 id: address._id,
+  //                 fullName: address.fullName || address.name,
+  //                 name: address.fullName || address.name,
+  //                 houseNo: address.houseNo || address.addressLine1 || "",
+  //                 addressLine1: address.addressLine1 || address.houseNo || "",
+  //                 addressLine2: address.addressLine2 || "",
+  //                 district: address.district || "",
+  //                 isDefault: address.isDefault,
+  //                 addressType: address.addressType,
+  //                 mobileNumber: address.mobileNumber || address.phone,
+  //                 phone: address.mobileNumber || address.phone,
+  //                 city: address.city,
+  //                 state: address.state,
+  //                 country: address.country || "India",
+  //                 pincode: address.pincode,
+  //               };
 
-                userAddresses.push(userAddressObj);
-              }
-            );
+  //               userAddresses.push(userAddressObj);
+  //             }
+  //           );
 
-            setUserAddress(userAddresses);
+  //           setUserAddress(userAddresses);
 
-            if (userAddresses.length > 0 && !selectedId) {
-              const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
-              setSelectedId(defaultAddr.id);
-              checkPincodeServiceability(defaultAddr.pincode);
-            }
-          }
+  //           if (userAddresses.length > 0 && !selectedId) {
+  //             const defaultAddr = userAddresses.find((a) => a.isDefault) || userAddresses[0];
+  //             setSelectedId(defaultAddr.id);
+  //             checkPincodeServiceability(defaultAddr.pincode);
+  //           }
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user address:", error);
+  //     }
+  //   };
+
+  //   fetchAddress();
+  // }, [isGuest, selectedId]);
+
+
+useEffect(() => {
+  if (isGuest) return;
+
+  const fetchAddress = async () => {
+    try {
+      const hazelUser = JSON.parse(
+        localStorage.getItem("hazelUser") || "null"
+      );
+
+      const userId = hazelUser?.id || hazelUser?._id;
+
+      if (!userId) return;
+
+      const response = await getAddresses();
+
+      if (response && response.data) {
+        const userAddresses = (
+          response.data.addresses || []
+        ).map((address) => ({
+          id: String(address._id || address.id),
+          _id: address._id,
+          fullName: address.fullName || address.name,
+          name: address.fullName || address.name,
+          houseNo:
+            address.houseNo || address.addressLine1 || "",
+          addressLine1:
+            address.addressLine1 || address.houseNo || "",
+          addressLine2: address.addressLine2 || "",
+          district: address.district || "",
+          isDefault: address.isDefault,
+          addressType: address.addressType,
+          mobileNumber:
+            address.mobileNumber || address.phone,
+          phone: address.mobileNumber || address.phone,
+          city: address.city,
+          state: address.state,
+          country: address.country || "India",
+          pincode: address.pincode,
+        }));
+
+        setUserAddress(userAddresses);
+
+        // Set default address only during initial loading
+        const defaultAddr =
+          userAddresses.find((a) => a.isDefault) ||
+          userAddresses[0];
+
+        if (defaultAddr) {
+          setSelectedId((currentId) => {
+            return currentId || defaultAddr.id;
+          });
+
+          checkPincodeServiceability(defaultAddr.pincode);
         }
-      } catch (error) {
-        console.error("Error fetching user address:", error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user address:", error);
+    }
+  };
 
-    fetchAddress();
-  }, [isGuest, selectedId]);
+  fetchAddress();
+}, [isGuest]);
+
 
   const getCartItems = async () => {
     try {
@@ -504,12 +566,19 @@ export default function Checkout({
   useEffect(() => {
     getCartItems();
   }, []);
+  const getAddressId = (a) => String(a.id || a._id || "");
+  // console.log("Selected_address_id:", selectedId);
+  // const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
+  const address = isGuest ? guestAddress : userAddress.find((a) => getAddressId(a) === String(selectedId)) || null;
 
-  const address = isGuest ? guestAddress : userAddress.find((a) => a.id === selectedId) || null;
+// console.log("Selected address ID:", selectedId);
+// console.log("Current delivery address:", address);
+
+  // console.log("Selected address:", address);
 
   useEffect(() => {
     if (address) {
-      setSelectedAddress(address);
+      // setSelectedAddress(address);
     }
   }, [address]);
 
@@ -604,16 +673,48 @@ export default function Checkout({
     setMode("select");
   };
 
+  // const deliverHere = () => {
+  //   console.log("Delivering to address ID:", pendingId);
+  //   setSelectedId(pendingId);
+  //   const selected = userAddress.find((a) => a.id === pendingId);
+  //   console.log("Selected address for delivery:", selected);
+  //   if (selected) {
+  //     checkPincodeServiceability(selected.pincode);
+  //     setSelectedAddress(selected);
+  //   }
+  //   onSelectAddress(selected);
+  //   setMode("view");
+  // };
+
   const deliverHere = () => {
-    setSelectedId(pendingId);
-    const selected = userAddress.find((a) => a.id === pendingId);
-    if (selected) {
-      checkPincodeServiceability(selected.pincode);
-      setSelectedAddress(selected);
-    }
-    onSelectAddress(selected);
-    setMode("view");
-  };
+  const selected = userAddress.find(
+    (a) => getAddressId(a) === String(pendingId)
+  );
+
+  if (!selected) {
+    toast.error("Please select a valid delivery address.");
+    return;
+  }
+
+  const confirmedId = getAddressId(selected);
+
+  // console.log("Confirmed delivery address:", selected);
+  // console.log("Confirmed address ID:", confirmedId);
+
+  // Update confirmed address ID
+  setSelectedId(confirmedId);
+
+  // Update selected address
+  // setSelectedAddress(selected);
+
+  // Update parent component
+  onSelectAddress(selected);
+
+  // Check delivery serviceability
+  checkPincodeServiceability(selected.pincode);
+
+  setMode("view");
+};
 
   // const openAdd = () => {
   //   setDraft(emptyAddress);
@@ -656,53 +757,6 @@ export default function Checkout({
       setErrors((e) => ({ ...e, [key]: undefined }));
     }
   };
-
-  // const saveNew = (e) => {
-  //   e.preventDefault();
-
-  //   const found = validate(draft);
-
-  //   if (Object.keys(found).length) {
-  //     setErrors(found);
-  //     return;
-  //   }
-
-  //   const cleaned = Object.fromEntries(
-  //     Object.entries(draft).map(([k, v]) => [k, typeof v === "string" ? v.trim() : v])
-  //   );
-
-  //   const created = {
-  //     ...cleaned,
-  //     id: `a${Date.now()}`,
-  //     fullName: cleaned.name,
-  //     addressLine1: cleaned.line1,
-  //     mobileNumber: cleaned.phone,
-  //     addressType: cleaned.addressType || cleaned.type || "Home",
-  //   };
-
-  //   if (isGuest) {
-  //     saveGuestAddress(created);
-  //     setGuestAddress(created);
-  //     setSelectedAddress(created);
-  //     setSelectedId(created.id);
-  //     setPendingId(created.id);
-  //     if (created.pincode) {
-  //       checkPincodeServiceability(created.pincode);
-  //     }
-  //     setMode("view");
-  //     return;
-  //   }
-
-  //   setUserAddress((list) => [...list, created]);
-  //   setSelectedId(created.id);
-  //   setPendingId(created.id);
-  //   setSelectedAddress(created);
-  //   if (created.pincode) {
-  //     checkPincodeServiceability(created.pincode);
-  //   }
-  //   onAddAddress(created);
-  //   setMode("view");
-  // };
 
   const saveNew = async (e) => {
   e.preventDefault();
@@ -798,7 +852,7 @@ console.log("Cleaned address data:", cleaned);
     // ==========================================
     // SELECT ADDRESS FOR CHECKOUT
     // ==========================================
-    setSelectedAddress(created);
+    // setSelectedAddress(created);
     setSelectedId(created.id);
     setPendingId(created.id);
 
@@ -823,8 +877,14 @@ console.log("Cleaned address data:", cleaned);
   }
 };
 
-  const handlePay = async (targetAddress) => {
-    const deliveryAddr = targetAddress || address;
+  const handlePay = async () => {
+    // console.log("Initiating payment process...",guestAddress, userAddress, selectedId);
+    // const deliveryAddr = targetAddress || address;
+    const deliveryAddr = isGuest ? guestAddress : userAddress.find((a) => getAddressId(a) === String(selectedId)
+    ) || null;
+
+// console.log("FINAL ADDRESS SENT TO PAYMENT:", deliveryAddr);
+    // console.log("Preparing to pay with address:", deliveryAddr);
     try {
       setLoading(true);
       setLoadingAPI(true);
@@ -986,6 +1046,10 @@ console.log("Cleaned address data:", cleaned);
     }
   }, [location?.state, address, cartItems]);
 
+  useEffect(() => {
+  setPendingId(selectedId || "");
+}, [selectedId]);
+
   return (
     <div className="checkout">
       <Loader show={loadingAPI} />
@@ -1137,7 +1201,7 @@ console.log("Cleaned address data:", cleaned);
 
             {mode === "select" && (
               <div className="addr-list" role="radiogroup" aria-label="Select delivery address">
-                {userAddress.map((a) => {
+                {/* {userAddress.map((a) => {
                   const active = a.id === pendingId;
 
                   return (
@@ -1162,6 +1226,59 @@ console.log("Cleaned address data:", cleaned);
                           </span>
                           <span className="addr-option__addr">
                             {a.houseNo || a.addressLine1}, {a.city}, {a.state} - <strong>{a.pincode}</strong>
+                          </span>
+                        </span>
+                      </label>
+
+                      {active && (
+                        <button
+                          type="button"
+                          className="btn-solid addr-option__cta"
+                          onClick={deliverHere}
+                        >
+                          Deliver here
+                        </button>
+                      )}
+                    </div>
+                  );
+                })} */}
+
+                {userAddress.map((a) => {
+                  const addressId = getAddressId(a);
+                  const active = addressId === String(pendingId);
+
+                  return (
+                    <div
+                      key={addressId}
+                      className={`addr-option ${active ? "addr-option--active" : ""
+                        }`}
+                    >
+                      <label className="addr-option__label">
+                        <input
+                          type="radio"
+                          name="address"
+                          className="addr-option__input"
+                          checked={active}
+                          onChange={() => {
+                            console.log("Radio selected:", addressId);
+                            setPendingId(addressId);
+                          }}
+                        />
+
+                        <span className="addr-option__radio" aria-hidden="true" />
+
+                        <span className="addr-option__text">
+                          <span className="addr-option__top">
+                            <strong>{a.fullName}</strong>
+                            <span className="badge">{a.addressType}</span>
+                            <span className="addr-option__phone">
+                              +91 {a.mobileNumber}
+                            </span>
+                          </span>
+
+                          <span className="addr-option__addr">
+                            {a.houseNo || a.addressLine1}, {a.city}, {a.state} -
+                            <strong>{a.pincode}</strong>
                           </span>
                         </span>
                       </label>
@@ -1406,8 +1523,8 @@ console.log("Cleaned address data:", cleaned);
           <button
             type="button"
             className="btn-pay"
-            onClick={() => handlePay(address)}
-            disabled={!canPay}
+            onClick={handlePay}
+            disabled={!canPay || loading || cartItems.length === 0}
           >
             <span>Pay {formatINR(total)}</span>
             <ArrowRight size={16} strokeWidth={2} />
