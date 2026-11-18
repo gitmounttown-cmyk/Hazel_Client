@@ -29,6 +29,7 @@ import "./Dashboard.css";
 import { getDashboardData } from "../../../Services/dashboardService";
 import { printInvoice } from "../../../Services/orderService";
 import { Link, useNavigate } from "react-router-dom";
+import defaultProfileImage from "../../../../public/defaultimage.png"; // <-- Added default profile image import
 
 // ============================================================
 // API CONFIGURATION
@@ -797,6 +798,10 @@ useEffect(() => {
                                 : (import.meta.env.VITE_UPLOAD_URL || "http://localhost:5004") + (product.image.startsWith("/") ? "" : "/") + product.image
                             }
                             alt={product.product || "Product"}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = defaultProfileImage;
+                            }}
                           />
                         ) : (
                           <span className="hz-table__thumb-fallback" />

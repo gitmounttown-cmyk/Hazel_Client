@@ -905,7 +905,10 @@ useEffect(() => {
                   {maxQty > 1 && <small>{maxQty} available</small>}
                 </div>
               )}
-              <div className="pp-fitmodel">
+              {/* <div className="pp-fitmodel">
+                {productDetails?.variants?.[0]?.sleeveStyle || productDetails?.variants?.[0]?.feel ? (
+                  <span className="pp-fitmodel-label">Fit Model</span>
+                ) : null}
                 <div>
                   <span className="pp-fitmodel-k">Sleeves</span>
                   <span className="pp-fitmodel-v">
@@ -918,7 +921,37 @@ useEffect(() => {
                     {productDetails?.variants?.[0]?.feel || "N/A"}
                   </span>
                 </div>
-              </div>
+              </div> */}
+
+              {(() => {
+                const variant = productDetails?.variants?.[0];
+
+                const sleeves = variant?.sleeveStyle?.trim();
+                const feel = variant?.feel?.trim();
+
+                if (!sleeves && !feel) return null;
+
+                return (
+                  <div className="pp-fitmodel">
+                    <span className="pp-fitmodel-label">Fit Model</span>
+
+                    {sleeves && (
+                      <div>
+                        <span className="pp-fitmodel-k">Sleeves</span>
+                        <span className="pp-fitmodel-v">{sleeves}</span>
+                      </div>
+                    )}
+
+                    {feel && (
+                      <div>
+                        <span className="pp-fitmodel-k">Feel</span>
+                        <span className="pp-fitmodel-v">{feel}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
             </div>
 
             <div className="pp-actions">

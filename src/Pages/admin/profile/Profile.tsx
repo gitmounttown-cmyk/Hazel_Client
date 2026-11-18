@@ -15,6 +15,8 @@ const Profile = () => {
     mobileNumber: "",
     profileImage: "",
   });
+  const [imageError, setImageError] = useState<boolean>(false);
+  const [previewImage, setPreviewImage] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const navigate = useNavigate();
 
@@ -65,6 +67,7 @@ const Profile = () => {
   useEffect(() => {
     void fetchProfile();
   }, [fetchProfile]);
+  
 
   // const handleImageChange = (e: ChangeEvent<HTMLInputElement>): void => {
   //   const file = e.target.files?.[0];
@@ -83,6 +86,52 @@ const Profile = () => {
   // };
 
 
+// const handleImageChange = async (
+//   e: ChangeEvent<HTMLInputElement>
+// ): Promise<void> => {
+//   const file = e.target.files?.[0];
+
+//   if (!file) return;
+
+//   try {
+//     setMessage("");
+
+//     // Validate image type
+//     if (!file.type.startsWith("image/")) {
+//       setMessage("Please select a valid image file");
+//       return;
+//     }
+
+//     // Compress image using shared helper
+//     const compressedFile = await compressProductImage(file);
+
+//     // Validate size after compression (600 KB)
+//     if (compressedFile.size > 600 * 1024) {
+//       setMessage(
+//         "Profile image must be smaller than 600 KB after compression."
+//       );
+//       return;
+//     }
+
+//     // Store compressed image for API upload
+//     setImageFile(compressedFile);
+
+//     // Preview compressed image
+//     setProfile((prev) => ({
+//       ...prev,
+//       profileImage: URL.createObjectURL(compressedFile),
+//     }));
+
+//   } catch (error: unknown) {
+//     console.error("Profile image compression failed:", error);
+
+//     setMessage("Failed to process profile image. Please try again.");
+//   } finally {
+//     // Allow selecting the same file again
+//     e.target.value = "";
+//   }
+// };
+
 const handleImageChange = async (
   e: ChangeEvent<HTMLInputElement>
 ): Promise<void> => {
@@ -93,38 +142,30 @@ const handleImageChange = async (
   try {
     setMessage("");
 
-    // Validate image type
     if (!file.type.startsWith("image/")) {
       setMessage("Please select a valid image file");
       return;
     }
 
-    // Compress image using shared helper
     const compressedFile = await compressProductImage(file);
 
-    // Validate size after compression (600 KB)
     if (compressedFile.size > 600 * 1024) {
-      setMessage(
-        "Profile image must be smaller than 600 KB after compression."
-      );
+      setMessage("Profile image must be smaller than 600 KB after compression.");
       return;
     }
 
-    // Store compressed image for API upload
     setImageFile(compressedFile);
 
-    // Preview compressed image
-    setProfile((prev) => ({
-      ...prev,
-      profileImage: URL.createObjectURL(compressedFile),
-    }));
+    // Generate preview
+    const previewUrl = URL.createObjectURL(compressedFile);
+
+    setPreviewImage(previewUrl);
+    setImageError(false);
 
   } catch (error: unknown) {
     console.error("Profile image compression failed:", error);
-
     setMessage("Failed to process profile image. Please try again.");
   } finally {
-    // Allow selecting the same file again
     e.target.value = "";
   }
 };
@@ -159,17 +200,27 @@ const handleImageChange = async (
       const response = await updateProfile(formData);
 
       if (response.data.success) {
+        const updatedUser = response.data.user;
         setProfile({
-          name: response.data.user.name || "",
-          email: response.data.user.email || "",
-          mobileNumber: response.data.user.mobileNumber || "",
-          profileImage: response.data.user.profileImage || "",
+          name: updatedUser.name || "",
+          email: updatedUser.email || "",
+          mobileNumber: updatedUser.mobileNumber || "",
+          profileImage: updatedUser.profileImage || "",
         });
 
-        localStorage.setItem("hazelUser", JSON.stringify(response.data.user));
+        localStorage.setItem("hazelUser", JSON.stringify(updatedUser));
+
+        // Notify Header about profile changes
+        window.dispatchEvent(
+          new CustomEvent("adminProfileUpdated", {
+            detail: updatedUser,
+          })
+        );
 
         setMessage("Profile updated successfully");
         setImageFile(null);
+        setPreviewImage("");
+        setImageError(false);
         toast.success("Profile updated successfully");
       }
     } catch (error: unknown) {
@@ -185,15 +236,32 @@ const handleImageChange = async (
     }
   };
 
+  const imageSrc = previewImage
+  ? previewImage
+  : profile.profileImage
+    ? profile.profileImage.startsWith("http")
+      ? profile.profileImage
+      : `${import.meta.env.VITE_UPLOAD_URL}/${profile.profileImage.replace(/^\/+/, "")}`
+    : "";
+
+    useEffect(() => {
+  setImageError(false);
+}, [imageSrc]);
+
+useEffect(() => {
+  return () => {
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage);
+    }
+  };
+}, [previewImage]);
+
 
   if (loading) {
     return <div className="profile-loading">Loading profile...</div>;
   }
 
-  const imageSrc = profile.profileImage ? profile.profileImage.startsWith("blob:")
-    ? profile.profileImage
-    : `${import.meta.env.VITE_UPLOAD_URL}/${profile.profileImage.replace(/^\/+/, "")}`
-    : "https://via.placeholder.com/120";
+    
 
   return (
     <div className="profile-page">
@@ -204,13 +272,20 @@ const handleImageChange = async (
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="profile-image-section">
+          {/* <div className="profile-image-section">
             <div className="profile-image-wrapper">
-              <img
-                src={imageSrc}
-                alt="Profile"
-                className="profile-image"
-              />
+              {imageError ? (
+                <div className="profile-image">{profile?.name?.charAt(0) || "A"}</div>
+              ) : (
+                <img
+                  src={imageSrc}
+                  alt="Profile"
+                  className="profile-image"
+                  onError={() => {
+                    setImageError(true);
+                  }}
+                />
+              )}
 
               <label
                 htmlFor="profileImageUpload"
@@ -226,6 +301,40 @@ const handleImageChange = async (
                 onChange={(e) => void handleImageChange(e)}
                 style={{ display: "none" }}
               />
+            </div>
+          </div> */}
+          <div className="profile-image-section">
+            <div className="profile-image-wrapper">
+
+              {imageSrc && !imageError ? (
+                <img
+                  src={imageSrc}
+                  alt="Profile"
+                  className="profile-image"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="profile-image profile-image-fallback">
+                  {profile?.name?.trim()?.charAt(0)?.toUpperCase() || "A"}
+                </div>
+              )}
+
+              <label
+                htmlFor="profileImageUpload"
+                className="profile-image-add-btn"
+                title="Add profile image"
+              >
+                +
+              </label>
+
+              <input
+                id="profileImageUpload"
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleImageChange(e)}
+                hidden
+              />
+
             </div>
           </div>
 

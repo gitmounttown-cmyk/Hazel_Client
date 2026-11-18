@@ -6,6 +6,8 @@ import { logout } from "../../../Services/authService";
 import { useAdminSearch } from "../../../context/AdminSearchContext";
 import { getAllNotifications, markAllNotificationsRead } from "../../../Services/notificationService";
 import { formatTimeAgo } from "../../../Utils/dateFormat";
+import userAvatar from "../../../../public/user-avatar.webp"; // <-- Added default profile image import
+import { formatRole } from "../../../utils/textTransform";
 
 // Sample notifications (replace with API data later)
 const SAMPLE_NOTIFICATIONS = [
@@ -51,6 +53,14 @@ const Header = ({
   adminRole = "Super Admin",
   avatarUrl,
 }) => {
+   const [admin, setAdmin] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("hazelUser")) || {};
+    } catch {
+      return {};
+    }
+  });
+  const [imageError, setImageError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -60,6 +70,21 @@ const Header = ({
   const navigate = useNavigate();
 
   const unreadCount = notifications?.filter((n) => !n?.isRead).length;
+
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      setAdmin(event.detail);
+    };
+
+    window.addEventListener("adminProfileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener(
+        "adminProfileUpdated",
+        handleProfileUpdate
+      );
+    };
+  }, []);
 
   //get all notifications from API
   useEffect(() => {
@@ -109,6 +134,9 @@ const Header = ({
     navigate("/login");
   };
 
+//   console.log("Admin Info:", admin);
+//   console.log("Avatar URL:", avatarUrl);
+// console.log("Avatar URL:", `${import.meta.env.VITE_UPLOAD_URL}/${admin?.profileImage}`);
   return (
     <header className="hz-header">
       <div className="hz-header__search">
@@ -189,15 +217,21 @@ const Header = ({
             }}
           >
             <span className="hz-header__avatar">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={adminName} />
-              ) : (
-                adminName.charAt(0)
-              )}
+              {!imageError && admin?.profileImage ? (
+                <img 
+                src={`${import.meta.env.VITE_UPLOAD_URL}/${admin?.profileImage}`} 
+                alt={admin?.name || "Admin"} 
+                onError={() => {
+                  setImageError(true);
+                }}
+              />
+                ) : (
+                 admin?.name?.charAt(0) || "A"
+               )} 
             </span>
             <span className="hz-header__profile-text">
-              <span className="hz-header__profile-name">{adminName}</span>
-              <span className="hz-header__profile-role">{adminRole}</span>
+              <span className="hz-header__profile-name">{admin?.name || "Admin"}</span>
+              <span className="hz-header__profile-role">{formatRole(admin?.role) || "Administrator"}</span>
             </span>
             <ChevronDown
               size={16}
