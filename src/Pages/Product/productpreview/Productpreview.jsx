@@ -10,6 +10,7 @@ import {
   removeWishlistItem,
 } from "../../../Services/wishlistService";
 import { updateNavbarCounts } from "../../../utils/navbarCounts";
+import defaultProductImage from "../../../../public/defaultimage.png";
 
 /* ---------- real image assets ---------- */
 import mainPhoto from "../../../assets/Trending/img2.png";
@@ -1139,7 +1140,7 @@ useEffect(() => {
                         alt=""
                         key={i}
                         onError={(e) => {
-                          e.target.src = mainPhoto;
+                          e.target.src = defaultProductImage;
                         }}
                       />
                     ))}
@@ -1189,7 +1190,7 @@ useEffect(() => {
                   src={p.image}
                   alt={p.name}
                   onError={(e) => {
-                    e.target.src = mainPhoto;
+                    e.target.src = defaultProductImage;
                   }}
                 />
               </div>
