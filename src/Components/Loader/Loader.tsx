@@ -1,6 +1,26 @@
 import { useEffect, useState } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import "./Loader.css";
-import { lockBodyScroll } from "../../Utils/scrollLock";
+import { lockBodyScroll } from "../../utils/scrollLock";
+
+type LoaderPhase = "loading" | "leaving" | "done";
+
+interface LoaderProps {
+  show?: boolean;
+  minDuration?: number;
+  exitDuration?: number;
+}
+
+interface Garment {
+  name: string;
+  image: string | null;
+  Drawing: ComponentType;
+}
+
+type LoaderStyle = CSSProperties & {
+  "--hz-exit"?: string;
+  "--hz-step"?: string;
+};
 
 /* ------------------------------------------------------------------
    Two garments: Maxi dress and Nighty.
@@ -230,7 +250,7 @@ const Nighty = () => (
   </svg>
 );
 
-const GARMENTS = [
+const GARMENTS: Garment[] = [
   { name: "Maxi dress", image: null, Drawing: MaxiDress },
   { name: "Nighty", image: null, Drawing: Nighty },
 ];
@@ -248,9 +268,9 @@ export default function Loader({
   show,
   minDuration = 2200,
   exitDuration = 500,
-}) {
-  const [phase, setPhase] = useState("loading");
-  const [index, setIndex] = useState(0);
+}: LoaderProps) {
+  const [phase, setPhase] = useState<LoaderPhase>("loading");
+  const [index, setIndex] = useState<number>(0);
 
   // If "show" is supplied, use controlled API loading.
   // Otherwise, preserve the automatic page loader.
@@ -328,13 +348,14 @@ export default function Loader({
 
   return (
     <div
-      className={`hz-loader ${
-        !controlled && phase === "leaving" ? "is-leaving" : ""
-      }`}
-      style={{
-        "--hz-exit": `${exitDuration}ms`,
-        "--hz-step": `${STEP}ms`,
-      }}
+      className={`hz-loader ${!controlled && phase === "leaving" ? "is-leaving" : ""
+        }`}
+      style={
+        {
+          "--hz-exit": `${exitDuration}ms`,
+          "--hz-step": `${STEP}ms`,
+        } as LoaderStyle
+      }
       role="status"
       aria-live="polite"
       aria-label="Loading"

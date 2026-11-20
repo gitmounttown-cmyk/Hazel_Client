@@ -23,7 +23,7 @@ export const sendOTP = async (mobileNumber: string): Promise<SendOTPResponse> =>
     const message = axios.isAxiosError<APIErrorResponse>(error) ? error.response?.data?.message
       : "Unable to send OTP.";
     console.error("Send OTP Error:", message);
-    throw new Error(message, { cause: error });
+    throw new Error(message);
   }
 };
 
