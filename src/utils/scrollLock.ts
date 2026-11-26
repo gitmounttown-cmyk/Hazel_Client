@@ -1,7 +1,7 @@
-let lockCount = 0;
-let previousOverflow = "";
+let lockCount: number = 0;
+let previousOverflow: string = "";
 
-export const lockBodyScroll = () => {
+export const lockBodyScroll = (): (() => void) => {
   if (lockCount === 0) {
     previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -9,9 +9,9 @@ export const lockBodyScroll = () => {
 
   lockCount++;
 
-  let released = false;
+  let released: boolean = false;
 
-  return () => {
+  return (): void => {
     if (released) return;
 
     released = true;

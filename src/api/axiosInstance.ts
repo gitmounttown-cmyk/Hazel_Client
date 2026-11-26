@@ -18,7 +18,7 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) => {
+  (error: unknown) => {
     return Promise.reject(error);
   }
 );
@@ -27,17 +27,20 @@ axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  (error: unknown) => {
     // Check if error was caused by manual cancellation/abortion
     if (axios.isCancel(error)) {
-      console.warn("[API CANCELLED]", error.message);
-    } else {
+      const message = error instanceof Error ? error.message : "Request cancelled";
+      console.warn("[API CANCELLED]", message);
+    } else if (axios.isAxiosError(error)) {
       console.error(
         "[API ERROR]",
         error.config?.url,
         error.response?.status || "NO_RESPONSE",
         error.response?.data || error.message
       );
+    } else {
+      console.error("[API ERROR]", error);
     }
 
     return Promise.reject(error);
